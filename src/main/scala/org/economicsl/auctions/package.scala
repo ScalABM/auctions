@@ -21,7 +21,7 @@ import scala.language.implicitConversions
 package object auctions {
 
   /** Type used to indicate that an object can be traded via an auction. */
-  type Tradable = Any
+  trait Tradable
 
   /** Type used to representing currencies. */
   type Currency = Double  // todo should this be Long or Double?

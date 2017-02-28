@@ -32,7 +32,7 @@ trait MarketAskOrder extends LimitAskOrder {
   */
 object MarketAskOrder {
 
-  def apply(issuer: UUID, quantity: Quantity, tradable: Tradable): MarketAskOrder with SinglePricePoint = {
+  def apply(issuer: UUID, quantity: Quantity, tradable: Tradable): MarketAskOrder = {
     SinglePricePointImpl(issuer, quantity, tradable)
   }
 
@@ -41,7 +41,7 @@ object MarketAskOrder {
   }
 
   private[this] case class SinglePricePointImpl(issuer: UUID, quantity: Quantity, tradable: Tradable)
-    extends MarketAskOrder with SinglePricePoint
+    extends MarketAskOrder
 
   private[this] case class SingleUnitImpl(issuer: UUID, tradable: Tradable) extends MarketAskOrder with SingleUnit
 

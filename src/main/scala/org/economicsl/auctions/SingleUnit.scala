@@ -16,9 +16,9 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Mixin trait defining an `Order` for a single unit of a `Tradable` at some limit price. */
-trait SingleUnit extends SinglePricePoint {
-  this: Order =>
+/** Mixin trait that restricts the quantity of an `Order with SinglePricePoint` to a single unit of a `Tradable`. */
+trait SingleUnit {
+  this: Order with SinglePricePoint =>
 
   val quantity = Quantity(1)
 
