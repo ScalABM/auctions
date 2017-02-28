@@ -1,6 +1,7 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.orderbooks.FourHeapOrderBook
 
 
 /** Example `Tradable` object. */
@@ -30,4 +31,15 @@ val order7: MarketBidOrder = MarketBidOrder(issuer, Quantity(100), tradable)
 val order8: MarketBidOrder with SingleUnit = MarketBidOrder(issuer, tradable)
 
 // Create a single-unit limit bid order...
-val order9: LimitBidOrder with SingleUnit = LimitBidOrder(issuer, Price(5.5), tradable)
+val order9: LimitBidOrder with SingleUnit = LimitBidOrder(issuer, Price(9.5), tradable)
+
+
+// Create a four-heap order book and add some orders...
+val orderBook = FourHeapOrderBook.empty
+val orderBook2 = orderBook + order3
+val orderBook3 = orderBook2 + order4
+val orderBook4 = orderBook3 + order9
+val orderBook5 = orderBook4 + order8
+
+orderBook5.matchedOrders.askOrders
+orderBook5.matchedOrders.bidOrders

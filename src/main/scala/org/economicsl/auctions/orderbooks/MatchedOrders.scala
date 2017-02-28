@@ -1,9 +1,8 @@
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, SingleUnit}
+package org.economicsl.auctions.orderbooks
+
+import org.economicsl.auctions._
 
 import scala.collection.immutable.TreeSet
-
-type SortedAskOrders = TreeSet[LimitAskOrder with SingleUnit]
-type SortedBidOrders = TreeSet[LimitBidOrder with SingleUnit]
 
 
 class MatchedOrders private(val askOrders: SortedAskOrders, val bidOrders: SortedBidOrders) {
@@ -47,7 +46,7 @@ object MatchedOrders {
     */
   def empty(askOrdering: Ordering[LimitAskOrder with SingleUnit], bidOrdering: Ordering[LimitBidOrder with SingleUnit]): MatchedOrders = {
 
-    new MatchedOrders(TreeSet.empty[AskOrder](askOrdering), TreeSet.empty[BidOrder](bidOrdering))
+    new MatchedOrders(TreeSet.empty[LimitAskOrder with SingleUnit](askOrdering), TreeSet.empty[LimitBidOrder with SingleUnit](bidOrdering))
 
   }
 
