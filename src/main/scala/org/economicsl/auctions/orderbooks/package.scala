@@ -5,8 +5,8 @@ import scala.collection.immutable
 
 package object orderbooks {
 
-  type SortedAskOrders[A <: LimitAskOrder] = immutable.TreeSet[A]
+  type SortedAskOrders[T <: Tradable, A <: LimitAskOrder[T]] = immutable.TreeSet[A]
 
-  type SortedBidOrders[B <: LimitBidOrder] = immutable.TreeSet[B]
+  type SortedBidOrders[T <: Tradable, B <: LimitBidOrder[T]] = immutable.TreeSet[B]
 
 }

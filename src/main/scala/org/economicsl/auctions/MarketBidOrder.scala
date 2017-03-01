@@ -19,7 +19,7 @@ import java.util.UUID
 
 
 /** Base trait for a market order to buy a particular `Tradable`. */
-trait MarketBidOrder extends LimitBidOrder {
+trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {
 
   /** An issuer of a `MarketBidOrder` is willing to pay any finite price. */
   val limit: Price = Price.MaxValue
@@ -32,17 +32,18 @@ trait MarketBidOrder extends LimitBidOrder {
   */
 object MarketBidOrder {
 
-  def apply(issuer: UUID, quantity: Quantity, tradable: Tradable): MarketBidOrder = {
+  def apply[T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T): MarketBidOrder[T] = {
     SinglePricePointImpl(issuer, quantity, tradable)
   }
 
-  def apply(issuer: UUID, tradable: Tradable): MarketBidOrder with SingleUnit = {
+  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketBidOrder[T] with SingleUnit[T] = {
     SingleUnitImpl(issuer, tradable)
   }
 
-  private[this] case class SinglePricePointImpl(issuer: UUID, quantity: Quantity, tradable: Tradable)
-    extends MarketBidOrder
+  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T)
+    extends MarketBidOrder[T]
 
-  private[this] case class SingleUnitImpl(issuer: UUID, tradable: Tradable) extends MarketBidOrder with SingleUnit
+  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, tradable: T)
+    extends MarketBidOrder[T] with SingleUnit[T]
 
 }
