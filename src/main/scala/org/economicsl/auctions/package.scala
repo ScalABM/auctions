@@ -20,6 +20,9 @@ import scala.language.implicitConversions
 
 package object auctions {
 
+  /** Type used to indicate that something is a contract. */
+  trait Contract
+
   /** Type used to indicate that an object can be traded via an auction. */
   trait Tradable
 

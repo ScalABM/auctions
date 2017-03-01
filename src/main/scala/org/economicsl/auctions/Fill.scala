@@ -16,7 +16,8 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-case class Fill(askOrder: LimitAskOrder, bidOrder: LimitBidOrder, price: Price) {
+/** A Fill is a contract that is created by an Auction mechanism by composing a LimitAskOrder with a LimitBidOrder. */
+case class Fill(askOrder: LimitAskOrder, bidOrder: LimitBidOrder, price: Price) extends Contract {
 
   val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
 
