@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.orderbooks.FourHeapOrderBook
+
 
 trait DoubleAuction {
 
@@ -26,6 +28,11 @@ trait DoubleAuction {
 
   def remove(order: LimitBidOrder): Boolean
 
-  def clear: Stream[Fill]
+  def clear: Stream[Fill] = {
+    val (pairedOrders, _) = orderBook.takeWhileMatched
+    pairedOrders.map{ case (a, b) => Fill(a, b, p((a, b))) }
+  }
+
+  def orderBook: FourHeapOrderBook[LimitAskOrder, LimitBidOrder]
 
 }
