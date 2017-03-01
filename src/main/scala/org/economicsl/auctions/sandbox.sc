@@ -35,7 +35,7 @@ val order9: LimitBidOrder with SingleUnit = LimitBidOrder(issuer, Price(9.5), tr
 
 
 // Create a four-heap order book and add some orders...
-val orderBook = FourHeapOrderBook.empty
+val orderBook = FourHeapOrderBook.empty[LimitAskOrder with SingleUnit, LimitBidOrder with SingleUnit]
 val orderBook2 = orderBook + order3
 val orderBook3 = orderBook2 + order4
 val orderBook4 = orderBook3 + order9
