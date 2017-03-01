@@ -41,5 +41,7 @@ val orderBook3 = orderBook2 + order4
 val orderBook4 = orderBook3 + order9
 val orderBook5 = orderBook4 + order8
 
-orderBook5.matchedOrders.askOrders
-orderBook5.matchedOrders.bidOrders
+
+// take a look at paired orders
+val (pairedOrders, _) = orderBook5.takeWhileMatched
+pairedOrders.toList

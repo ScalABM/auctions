@@ -18,7 +18,7 @@ package org.economicsl.auctions.orderbooks
 import org.economicsl.auctions._
 
 
-class FourHeapOrderBook[A <: LimitAskOrder, B <: LimitBidOrder] private(val matchedOrders: MatchedOrders[A, B], val unMatchedOrders: UnMatchedOrders[A, B]) {
+class FourHeapOrderBook[A <: LimitAskOrder, B <: LimitBidOrder] private(matchedOrders: MatchedOrders[A, B], unMatchedOrders: UnMatchedOrders[A, B]) {
 
   def - (order: A): FourHeapOrderBook[A, B] = {
     if (unMatchedOrders.contains(order)) {
@@ -62,6 +62,16 @@ class FourHeapOrderBook[A <: LimitAskOrder, B <: LimitBidOrder] private(val matc
       case _ =>
         new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
     }
+  }
+
+  def takeWhileMatched: (Stream[(A, B)], FourHeapOrderBook[A, B]) = {
+    (matchedOrders.zipped, withEmptyMatchedOrders)
+  }
+
+  private[this] def withEmptyMatchedOrders = {
+    val askOrdering = matchedOrders.askOrders.ordering
+    val bidOrdering = matchedOrders.bidOrders.ordering
+    new FourHeapOrderBook(MatchedOrders.empty(askOrdering, bidOrdering), unMatchedOrders)
   }
 
 }

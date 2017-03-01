@@ -45,6 +45,19 @@ private[orderbooks] class MatchedOrders[A <: LimitAskOrder, B <: LimitBidOrder] 
     new MatchedOrders(askOrders, bidOrders - existing + incoming)
   }
 
+  def zipped: Stream[(A, B)] = {
+    @annotation.tailrec
+    def loop(askOrders: SortedAskOrders[A], bidOrders: SortedBidOrders[B], pairedOrders: Stream[(A, B)]): Stream[(A, B)] = {
+      if (askOrders.isEmpty || bidOrders.isEmpty) {
+        pairedOrders
+      } else {
+        val pair = (askOrders.head, bidOrders.head)
+        loop(askOrders.tail, bidOrders.tail, Stream.cons(pair, pairedOrders))
+      }
+    }
+    loop(askOrders, bidOrders, Stream.empty[(A, B)])
+  }
+
 }
 
 
