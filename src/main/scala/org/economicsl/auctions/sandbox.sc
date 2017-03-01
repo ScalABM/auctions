@@ -42,7 +42,7 @@ val apple = new Apple()
 val order10: LimitBidOrder[Apple] with SingleUnit[Apple] = LimitBidOrder(issuer, Price(55.9), apple)
 
 // Create a four-heap order book and add some orders...
-val orderBook = FourHeapOrderBook.empty[Google, LimitAskOrder[Google] with SingleUnit[Google], LimitBidOrder[Google] with SingleUnit[Google]]
+val orderBook = FourHeapOrderBook.empty[Google]
 val orderBook2 = orderBook + order3
 val orderBook3 = orderBook2 + order4
 val orderBook4 = orderBook3 + order9

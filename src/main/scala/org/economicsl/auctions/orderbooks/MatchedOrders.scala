@@ -17,37 +17,39 @@ package org.economicsl.auctions.orderbooks
 
 import org.economicsl.auctions._
 
-import scala.collection.immutable.TreeSet
 
+private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
-private[orderbooks] class MatchedOrders[T <: Tradable, A <: LimitAskOrder[T], B <: LimitBidOrder[T]] private(val askOrders: SortedAskOrders[T, A], val bidOrders: SortedBidOrders[T, B]) {
-
-  require(askOrders.size == bidOrders.size)  // number of units must be the same!
+  require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
   require(bidOrders.headOption.forall(bidOrder => bidOrder.limit >= askOrders.head.limit))  // value of lowest bid must exceed value of highest ask!
 
-  def + (orders: (A, B)): MatchedOrders[T, A, B] = {
+  def + (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)
   }
 
-  def - (orders: (A, B)): MatchedOrders[T, A, B] = {
+  def - (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders - orders._1, bidOrders - orders._2)
   }
 
-  def contains(order: A): Boolean = askOrders.contains(order)
+  val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
 
-  def contains(order: B): Boolean = bidOrders.contains(order)
+  val bidOrdering: Ordering[LimitBidOrder[T]] = bidOrders.ordering
 
-  def replace(existing: A, incoming: A): MatchedOrders[T, A, B] = {
+  def contains(order: LimitAskOrder[T]): Boolean = askOrders.contains(order)
+
+  def contains(order: LimitBidOrder[T]): Boolean = bidOrders.contains(order)
+
+  def replace(existing: LimitAskOrder[T], incoming: LimitAskOrder[T]): MatchedOrders[T] = {
     new MatchedOrders(askOrders - existing + incoming, bidOrders)
   }
 
-  def replace(existing: B, incoming: B): MatchedOrders[T, A, B] = {
+  def replace(existing: LimitBidOrder[T], incoming: LimitBidOrder[T]): MatchedOrders[T] = {
     new MatchedOrders(askOrders, bidOrders - existing + incoming)
   }
 
-  def zipped: Stream[(A, B)] = {
+  def zipped: Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
     @annotation.tailrec
-    def loop(askOrders: SortedAskOrders[T, A], bidOrders: SortedBidOrders[T, B], pairedOrders: Stream[(A, B)]): Stream[(A, B)] = {
+    def loop(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T], pairedOrders: Stream[(LimitAskOrder[T], LimitBidOrder[T])]): Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
       if (askOrders.isEmpty || bidOrders.isEmpty) {
         pairedOrders
       } else {
@@ -55,7 +57,7 @@ private[orderbooks] class MatchedOrders[T <: Tradable, A <: LimitAskOrder[T], B 
         loop(askOrders.tail, bidOrders.tail, Stream.cons(pair, pairedOrders))
       }
     }
-    loop(askOrders, bidOrders, Stream.empty[(A, B)])
+    loop(askOrders, bidOrders, Stream.empty[(LimitAskOrder[T], LimitBidOrder[T])])
   }
 
 }
@@ -72,8 +74,8 @@ private[orderbooks] object MatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from low to high based on `limit` price.
     */
-  def empty[T <: Tradable, A <: LimitAskOrder[T], B <: LimitBidOrder[T]](askOrdering: Ordering[A], bidOrdering: Ordering[B]): MatchedOrders[T, A, B] = {
-    new MatchedOrders(TreeSet.empty[A](askOrdering), TreeSet.empty[B](bidOrdering))
+  def empty[T <: Tradable](askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): MatchedOrders[T] = {
+    new MatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 
 }
