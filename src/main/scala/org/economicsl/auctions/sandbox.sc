@@ -58,13 +58,19 @@ case class WeightedAveragePricing(weight: Double) extends DiscriminatoryPricingR
 }
 
 
+case class Fill(askOrder: LimitAskOrder, bidOrder: LimitBidOrder, price: Price) {
+
+  val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
+
+}
+
 // example of buyer's bid (or M+1 price rule)...incentive compatible for the seller!
-pairedOrders.map(WeightedAveragePricing(1.0)).toList
+pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(1.0)((askOrder, bidOrder))) }
 
 
 // example of seller's ask (or M price rule)...incentive compatible for the buyer
-pairedOrders.map(WeightedAveragePricing(0.0)).toList
+pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(0.0)((askOrder, bidOrder))) }
 
 
 // split the trade surplus evenly...not incentive compatible!
-pairedOrders.map(WeightedAveragePricing(0.5)).toList
+pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(0.5)((askOrder, bidOrder))) }
