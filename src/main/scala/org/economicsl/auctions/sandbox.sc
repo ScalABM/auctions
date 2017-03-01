@@ -2,6 +2,7 @@ import java.util.UUID
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.pricing.DiscriminatoryPricingRule
 
 
 /** Example `Tradable` object. */
@@ -45,3 +46,25 @@ val orderBook5 = orderBook4 + order8
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
+
+
+// Implement a weighted average pricing rule...
+case class WeightedAveragePricing(weight: Double) extends DiscriminatoryPricingRule {
+
+  def apply(pair: (LimitAskOrder, LimitBidOrder)): Price = pair match {
+    case (askOrder, bidOrder) => Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
+  }
+
+}
+
+
+// example of buyer's bid (or M+1 price rule)...incentive compatible for the seller!
+pairedOrders.map(WeightedAveragePricing(1.0)).toList
+
+
+// example of seller's ask (or M price rule)...incentive compatible for the buyer
+pairedOrders.map(WeightedAveragePricing(0.0)).toList
+
+
+// split the trade surplus evenly...not incentive compatible!
+pairedOrders.map(WeightedAveragePricing(0.5)).toList
