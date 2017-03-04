@@ -61,6 +61,7 @@ case class DivisibleLimitAskOrder[T <: Tradable](issuer: UUID, limit: Price, qua
   LimitAskOrder[T] with Divisible[T, DivisibleLimitAskOrder[T]] {
 
   def split(residual: Quantity): (DivisibleLimitAskOrder[T], DivisibleLimitAskOrder[T]) = {
+    require(residual.value < this.quantity.value)  // can this be check be lifted into the type system?
     val remaining = Quantity(quantity.value - residual.value)
     (this.copy(quantity = remaining), this.copy(quantity = residual))
   }
