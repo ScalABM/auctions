@@ -54,3 +54,22 @@ val orderBook5 = orderBook4 + order8
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
+
+
+// Why can this not be made covariant in T? Can divisible orders be constructed using an auxiliary constructor on LimitAskOrder?
+case class DivisibleLimitAskOrder[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T) extends
+  LimitAskOrder[T] with Divisible[T, DivisibleLimitAskOrder[T]] {
+
+  def split(residual: Quantity): (DivisibleLimitAskOrder[T], DivisibleLimitAskOrder[T]) = {
+    val remaining = Quantity(quantity.value - residual.value)
+    (this.copy(quantity = remaining), this.copy(quantity = residual))
+  }
+
+}
+
+
+// usage example for a divisible order
+val divisibleOrder: DivisibleLimitAskOrder[Google] = DivisibleLimitAskOrder(issuer, Price(9.56), Quantity(3), google)
+val(filled, residual) = divisibleOrder.split(Quantity(2))
+filled.quantity
+residual.quantity
