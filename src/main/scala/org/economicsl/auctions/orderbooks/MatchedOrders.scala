@@ -18,7 +18,7 @@ package org.economicsl.auctions.orderbooks
 import org.economicsl.auctions._
 
 
-private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
   require(bidOrders.headOption.forall(bidOrder => bidOrder.limit >= askOrders.head.limit))  // value of lowest bid must exceed value of highest ask!
@@ -63,7 +63,7 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
 }
 
 
-private[orderbooks] object MatchedOrders {
+object MatchedOrders {
 
   /** Create an instance of `MatchedOrders`.
     *
