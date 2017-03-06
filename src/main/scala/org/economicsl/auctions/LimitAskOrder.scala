@@ -19,7 +19,7 @@ import java.util.UUID
 
 
 /** Base trait for a limit order to sell some `Tradable`. */
-trait LimitAskOrder extends AskOrder with SinglePricePoint
+trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
 
 
 /** Companion object for `LimitAskOrder`.
@@ -28,21 +28,21 @@ trait LimitAskOrder extends AskOrder with SinglePricePoint
   */
 object LimitAskOrder {
 
-  implicit def ordering[O <: LimitAskOrder]: Ordering[O] = SinglePricePoint.ordering[O]
+  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
 
-  def apply(issuer: UUID, limit: Price, quantity: Quantity, tradable: Tradable): LimitAskOrder = {
+  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitAskOrder[T] = {
     SinglePricePointImpl(issuer, limit, quantity, tradable)
   }
 
-  def apply(issuer: UUID, limit: Price, tradable: Tradable): LimitAskOrder with SingleUnit = {
+  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] with SingleUnit[T] = {
     SingleUnitImpl(issuer, limit, tradable)
   }
 
-  private[this] case class SinglePricePointImpl(issuer: UUID, limit: Price, quantity: Quantity, tradable: Tradable)
-    extends LimitAskOrder
+  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
+    extends LimitAskOrder[T]
 
-  private[this] case class SingleUnitImpl(issuer: UUID, limit: Price, tradable: Tradable)
-    extends LimitAskOrder with SingleUnit
+  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T)
+    extends LimitAskOrder[T] with SingleUnit[T]
 
 }
 

@@ -6,43 +6,51 @@ import org.economicsl.auctions.pricing.{DiscriminatoryPricingRule, UniformPricin
 
 
 /** Example `Tradable` object. */
-case class Security(ticker: UUID) extends Tradable
+trait Security extends Tradable
+
+class Google extends Security
+
+class Apple extends Security
 
 // Create a multi-unit limit ask order...
 val issuer = UUID.randomUUID()
-val tradable = Security(UUID.randomUUID())
-val order1: LimitAskOrder = LimitAskOrder(issuer, Price(10), Quantity(100), tradable)
+val google = new Google()
+val order1: LimitAskOrder[Google] = LimitAskOrder(issuer, Price(10), Quantity(100), google)
 
 // Create a multi-unit market ask order...
-val order2: MarketAskOrder = MarketAskOrder(issuer, Quantity(100), tradable)
+val order2: MarketAskOrder[Google] = MarketAskOrder(issuer, Quantity(100), google)
 
 // Create a single-unit market ask order...
-val order3: MarketAskOrder with SingleUnit = MarketAskOrder(issuer, tradable)
+val order3: MarketAskOrder[Google] with SingleUnit[Google] = MarketAskOrder(issuer, google)
 
 // Create a single-unit limit ask order...
-val order4: LimitAskOrder with SingleUnit = LimitAskOrder(issuer, Price(5.5), tradable)
+val order4: LimitAskOrder[Google] with SingleUnit[Google] = LimitAskOrder(issuer, Price(5.5), google)
 
 // Create a multi-unit limit bid order...
-val order5: LimitBidOrder = LimitBidOrder(issuer, Price(10), Quantity(100), tradable)
+val order5: LimitBidOrder[Google] = LimitBidOrder(issuer, Price(10), Quantity(100), google)
 
 // Create a multi-unit market bid order...
-val order7: MarketBidOrder = MarketBidOrder(issuer, Quantity(100), tradable)
+val order7: MarketBidOrder[Google] = MarketBidOrder(issuer, Quantity(100), google)
 
 // Create a single-unit market bid order...
-val order8: MarketBidOrder with SingleUnit = MarketBidOrder(issuer, tradable)
+val order8: MarketBidOrder[Google] with SingleUnit[Google] = MarketBidOrder(issuer, google)
 
 // Create a single-unit limit bid order...
-val order9: LimitBidOrder with SingleUnit = LimitBidOrder(issuer, Price(9.5), tradable)
+val order9: LimitBidOrder[Google] with SingleUnit[Google] = LimitBidOrder(issuer, Price(9.5), google)
 
+// Create an order for some other tradable
+val apple = new Apple()
+val order10: LimitBidOrder[Apple] with SingleUnit[Apple] = LimitBidOrder(issuer, Price(55.9), apple)
 
 // Create a four-heap order book and add some orders...
-val orderBook = FourHeapOrderBook.empty[LimitAskOrder with SingleUnit, LimitBidOrder with SingleUnit]
+val orderBook = FourHeapOrderBook.empty[Google]
 val orderBook2 = orderBook + order3
 val orderBook3 = orderBook2 + order4
 val orderBook4 = orderBook3 + order9
 val orderBook5 = orderBook4 + order8
-// val orderBook6 = orderBook5 - order8  todo fix issues with requirement in UnMatchedOrders!
-// val orderBook7 = orderBook6 - order3
+
+// this should not compile...and it doesn't!
+// orderBook5 + order10
 
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
@@ -52,7 +60,7 @@ pairedOrders.toList
 // Implement a weighted average pricing rule...
 case class WeightedAveragePricing(weight: Double) extends DiscriminatoryPricingRule {
 
-  def apply(pair: (LimitAskOrder, LimitBidOrder)): Price = pair match {
+  def apply(pair: (LimitAskOrder[Google], LimitBidOrder[Google])): Price = pair match {
     case (askOrder, bidOrder) => Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
   }
 
