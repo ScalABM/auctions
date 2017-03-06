@@ -15,26 +15,28 @@ limitations under the License.
 */
 package org.economicsl.auctions.orderbooks
 
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, SingleUnit, Tradable}
-
-import scala.collection.immutable.TreeSet
+import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Tradable}
 
 
-private[orderbooks] class UnMatchedOrders[T <: Tradable, A <: LimitAskOrder[T], B <: LimitBidOrder[T]] private(val askOrders: SortedAskOrders[T, A], val bidOrders: SortedBidOrders[T, B]) {
+private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   require(bidOrders.headOption.forall(bidOrder => bidOrder.limit <= askOrders.head.limit))
 
-  def + (order: A): UnMatchedOrders[T, A, B] = new UnMatchedOrders(askOrders + order, bidOrders)
+  def + (order: LimitAskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
 
-  def + (order: B): UnMatchedOrders[T, A, B] = new UnMatchedOrders(askOrders, bidOrders + order)
+  def + (order: LimitBidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders + order)
 
-  def - (order: A): UnMatchedOrders[T, A, B] = new UnMatchedOrders(askOrders - order, bidOrders)
+  def - (order: LimitAskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders - order, bidOrders)
 
-  def - (order: B): UnMatchedOrders[T, A, B] = new UnMatchedOrders(askOrders, bidOrders - order)
+  def - (order: LimitBidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders - order)
 
-  def contains(order: A): Boolean = askOrders.contains(order)
+  val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
 
-  def contains(order: B): Boolean = bidOrders.contains(order)
+  val bidOrdering: Ordering[LimitBidOrder[T]] = bidOrders.ordering
+
+  def contains(order: LimitAskOrder[T]): Boolean = askOrders.contains(order)
+
+  def contains(order: LimitBidOrder[T]): Boolean = bidOrders.contains(order)
 
 }
 
@@ -50,8 +52,8 @@ private[orderbooks] object UnMatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from high to low based on `limit` price.
     */
-  def empty[T <: Tradable, A <: LimitAskOrder[T], B <: LimitBidOrder[T]](askOrdering: Ordering[A], bidOrdering: Ordering[B]): UnMatchedOrders[T, A, B] = {
-    new UnMatchedOrders(TreeSet.empty[A](askOrdering), TreeSet.empty[B](bidOrdering))
+  def empty[T <: Tradable](askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): UnMatchedOrders[T] = {
+    new UnMatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 
 }
