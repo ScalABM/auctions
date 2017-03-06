@@ -58,18 +58,18 @@ pairedOrders.toList
 
 
 // Implement a weighted average pricing rule...
-case class WeightedAveragePricing(weight: Double) extends DiscriminatoryPricingRule {
+case class WeightedAveragePricing[T <: Tradable](weight: Double) extends DiscriminatoryPricingRule[T] {
 
-  def apply(pair: (LimitAskOrder[Google], LimitBidOrder[Google])): Price = pair match {
+  def apply(pair: (LimitAskOrder[T], LimitBidOrder[T])): Price = pair match {
     case (askOrder, bidOrder) => Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
   }
 
 }
 
 // Not sure this is right! Might need this to be function of four-heap order book!
-case class WeightedAveragePricing2(weight: Double) extends UniformPricingRule {
+case class WeightedAveragePricing2[T <: Tradable](weight: Double) extends UniformPricingRule[T] {
 
-  def apply(pairs: Stream[(LimitAskOrder, LimitBidOrder)]): Price = {
+  def apply(pairs: Stream[(LimitAskOrder[T], LimitBidOrder[T])]): Price = {
      val (askOrder, bidOrder) = pairs.head
     Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
   }

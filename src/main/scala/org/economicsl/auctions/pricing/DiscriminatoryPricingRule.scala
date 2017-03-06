@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.pricing
 
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Price}
+import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Price, Tradable}
 
 
 /** Discriminatory pricing rule computes a different price for each pair of orders. */
-trait DiscriminatoryPricingRule extends (((LimitAskOrder, LimitBidOrder)) => Price)
+trait DiscriminatoryPricingRule[T <: Tradable] extends (((LimitAskOrder[T], LimitBidOrder[T])) => Price)
 
