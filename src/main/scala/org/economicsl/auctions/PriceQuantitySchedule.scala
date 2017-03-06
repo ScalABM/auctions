@@ -19,8 +19,8 @@ import scala.collection.GenIterable
 
 
 /** Mixin trait providing a schedule of price-quantity pairs for an order. */
-trait PriceQuantitySchedule {
-  this: Order =>
+trait PriceQuantitySchedule[+T <: Tradable] {
+  this: Order[T] =>
 
   type PricePoint = (Price, Quantity)
 

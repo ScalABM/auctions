@@ -18,7 +18,7 @@ package org.economicsl.auctions
 import java.util.UUID
 
 /** Base trait for a limit order to buy some `Tradable`. */
-trait LimitBidOrder extends BidOrder with SinglePricePoint
+trait LimitBidOrder[+T <: Tradable] extends BidOrder[T] with SinglePricePoint[T]
 
 
 /** Companion object for `LimitBidOrder`.
@@ -27,21 +27,21 @@ trait LimitBidOrder extends BidOrder with SinglePricePoint
   */
 object LimitBidOrder {
 
-  implicit def ordering[O <: LimitBidOrder]: Ordering[O] = SinglePricePoint.ordering[O].reverse
+  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O].reverse
 
-  def apply(issuer: UUID, limit: Price, quantity: Quantity, tradable: Tradable): LimitBidOrder = {
+  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitBidOrder[T] = {
     SinglePricePointImpl(issuer, limit, quantity, tradable)
   }
 
-  def apply(issuer: UUID, limit: Price, tradable: Tradable): LimitBidOrder with SingleUnit = {
+  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitBidOrder[T] with SingleUnit[T] = {
     SingleUnitImpl(issuer, limit, tradable)
   }
 
-  private[this] case class SinglePricePointImpl(issuer: UUID, limit: Price, quantity: Quantity, tradable: Tradable)
-    extends LimitBidOrder
+  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
+    extends LimitBidOrder[T]
 
-  private[this] case class SingleUnitImpl(issuer: UUID, limit: Price, tradable: Tradable)
-    extends LimitBidOrder with SingleUnit
+  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T)
+    extends LimitBidOrder[T] with SingleUnit[T]
 
 }
 
