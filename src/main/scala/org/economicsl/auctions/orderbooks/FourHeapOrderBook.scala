@@ -18,7 +18,7 @@ package org.economicsl.auctions.orderbooks
 import org.economicsl.auctions._
 
 
-class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
+class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
 
   def - (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     if (unMatchedOrders.contains(order)) {

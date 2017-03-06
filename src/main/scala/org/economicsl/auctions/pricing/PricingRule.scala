@@ -20,4 +20,14 @@ import org.economicsl.auctions.orderbooks.FourHeapOrderBook
 
 
 /** Base trait for all pricing rules. */
-trait PricingRule[-T <: Tradable] extends ((FourHeapOrderBook[T]) => Option[Price])
+trait PricingRule[T <: Tradable, +V <: AnyVal] extends ((FourHeapOrderBook[T]) => Option[V])
+
+
+/** Example implementation of the Mth-price rule discussed in P.R. Wurman et al (1998). */
+class BuyersBidPricingRule[T <: Tradable] extends PricingRule[T, Price] {
+
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
+    orderBook.matchedOrders.bidOrders.headOption.map(bidOrder => bidOrder.limit)
+  }
+
+}
