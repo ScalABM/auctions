@@ -5,6 +5,7 @@ import org.economicsl.auctions.{Order, Tradable}
 import scala.collection.GenIterable
 
 
+/** Base trait defining and interface for an `OrderBook`. */
 trait OrderBookLike[+O <: Order[_ <: Tradable]] {
 
   /** Filter the `OrderBook` and return those `Order` instances satisfying the given predicate.
