@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.multiunit.SinglePricePoint
+
 
 /** Mixin trait that restricts the quantity of an `Order with SinglePricePoint` to a single unit of a `Tradable`. */
 trait SingleUnit[+T <: Tradable] {

@@ -17,6 +17,8 @@ package org.economicsl.auctions
 
 import java.util.UUID
 
+import org.economicsl.auctions.multiunit.SinglePricePoint
+
 /** Base trait for a limit order to buy some `Tradable`. */
 trait LimitBidOrder[+T <: Tradable] extends BidOrder[T] with SinglePricePoint[T]
 
