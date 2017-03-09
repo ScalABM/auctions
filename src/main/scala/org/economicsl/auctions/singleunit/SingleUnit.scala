@@ -26,3 +26,21 @@ trait SingleUnit[+T <: Tradable] extends multiunit.SinglePricePoint[T] {
 
 }
 
+
+/** Companion object for the `SingleUnit` trait.
+  *
+  * Defines a basic ordering for anything that mixes in the `SingleUnit` trait.
+  */
+object SingleUnit {
+
+  /** All `Order` instances that mixin `SingleUnit` are ordered by `limit` from lowest to highest.
+    *
+    * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
+    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
+    */
+  def ordering[O <: Order[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
+    multiunit.SinglePricePoint.ordering
+  }
+
+}
+
