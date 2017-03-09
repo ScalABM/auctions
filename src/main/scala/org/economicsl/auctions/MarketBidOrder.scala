@@ -17,6 +17,8 @@ package org.economicsl.auctions
 
 import java.util.UUID
 
+import org.economicsl.auctions.singleunit.SingleUnit
+
 
 /** Base trait for a market order to buy a particular `Tradable`. */
 trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {

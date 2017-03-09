@@ -2,6 +2,7 @@ import java.util.UUID
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.multiunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.SingleUnit
 
 
 /** Example `Tradable` object. */

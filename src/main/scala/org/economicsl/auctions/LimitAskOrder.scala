@@ -18,6 +18,7 @@ package org.economicsl.auctions
 import java.util.UUID
 
 import org.economicsl.auctions.multiunit.SinglePricePoint
+import org.economicsl.auctions.singleunit.SingleUnit
 
 
 /** Base trait for a limit order to sell some `Tradable`. */
