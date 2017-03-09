@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Tradable}
+import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.{LimitBidOrder, Tradable}
 
 
 private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {

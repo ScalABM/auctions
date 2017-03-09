@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.multiunit.orderbooks
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 
 
 class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
