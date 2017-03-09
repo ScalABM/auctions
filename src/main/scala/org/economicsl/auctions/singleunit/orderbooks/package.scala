@@ -1,6 +1,7 @@
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
+
+import org.economicsl.auctions.{Quantity, Tradable}
 
 import scala.collection.immutable
 

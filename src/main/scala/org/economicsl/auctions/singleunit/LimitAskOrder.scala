@@ -13,39 +13,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit
+package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.SingleUnit
-import org.economicsl.auctions.{AskOrder, Price, Quantity, Tradable}
+import org.economicsl.auctions.{AskOrder, Price, Tradable}
 
 
-/** Base trait for a limit order to sell some `Tradable`. */
-trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
+trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SingleUnit[T]
 
 
-/** Companion object for `LimitAskOrder`.
-  *
-  * Provides default ordering as well as constructors for default implementations of `LimitAskOrder` trait.
-  */
 object LimitAskOrder {
 
-  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
-
-  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitAskOrder[T] = {
-    SinglePricePointImpl(issuer, limit, quantity, tradable)
-  }
-
-  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] with SingleUnit[T] = {
+  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {
     SingleUnitImpl(issuer, limit, tradable)
   }
 
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
-    extends LimitAskOrder[T]
-
-  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T)
-    extends LimitAskOrder[T] with SingleUnit[T]
+  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T) extends LimitAskOrder[T]
 
 }
 

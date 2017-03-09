@@ -13,10 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit.orderbooks
+package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions._
-import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 
 class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
