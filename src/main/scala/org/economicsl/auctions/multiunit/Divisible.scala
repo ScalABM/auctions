@@ -13,13 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.multiunit
+
+import org.economicsl.auctions.{Order, Quantity, Tradable}
 
 
 /** Mixin trait providing behavior necessary to split an order into two orders. */
-trait Divisible[+T <: Tradable, O <: Order[T] with SinglePricePoint[T] with Divisible[T, O]] {
+trait Divisible[+T <: Tradable, +O <: Order[T] with SinglePricePoint[T] with Divisible[T, O]] {
   this: Order[T] with SinglePricePoint[T] =>
 
-  def split(residual: Quantity): (O, O)
+  def withQuantity(residual: Quantity): O
 
 }
