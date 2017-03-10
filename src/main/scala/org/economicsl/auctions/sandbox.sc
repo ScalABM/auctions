@@ -54,3 +54,7 @@ val orderBook5 = orderBook4 + order8
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
+
+// currently all multi-unit orders are divisible...
+val residual = order7.withQuantity(Quantity(2))
+residual.quantity

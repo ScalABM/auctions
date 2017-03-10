@@ -20,8 +20,8 @@ import java.util.UUID
 import org.economicsl.auctions.{AskOrder, Price, Quantity, Tradable}
 
 
-/** Base trait for a limit order to sell some `Tradable`. */
-trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
+/** Base trait for a multi-unit limit order to sell some `Tradable`. */
+trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T] with Divisible[T, LimitAskOrder[T]]
 
 
 /** Companion object for `LimitAskOrder`.
@@ -37,7 +37,14 @@ object LimitAskOrder {
   }
 
   private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
-    extends LimitAskOrder[T]
+    extends LimitAskOrder[T] {
+
+    def withQuantity(residual: Quantity): LimitAskOrder[T] = {
+      require(residual.value < quantity.value)
+      copy(quantity = residual)
+    }
+
+  }
 
 }
 

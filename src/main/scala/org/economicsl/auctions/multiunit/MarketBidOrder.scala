@@ -28,6 +28,7 @@ trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {
 
 }
 
+
 /** Companion object for `MarketBidOrder`.
   *
   * Provides constructor for default implementation of `MarketBidOrder` trait.
@@ -39,6 +40,13 @@ object MarketBidOrder {
   }
 
   private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T)
-    extends MarketBidOrder[T]
+    extends MarketBidOrder[T] {
+
+    def withQuantity(residual: Quantity): MarketBidOrder[T] = {
+      require(residual.value < quantity.value)
+      copy(quantity = residual)
+    }
+
+  }
 
 }
