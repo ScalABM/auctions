@@ -65,4 +65,36 @@ package object auctions {
   /** Value class representing quantities. */
   case class Quantity(value: Double) extends AnyVal  // todo should this be Long or Double?
 
+
+  object Quantity {
+
+    implicit def mkNumericOps(lhs: Quantity): QuantityIsNumeric.Ops = QuantityIsNumeric.mkNumericOps(lhs)
+
+  }
+
+
+  object QuantityIsNumeric extends Numeric[Quantity] {
+
+    def plus(x: Quantity, y: Quantity): Quantity = Quantity(x.value + y.value)
+
+    def minus(x: Quantity, y: Quantity): Quantity = Quantity(x.value - y.value)
+
+    def times(x: Quantity, y: Quantity): Quantity = Quantity(x.value * y.value)
+
+    def negate(x: Quantity): Quantity = Quantity(-x.value)
+
+    def fromInt(x: Int): Quantity = Quantity(x.toDouble)
+
+    def toInt(x: Quantity): Int = x.value.toInt
+
+    def toLong(x: Quantity): Long = x.value.toLong
+
+    def toFloat(x: Quantity): Float = x.value.toFloat
+
+    def toDouble(x: Quantity): Double = x.value
+
+    def compare(x: Quantity, y: Quantity): Int = x.value compare y.value
+
+  }
+
 }
