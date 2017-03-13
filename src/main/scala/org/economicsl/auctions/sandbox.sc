@@ -14,10 +14,10 @@ class Apple extends Security
 // Create a multi-unit limit ask order...
 val issuer = UUID.randomUUID()
 val google = new Google()
-val order1: multiunit.LimitAskOrder[Google] = multiunit.LimitAskOrder(issuer, Price(10), Quantity(100), google)
+val order1: multiunit.LimitAskOrder[Google, DiscreteQuantity] = multiunit.LimitAskOrder(issuer, Price(10), DiscreteQuantity(100), google)
 
 // Create a multi-unit market ask order...
-val order2: multiunit.MarketAskOrder[Google] = multiunit.MarketAskOrder(issuer, Quantity(100), google)
+val order2: multiunit.MarketAskOrder[Google, DiscreteQuantity] = multiunit.MarketAskOrder(issuer, DiscreteQuantity(100), google)
 
 // Create a single-unit market ask order...
 val order3: singleunit.MarketAskOrder[Google] = singleunit.MarketAskOrder(issuer, google)
@@ -26,10 +26,10 @@ val order3: singleunit.MarketAskOrder[Google] = singleunit.MarketAskOrder(issuer
 val order4: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(5.5), google)
 
 // Create a multi-unit limit bid order...
-val order5: multiunit.LimitBidOrder[Google] = multiunit.LimitBidOrder(issuer, Price(10), Quantity(100), google)
+val order5: multiunit.LimitBidOrder[Google, ContinuousQuantity] = multiunit.LimitBidOrder(issuer, Price(10), ContinuousQuantity(150.5), google)
 
 // Create a multi-unit market bid order...
-val order7: multiunit.MarketBidOrder[Google] = multiunit.MarketBidOrder(issuer, Quantity(100), google)
+val order7: multiunit.MarketBidOrder[Google, ContinuousQuantity] = multiunit.MarketBidOrder(issuer, ContinuousQuantity(100), google)
 
 // Create a single-unit market bid order...
 val order8: singleunit.MarketBidOrder[Google] = singleunit.MarketBidOrder(issuer, google)

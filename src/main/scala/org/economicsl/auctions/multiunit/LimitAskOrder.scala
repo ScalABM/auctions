@@ -21,7 +21,7 @@ import org.economicsl.auctions.{AskOrder, Price, Quantity, Tradable}
 
 
 /** Base trait for a limit order to sell some `Tradable`. */
-trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
+trait LimitAskOrder[+T <: Tradable, Q <: Quantity[_]] extends AskOrder[T] with SinglePricePoint[T, Q]
 
 
 /** Companion object for `LimitAskOrder`.
@@ -30,14 +30,14 @@ trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
   */
 object LimitAskOrder {
 
-  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
+  implicit def ordering[O <: LimitAskOrder[_ <: Tradable, _ <: Quantity[_]]]: Ordering[O] = SinglePricePoint.ordering[O]
 
-  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitAskOrder[T] = {
+  def apply[T <: Tradable, Q <: Quantity[_]](issuer: UUID, limit: Price, quantity: Q, tradable: T): LimitAskOrder[T, Q] = {
     SinglePricePointImpl(issuer, limit, quantity, tradable)
   }
 
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
-    extends LimitAskOrder[T]
+  private[this] case class SinglePricePointImpl[+T <: Tradable, Q <: Quantity[_]](issuer: UUID, limit: Price, quantity: Q, tradable: T)
+    extends LimitAskOrder[T, Q]
 
 }
 

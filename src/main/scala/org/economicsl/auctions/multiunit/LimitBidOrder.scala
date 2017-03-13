@@ -20,7 +20,7 @@ import java.util.UUID
 import org.economicsl.auctions.{BidOrder, Price, Quantity, Tradable}
 
 /** Base trait for a limit order to buy some `Tradable`. */
-trait LimitBidOrder[+T <: Tradable] extends BidOrder[T] with SinglePricePoint[T]
+trait LimitBidOrder[+T <: Tradable, Q <: Quantity[_]] extends BidOrder[T] with SinglePricePoint[T, Q]
 
 
 /** Companion object for `LimitBidOrder`.
@@ -29,14 +29,14 @@ trait LimitBidOrder[+T <: Tradable] extends BidOrder[T] with SinglePricePoint[T]
   */
 object LimitBidOrder {
 
-  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O].reverse
+  implicit def ordering[O <: LimitBidOrder[_ <: Tradable, _ <: Quantity[_]]]: Ordering[O] = SinglePricePoint.ordering[O].reverse
 
-  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitBidOrder[T] = {
+  def apply[T <: Tradable, Q <: Quantity[_]](issuer: UUID, limit: Price, quantity: Q, tradable: T): LimitBidOrder[T, Q] = {
     SinglePricePointImpl(issuer, limit, quantity, tradable)
   }
 
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
-    extends LimitBidOrder[T]
+  private[this] case class SinglePricePointImpl[+T <: Tradable, Q <: Quantity[_]](issuer: UUID, limit: Price, quantity: Q, tradable: T)
+    extends LimitBidOrder[T, Q]
 
 }
 

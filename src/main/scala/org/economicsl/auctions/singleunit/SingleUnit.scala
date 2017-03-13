@@ -15,14 +15,14 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Order, Quantity, Tradable, multiunit}
+import org.economicsl.auctions.{Order, DiscreteQuantity, Tradable, multiunit}
 
 
 /** Mixin trait that restricts the quantity of an `Order with SinglePricePoint` to a single unit of a `Tradable`. */
-trait SingleUnit[+T <: Tradable] extends multiunit.SinglePricePoint[T] {
+trait SingleUnit[+T <: Tradable] extends multiunit.SinglePricePoint[T, DiscreteQuantity] {
   this: Order[T]  =>
 
-  val quantity = Quantity(1)
+  val quantity: DiscreteQuantity = DiscreteQuantity(1)
 
 }
 

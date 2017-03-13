@@ -21,7 +21,7 @@ import scala.collection.immutable
 
 
 /** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price. */
-trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
+trait SinglePricePoint[+T <: Tradable, Q <: Quantity[_]] extends PriceQuantitySchedule[T, Q] {
   this: Order[T] =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
@@ -31,9 +31,9 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   def limit: Price
 
   /** Desired number of units of the `Tradable`. */
-  def quantity: Quantity
+  def quantity: Q
 
-  val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
+  val schedule: immutable.Map[Price, Q] = immutable.Map(limit -> quantity)
 
 }
 
@@ -49,7 +49,7 @@ object SinglePricePoint {
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
     * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
     */
-  def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
+  def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable, _ <: Quantity[_]]]: Ordering[O] = {
     Ordering.by(o => (o.limit, o.issuer))
   }
 

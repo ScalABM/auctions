@@ -21,7 +21,7 @@ import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
 /** Base trait for a market order to sell some `Tradable`. */
-trait MarketAskOrder[+T <: Tradable] extends LimitAskOrder[T] {
+trait MarketAskOrder[+T <: Tradable, Q <: Quantity[_]] extends LimitAskOrder[T, Q] {
 
   /** An issuer of a `MarketAskOrder` is willing to sell at any strictly positive price. */
   val limit: Price = Price.MinPositiveValue
@@ -34,12 +34,12 @@ trait MarketAskOrder[+T <: Tradable] extends LimitAskOrder[T] {
   */
 object MarketAskOrder {
 
-  def apply[T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T): MarketAskOrder[T] = {
+  def apply[T <: Tradable, Q <: Quantity[_]](issuer: UUID, quantity: Q, tradable: T): MarketAskOrder[T, Q] = {
     SinglePricePointImpl(issuer, quantity, tradable)
   }
 
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T)
-    extends MarketAskOrder[T]
+  private[this] case class SinglePricePointImpl[+T <: Tradable, Q <: Quantity[_]](issuer: UUID, quantity: Q, tradable: T)
+    extends MarketAskOrder[T, Q]
 
 }
 

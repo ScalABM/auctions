@@ -21,10 +21,10 @@ import scala.collection.GenIterable
 
 
 /** Mixin trait providing a schedule of price-quantity pairs for an order. */
-trait PriceQuantitySchedule[+T <: Tradable] {
+trait PriceQuantitySchedule[+T <: Tradable, Q <: Quantity[_]] {
   this: Order[T] =>
 
-  type PricePoint = (Price, Quantity)
+  type PricePoint = (Price, Q)
 
   /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
     * of a `Tradable` at specific, discrete price-points.

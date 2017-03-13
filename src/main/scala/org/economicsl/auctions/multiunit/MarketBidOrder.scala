@@ -21,7 +21,7 @@ import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
 /** Base trait for a market order to buy a particular `Tradable`. */
-trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {
+trait MarketBidOrder[+T <: Tradable, Q <: Quantity[_]] extends LimitBidOrder[T, Q] {
 
   /** An issuer of a `MarketBidOrder` is willing to pay any finite price. */
   val limit: Price = Price.MaxValue
@@ -34,11 +34,11 @@ trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {
   */
 object MarketBidOrder {
 
-  def apply[T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T): MarketBidOrder[T] = {
+  def apply[T <: Tradable, Q <: Quantity[_]](issuer: UUID, quantity: Q, tradable: T): MarketBidOrder[T, Q] = {
     SinglePricePointImpl(issuer, quantity, tradable)
   }
 
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T)
-    extends MarketBidOrder[T]
+  private[this] case class SinglePricePointImpl[+T <: Tradable, Q <: Quantity[_]](issuer: UUID, quantity: Q, tradable: T)
+    extends MarketBidOrder[T, Q]
 
 }
