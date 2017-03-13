@@ -62,7 +62,15 @@ package object auctions {
   }
 
 
-  /** Value class representing quantities. */
-  case class Quantity(value: Double) extends AnyVal  // todo should this be Long or Double?
+  /** Classes representing discrete and continuous quantities. */
+  sealed abstract class Quantity[@specialized (Long, Double) +T](implicit ev: T => Double) {
+
+    def value: T
+
+  }
+
+  final case class DiscreteQuantity(value: Long) extends Quantity[Long]
+
+  final case class ContinuousQuantity(value: Double) extends Quantity[Double]
 
 }
