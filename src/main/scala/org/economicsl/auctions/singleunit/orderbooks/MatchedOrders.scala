@@ -22,7 +22,7 @@ import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
-  require(bidOrders.headOption.forall(bidOrder => bidOrder.limit >= askOrders.head.limit))  // value of lowest bid must exceed value of highest ask!
+  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.value >= askOrder.value)))  // value of lowest bid must exceed value of highest ask!
 
   def + (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)

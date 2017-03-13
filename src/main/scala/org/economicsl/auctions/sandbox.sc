@@ -15,6 +15,7 @@ class Apple extends Security
 val issuer = UUID.randomUUID()
 val google = new Google()
 val order1: multiunit.LimitAskOrder[Google] = multiunit.LimitAskOrder(issuer, Price(10), Quantity(100), google)
+order1.value
 
 // Create a multi-unit market ask order...
 val order2: multiunit.MarketAskOrder[Google] = multiunit.MarketAskOrder(issuer, Quantity(100), google)
