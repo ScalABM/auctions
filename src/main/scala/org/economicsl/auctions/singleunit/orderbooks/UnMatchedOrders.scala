@@ -21,7 +21,7 @@ import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
-  require(bidOrders.headOption.forall(bidOrder => bidOrder.limit <= askOrders.head.limit))
+  require(bidOrders.headOption.forall(bidOrder => bidOrder.value <= askOrders.head.value))
 
   def + (order: LimitAskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
 

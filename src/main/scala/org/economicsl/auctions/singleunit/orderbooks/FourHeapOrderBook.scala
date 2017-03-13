@@ -21,6 +21,9 @@ import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
 
+  require(matchedOrders.bidOrders.headOption.forall(bidOrder => bidOrder.value >= unMatchedOrders.bidOrders.head.value))  // value of lowest bid must exceed value of highest ask!
+  require(unMatchedOrders.askOrders.headOption.forall(askOrder => askOrder.value >= matchedOrders.askOrders.head.value))
+
   def - (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     if (unMatchedOrders.contains(order)) {
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
