@@ -28,8 +28,16 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
     new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)
   }
 
+  def ++ (orders: (TraversableOnce[LimitAskOrder[T]], TraversableOnce[LimitBidOrder[T]])): MatchedOrders[T] = {
+    new MatchedOrders(askOrders ++ orders._1, bidOrders ++ orders._2)
+  }
+
   def - (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders - orders._1, bidOrders - orders._2)
+  }
+
+  def -- (orders: (TraversableOnce[LimitAskOrder[T]], TraversableOnce[LimitBidOrder[T]])): MatchedOrders[T] = {
+    new MatchedOrders(askOrders -- orders._1, bidOrders -- orders._2)
   }
 
   val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
@@ -49,16 +57,7 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
   }
 
   def zipped: Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
-    @annotation.tailrec
-    def loop(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T], pairedOrders: Stream[(LimitAskOrder[T], LimitBidOrder[T])]): Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
-      if (askOrders.isEmpty || bidOrders.isEmpty) {
-        pairedOrders
-      } else {
-        val pair = (askOrders.head, bidOrders.head)
-        loop(askOrders.tail, bidOrders.tail, Stream.cons(pair, pairedOrders))
-      }
-    }
-    loop(askOrders, bidOrders, Stream.empty[(LimitAskOrder[T], LimitBidOrder[T])])
+    ???
   }
 
 }

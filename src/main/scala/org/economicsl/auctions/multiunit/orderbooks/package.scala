@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.{Quantity, Tradable}
+import org.economicsl.auctions.{Order, Quantity, Tradable}
 
-import scala.collection.immutable
+import scala.collection.{GenIterable, immutable}
 
 
 /** Documentation for multi-unit orderbooks goes here! */
@@ -29,8 +29,16 @@ package object orderbooks {
       new SortedAskOrders(orders + order, Quantity(numberUnits.value + order.quantity.value))
     }
 
+    def ++ (additional: TraversableOnce[LimitAskOrder[T]]): SortedAskOrders[T] = {
+      new SortedAskOrders(orders ++ additional, Quantity(numberUnits.value + additional.reduce((a1, a2) => Quantity(a1.quantity.value + a2.quantity.value)).value))
+    }
+
     def - (order: LimitAskOrder[T]): SortedAskOrders[T] = {
       new SortedAskOrders(orders - order, Quantity(numberUnits.value - order.quantity.value))
+    }
+
+    def -- (excess: TraversableOnce[LimitAskOrder[T]]): SortedAskOrders[T] = {
+      new SortedAskOrders(orders -- excess, Quantity(numberUnits.value - excess.reduce((a1, a2) => Quantity(a1.quantity.value + a2.quantity.value)).value))
     }
 
     def contains(order: LimitAskOrder[T]): Boolean = orders.contains(order)
@@ -62,13 +70,21 @@ package object orderbooks {
       new SortedBidOrders(orders + order, Quantity(numberUnits.value + order.quantity.value))
     }
 
+    def ++ (additional: GenIterable[LimitBidOrder[T]]): SortedBidOrders[T] = {
+      new SortedBidOrders(orders ++ additional, Quantity(numberUnits.value + totalQuantity(additional).value))
+    }
+
     def - (order: LimitBidOrder[T]): SortedBidOrders[T] = {
       new SortedBidOrders(orders - order, Quantity(numberUnits.value - order.quantity.value))
     }
 
+    def -- (excess: TraversableOnce[LimitBidOrder[T]]): SortedBidOrders[T] = {
+      new SortedBidOrders(orders -- excess, Quantity(numberUnits.value - excess.reduce((b1, b2) => Quantity(b1.quantity.value + b2.quantity.value)).value))
+    }
+
     def contains(order: LimitBidOrder[T]): Boolean = orders.contains(order)
 
-    def  head: LimitBidOrder[T] = orders.head
+    def head: LimitBidOrder[T] = orders.head
 
     val headOption: Option[LimitBidOrder[T]] = orders.headOption
 
@@ -86,6 +102,10 @@ package object orderbooks {
       new SortedBidOrders(immutable.TreeSet.empty[LimitBidOrder[T]](ordering), Quantity(0))
     }
 
+  }
+
+  private[this] def totalQuantity[T <: Tradable](orders: GenIterable[Order[T] with SinglePricePoint[T]]): Quantity = {
+    orders.aggregate[Quantity](Quantity(0))((total, order) => Quantity(total.value + order.quantity.value), (q1, q2) => Quantity(q1.value + q2.value))
   }
 
 }
