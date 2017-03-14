@@ -19,7 +19,10 @@ order1.value
 
 // Create a multi-unit market ask order...
 val order2: multiunit.MarketAskOrder[Google] = multiunit.MarketAskOrder(issuer, Quantity(100), google)
+
+// check that numeric operators are working as expected
 order1.quantity - order2.quantity
+order1.quantity + order2.quantity
 
 // Create a single-unit market ask order...
 val order3: singleunit.MarketAskOrder[Google] = singleunit.MarketAskOrder(issuer, google)

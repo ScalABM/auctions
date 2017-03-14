@@ -66,6 +66,10 @@ package object auctions {
   case class Quantity(value: Double) extends AnyVal  // todo should this be Long or Double?
 
 
+  /** Companion object for the `Quantity` value class.
+    *
+    * Currently holds the implicit conversions used to provide numeric operators.
+    */
   object Quantity {
 
     implicit def mkNumericOps(lhs: Quantity): QuantityIsNumeric.Ops = QuantityIsNumeric.mkNumericOps(lhs)
@@ -73,6 +77,7 @@ package object auctions {
   }
 
 
+  /** Object containing the numeric operators for the `Quantity` value class. */
   object QuantityIsNumeric extends Numeric[Quantity] {
 
     def plus(x: Quantity, y: Quantity): Quantity = Quantity(x.value + y.value)
