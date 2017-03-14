@@ -19,7 +19,7 @@ import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 
-class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
+class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
 
   // value of lowest matched bid must exceed value of highest unmatched bid!
   require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.value >= b2.value)))

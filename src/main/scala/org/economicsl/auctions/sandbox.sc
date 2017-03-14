@@ -1,9 +1,9 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.Fill
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.{BuyersBidPricingRule, SellersAskPricingRule, WeightedAveragePricingRule}
+import org.economicsl.auctions.singleunit.pricing.{BuyersBidPricingRule, PricingRule, SellersAskPricingRule, WeightedAveragePricingRule}
 
 
 /** Example `Tradable` object. */
@@ -62,13 +62,6 @@ val askPriceQuote = buyersBidPricing(orderBook5)
 val sellersAskPricing = new SellersAskPricingRule[Google]()
 val bidPriceQuote = sellersAskPricing(orderBook5)
 
-
-case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) {
-
-  val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
-
-}
-
 // example of a uniform price auction that would be incentive compatible for the sellers...
 val averagePricing = WeightedAveragePricingRule[Google](0.5)
 val averagePrice = averagePricing(orderBook5)
@@ -76,3 +69,8 @@ val averagePrice = averagePricing(orderBook5)
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
+
+
+def fill[T <: Tradable](pricingRule: PricingRule[T, Price])(orderBook: FourHeapOrderBook[T]): Option[(Fill[T], FourHeapOrderBook[T])] = {
+  pricingRule(orderBook).map{ price => val (askOrder, bidOrder) = orderBook.head; Some(Fill(askOrder, bidOrder, price), orderBook.tail) }
+}
