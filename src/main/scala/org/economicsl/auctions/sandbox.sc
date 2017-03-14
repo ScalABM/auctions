@@ -1,8 +1,14 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
+<<<<<<< HEAD
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+=======
+import org.economicsl.auctions.singleunit.Fill
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.pricing.{BuyersBidPricingRule, PricingRule, SellersAskPricingRule, WeightedAveragePricingRule}
+>>>>>>> add-fills
 
 
 /** Example `Tradable` object. */
@@ -53,28 +59,22 @@ val orderBook5 = orderBook4 + order8
 // this should not compile...and it doesn't!
 // orderBook5 + order10
 
+// example of a uniform price auction that would be incentive compatible for the sellers...
+val buyersBidPricing = new BuyersBidPricingRule[Google]()
+val askPriceQuote = buyersBidPricing(orderBook5)
+
+// example of a uniform price auction that would be incentive compatible for the buyers...
+val sellersAskPricing = new SellersAskPricingRule[Google]()
+val bidPriceQuote = sellersAskPricing(orderBook5)
+
+// example of a uniform price auction that would be incentive compatible for the sellers...
+val averagePricing = WeightedAveragePricingRule[Google](0.5)
+val averagePrice = averagePricing(orderBook5)
+
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
 
-
-// Implement a weighted average pricing rule...
-case class WeightedAveragePricing(weight: Double) extends DiscriminatoryPricingRule {
-
-  def apply(pair: (LimitAskOrder, LimitBidOrder)): Price = pair match {
-    case (askOrder, bidOrder) => Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
-  }
-
+def fill[T <: Tradable](pricingRule: PricingRule[T, Price])(orderBook: FourHeapOrderBook[T]): Option[(Fill[T], FourHeapOrderBook[T])] = {
+  pricingRule(orderBook).map{ price => val (askOrder, bidOrder) = orderBook.head; Some(Fill(askOrder, bidOrder, price), orderBook.tail) }
 }
-
-
-// example of buyer's bid (or M+1 price rule)...incentive compatible for the seller!
-pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(1.0)((askOrder, bidOrder))) }
-
-
-// example of seller's ask (or M price rule)...incentive compatible for the buyer
-pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(0.0)((askOrder, bidOrder))) }
-
-
-// split the trade surplus evenly...not incentive compatible!
-pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(0.5)((askOrder, bidOrder))) }

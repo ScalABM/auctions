@@ -12,7 +12,14 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/package org.economicsl.auctions
+*/
+package org.economicsl.auctions.singleunit
+
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
-package object pricing
+case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) {
+
+  val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
+
+}
