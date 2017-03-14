@@ -13,12 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.pricing
-
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Price, Tradable}
+package org.economicsl.auctions.singleunit
 
 
-/** Uniform pricing rule computes a single price for the entire stream of paired orders. */
-trait UniformPricingRule[T <: Tradable] extends (Stream[(LimitAskOrder[T], LimitBidOrder[T])] => Price)
-
-
+/** Documentation for the pricing package should go here! */
+package object pricing

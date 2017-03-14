@@ -1,8 +1,8 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.pricing.{DiscriminatoryPricingRule, UniformPricingRule}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.pricing.{BuyersBidPricingRule, SellersAskPricingRule, WeightedAveragePricingRule}
 
 
 /** Example `Tradable` object. */
@@ -53,37 +53,37 @@ val orderBook5 = orderBook4 + order8
 // this should not compile...and it doesn't!
 // orderBook5 + order10
 
+// example of a uniform price auction that would be incentive compatible for the sellers...
+val buyersBidPricing = new BuyersBidPricingRule[Google]()
+val askPriceQuote = buyersBidPricing(orderBook5)
+
+// example of a uniform price auction that would be incentive compatible for the buyers...
+val sellersAskPricing = new SellersAskPricingRule[Google]()
+val bidPriceQuote = sellersAskPricing(orderBook5)
+
+
+// example of a uniform price auction that would be incentive compatible for the sellers...
+val averagePricing = WeightedAveragePricingRule[Google](0.5)
+val averagePrice = averagePricing(orderBook5)
+
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
 
 
 // Implement a weighted average pricing rule...
-case class WeightedAveragePricing[T <: Tradable](weight: Double) extends DiscriminatoryPricingRule[T] {
 
-  def apply(pair: (LimitAskOrder[T], LimitBidOrder[T])): Price = pair match {
-    case (askOrder, bidOrder) => Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
-  }
-
-}
 
 // Not sure this is right! Might need this to be function of four-heap order book!
-case class WeightedAveragePricing2[T <: Tradable](weight: Double) extends UniformPricingRule[T] {
 
-  def apply(pairs: Stream[(LimitAskOrder[T], LimitBidOrder[T])]): Price = {
-     val (askOrder, bidOrder) = pairs.head
-    Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
-  }
-
-}
 
 // example of buyer's bid (or M+1 price rule)...incentive compatible for the seller!
-pairedOrders.map(WeightedAveragePricing(1.0)).toList
+// pairedOrders.map(WeightedAveragePricingRule(1.0)).toList
 
 
 // example of seller's ask (or M price rule)...incentive compatible for the buyer
-pairedOrders.map(WeightedAveragePricing(0.0)).toList
+// pairedOrders.map(WeightedAveragePricingRule(0.0)).toList
 
 
 // split the trade surplus evenly...not incentive compatible!
-pairedOrders.map(WeightedAveragePricing(0.5)).toList
+// pairedOrders.map(WeightedAveragePricing(0.5)).toList

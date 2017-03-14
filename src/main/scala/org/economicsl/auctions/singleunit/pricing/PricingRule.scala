@@ -13,21 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.pricing
+package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.{Price, Tradable}
-import org.economicsl.auctions.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.Tradable
 
 
 /** Base trait for all pricing rules. */
 trait PricingRule[T <: Tradable, +V <: AnyVal] extends ((FourHeapOrderBook[T]) => Option[V])
-
-
-/** Example implementation of the Mth-price rule discussed in P.R. Wurman et al (1998). */
-class BuyersBidPricingRule[T <: Tradable] extends PricingRule[T, Price] {
-
-  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
-    orderBook.matchedOrders.bidOrders.headOption.map(bidOrder => bidOrder.limit)
-  }
-
-}
