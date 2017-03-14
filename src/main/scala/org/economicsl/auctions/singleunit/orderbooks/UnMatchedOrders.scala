@@ -13,14 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.orderbooks
+package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Tradable}
+import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 
 private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
-  require(bidOrders.headOption.forall(bidOrder => bidOrder.limit <= askOrders.head.limit))
+  // highest bid order value must not exceed the lowest ask order value!
+  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.value <= askOrder.value)))
 
   def + (order: LimitAskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
 
