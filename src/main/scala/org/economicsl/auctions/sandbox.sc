@@ -69,21 +69,3 @@ val averagePrice = averagePricing(orderBook5)
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
-
-
-// Implement a weighted average pricing rule...
-
-
-// Not sure this is right! Might need this to be function of four-heap order book!
-
-
-// example of buyer's bid (or M+1 price rule)...incentive compatible for the seller!
-// pairedOrders.map(WeightedAveragePricingRule(1.0)).toList
-
-
-// example of seller's ask (or M price rule)...incentive compatible for the buyer
-// pairedOrders.map(WeightedAveragePricingRule(0.0)).toList
-
-
-// split the trade surplus evenly...not incentive compatible!
-// pairedOrders.map(WeightedAveragePricing(0.5)).toList
