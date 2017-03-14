@@ -15,18 +15,6 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import scala.collection.GenIterable
 
-
-/** Mixin trait providing a schedule of price-quantity pairs for an order. */
-trait PriceQuantitySchedule {
-  this: Order =>
-
-  type PricePoint = (Price, Quantity)
-
-  /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
-    * of a `Tradable` at specific, discrete price-points.
-    */
-  def schedule: GenIterable[PricePoint]
-
-}
+/**Documentation for the Single Unit Auctions goes here! */
+package object singleunit

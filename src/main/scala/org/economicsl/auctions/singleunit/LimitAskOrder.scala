@@ -13,27 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.{AskOrder, Price, Tradable}
 
-/** Base trait defining an order for a particular tradable object. */
-sealed trait Order[+T <: Tradable] {
 
-  /** Some kind of unique identifier of the market participant that issued the order. */
-  def issuer: UUID
+trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SingleUnit[T]
 
-  /** The type of tradable for which the order has been issued. */
-  def tradable: T
+
+object LimitAskOrder {
+
+  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
+
+
+  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {
+    SingleUnitImpl(issuer, limit, tradable)
+  }
+
+  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T) extends LimitAskOrder[T]
 
 }
-
-
-/** Base trait for an order to sell some `Tradable`. */
-trait AskOrder[+T <: Tradable] extends Order[T]
-
-
-/** Base trait for an order to buy some `Tradable`. */
-trait BidOrder[+T <: Tradable] extends Order[T]
 

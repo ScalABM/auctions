@@ -15,25 +15,5 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import java.util.UUID
-
-
-/** Base trait defining an order for a particular tradable object. */
-sealed trait Order[+T <: Tradable] {
-
-  /** Some kind of unique identifier of the market participant that issued the order. */
-  def issuer: UUID
-
-  /** The type of tradable for which the order has been issued. */
-  def tradable: T
-
-}
-
-
-/** Base trait for an order to sell some `Tradable`. */
-trait AskOrder[+T <: Tradable] extends Order[T]
-
-
-/** Base trait for an order to buy some `Tradable`. */
-trait BidOrder[+T <: Tradable] extends Order[T]
-
+/** Documentation for Multi-Unit Auction goes here! */
+package object multiunit
