@@ -13,26 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.Tradable
 
 
-trait DoubleAuction {
+/** Base trait for all single-unit auctions. */
+trait Auction[T <: Tradable, A <: Auction[T, A]] {
 
-  def insert(order: LimitAskOrder): Unit
+  def insert(order: LimitAskOrder[T]): A
 
-  def insert(order: LimitBidOrder): Unit
+  def insert(order: LimitBidOrder[T]): A
 
-  def remove(order: LimitAskOrder): Boolean
+  def remove(order: LimitAskOrder[T]): A
 
-  def remove(order: LimitBidOrder): Boolean
+  def remove(order: LimitBidOrder[T]): A
 
-  def clear: Stream[Fill] = {
-    val (pairedOrders, _) = orderBook.takeWhileMatched
-    pairedOrders.map{ case (a, b) => Fill(a, b, p((a, b))) }
-  }
-
-  def orderBook: FourHeapOrderBook[LimitAskOrder, LimitBidOrder]
+  def clear: Stream[Fill[T]]
 
 }
