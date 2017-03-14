@@ -13,9 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.multiunit
 
 import java.util.UUID
+
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
 /** Base trait for a market order to sell some `Tradable`. */
@@ -28,7 +30,7 @@ trait MarketAskOrder[+T <: Tradable] extends LimitAskOrder[T] {
 
 /** Companion object for `MarketAskOrder`.
   *
-  * Provides default ordering as well as constructors for default implementations of `MarketAskOrder` trait.
+  * Provides constructor for default implementation of `MarketAskOrder` trait.
   */
 object MarketAskOrder {
 
@@ -36,15 +38,8 @@ object MarketAskOrder {
     SinglePricePointImpl(issuer, quantity, tradable)
   }
 
-  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketAskOrder[T] with SingleUnit[T] = {
-    SingleUnitImpl(issuer, tradable)
-  }
-
   private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T)
     extends MarketAskOrder[T]
-
-  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, tradable: T)
-    extends MarketAskOrder[T] with SingleUnit[T]
 
 }
 

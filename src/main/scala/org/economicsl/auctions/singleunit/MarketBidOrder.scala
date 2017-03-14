@@ -13,12 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.pricing
+package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{LimitAskOrder, LimitBidOrder, Price}
+import java.util.UUID
 
-
-/** Uniform pricing rule computes a single price for the entire stream of paired orders. */
-trait UniformPricingRule extends (Stream[(LimitAskOrder, LimitBidOrder)] => Price)
+import org.economicsl.auctions.{Price, Tradable}
 
 
+case class MarketBidOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitBidOrder[T] {
+
+  /** An issuer of a `MarketBidOrder` is willing to pay any finite price. */
+  val limit: Price = Price.MaxValue
+
+}

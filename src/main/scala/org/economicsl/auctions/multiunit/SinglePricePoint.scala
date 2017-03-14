@@ -13,7 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.multiunit
+
+import org.economicsl.auctions._
 
 import scala.collection.immutable
 
@@ -32,6 +34,9 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   def quantity: Quantity
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
+
+  /** The total value of the order */
+  val value: Currency = limit.value * quantity.value
 
 }
 
