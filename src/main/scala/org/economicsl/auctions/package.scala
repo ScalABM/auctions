@@ -63,40 +63,31 @@ package object auctions {
 
 
   /** Value class representing quantities. */
-  case class Quantity(value: Double) extends AnyVal  // todo should this be Long or Double?
+  case class Quantity(value: Double) extends AnyVal {
+
+    def + (that: Quantity): Quantity = {
+      Quantity(value + that.value)
+    }
+
+    def - (that: Quantity): Quantity = {
+      Quantity(value - that.value)
+    }
+
+  }
 
 
-  /** Companion object for the `Quantity` value class.
-    *
-    * Currently holds the implicit conversions used to provide numeric operators.
-    */
+  /** Companion object for the `Quantity` value class. */
   object Quantity {
 
-    implicit def mkNumericOps(lhs: Quantity): QuantityIsNumeric.Ops = QuantityIsNumeric.mkNumericOps(lhs)
+    implicit val ordering: Ordering[Quantity] = QuantityOrdering
+
+    implicit def mkOrderingOps(lhs: Quantity): QuantityOrdering.Ops = QuantityOrdering.mkOrderingOps(lhs)
 
   }
 
 
   /** Object containing the numeric operators for the `Quantity` value class. */
-  object QuantityIsNumeric extends Numeric[Quantity] {
-
-    def plus(x: Quantity, y: Quantity): Quantity = Quantity(x.value + y.value)
-
-    def minus(x: Quantity, y: Quantity): Quantity = Quantity(x.value - y.value)
-
-    def times(x: Quantity, y: Quantity): Quantity = Quantity(x.value * y.value)
-
-    def negate(x: Quantity): Quantity = Quantity(-x.value)
-
-    def fromInt(x: Int): Quantity = Quantity(x.toDouble)
-
-    def toInt(x: Quantity): Int = x.value.toInt
-
-    def toLong(x: Quantity): Long = x.value.toLong
-
-    def toFloat(x: Quantity): Float = x.value.toFloat
-
-    def toDouble(x: Quantity): Double = x.value
+  object QuantityOrdering extends Ordering[Quantity] {
 
     def compare(x: Quantity, y: Quantity): Int = x.value compare y.value
 

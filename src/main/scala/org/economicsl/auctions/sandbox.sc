@@ -3,8 +3,6 @@ import java.util.UUID
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
-import scala.Predef._
-
 
 /** Example `Tradable` object. */
 trait Security extends Tradable
