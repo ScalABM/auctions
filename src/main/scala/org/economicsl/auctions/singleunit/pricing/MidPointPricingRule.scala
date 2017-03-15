@@ -13,11 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit.pricing
+
+import org.economicsl.auctions.Tradable
 
 
-case class Fill(askOrder: LimitAskOrder, bidOrder: LimitBidOrder, price: Price) {
-
-  val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
-
-}
+class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)

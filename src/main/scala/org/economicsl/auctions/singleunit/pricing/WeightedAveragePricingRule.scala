@@ -4,7 +4,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.{Price, Tradable}
 
 
-case class WeightedAveragePricingRule[T <: Tradable](weight: Double) extends PricingRule[T, Price] {
+class WeightedAveragePricingRule[T <: Tradable](weight: Double) extends PricingRule[T, Price] {
   require(0.0 <= weight && weight <= 1.0)  // individual rationality requirement!
 
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
