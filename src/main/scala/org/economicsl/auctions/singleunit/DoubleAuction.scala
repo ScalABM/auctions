@@ -20,7 +20,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingRule
 
 
-class DoubleAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T]) {
+class DoubleAuction[T <: Tradable] private(protected val orderBook: FourHeapOrderBook[T]) {
 
   def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
     new DoubleAuction(orderBook + order)
