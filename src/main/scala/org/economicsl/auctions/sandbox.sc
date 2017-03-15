@@ -2,6 +2,7 @@ import java.util.UUID
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, MidPointPricingRule, WeightedAveragePricingRule}
 
 
 /** Example `Tradable` object. */
@@ -51,6 +52,22 @@ val orderBook5 = orderBook4 + order8
 
 // this should not compile...and it doesn't!
 // orderBook5 + order10
+
+// example of a uniform price auction that would be incentive compatible for the sellers...
+val askQuotePricing = new AskQuotePricingRule[Google]()
+val price1 = askQuotePricing(orderBook5)
+
+// example of a uniform price auction that would be incentive compatible for the buyers...
+val bidQuotePricing = new BidQuotePricingRule[Google]()
+val price2 = bidQuotePricing(orderBook5)
+
+// example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
+val midPointPricing = new MidPointPricingRule[Google]
+val midPrice = midPointPricing(orderBook5)
+
+// example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
+val averagePricing = new WeightedAveragePricingRule[Google](0.75)
+val averagePrice = averagePricing(orderBook5)
 
 // take a look at paired orders
 val (pairedOrders, _) = orderBook5.takeWhileMatched

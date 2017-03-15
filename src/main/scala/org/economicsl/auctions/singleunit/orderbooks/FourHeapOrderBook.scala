@@ -15,11 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 
-class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
+class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
 
   // value of lowest matched bid must exceed value of highest unmatched bid!
   require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.value >= b2.value)))
@@ -68,6 +68,20 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
       case _ =>
         new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
     }
+  }
+
+  val askPriceQuote: Option[Price] = (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
+    case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)
+    case (Some(bidOrder), None) => Some(bidOrder.limit)
+    case (None, Some(askOrder)) => Some(askOrder.limit)
+    case _ => None
+  }
+
+  val bidPriceQuote: Option[Price] = (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
+    case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)
+    case (Some(bidOrder), None) => Some(bidOrder.limit)
+    case (None, Some(askOrder)) => Some(askOrder.limit)
+    case _ => None
   }
 
   def takeWhileMatched: (Stream[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {

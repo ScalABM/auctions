@@ -16,5 +16,5 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Documentation for Multi-Unit Auction goes here! */
-package object multiunit
+/** Trait used to indicate that an object can be traded via an auction. */
+trait Tradable
