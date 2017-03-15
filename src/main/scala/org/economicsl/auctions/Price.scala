@@ -17,7 +17,13 @@ package org.economicsl.auctions
 
 
 /** Value class representing prices. */
-case class Price(value: Currency) extends AnyVal
+case class Price(value: Currency) extends AnyVal {
+
+  def + (that: Price): Price = {
+    Price(value + that.value)
+  }
+
+}
 
 
 /** Companion object for the Price value class. */
@@ -30,7 +36,7 @@ object Price {
 
   val MaxValue = Price(Double.MaxValue)  // todo this number might be hardware specific?
 
-  val MinValue = Price(0.0)  // todo Wellman et al use negative prices to indicate sell orders?
+  val MinValue = Price(0.0)
 
   val MinPositiveValue = Price(Double.MinPositiveValue)  // todo this number might be hardware specific?
 
