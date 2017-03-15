@@ -15,5 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.pricing
 
+import org.economicsl.auctions.Tradable
 
-class MidPointPricingRule extends WeightedAveragePricingRule(0.5)
+
+class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)
