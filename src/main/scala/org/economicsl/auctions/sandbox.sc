@@ -1,7 +1,7 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.Fill
+import org.economicsl.auctions.singleunit.{DoubleAuction, Fill}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
 
@@ -74,6 +74,19 @@ val averagePrice = averagePricing(orderBook5)
 val (pairedOrders, _) = orderBook5.takeWhileMatched
 pairedOrders.toList
 
-def fill[T <: Tradable](pricingRule: PricingRule[T, Price])(orderBook: FourHeapOrderBook[T]): Option[(Fill[T], FourHeapOrderBook[T])] = {
-  pricingRule(orderBook).map{ price => val (askOrder, bidOrder) = orderBook.head; Some(Fill(askOrder, bidOrder, price), orderBook.tail) }
-}
+//def fill[T <: Tradable](pricingRule: PricingRule[T, Price])(orderBook: FourHeapOrderBook[T]): Option[(Fill[T], FourHeapOrderBook[T])] = {
+//  pricingRule(orderBook).map{ price => val (askOrder, bidOrder) = orderBook.head; Some(Fill(askOrder, bidOrder, price), orderBook.tail) }
+//}
+
+// example usage of the auction...
+val auction = DoubleAuction.withEmptyOrderBook[Google]
+val auction2 = auction.insert(order4)
+val auction3 = auction2.insert(order9)
+
+// thanks to @bherd-rb we can do things like this...
+val (result, _) = auction3.clear(midPointPricing)
+result.map(fills => fills.toList)
+
+// ...trivial to re-run the same auction with a different pricing rule!
+val (result2, _) = auction3.clear(askQuotePricing)
+result2.map(fills => fills.toList)
