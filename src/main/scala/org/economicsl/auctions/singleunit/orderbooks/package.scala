@@ -26,7 +26,7 @@ package object orderbooks {
   class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[LimitAskOrder[T]], val numberUnits: Quantity) {
 
     def + (order: LimitAskOrder[T]): SortedAskOrders[T] = {
-      new SortedAskOrders(orders + order, Quantity.mkNumericOps(numberUnits) + order.quantity)
+      new SortedAskOrders(orders + order, numberUnits + order.quantity)
     }
 
     def - (order: LimitAskOrder[T]): SortedAskOrders[T] = {
@@ -59,7 +59,7 @@ package object orderbooks {
   class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[LimitBidOrder[T]], val numberUnits: Quantity) {
 
     def + (order: LimitBidOrder[T]): SortedBidOrders[T] = {
-      new SortedBidOrders(orders + order, Quantity.mkNumericOps(numberUnits) + order.quantity)
+      new SortedBidOrders(orders + order, numberUnits + order.quantity)
     }
 
     def - (order: LimitBidOrder[T]): SortedBidOrders[T] = {
