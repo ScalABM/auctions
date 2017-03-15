@@ -13,13 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+/** Value class representing quantities. */
+case class Quantity(value: Double) extends AnyVal  // todo should this be Long or Double?
 
-  /** Type used to representing currencies. */
-  type Currency = Double  // todo should this be Long or Double?
-
-}
