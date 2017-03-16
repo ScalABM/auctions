@@ -35,6 +35,9 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
 
+  /** The total value of the order */
+  val value: Currency = limit.value * quantity.value
+
 }
 
 

@@ -16,5 +16,5 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 
-/** Documentation for the single unit order books pacakge should go here! */
-package object orderbooks
+/** Documentation for the pricing package should go here! */
+package object pricing

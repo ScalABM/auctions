@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.multiunit
 
 
-/** Documentation for the single unit order books pacakge should go here! */
-package object orderbooks
+/** Documentation for the pricing package should go here! */
+package object pricing
