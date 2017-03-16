@@ -53,8 +53,8 @@ class DoubleAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T]) {
 
 object DoubleAuction {
 
-  def withEmptyOrderBook[T <: Tradable]: DoubleAuction[T] = {
-    new DoubleAuction(FourHeapOrderBook.empty[T])
+  def withEmptyOrderBook[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): DoubleAuction[T] = {
+    new DoubleAuction(FourHeapOrderBook.empty[T](askOrdering, bidOrdering))
   }
 
 }
