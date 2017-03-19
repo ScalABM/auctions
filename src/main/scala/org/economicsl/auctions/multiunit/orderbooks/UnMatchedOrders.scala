@@ -15,29 +15,42 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
+import java.util.UUID
+
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 
 
-private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
+                                                                 val bidOrders: SortedBidOrders[T]) {
 
   require(bidOrders.headOption.forall(bidOrder => bidOrder.limit <= askOrders.head.limit))
 
-  def + (order: LimitAskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
-
-  def + (order: LimitBidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders + order)
-
-  def - (order: LimitAskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders - order, bidOrders)
-
-  def - (order: LimitBidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders - order)
+  /** Remove an order from the collection of unmatched orders. */
+  def - (uuid: UUID): UnMatchedOrders[T] = {
+    if (askOrders.contains(uuid)) {
+      new UnMatchedOrders(askOrders - uuid, bidOrders)
+    } else {
+      new UnMatchedOrders(askOrders, bidOrders - uuid)
+    }
+  }
 
   val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
 
   val bidOrdering: Ordering[LimitBidOrder[T]] = bidOrders.ordering
 
-  def contains(order: LimitAskOrder[T]): Boolean = askOrders.contains(order)
+  /** Check whether an order is contained in the collection of unmatched orders using. */
+  def contains(uuid: UUID): Boolean = askOrders.contains(uuid) || bidOrders.contains(uuid)
 
-  def contains(order: LimitBidOrder[T]): Boolean = bidOrders.contains(order)
+  /** Add a `LimitAskOrder` to the collection of unmatched orders. */
+  def updated(uuid: UUID, order: LimitAskOrder[T]): UnMatchedOrders[T] = {
+    new UnMatchedOrders(askOrders.updated(uuid, order), bidOrders)
+  }
+
+  /** Add a `LimitBidOrder` to the collection of unmatched orders. */
+  def updated(uuid: UUID, order: LimitBidOrder[T]): UnMatchedOrders[T] = {
+    new UnMatchedOrders(askOrders, bidOrders.updated(uuid, order))
+  }
 
 }
 
