@@ -15,45 +15,42 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
+import java.util.UUID
+
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 
 
-private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
+                                                               val bidOrders: SortedBidOrders[T]) {
 
-  require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
-  require(bidOrders.headOption.forall(bidOrder => bidOrder.limit >= askOrders.head.limit))  // value of lowest bid must exceed value of highest ask!
+  require(askOrders.numberUnits == bidOrders.numberUnits)
+  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.value >= askOrder.value)))  // value of lowest bid must exceed value of highest ask!
 
-  def + (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
-    new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)
-  }
-
-  def ++ (orders: (TraversableOnce[LimitAskOrder[T]], TraversableOnce[LimitBidOrder[T]])): MatchedOrders[T] = {
-    new MatchedOrders(askOrders ++ orders._1, bidOrders ++ orders._2)
-  }
-
-  def - (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
-    new MatchedOrders(askOrders - orders._1, bidOrders - orders._2)
-  }
-
-  def -- (orders: (TraversableOnce[LimitAskOrder[T]], TraversableOnce[LimitBidOrder[T]])): MatchedOrders[T] = {
-    new MatchedOrders(askOrders -- orders._1, bidOrders -- orders._2)
+  def - (orders: ((UUID, LimitAskOrder[T]), (UUID, LimitBidOrder[T]))): MatchedOrders[T] = {
+    val ((uuid1, _), (uuid2, _)) = orders
+    new MatchedOrders(askOrders - uuid1, bidOrders - uuid2)
   }
 
   val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
 
   val bidOrdering: Ordering[LimitBidOrder[T]] = bidOrders.ordering
 
-  def contains(order: LimitAskOrder[T]): Boolean = askOrders.contains(order)
+  def contains(uuid: UUID): Boolean = askOrders.contains(uuid) || bidOrders.contains(uuid)
 
-  def contains(order: LimitBidOrder[T]): Boolean = bidOrders.contains(order)
-
-  def replace(existing: LimitAskOrder[T], incoming: LimitAskOrder[T]): MatchedOrders[T] = {
-    new MatchedOrders(askOrders - existing + incoming, bidOrders)
+  def replace(existing: (UUID, LimitAskOrder[T]), incoming: (UUID, LimitAskOrder[T])): MatchedOrders[T] = {
+    val updatedAskOrders = (askOrders - existing._1).updated(incoming._1, incoming._2)
+    new MatchedOrders(updatedAskOrders, bidOrders)
   }
 
-  def replace(existing: LimitBidOrder[T], incoming: LimitBidOrder[T]): MatchedOrders[T] = {
-    new MatchedOrders(askOrders, bidOrders - existing + incoming)
+  def replace(existing: (UUID, LimitBidOrder[T]), incoming: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
+    val updatedBidOrders = (bidOrders - existing._1).updated(incoming._1, incoming._2)
+    new MatchedOrders(askOrders, updatedBidOrders)
+  }
+
+  def updated(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
+    val (uuid1, order1) = askOrder; val (uuid2, order2) = bidOrder
+    new MatchedOrders(askOrders.updated(uuid1, order1), bidOrders.updated(uuid2, order2))
   }
 
   def zipped: Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
