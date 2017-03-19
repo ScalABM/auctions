@@ -31,14 +31,6 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  def + (kv: (UUID, LimitAskOrder[T])): FourHeapOrderBook[T] = {
-    updated(kv._1, kv._2)
-  }
-
-  def + (kv: (UUID, LimitBidOrder[T])): FourHeapOrderBook[T] = {
-    updated(kv._1, kv._2)
-  }
-
   def takeWhileMatched: (Stream[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
     (matchedOrders.zipped, withEmptyMatchedOrders)
   }
