@@ -15,58 +15,52 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
+import java.util.UUID
+
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 
 
 class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
 
-  def - (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
-    if (unMatchedOrders.contains(order)) {
-      new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
+  def - (uuid: UUID): FourHeapOrderBook[T] = {
+    if (unMatchedOrders.contains(uuid)) {
+      new FourHeapOrderBook(matchedOrders, unMatchedOrders - uuid)
     } else {
-      val bidOrder = matchedOrders.bidOrders.head
-      new FourHeapOrderBook(matchedOrders - (order, bidOrder), unMatchedOrders + bidOrder)
+      ???
     }
   }
 
-  def - (order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
-    if (unMatchedOrders.contains(order)) {
-      new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
-    } else {
-      val askOrder = matchedOrders.askOrders.head
-      new FourHeapOrderBook(matchedOrders - (askOrder, order), unMatchedOrders + askOrder)
-    }
+  def + (kv: (UUID, LimitAskOrder[T])): FourHeapOrderBook[T] = {
+    updated(kv._1, kv._2)
   }
 
-  def + (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
-    (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-      case (Some(askOrder), Some(bidOrder)) if order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (order, bidOrder), unMatchedOrders - bidOrder)
-      case (None, Some(bidOrder)) if order.limit <= bidOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (order, bidOrder), unMatchedOrders - bidOrder)
-      case (Some(askOrder), Some(_)) if order.limit < askOrder.limit =>
-        new FourHeapOrderBook(matchedOrders.replace(askOrder, order), unMatchedOrders + askOrder)
-      case _ =>
-        new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
-    }
-  }
-
-  def + (order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
-    (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
-      case (Some(bidOrder), Some(askOrder)) if order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (askOrder, order), unMatchedOrders - askOrder)
-      case (None, Some(askOrder)) if order.limit >= askOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (askOrder, order), unMatchedOrders - askOrder)
-      case (Some(bidOrder), Some(_)) if order.limit > bidOrder.limit =>
-        new FourHeapOrderBook(matchedOrders.replace(bidOrder, order), unMatchedOrders + bidOrder)
-      case _ =>
-        new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
-    }
+  def + (kv: (UUID, LimitBidOrder[T])): FourHeapOrderBook[T] = {
+    updated(kv._1, kv._2)
   }
 
   def takeWhileMatched: (Stream[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
     (matchedOrders.zipped, withEmptyMatchedOrders)
+  }
+
+  def updated(uuid: UUID, order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
+    (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
+      case (Some(askOrder), Some(bidOrder)) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
+        ???
+      case (Some(askOrder), _) if order.value <= askOrder.value =>
+        ???
+      case _ => new FourHeapOrderBook(matchedOrders, unMatchedOrders.updated(uuid, order))
+    }
+  }
+
+  def updated(uuid: UUID, order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
+    (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
+      case (Some(askOrder), Some(bidOrder)) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
+        ???
+      case (Some(askOrder), _) if order.value <= askOrder.value =>
+        ???
+      case _ => new FourHeapOrderBook(matchedOrders, unMatchedOrders.updated(uuid, order))
+    }
   }
 
   private[this] def withEmptyMatchedOrders: FourHeapOrderBook[T] = {
