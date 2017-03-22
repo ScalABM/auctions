@@ -17,7 +17,7 @@ package org.economicsl.auctions.multiunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Quantity, Tradable}
 import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 
 
@@ -38,7 +38,16 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
   def updated(uuid: UUID, order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
       case (Some(askOrder), Some(bidOrder)) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
-        ???
+        val excessDemand = bidOrder.quantity - order.quantity
+        if (excessDemand > Quantity(0.0)) {
+          val (filled, residual) = bidOrder.split()
+          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, filled)), unMatchedOrders - ???)
+        } else if (excessDemand < Quantity(0.0)) {
+          ???
+        } else {
+          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, bidOrder)), unMatchedOrders - ???)
+        }
+
       case (Some(askOrder), _) if order.value <= askOrder.value =>
         ???
       case _ => new FourHeapOrderBook(matchedOrders, unMatchedOrders.updated(uuid, order))
