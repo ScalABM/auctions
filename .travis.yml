@@ -1,0 +1,28 @@
+language: scala
+
+scala:
+  - 2.10.6
+  - 2.11.8
+  - 2.12.1
+  
+jdk:
+  - oraclejdk8
+  - openjdk8
+  
+branches:
+  only:
+    - master
+    - develop
+    
+script:
+  - sbt clean compile
+  
+before_cache:
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/
