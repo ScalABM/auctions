@@ -18,7 +18,6 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule;
 import scala.Option;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 

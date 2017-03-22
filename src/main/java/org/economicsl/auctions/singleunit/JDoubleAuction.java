@@ -18,6 +18,9 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.Price;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.pricing.PricingRule;
+import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule;
+import scala.AnyVal;
+import scala.Double;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -27,6 +30,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class JDoubleAuction<T extends Tradable> {
+
+    private DoubleAuction<T> auction = DoubleAuction$.MODULE$.withEmptyOrderBook(
+            LimitAskOrder$.MODULE$.<LimitAskOrder<T>>ordering(),
+            LimitBidOrder$.MODULE$.<LimitBidOrder<T>>ordering().reverse()
+    );
 
     public class ClearResult<T extends Tradable> {
         private JDoubleAuction<T> auction;
@@ -45,11 +53,6 @@ public class JDoubleAuction<T extends Tradable> {
             return fills;
         }
     }
-
-    private DoubleAuction<T> auction = DoubleAuction$.MODULE$.withEmptyOrderBook(
-            LimitAskOrder$.MODULE$.<LimitAskOrder<T>>ordering(),
-            LimitBidOrder$.MODULE$.<LimitBidOrder<T>>ordering().reverse()
-    );
 
     private JDoubleAuction() {
     }
@@ -77,11 +80,12 @@ public class JDoubleAuction<T extends Tradable> {
     public Optional<ClearResult<T>> clear(PricingRule<T, Price> p) {
         Tuple2<Option<Stream<Fill<T>>>, DoubleAuction<T>> clear = auction.clear(p);
         Option<Stream<Fill<T>>> streamOption = clear._1();
-        List<Fill<T>> fills = JavaConverters.seqAsJavaListConverter(clear._1().get()).asJava();
-        JDoubleAuction<T> newAuction = new JDoubleAuction<T>(clear._2());
-        return streamOption.isDefined() ?
-                Optional.of(new ClearResult<T>(fills, newAuction)) :
-                Optional.empty();
+        if(streamOption.isDefined()) {
+            List<Fill<T>> fills = JavaConverters.seqAsJavaListConverter(clear._1().get()).asJava();
+            JDoubleAuction<T> newAuction = new JDoubleAuction<T>(clear._2());
+            return Optional.of(new ClearResult<T>(fills, newAuction));
+        }
+        return Optional.empty();
     }
 
     public static <T extends Tradable> JDoubleAuction<T> withEmptyOrderBook() {
