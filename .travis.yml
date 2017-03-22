@@ -1,3 +1,7 @@
+dist: trusty
+
+sudo: false  # builds will run on Docker infrastructure!
+
 language: scala
 
 scala:
