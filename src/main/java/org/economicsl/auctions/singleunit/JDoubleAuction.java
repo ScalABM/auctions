@@ -15,6 +15,7 @@
 
 package org.economicsl.auctions.singleunit;
 
+import org.economicsl.auctions.Price;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.pricing.PricingRule;
 import scala.Option;
@@ -73,7 +74,7 @@ public class JDoubleAuction<T extends Tradable> {
         return new JDoubleAuction<T>(auction.remove(order));
     }
 
-    public Optional<ClearResult<T>> clear(PricingRule<T, Object> p) {
+    public Optional<ClearResult<T>> clear(PricingRule<T, Price> p) {
         Tuple2<Option<Stream<Fill<T>>>, DoubleAuction<T>> clear = auction.clear(p);
         Option<Stream<Fill<T>>> streamOption = clear._1();
         List<Fill<T>> fills = JavaConverters.seqAsJavaListConverter(clear._1().get()).asJava();
