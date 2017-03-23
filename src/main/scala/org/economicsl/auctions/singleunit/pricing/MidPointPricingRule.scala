@@ -13,12 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit.pricing
+
+import org.economicsl.auctions.Tradable
 
 
-/** A Fill is a contract that is created by an Auction mechanism by composing a LimitAskOrder with a LimitBidOrder. */
-case class Fill(askOrder: LimitAskOrder, bidOrder: LimitBidOrder, price: Price) extends Contract {
-
-  val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
-
-}
+class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)

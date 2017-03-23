@@ -1,70 +1,105 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.pricing.DiscriminatoryPricingRule
+import org.economicsl.auctions.singleunit.DoubleAuction
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.pricing._
 
 
 /** Example `Tradable` object. */
-case class Security(ticker: UUID) extends Tradable
+trait Security extends Tradable
+
+class Google extends Security
+
+class Apple extends Security
 
 // Create a multi-unit limit ask order...
 val issuer = UUID.randomUUID()
-val tradable = Security(UUID.randomUUID())
-val order1: LimitAskOrder = LimitAskOrder(issuer, Price(10), Quantity(100), tradable)
+val google = new Google()
+val order1: multiunit.LimitAskOrder[Google] = multiunit.LimitAskOrder(issuer, Price(10), Quantity(100), google)
+order1.value
 
 // Create a multi-unit market ask order...
-val order2: MarketAskOrder = MarketAskOrder(issuer, Quantity(100), tradable)
+val order2: multiunit.MarketAskOrder[Google] = multiunit.MarketAskOrder(issuer, Quantity(100), google)
 
-// Create a single-unit market ask order...
-val order3: MarketAskOrder with SingleUnit = MarketAskOrder(issuer, tradable)
-
-// Create a single-unit limit ask order...
-val order4: LimitAskOrder with SingleUnit = LimitAskOrder(issuer, Price(5.5), tradable)
+// Create some single-unit limit ask orders...
+val order3: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(5.0), google)
+val order4: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(6.0), google)
 
 // Create a multi-unit limit bid order...
-val order5: LimitBidOrder = LimitBidOrder(issuer, Price(10), Quantity(100), tradable)
+val order5: multiunit.LimitBidOrder[Google] = multiunit.LimitBidOrder(issuer, Price(10), Quantity(100), google)
 
 // Create a multi-unit market bid order...
-val order7: MarketBidOrder = MarketBidOrder(issuer, Quantity(100), tradable)
+val order7: multiunit.MarketBidOrder[Google] = multiunit.MarketBidOrder(issuer, Quantity(100), google)
 
-// Create a single-unit market bid order...
-val order8: MarketBidOrder with SingleUnit = MarketBidOrder(issuer, tradable)
+// Create some single-unit limit bid orders...
+val order8: singleunit.LimitBidOrder[Google] = singleunit.LimitBidOrder(issuer, Price(10.0), google)
+val order9: singleunit.LimitBidOrder[Google] = singleunit.LimitBidOrder(issuer, Price(6.0), google)
 
-// Create a single-unit limit bid order...
-val order9: LimitBidOrder with SingleUnit = LimitBidOrder(issuer, Price(9.5), tradable)
-
+// Create an order for some other tradable
+val apple = new Apple()
+val order10: singleunit.LimitBidOrder[Apple] = singleunit.LimitBidOrder(issuer, Price(55.9), apple)
 
 // Create a four-heap order book and add some orders...
-val orderBook = FourHeapOrderBook.empty[LimitAskOrder with SingleUnit, LimitBidOrder with SingleUnit]
+val orderBook = FourHeapOrderBook.empty[Google]
 val orderBook2 = orderBook + order3
 val orderBook3 = orderBook2 + order4
 val orderBook4 = orderBook3 + order9
 val orderBook5 = orderBook4 + order8
 
+val (matchedOrders, _) = orderBook5.takeAllMatched
+matchedOrders.toList
+
+// this should not compile...and it doesn't!
+// orderBook5 + order10
+
+// example of a uniform price auction that would be incentive compatible for the sellers...
+val askQuotePricing = new AskQuotePricingRule[Google]()
+val price1 = askQuotePricing(orderBook5)
+
+// example of a uniform price auction that would be incentive compatible for the buyers...
+val bidQuotePricing = new BidQuotePricingRule[Google]()
+val price2 = bidQuotePricing(orderBook5)
+
+// example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
+val midPointPricing = new MidPointPricingRule[Google]
+val midPrice = midPointPricing(orderBook5)
+
+// example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
+val averagePricing = new WeightedAveragePricingRule[Google](0.75)
+val averagePrice = averagePricing(orderBook5)
 
 // take a look at paired orders
-val (pairedOrders, _) = orderBook5.takeWhileMatched
+val (pairedOrders, _) = orderBook5.takeAllMatched
 pairedOrders.toList
 
+// example usage of a double auction with uniform pricing...
+val auction = DoubleAuction.withUniformPricing[Google]
+val auction2 = auction.insert(order3)
+val auction3 = auction2.insert(order4)
+val auction4 = auction3.insert(order9)
+val auction5 = auction4.insert(order8)
 
-// Implement a weighted average pricing rule...
-case class WeightedAveragePricing(weight: Double) extends DiscriminatoryPricingRule {
+// thanks to @bherd-rb we can do things like this...
+val (result, _) = auction5.clear(midPointPricing)
+result.map(fills => fills.map(fill => fill.price).toList)
 
-  def apply(pair: (LimitAskOrder, LimitBidOrder)): Price = pair match {
-    case (askOrder, bidOrder) => Price((1 - weight) * askOrder.limit.value + weight * bidOrder.limit.value)
-  }
-
-}
-
-
-// example of buyer's bid (or M+1 price rule)...incentive compatible for the seller!
-pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(1.0)((askOrder, bidOrder))) }
-
-
-// example of seller's ask (or M price rule)...incentive compatible for the buyer
-pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(0.0)((askOrder, bidOrder))) }
+// ...trivial to re-run the same auction with a different pricing rule!
+val (result2, _) = auction5.clear(askQuotePricing)
+result2.map(fills => fills.map(fill => fill.price).toList)
 
 
-// split the trade surplus evenly...not incentive compatible!
-pairedOrders map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, WeightedAveragePricing(0.5)((askOrder, bidOrder))) }
+// example usage of a double auction with discriminatory pricing...
+val auction6 = DoubleAuction.withDiscriminatoryPricing[Google]
+val auction7 = auction6.insert(order3)
+val auction8 = auction7.insert(order4)
+val auction9 = auction8.insert(order9)
+val auction10 = auction9.insert(order8)
+
+// thanks to @bherd-rb we can do things like this...
+val (result3, _) = auction10.clear(midPointPricing)
+result3.map(fills => fills.map(fill => fill.price).toList)
+
+// ...trivial to re-run the same auction with a different pricing rule!
+val (result4, _) = auction10.clear(bidQuotePricing)
+result4.map(fills => fills.map(fill => fill.price).toList)

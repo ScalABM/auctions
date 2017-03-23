@@ -1,5 +1,6 @@
 /*
 Copyright 2017 EconomicSL
+<<<<<<< HEAD
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,13 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions.singleunit
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
-
-  /** Type used to representing currencies. */
-  type Currency = Double  // todo should this be Long or Double?
-
-}
+/** Documentation for the single unit order books pacakge should go here! */
+package object orderbooks

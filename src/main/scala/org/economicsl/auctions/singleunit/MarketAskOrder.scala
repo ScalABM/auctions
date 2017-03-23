@@ -13,14 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
+
+import java.util.UUID
+
+import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Mixin trait that restricts the quantity of an `Order with SinglePricePoint` to a single unit of a `Tradable`. */
-trait SingleUnit {
-  this: Order with SinglePricePoint =>
+case class MarketAskOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitAskOrder[T] {
 
-  val quantity = Quantity(1)
+  /** An issuer of a `MarketAskOrder` is willing to sell at any strictly positive price. */
+  val limit: Price = Price.MinPositiveValue
 
 }
 

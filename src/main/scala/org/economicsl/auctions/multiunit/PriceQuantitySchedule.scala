@@ -13,13 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions.multiunit
+
+import org.economicsl.auctions.{Order, Price, Quantity, Tradable}
+
+import scala.collection.GenIterable
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+/** Mixin trait providing a schedule of price-quantity pairs for an order. */
+trait PriceQuantitySchedule[+T <: Tradable] {
+  this: Order[T] =>
 
-  /** Type used to representing currencies. */
-  type Currency = Double  // todo should this be Long or Double?
+  type PricePoint = (Price, Quantity)
+
+  /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
+    * of a `Tradable` at specific, discrete price-points.
+    */
+  def schedule: GenIterable[PricePoint]
 
 }
