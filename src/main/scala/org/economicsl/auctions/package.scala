@@ -15,51 +15,12 @@ limitations under the License.
 */
 package org.economicsl
 
-import scala.language.implicitConversions
 
-
+/** General documentation for the auctions package should go here! */
 package object auctions {
-
-  /** Type used to indicate that an object can be traded via an auction. */
-  trait Tradable
 
   /** Type used to representing currencies. */
   type Currency = Double  // todo should this be Long or Double?
-
-
-  /** Value class representing prices. */
-  case class Price(value: Currency) extends AnyVal
-
-
-  /** Companion object for the Price value class. */
-  object Price {
-
-    /** Default ordering for `Price` instances is low to high based on the underlying value. */
-    implicit val ordering: Ordering[Price] = PriceOrdering
-
-    implicit def mkOrderingOps(lhs: Price): PriceOrdering.Ops = PriceOrdering.mkOrderingOps(lhs)
-
-    val MaxValue = Price(Double.MaxValue)  // todo this number might be hardware specific?
-
-    val MinValue = Price(0.0)  // todo Wellman et al use negative prices to indicate sell orders?
-
-    val MinPositiveValue = Price(Double.MinPositiveValue)  // todo this number might be hardware specific?
-
-  }
-
-
-  /** Default ordering for `Price` instances is low to high based on the underlying value. */
-  object PriceOrdering extends Ordering[Price] {
-
-    /** Instances of `Price` are compared using their underlying values.
-      *
-      * @param p1 some `Price` instance.
-      * @param p2 another `Price` instance.
-      * @return -1 if `p1` is less than `p2`, 0 if `p1` equals `p2`, 1 otherwise.
-      */
-    def compare(p1: Price, p2: Price): Int = p1.value compare p2.value
-
-  }
 
 
   /** Classes representing discrete and continuous quantities. */

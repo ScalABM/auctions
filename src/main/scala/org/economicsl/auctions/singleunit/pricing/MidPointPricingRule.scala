@@ -13,8 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit.pricing
+
+import org.economicsl.auctions.Tradable
 
 
-/** Documentation for Multi-Unit Auction goes here! */
-package object multiunit
+class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)

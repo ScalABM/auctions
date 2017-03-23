@@ -19,10 +19,10 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 
-private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
-  require(bidOrders.headOption.forall(bidOrder => bidOrder.limit >= askOrders.head.limit))  // value of lowest bid must exceed value of highest ask!
+  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.value >= askOrder.value)))  // value of lowest bid must exceed value of highest ask!
 
   def + (orders: (LimitAskOrder[T], LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)
@@ -48,6 +48,14 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
     new MatchedOrders(askOrders, bidOrders - existing + incoming)
   }
 
+  def takeBestMatch: (Option[(LimitAskOrder[T], LimitBidOrder[T])], MatchedOrders[T]) = {
+    (askOrders.headOption, bidOrders.headOption) match {
+      case (Some(askOrder), Some(bidOrder)) =>
+        (Some(askOrder, bidOrder), new MatchedOrders(askOrders - askOrder, bidOrders - bidOrder))
+      case _ => (None, this)
+    }
+  }
+
   def zipped: Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
     @annotation.tailrec
     def loop(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T], pairedOrders: Stream[(LimitAskOrder[T], LimitBidOrder[T])]): Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
@@ -64,7 +72,7 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
 }
 
 
-private[orderbooks] object MatchedOrders {
+object MatchedOrders {
 
   /** Create an instance of `MatchedOrders`.
     *
