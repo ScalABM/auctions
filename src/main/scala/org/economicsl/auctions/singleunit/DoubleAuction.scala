@@ -20,41 +20,96 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingRule
 
 
-class DoubleAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T]) {
+/** Base trait for all double auction implementations. */
+trait DoubleAuction[T <: Tradable] {
 
-  def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
-    new DoubleAuction(orderBook + order)
-  }
+  def insert(order: LimitAskOrder[T]): DoubleAuction[T]
 
-  def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
-    new DoubleAuction(orderBook + order)
-  }
+  def insert(order: LimitBidOrder[T]): DoubleAuction[T]
 
-  def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
-    new DoubleAuction(orderBook - order)
-  }
+  def remove(order: LimitAskOrder[T]): DoubleAuction[T]
 
-  def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
-    new DoubleAuction(orderBook - order)
-  }
+  def remove(order: LimitBidOrder[T]): DoubleAuction[T]
 
-  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
-    p(orderBook) match {
-      case Some(price) =>
-        val (pairedOrders, newOrderBook) = orderBook.takeWhileMatched
-        val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-        (Some(fills), new DoubleAuction(newOrderBook))
-      case None => (None, new DoubleAuction(orderBook))
-    }
-  }
+  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], DoubleAuction[T])
 
 }
 
 
 object DoubleAuction {
 
-  def withEmptyOrderBook[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): DoubleAuction[T] = {
-    new DoubleAuction(FourHeapOrderBook.empty[T](askOrdering, bidOrdering))
+  def withUniformPricing[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): DoubleAuction[T] = {
+    new UniformPriceImpl[T](FourHeapOrderBook.empty[T](askOrdering, bidOrdering))
   }
 
+  def withDiscriminatoryPricing[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): DoubleAuction[T] = {
+    new DiscriminatoryPriceImpl[T](FourHeapOrderBook.empty[T](askOrdering, bidOrdering))
+  }
+
+  private[this] class UniformPriceImpl[T <: Tradable] (orderBook: FourHeapOrderBook[T]) extends DoubleAuction[T] {
+
+    def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
+      new UniformPriceImpl(orderBook + order)
+    }
+
+    def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
+      new UniformPriceImpl(orderBook + order)
+    }
+
+    def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
+      new UniformPriceImpl(orderBook - order)
+    }
+
+    def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
+      new UniformPriceImpl(orderBook - order)
+    }
+
+    def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+      p(orderBook) match {
+        case Some(price) =>
+          val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
+          val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
+          (Some(fills), new UniformPriceImpl(newOrderBook))
+        case None => (None, new UniformPriceImpl(orderBook))
+      }
+    }
+
+  }
+
+
+  private[this] class DiscriminatoryPriceImpl[T <: Tradable] (orderBook: FourHeapOrderBook[T]) extends DoubleAuction[T] {
+
+    def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
+      new DiscriminatoryPriceImpl(orderBook + order)
+    }
+
+    def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
+      new DiscriminatoryPriceImpl(orderBook + order)
+    }
+
+    def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
+      new DiscriminatoryPriceImpl(orderBook - order)
+    }
+
+    def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
+      new DiscriminatoryPriceImpl(orderBook - order)
+    }
+
+    def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+
+      @annotation.tailrec
+      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+        p(ob) match {
+          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(ob))
+          case Some(price) =>
+            val (bestMatch, residual) = ob.takeBestMatched
+            val fill = bestMatch.map{ case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
+            loop(fill.fold(fills)(head => head #:: fills), residual)
+        }
+      }
+      loop(Stream.empty, orderBook)
+
+    }
+
+  }
 }
