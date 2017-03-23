@@ -8,7 +8,10 @@ class WeightedAveragePricingRule[T <: Tradable](weight: Double) extends PricingR
   require(0.0 <= weight && weight <= 1.0)  // individual rationality requirement!
 
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
-    orderBook.askPriceQuote.flatMap(p1 => orderBook.bidPriceQuote.map(p2 => Price(p2.value * weight + p1.value * (1 - weight))))  // todo fix this once there is support for numeric ops between prices!
+    orderBook.askPriceQuote.flatMap(askPrice => orderBook.bidPriceQuote.map(bidPrice=> average(weight)(bidPrice, askPrice)))
   }
 
+  private[this] def average(k: Double)(bid: Price, ask: Price): Price = {
+    Price(k * bid.value) + Price((1 - k) * ask.value)
+  }
 }

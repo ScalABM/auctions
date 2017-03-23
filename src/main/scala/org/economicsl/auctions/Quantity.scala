@@ -17,5 +17,32 @@ package org.economicsl.auctions
 
 
 /** Value class representing quantities. */
-case class Quantity(value: Double) extends AnyVal  // todo should this be Long or Double?
+case class Quantity(value: Double) extends AnyVal {
 
+  def + (that: Quantity): Quantity = {
+    Quantity(value + that.value)
+  }
+
+  def - (that: Quantity): Quantity = {
+    Quantity(value - that.value)
+  }
+
+}
+
+
+/** Companion object for the `Quantity` value class. */
+object Quantity {
+
+  implicit val ordering: Ordering[Quantity] = QuantityOrdering
+
+  implicit def mkOrderingOps(lhs: Quantity): QuantityOrdering.Ops = QuantityOrdering.mkOrderingOps(lhs)
+
+}
+
+
+/** Object containing the numeric operators for the `Quantity` value class. */
+object QuantityOrdering extends Ordering[Quantity] {
+
+  def compare(x: Quantity, y: Quantity): Int = x.value compare y.value
+
+}
