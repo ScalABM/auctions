@@ -22,6 +22,7 @@ import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.immutable.Stream;
+import scala.math.Ordering;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +86,15 @@ public class JDoubleAuction<T extends Tradable> {
         return Optional.empty();
     }
 
-    public static <T extends Tradable> JDoubleAuction<T> withEmptyOrderBook() {
-        return new JDoubleAuction<T>();
+    public static <T extends Tradable> JDoubleAuction<T> withUniformPricing(
+            Ordering<LimitAskOrder<T>> askOrdering,
+            Ordering<LimitBidOrder<T>> bidOrdering) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withUniformPricing(askOrdering, bidOrdering));
+    }
+
+    public static <T extends Tradable> JDoubleAuction<T> withDiscriminatoryPricing(
+            Ordering<LimitAskOrder<T>> askOrdering,
+            Ordering<LimitBidOrder<T>> bidOrdering) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withDiscriminatoryPricing(askOrdering, bidOrdering));
     }
 }

@@ -23,7 +23,10 @@ import java.util.UUID;
 public class JDoubleAuctionTest {
 
     public static void main( String[] args ) {
-        JDoubleAuction<Service> auction = JDoubleAuction.withEmptyOrderBook();
+        JDoubleAuction<Service> auction = JDoubleAuction.withUniformPricing(
+                LimitAskOrder$.MODULE$.<LimitAskOrder<Service>>ordering(),
+                LimitBidOrder$.MODULE$.<LimitBidOrder<Service>>ordering().reverse());
+
         LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 10.0, new Service());
         LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5.0, new Service());
         auction = auction.insert(bid1);
