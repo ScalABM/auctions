@@ -1,7 +1,7 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.{DoubleAuction, Fill}
+import org.economicsl.auctions.singleunit.DoubleAuction
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
 
@@ -82,14 +82,14 @@ val auction5 = auction4.insert(order8)
 
 // thanks to @bherd-rb we can do things like this...
 val (result, _) = auction5.clear(midPointPricing)
-result.map(fills => fills.toList)
+result.map(fills => fills.map(fill => fill.price).toList)
 
 // ...trivial to re-run the same auction with a different pricing rule!
 val (result2, _) = auction5.clear(askQuotePricing)
-result2.map(fills => fills.toList)
+result2.map(fills => fills.map(fill => fill.price).toList)
 
 
-// example usage of a double auction with uniform pricing...
+// example usage of a double auction with discriminatory pricing...
 val auction6 = DoubleAuction.withDiscriminatoryPricing[Google]
 val auction7 = auction6.insert(order3)
 val auction8 = auction7.insert(order4)
@@ -98,4 +98,8 @@ val auction10 = auction9.insert(order8)
 
 // thanks to @bherd-rb we can do things like this...
 val (result3, _) = auction10.clear(midPointPricing)
-result3.map(fills => fills.toList)
+result3.map(fills => fills.map(fill => fill.price).toList)
+
+// ...trivial to re-run the same auction with a different pricing rule!
+val (result4, _) = auction10.clear(bidQuotePricing)
+result4.map(fills => fills.map(fill => fill.price).toList)
