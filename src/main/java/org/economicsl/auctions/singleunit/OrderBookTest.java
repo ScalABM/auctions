@@ -39,7 +39,7 @@ public class OrderBookTest {
         orderbook = orderbook.$plus(bid1);
         orderbook = orderbook.$plus(ask1);
 
-        Tuple2<Stream<Tuple2<LimitAskOrder<Service>, LimitBidOrder<Service>>>, FourHeapOrderBook<Service>> tuple = orderbook.takeWhileMatched();
+        Tuple2<Stream<Tuple2<LimitAskOrder<Service>, LimitBidOrder<Service>>>, FourHeapOrderBook<Service>> tuple = orderbook.takeAllMatched();
         List<Tuple2<LimitAskOrder<Service>, LimitBidOrder<Service>>> matchedOrders = JavaConverters.seqAsJavaList(tuple._1());
         matchedOrders.forEach(t -> System.out.println(t));
     }

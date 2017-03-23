@@ -18,9 +18,6 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.Price;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.pricing.PricingRule;
-import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule;
-import scala.AnyVal;
-import scala.Double;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -31,7 +28,7 @@ import java.util.Optional;
 
 public class JDoubleAuction<T extends Tradable> {
 
-    private DoubleAuction<T> auction = DoubleAuction$.MODULE$.withEmptyOrderBook(
+    private DoubleAuction<T> auction = DoubleAuction$.MODULE$.withUniformPricing(
             LimitAskOrder$.MODULE$.<LimitAskOrder<T>>ordering(),
             LimitBidOrder$.MODULE$.<LimitBidOrder<T>>ordering().reverse()
     );
