@@ -13,6 +13,6 @@ class WeightedAveragePricingRule[T <: Tradable](weight: Double) extends PricingR
 
   private[this] def average(k: Double)(bid: Price, ask: Price): Price = {
     val weightedAverage = k * bid.value.toDouble + (1 - k) * ask.value.toDouble
-    Price(weightedAverage.toLong)  // be mindful of possible overflow!
+    Price(weightedAverage.round)  // be mindful of possible overflow!
   }
 }
