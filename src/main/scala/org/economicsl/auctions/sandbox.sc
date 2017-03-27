@@ -1,7 +1,7 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.{Auction, DoubleAuction}
+import org.economicsl.auctions.singleunit.{Auction, DoubleAuction, ReverseAuction}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
 
@@ -126,3 +126,24 @@ val otherAuction3 = otherAuction2.insert(highBidOrder)
 val highestPriceWins = new AskQuotePricingRule[Painting]
 val (results, _) = otherAuction3.clear(highestPriceWins)
 results.map(fills => fills.map(fill => fill.price).toList)
+
+// example of a first-price reverse auction for some tradable...
+class Electricity extends Tradable
+
+val electricity = new Electricity  // how do we know auction is for this particular Painting instance! Probably requires run-time check!
+val wholesaleDemand = singleunit.MarketBidOrder(otherIssuer, electricity)  // in reality need multi-unit orders!
+
+val lowSeller = UUID.randomUUID()
+val lowAskOrder = singleunit.LimitAskOrder(lowSeller, Price(1.5), electricity)
+
+val highSeller = UUID.randomUUID()
+val highAskOrder = singleunit.LimitAskOrder(highSeller, Price(3.0), electricity)
+
+val reverseAuction = ReverseAuction(wholesaleDemand)
+val reverseAuction2 = reverseAuction.insert(lowAskOrder)
+val reverseAuction3 = reverseAuction2.insert(highAskOrder)
+
+// lowest price generator should get dispatched...
+val lowestPriceWins = new BidQuotePricingRule[Electricity]
+val (results2, _) = reverseAuction3.clear(lowestPriceWins)
+results2.map(fills => fills.map(fill => fill.price).toList)
