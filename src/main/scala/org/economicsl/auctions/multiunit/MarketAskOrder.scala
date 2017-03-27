@@ -24,7 +24,7 @@ import org.economicsl.auctions.{Price, Quantity, Tradable}
 trait MarketAskOrder[+T <: Tradable] extends LimitAskOrder[T] {
 
   /** An issuer of a `MarketAskOrder` is willing to sell at any strictly positive price. */
-  val limit: Price = Price.MinPositiveValue
+  val limit: Price = Price.MinValue
 
 }
 
