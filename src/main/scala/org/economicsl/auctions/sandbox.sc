@@ -1,7 +1,6 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.multiunit.LimitAskOrder
 import org.economicsl.auctions.singleunit.{Auction, DoubleAuction}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
