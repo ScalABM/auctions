@@ -34,11 +34,9 @@ object Price {
 
   implicit def mkOrderingOps(lhs: Price): PriceOrdering.Ops = PriceOrdering.mkOrderingOps(lhs)
 
-  val MaxValue = Price(Double.MaxValue)  // todo this number might be hardware specific?
+  val MaxValue = Price(Long.MaxValue)
 
-  val MinValue = Price(0.0)
-
-  val MinPositiveValue = Price(Double.MinPositiveValue)  // todo this number might be hardware specific?
+  val MinValue = Price(0)  // this is not restricting quantities to be non-negative!
 
 }
 
