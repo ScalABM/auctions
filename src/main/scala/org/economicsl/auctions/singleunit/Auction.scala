@@ -30,8 +30,9 @@ class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T]) extends Au
 
 object Auction{
 
-  def withEmptyOrderBook[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): Auction[T] = {
-    new Auction[T](FourHeapOrderBook.empty[T](askOrdering, bidOrdering))
+  def apply[T <: Tradable](initial: LimitAskOrder[T])(implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): Auction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T](askOrdering, bidOrdering)
+    new Auction[T](orderBook + initial)
   }
 
 }
