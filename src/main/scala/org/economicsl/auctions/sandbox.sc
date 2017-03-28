@@ -110,13 +110,13 @@ class Painting extends Tradable
 
 val otherIssuer = UUID.randomUUID()
 val picasso = new Painting  // how do we know auction is for this particular Painting instance! Probably requires run-time check!
-val reservationPrice = singleunit.LimitAskOrder(otherIssuer, Price(1e7), picasso)
+val reservationPrice = singleunit.LimitAskOrder(otherIssuer, Price(10000000), picasso)
 
 val lowBidder = UUID.randomUUID()
-val lowBidOrder = singleunit.LimitBidOrder(lowBidder, Price(1.5e7), picasso)
+val lowBidOrder = singleunit.LimitBidOrder(lowBidder, Price(15000000), picasso)
 
 val highBidder = UUID.randomUUID()
-val highBidOrder = singleunit.LimitBidOrder(highBidder, Price(1e8), picasso)
+val highBidOrder = singleunit.LimitBidOrder(highBidder, Price(100000000), picasso)
 
 val otherAuction = Auction(reservationPrice)
 val otherAuction2 = otherAuction.insert(lowBidOrder)
