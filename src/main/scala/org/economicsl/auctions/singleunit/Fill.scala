@@ -15,10 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Price, Quantity, Tradable}
+import org.economicsl.auctions.{Contract, Price, Quantity, Tradable}
 
 
-case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) {
+/** Note that a Fill is also a type of Contract! */
+case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) extends Contract {
 
   val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
 
