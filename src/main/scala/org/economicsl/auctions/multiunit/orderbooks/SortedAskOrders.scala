@@ -24,13 +24,13 @@ import scala.collection.immutable.TreeSet
 
 
 private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[UUID, LimitAskOrder[T]],
-                                                                 sorted: TreeSet[LimitAskOrder[T]],
+                                                                 sorted: TreeSet[(UUID, LimitAskOrder[T])],
                                                                  val numberUnits: Quantity) {
 
   def - (uuid: UUID): SortedAskOrders[T] = existing.get(uuid) match {
     case Some(order) =>
       val remaining = Quantity(numberUnits.value - order.quantity.value)
-      new SortedAskOrders(existing - uuid, sorted - order, remaining)
+      new SortedAskOrders(existing - uuid, sorted - ((uuid, order)), remaining)
     case None => this
   }
 
@@ -38,20 +38,20 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
 
   def head: LimitAskOrder[T] = sorted.head
 
-  val headOption: Option[LimitAskOrder[T]] = sorted.headOption
+  val headOption: Option[(UUID, LimitAskOrder[T])] = sorted.headOption
 
   val isEmpty: Boolean = existing.isEmpty && sorted.isEmpty
 
-  val ordering: Ordering[LimitAskOrder[T]] = sorted.ordering
+  val ordering: Ordering[(UUID, LimitAskOrder[T])] = sorted.ordering
 
   def tail: SortedAskOrders[T] = {
-    val remainingQuantity = Quantity(numberUnits.value - head.quantity.value)
+    val remainingQuantity = numberUnits - head.quantity
     new SortedAskOrders(existing.tail, sorted.tail, remainingQuantity)
   }
 
   def updated(uuid: UUID, order: LimitAskOrder[T]): SortedAskOrders[T] = {
-    val additional = Quantity(numberUnits.value + order.quantity.value)
-    new SortedAskOrders(existing.updated(uuid, order), sorted + order, additional)
+    val additional = numberUnits + order.quantity
+    new SortedAskOrders(existing.updated(uuid, order), sorted + ((uuid, order)), additional)
   }
 
 }
@@ -59,7 +59,7 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
 object SortedAskOrders {
 
   def empty[T <: Tradable](ordering: Ordering[LimitAskOrder[T]]): SortedAskOrders[T] = {
-    new SortedAskOrders(Map.empty[UUID, LimitAskOrder[T]], TreeSet.empty[LimitAskOrder[T]](ordering), Quantity(0))
+    new SortedAskOrders(Map.empty[UUID, LimitAskOrder[T]], TreeSet.empty[(UUID, LimitAskOrder[T])](ordering), Quantity(0))
   }
 
 }

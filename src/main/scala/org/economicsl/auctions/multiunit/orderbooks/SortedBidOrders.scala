@@ -24,13 +24,13 @@ import scala.collection.immutable.TreeSet
 
 
 private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[UUID, LimitBidOrder[T]],
-                                                                 sorted: TreeSet[LimitBidOrder[T]],
+                                                                 sorted: TreeSet[(UUID, LimitBidOrder[T])],
                                                                  val numberUnits: Quantity) {
 
   def - (uuid: UUID): SortedBidOrders[T] = existing.get(uuid) match {
     case Some(order) =>
       val remaining = Quantity(numberUnits.value - order.quantity.value)
-      new SortedBidOrders(existing - uuid, sorted - order, remaining)
+      new SortedBidOrders(existing - uuid, sorted - ((uuid, order)), remaining)
     case None => this
   }
 
@@ -38,20 +38,20 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
 
   def head: LimitBidOrder[T] = sorted.head
 
-  val headOption: Option[LimitBidOrder[T]] = sorted.headOption
+  val headOption: Option[(UUID, LimitBidOrder[T])] = sorted.headOption
 
   val isEmpty: Boolean = existing.isEmpty && sorted.isEmpty
 
   val ordering: Ordering[LimitBidOrder[T]] = sorted.ordering
 
   def tail: SortedBidOrders[T] = {
-    val remainingQuantity = Quantity(numberUnits.value - head.quantity.value)
+    val remainingQuantity = numberUnits - head.quantity
     new SortedBidOrders(existing.tail, sorted.tail, remainingQuantity)
   }
 
   def updated(uuid: UUID, order: LimitBidOrder[T]): SortedBidOrders[T] = {
-    val additional = Quantity(numberUnits.value + order.quantity.value)
-    new SortedBidOrders(existing.updated(uuid, order), sorted + order, additional)
+    val additional = numberUnits + order.quantity
+    new SortedBidOrders(existing.updated(uuid, order), sorted + ((uuid, order)), additional)
   }
 
 }
@@ -60,7 +60,7 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
 object SortedBidOrders {
 
   def empty[T <: Tradable](ordering: Ordering[LimitBidOrder[T]]): SortedBidOrders[T] = {
-    new SortedBidOrders(Map.empty[UUID, LimitBidOrder[T]], TreeSet.empty[LimitBidOrder[T]](ordering), Quantity(0))
+    new SortedBidOrders(Map.empty[UUID, LimitBidOrder[T]], TreeSet.empty[(UUID, LimitBidOrder[T])](ordering), Quantity(0))
   }
 
 }

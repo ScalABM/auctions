@@ -37,12 +37,13 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
   def updated(uuid: UUID, order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-      case (Some(askOrder), Some(bidOrder)) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
+      case (Some((_, askOrder)), Some((???, bidOrder))) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
         val excessDemand = bidOrder.quantity - order.quantity
-        if (excessDemand > Quantity(0.0)) {
-          val (filled, residual) = bidOrder.split()
-          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, filled)), unMatchedOrders - ???)
-        } else if (excessDemand < Quantity(0.0)) {
+        if (excessDemand > Quantity(0)) {
+          val residualUnMatchedOrders = unMatchedOrders - ???
+          val (filled, residual) = (bidOrder.withQuantity(order.quantity), bidOrder.withQuantity(excessDemand))
+          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, filled)), residualUnMatchedOrders.updated(???, residual))
+        } else if (excessDemand < Quantity(0)) {
           ???
         } else {
           new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, bidOrder)), unMatchedOrders - ???)
@@ -56,7 +57,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
   def updated(uuid: UUID, order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-      case (Some(askOrder), Some(bidOrder)) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
+      case (Some((???, askOrder)), Some((_, bidOrder))) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
         ???
       case (Some(askOrder), _) if order.value <= askOrder.value =>
         ???
