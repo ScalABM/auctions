@@ -33,8 +33,8 @@ public class OrderBookTest {
 
         Service service = new Service();
 
-        LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 5.0, service);
-        LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5.0, service);
+        LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 5, service);
+        LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5, service);
 
         orderbook = orderbook.$plus(bid1);
         orderbook = orderbook.$plus(ask1);

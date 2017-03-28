@@ -17,7 +17,7 @@ package org.economicsl.auctions
 
 
 /** Value class representing quantities. */
-case class Quantity(value: Double) extends AnyVal {
+case class Quantity(value: Long) extends AnyVal {
 
   def + (that: Quantity): Quantity = {
     Quantity(value + that.value)
