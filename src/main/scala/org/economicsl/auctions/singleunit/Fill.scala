@@ -21,6 +21,6 @@ import org.economicsl.auctions.{Contract, Price, Quantity, Tradable}
 /** Note that a Fill is also a type of Contract! */
 case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) extends Contract {
 
-  val quantity: Quantity = Quantity(math.min(askOrder.quantity.value, bidOrder.quantity.value))
+  val quantity: Quantity = askOrder.quantity min bidOrder.quantity
 
 }
