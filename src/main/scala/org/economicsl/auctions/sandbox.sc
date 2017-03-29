@@ -23,8 +23,8 @@ order1.value
 val order2: multiunit.MarketAskOrder[Google] = multiunit.MarketAskOrder(issuer, Quantity(100), google)
 
 // Create some single-unit limit ask orders...
-val order3: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(5.0), google)
-val order4: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(6.0), google)
+val order3: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(5), google)
+val order4: singleunit.LimitAskOrder[Google] = singleunit.LimitAskOrder(issuer, Price(6), google)
 
 // Create a multi-unit limit bid order...
 val order5: multiunit.LimitBidOrder[Google] = multiunit.LimitBidOrder(issuer, Price(10), Quantity(100), google)
@@ -33,12 +33,12 @@ val order5: multiunit.LimitBidOrder[Google] = multiunit.LimitBidOrder(issuer, Pr
 val order7: multiunit.MarketBidOrder[Google] = multiunit.MarketBidOrder(issuer, Quantity(100), google)
 
 // Create some single-unit limit bid orders...
-val order8: singleunit.LimitBidOrder[Google] = singleunit.LimitBidOrder(issuer, Price(10.0), google)
-val order9: singleunit.LimitBidOrder[Google] = singleunit.LimitBidOrder(issuer, Price(6.0), google)
+val order8: singleunit.LimitBidOrder[Google] = singleunit.LimitBidOrder(issuer, Price(10), google)
+val order9: singleunit.LimitBidOrder[Google] = singleunit.LimitBidOrder(issuer, Price(6), google)
 
 // Create an order for some other tradable
 val apple = new Apple()
-val order10: singleunit.LimitBidOrder[Apple] = singleunit.LimitBidOrder(issuer, Price(55.9), apple)
+val order10: singleunit.LimitBidOrder[Apple] = singleunit.LimitBidOrder(issuer, Price(10), apple)
 
 // Create a four-heap order book and add some orders...
 val orderBook = FourHeapOrderBook.empty[Google]
