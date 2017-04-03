@@ -39,18 +39,14 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
     }
   }
 
-  val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
+  val askOrdering: Ordering[(UUID, LimitAskOrder[T])] = askOrders.ordering
 
-  val bidOrdering: Ordering[LimitBidOrder[T]] = bidOrders.ordering
+  val bidOrdering: Ordering[(UUID, LimitBidOrder[T])] = bidOrders.ordering
 
   def contains(uuid: UUID): Boolean = askOrders.contains(uuid) || bidOrders.contains(uuid)
 
   def removeAndReplace(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders - askOrder._1, bidOrders.updated(bidOrder._1, bidOrder._2))
-  }
-
-  def removeAndReplace(bidOrder: (UUID, LimitBidOrder[T]), askOrder: (UUID, LimitAskOrder[T])): MatchedOrders[T] = {
-    new MatchedOrders(askOrders.updated(askOrder._1, askOrder._2), bidOrders - bidOrder._1)
   }
 
   def updated(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
@@ -74,8 +70,8 @@ private[orderbooks] object MatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from low to high based on `limit` price.
     */
-  def empty[T <: Tradable]: MatchedOrders[T] = {
-    new MatchedOrders(SortedAskOrders.empty, SortedBidOrders.empty)
+  def empty[T <: Tradable](askOrdering: Ordering[(UUID, LimitAskOrder[T])], bidOrdering: Ordering[(UUID, LimitBidOrder[T])]): MatchedOrders[T] = {
+    new MatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 
 }

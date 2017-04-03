@@ -26,6 +26,7 @@ import scala.collection.immutable.TreeSet
 private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[UUID, LimitAskOrder[T]],
                                                                  sorted: TreeSet[(UUID, LimitAskOrder[T])],
                                                                  val quantity: Quantity) {
+  assert(existing.size == sorted.size)
 
   def apply(uuid: UUID): LimitAskOrder[T] = existing(uuid)
 
@@ -50,6 +51,8 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
 
   val ordering: Ordering[(UUID, LimitAskOrder[T])] = sorted.ordering
 
+  val size: Int = existing.size
+
   def splitAt(quantity: Quantity): (SortedAskOrders[T], SortedAskOrders[T]) = {
 
     def split(order: LimitAskOrder[T], quantity: Quantity): (LimitAskOrder[T], LimitAskOrder[T]) = {
@@ -67,21 +70,22 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
          loop(in + (uuid -> matched), out.updated(uuid, residual))
        }
      }
-    loop(SortedAskOrders.empty[T], this)
+    loop(SortedAskOrders.empty[T](sorted.ordering), this)
   }
 
   def updated(uuid: UUID, order: LimitAskOrder[T]): SortedAskOrders[T] = {
     val askOrder = this(uuid)
-    val change = askOrder.quantity - order.quantity
+    val change = order.quantity - askOrder.quantity
     new SortedAskOrders(existing.updated(uuid, order), sorted - ((uuid, askOrder)) + ((uuid, order)), quantity + change)
   }
 
 }
 
+
 object SortedAskOrders {
 
-  def empty[T <: Tradable]: SortedAskOrders[T] = {
-    new SortedAskOrders(Map.empty[UUID, LimitAskOrder[T]], TreeSet.empty[(UUID, LimitAskOrder[T])], Quantity(0))
+  def empty[T <: Tradable](implicit ordering: Ordering[(UUID, LimitAskOrder[T])]): SortedAskOrders[T] = {
+    new SortedAskOrders(Map.empty[UUID, LimitAskOrder[T]], TreeSet.empty[(UUID, LimitAskOrder[T])](ordering), Quantity(0))
   }
 
 }

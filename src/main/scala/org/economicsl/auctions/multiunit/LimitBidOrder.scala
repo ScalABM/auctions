@@ -39,7 +39,7 @@ object LimitBidOrder {
     extends LimitBidOrder[T] {
 
     def withQuantity(quantity: Quantity): LimitBidOrder[T] = {
-      require(quantity.value < quantity.value)
+      require(quantity <= this.quantity)
       copy(quantity = quantity)
     }
 

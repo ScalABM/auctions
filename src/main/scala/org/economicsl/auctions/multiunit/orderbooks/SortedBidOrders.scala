@@ -27,6 +27,8 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
                                                                  sorted: TreeSet[(UUID, LimitBidOrder[T])],
                                                                  val quantity: Quantity) {
 
+  assert(existing.size == sorted.size)
+
   def apply(uuid: UUID): LimitBidOrder[T] = existing(uuid)
 
   def + (kv: (UUID, LimitBidOrder[T])): SortedBidOrders[T] = {
@@ -50,6 +52,8 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
 
   val ordering: Ordering[(UUID, LimitBidOrder[T])] = sorted.ordering
 
+  val size: Int = existing.size
+
   def splitAt(quantity: Quantity): (SortedBidOrders[T], SortedBidOrders[T]) = {
 
     def split(order: LimitBidOrder[T], quantity: Quantity): (LimitBidOrder[T], LimitBidOrder[T]) = {
@@ -67,12 +71,12 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
         loop(in + (uuid -> matched), out.updated(uuid, residual))
       }
     }
-    loop(SortedBidOrders.empty[T], this)
+    loop(SortedBidOrders.empty[T](sorted.ordering), this)
   }
 
   def updated(uuid: UUID, order: LimitBidOrder[T]): SortedBidOrders[T] = {
     val bidOrder = this(uuid)
-    val change = bidOrder.quantity - order.quantity
+    val change = order.quantity - bidOrder.quantity
     new SortedBidOrders(existing.updated(uuid, order), sorted - ((uuid, bidOrder)) + ((uuid, order)), quantity + change)
   }
 
@@ -81,8 +85,8 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
 
 object SortedBidOrders {
 
-  def empty[T <: Tradable]: SortedBidOrders[T] = {
-    new SortedBidOrders(Map.empty[UUID, LimitBidOrder[T]], TreeSet.empty[(UUID, LimitBidOrder[T])], Quantity(0))
+  def empty[T <: Tradable](implicit ordering: Ordering[(UUID, LimitBidOrder[T])]): SortedBidOrders[T] = {
+    new SortedBidOrders(Map.empty[UUID, LimitBidOrder[T]], TreeSet.empty[(UUID, LimitBidOrder[T])](ordering), Quantity(0))
   }
 
 }

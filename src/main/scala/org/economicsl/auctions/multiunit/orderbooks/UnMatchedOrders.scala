@@ -24,7 +24,7 @@ import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
                                                                  val bidOrders: SortedBidOrders[T]) {
 
-  require(bidOrders.headOption.forall(bidOrder => bidOrder.limit <= askOrders.head.limit))
+  require(bidOrders.headOption.forall{ case (_, bidOrder) => bidOrder.limit <= askOrders.head._2.limit })
 
   /** Remove an order from the collection of unmatched orders. */
   def - (uuid: UUID): UnMatchedOrders[T] = {
@@ -35,9 +35,9 @@ private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: 
     }
   }
 
-  val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
+  val askOrdering: Ordering[(UUID, LimitAskOrder[T])] = askOrders.ordering
 
-  val bidOrdering: Ordering[LimitBidOrder[T]] = bidOrders.ordering
+  val bidOrdering: Ordering[(UUID, LimitBidOrder[T])] = bidOrders.ordering
 
   /** Check whether an order is contained in the collection of unmatched orders using. */
   def contains(uuid: UUID): Boolean = askOrders.contains(uuid) || bidOrders.contains(uuid)
@@ -66,7 +66,7 @@ private[orderbooks] object UnMatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from high to low based on `limit` price.
     */
-  def empty[T <: Tradable](askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): UnMatchedOrders[T] = {
+  def empty[T <: Tradable](askOrdering: Ordering[(UUID, LimitAskOrder[T])], bidOrdering: Ordering[(UUID, LimitBidOrder[T])]): UnMatchedOrders[T] = {
     new UnMatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 

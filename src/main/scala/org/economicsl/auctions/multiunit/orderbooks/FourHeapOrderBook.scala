@@ -32,7 +32,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
       val excessDemand = bidOrder.quantity - askOrder.quantity
       if (excessDemand > Quantity(0)) {
         val (matched, residual) = split(bidOrder, excessDemand)
-        new FourHeapOrderBook(matchedOrders.removeAndReplace((uuid, askOrder), (uuid2, residual)), unMatchedOrders.updated(uuid2, matched))
+        ??? // new FourHeapOrderBook(matchedOrders.removeAndReplace((uuid, askOrder), (uuid2, residual)), unMatchedOrders.updated(uuid2, matched))
       } else if (excessDemand < Quantity(0)) {
         ??? // split the ask order; removed the matched portion of the askOrder and the bidOrder; recurse with the residual askOrder; add residual askOrder to unMatchedOrders
       } else {
@@ -59,7 +59,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
           new FourHeapOrderBook(matchedOrders.updated((uuid, order), (uuid2, bidOrder)), unMatchedOrders - uuid2)
         }
 
-      case (Some(askOrder), _) if order.value <= askOrder.value =>
+      case (Some((_, askOrder)), _) if order.value <= askOrder.value =>
         ???
       case _ => new FourHeapOrderBook(matchedOrders, unMatchedOrders.updated(uuid, order))
     }
@@ -67,9 +67,9 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
   def updated(uuid: UUID, order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-      case (Some((???, askOrder)), Some((_, bidOrder))) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
+      case (Some((uuid2, askOrder)), Some((_, bidOrder))) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
         ???
-      case (Some(askOrder), _) if order.value <= askOrder.value =>
+      case (Some((_, askOrder)), _) if order.value <= askOrder.value =>
         ???
       case _ => new FourHeapOrderBook(matchedOrders, unMatchedOrders.updated(uuid, order))
     }
@@ -95,7 +95,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
 object FourHeapOrderBook {
 
-  def empty[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): FourHeapOrderBook[T] = {
+  def empty[T <: Tradable](implicit askOrdering: Ordering[(UUID, LimitAskOrder[T])], bidOrdering: Ordering[(UUID, LimitBidOrder[T])]): FourHeapOrderBook[T] = {
     val matchedOrders = MatchedOrders.empty(askOrdering.reverse, bidOrdering.reverse)
     val unMatchedOrders = UnMatchedOrders.empty(askOrdering, bidOrdering)
     new FourHeapOrderBook(matchedOrders, unMatchedOrders)
