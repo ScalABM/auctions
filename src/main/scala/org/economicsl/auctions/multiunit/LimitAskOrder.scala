@@ -39,9 +39,9 @@ object LimitAskOrder {
   private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
     extends LimitAskOrder[T] {
 
-    def withQuantity(residual: Quantity): LimitAskOrder[T] = {
-      require(residual.value < quantity.value)
-      copy(quantity = residual)
+    def withQuantity(quantity: Quantity): LimitAskOrder[T] = {
+      require(quantity.value < quantity.value)
+      copy(quantity = quantity)
     }
 
   }

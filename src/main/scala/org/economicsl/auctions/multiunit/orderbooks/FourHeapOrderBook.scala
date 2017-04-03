@@ -27,7 +27,17 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     if (unMatchedOrders.contains(uuid)) {
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - uuid)
     } else {
-      ???
+      val askOrder = matchedOrders.askOrders(uuid)
+      val (uuid2, bidOrder) = matchedOrders.bidOrders.head
+      val excessDemand = bidOrder.quantity - askOrder.quantity
+      if (excessDemand > Quantity(0)) {
+        val (matched, residual) = split(bidOrder, excessDemand)
+        new FourHeapOrderBook(matchedOrders.removeAndReplace((uuid, askOrder), (uuid2, residual)), unMatchedOrders.updated(uuid2, matched))
+      } else if (excessDemand < Quantity(0)) {
+        ??? // split the ask order; removed the matched portion of the askOrder and the bidOrder; recurse with the residual askOrder; add residual askOrder to unMatchedOrders
+      } else {
+        ??? // remove the askOrder and the bidOrder from the matched orders
+      }
     }
   }
 
@@ -37,16 +47,16 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
   def updated(uuid: UUID, order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-      case (Some((_, askOrder)), Some((???, bidOrder))) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
+      case (Some((_, askOrder)), Some((uuid2, bidOrder))) if order.value <= bidOrder.value && askOrder.value <= bidOrder.value =>
         val excessDemand = bidOrder.quantity - order.quantity
         if (excessDemand > Quantity(0)) {
-          val residualUnMatchedOrders = unMatchedOrders - ???
-          val (filled, residual) = (bidOrder.withQuantity(order.quantity), bidOrder.withQuantity(excessDemand))
-          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, filled)), residualUnMatchedOrders.updated(???, residual))
+          val residualUnMatchedOrders = unMatchedOrders - uuid2
+          val (filled, residual) = (bidOrder.withQuantity(order.quantity), bidOrder.withQuantity(excessDemand))  // split the bidOrder!
+          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (uuid2, filled)), residualUnMatchedOrders.updated(uuid2, residual))
         } else if (excessDemand < Quantity(0)) {
           ???
         } else {
-          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (???, bidOrder)), unMatchedOrders - ???)
+          new FourHeapOrderBook(matchedOrders.updated((uuid, order), (uuid2, bidOrder)), unMatchedOrders - uuid2)
         }
 
       case (Some(askOrder), _) if order.value <= askOrder.value =>
@@ -68,6 +78,16 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
   private[this] def withEmptyMatchedOrders: FourHeapOrderBook[T] = {
     val (askOrdering, bidOrdering) = (matchedOrders.askOrdering, matchedOrders.bidOrdering)
     new FourHeapOrderBook[T](MatchedOrders.empty(askOrdering, bidOrdering), unMatchedOrders)
+  }
+
+  private[this] def split(order: LimitAskOrder[T], residual: Quantity): (LimitAskOrder[T], LimitAskOrder[T]) = {
+    val matched = order.quantity - residual  // todo consider checking that order.quantity is greater than residual!
+    (order.withQuantity(matched), order.withQuantity(residual))
+  }
+
+  private[this] def split(order: LimitBidOrder[T], residual: Quantity): (LimitBidOrder[T], LimitBidOrder[T]) = {
+    val matched = order.quantity - residual  // todo consider checking that order.quantity is greater than residual!
+    (order.withQuantity(matched), order.withQuantity(residual))
   }
 
 }

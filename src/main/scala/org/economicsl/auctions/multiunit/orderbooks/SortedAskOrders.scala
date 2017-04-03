@@ -25,18 +25,24 @@ import scala.collection.immutable.TreeSet
 
 private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[UUID, LimitAskOrder[T]],
                                                                  sorted: TreeSet[(UUID, LimitAskOrder[T])],
-                                                                 val numberUnits: Quantity) {
+                                                                 val quantity: Quantity) {
+
+  def apply(uuid: UUID): LimitAskOrder[T] = existing(uuid)
+
+  def + (kv: (UUID, LimitAskOrder[T])): SortedAskOrders[T] = {
+    new SortedAskOrders(existing + kv, sorted + kv, quantity + kv._2.quantity)
+  }
 
   def - (uuid: UUID): SortedAskOrders[T] = existing.get(uuid) match {
     case Some(order) =>
-      val remaining = Quantity(numberUnits.value - order.quantity.value)
+      val remaining = Quantity(quantity.value - order.quantity.value)
       new SortedAskOrders(existing - uuid, sorted - ((uuid, order)), remaining)
     case None => this
   }
 
   def contains(uuid: UUID): Boolean = existing.contains(uuid)
 
-  def head: LimitAskOrder[T] = sorted.head
+  def head: (UUID, LimitAskOrder[T]) = sorted.head
 
   val headOption: Option[(UUID, LimitAskOrder[T])] = sorted.headOption
 
@@ -44,22 +50,38 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
 
   val ordering: Ordering[(UUID, LimitAskOrder[T])] = sorted.ordering
 
-  def tail: SortedAskOrders[T] = {
-    val remainingQuantity = numberUnits - head.quantity
-    new SortedAskOrders(existing.tail, sorted.tail, remainingQuantity)
+  def splitAt(quantity: Quantity): (SortedAskOrders[T], SortedAskOrders[T]) = {
+
+    def split(order: LimitAskOrder[T], quantity: Quantity): (LimitAskOrder[T], LimitAskOrder[T]) = {
+      val residual = order.quantity - Quantity(1)
+      (order.withQuantity(Quantity(1)), order.withQuantity(residual))
+    }
+
+    @annotation.tailrec
+    def loop(in: SortedAskOrders[T], out: SortedAskOrders[T]): (SortedAskOrders[T], SortedAskOrders[T]) = {
+       if (in.quantity == quantity) {
+         (in, out)
+       } else {
+         val (uuid, askOrder) = out.head
+         val (matched, residual) = split(askOrder, Quantity(1))
+         loop(in + (uuid -> matched), out.updated(uuid, residual))
+       }
+     }
+    loop(SortedAskOrders.empty[T], this)
   }
 
   def updated(uuid: UUID, order: LimitAskOrder[T]): SortedAskOrders[T] = {
-    val additional = numberUnits + order.quantity
-    new SortedAskOrders(existing.updated(uuid, order), sorted + ((uuid, order)), additional)
+    val askOrder = this(uuid)
+    val change = askOrder.quantity - order.quantity
+    new SortedAskOrders(existing.updated(uuid, order), sorted - ((uuid, askOrder)) + ((uuid, order)), quantity + change)
   }
 
 }
 
 object SortedAskOrders {
 
-  def empty[T <: Tradable](ordering: Ordering[LimitAskOrder[T]]): SortedAskOrders[T] = {
-    new SortedAskOrders(Map.empty[UUID, LimitAskOrder[T]], TreeSet.empty[(UUID, LimitAskOrder[T])](ordering), Quantity(0))
+  def empty[T <: Tradable]: SortedAskOrders[T] = {
+    new SortedAskOrders(Map.empty[UUID, LimitAskOrder[T]], TreeSet.empty[(UUID, LimitAskOrder[T])], Quantity(0))
   }
 
 }

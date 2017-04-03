@@ -17,19 +17,26 @@ package org.economicsl.auctions.multiunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Quantity, Tradable}
 import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 
 
 private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
                                                                val bidOrders: SortedBidOrders[T]) {
 
-  require(askOrders.numberUnits == bidOrders.numberUnits)
-  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.value >= askOrder.value)))  // value of lowest bid must exceed value of highest ask!
+  require(askOrders.quantity == bidOrders.quantity)
+  require(bidOrders.headOption.forall{ case (_, bidOrder) => askOrders.headOption.forall{ case (_, askOrder) => bidOrder.value >= askOrder.value }})  // value of lowest bid must exceed value of highest ask!
 
-  def - (orders: ((UUID, LimitAskOrder[T]), (UUID, LimitBidOrder[T]))): MatchedOrders[T] = {
-    val ((uuid1, _), (uuid2, _)) = orders
-    new MatchedOrders(askOrders - uuid1, bidOrders - uuid2)
+  def - (uuid: UUID): (MatchedOrders[T], Option[SortedAskOrders[T]], Option[SortedBidOrders[T]]) = {
+    if (askOrders.contains(uuid)) {
+      val removedOrder = askOrders(uuid)
+      val (matched, residual) = bidOrders.splitAt(removedOrder.quantity)
+      (new MatchedOrders(askOrders - uuid, residual), None, Some(matched))
+    } else {
+      val removedOrder = bidOrders(uuid)
+      val (matched, residual) = askOrders.splitAt(removedOrder.quantity)
+      (new MatchedOrders(residual, bidOrders - uuid), Some(matched), None)
+    }
   }
 
   val askOrdering: Ordering[LimitAskOrder[T]] = askOrders.ordering
@@ -38,14 +45,12 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
 
   def contains(uuid: UUID): Boolean = askOrders.contains(uuid) || bidOrders.contains(uuid)
 
-  def replace(existing: (UUID, LimitAskOrder[T]), incoming: (UUID, LimitAskOrder[T])): MatchedOrders[T] = {
-    val updatedAskOrders = (askOrders - existing._1).updated(incoming._1, incoming._2)
-    new MatchedOrders(updatedAskOrders, bidOrders)
+  def removeAndReplace(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
+    new MatchedOrders(askOrders - askOrder._1, bidOrders.updated(bidOrder._1, bidOrder._2))
   }
 
-  def replace(existing: (UUID, LimitBidOrder[T]), incoming: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
-    val updatedBidOrders = (bidOrders - existing._1).updated(incoming._1, incoming._2)
-    new MatchedOrders(askOrders, updatedBidOrders)
+  def removeAndReplace(bidOrder: (UUID, LimitBidOrder[T]), askOrder: (UUID, LimitAskOrder[T])): MatchedOrders[T] = {
+    new MatchedOrders(askOrders.updated(askOrder._1, askOrder._2), bidOrders - bidOrder._1)
   }
 
   def updated(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
@@ -64,15 +69,13 @@ private[orderbooks] object MatchedOrders {
 
   /** Create an instance of `MatchedOrders`.
     *
-    * @param askOrdering
-    * @param bidOrdering
     * @return
     * @note the heap used to store store the `AskOrder` instances is ordered from high to low
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from low to high based on `limit` price.
     */
-  def empty[T <: Tradable](askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): MatchedOrders[T] = {
-    new MatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
+  def empty[T <: Tradable]: MatchedOrders[T] = {
+    new MatchedOrders(SortedAskOrders.empty, SortedBidOrders.empty)
   }
 
 }
