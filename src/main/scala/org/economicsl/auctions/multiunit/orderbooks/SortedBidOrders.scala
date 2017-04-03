@@ -57,21 +57,25 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
   def splitAt(quantity: Quantity): (SortedBidOrders[T], SortedBidOrders[T]) = {
 
     def split(order: LimitBidOrder[T], quantity: Quantity): (LimitBidOrder[T], LimitBidOrder[T]) = {
-      val residual = order.quantity - Quantity(1)
-      (order.withQuantity(Quantity(1)), order.withQuantity(residual))
+      val residual = order.quantity - quantity
+      (order.withQuantity(quantity), order.withQuantity(residual))
     }
 
     @annotation.tailrec
     def loop(in: SortedBidOrders[T], out: SortedBidOrders[T]): (SortedBidOrders[T], SortedBidOrders[T]) = {
-      if (in.quantity == quantity) {
-        (in, out)
+      val unMatched = quantity - in.quantity
+      val (uuid, bidOrder) = out.head
+      if (unMatched > bidOrder.quantity) {
+        loop(in + (uuid -> bidOrder), out - uuid)
+      } else if (unMatched < bidOrder.quantity) {
+        val (matched, residual) = split(bidOrder, unMatched)
+        (in + (uuid -> matched), out.updated(uuid, residual))
       } else {
-        val (uuid, bidOrder) = out.head
-        val (matched, residual) = split(bidOrder, Quantity(1))
-        loop(in + (uuid -> matched), out.updated(uuid, residual))
+        (in + (uuid -> bidOrder), out - uuid)
       }
     }
     loop(SortedBidOrders.empty[T](sorted.ordering), this)
+
   }
 
   def updated(uuid: UUID, order: LimitBidOrder[T]): SortedBidOrders[T] = {

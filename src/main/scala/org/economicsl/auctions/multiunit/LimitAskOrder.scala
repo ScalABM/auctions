@@ -40,6 +40,7 @@ object LimitAskOrder {
     extends LimitAskOrder[T] {
 
     def withQuantity(quantity: Quantity): LimitAskOrder[T] = {
+      println(quantity, this.quantity)
       require(quantity <= this.quantity)
       copy(quantity = quantity)
     }
