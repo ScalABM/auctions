@@ -43,14 +43,14 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
 
 /** Companion object for the `SinglePricePoint` trait.
   *
-  * Defines a basic ordering for anything that mixes in the `SinglePricePoint` trait.
+  * Defines a basic ordering for any `Order` that mixes in the `SinglePricePoint` trait.
   */
 object SinglePricePoint {
 
   /** All `Order` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
     *
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
+    * @return an `Ordering` defined over `Order with SinglePricePoint` instances.
     */
   def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
     Ordering.by(o => (o.limit, o.issuer))

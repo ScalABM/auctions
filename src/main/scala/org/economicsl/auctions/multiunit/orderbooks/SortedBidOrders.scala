@@ -24,7 +24,7 @@ import scala.collection.immutable.TreeSet
 
 
 private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[UUID, LimitBidOrder[T]],
-                                                                 sorted: TreeSet[(UUID, LimitBidOrder[T])],
+                                                                 val sorted: TreeSet[(UUID, LimitBidOrder[T])],
                                                                  val quantity: Quantity) {
 
   assert(existing.size == sorted.size)

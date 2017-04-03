@@ -23,6 +23,8 @@ case class Price(value: Currency) extends AnyVal {
     Price(value + that.value)
   }
 
+  def unary_- : Price = Price(-value)  // todo consider making Price fully numeric to get this for free!
+
 }
 
 

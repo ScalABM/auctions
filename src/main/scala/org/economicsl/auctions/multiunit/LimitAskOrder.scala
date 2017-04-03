@@ -30,7 +30,9 @@ trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
   */
 object LimitAskOrder {
 
-  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
+  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[(UUID, O)] = {
+    Ordering.by{case (uuid, order) => (order.limit, uuid) }
+  }
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitAskOrder[T] = {
     SinglePricePointImpl(issuer, limit, quantity, tradable)
@@ -40,7 +42,6 @@ object LimitAskOrder {
     extends LimitAskOrder[T] {
 
     def withQuantity(quantity: Quantity): LimitAskOrder[T] = {
-      println(quantity, this.quantity)
       require(quantity <= this.quantity)
       copy(quantity = quantity)
     }
