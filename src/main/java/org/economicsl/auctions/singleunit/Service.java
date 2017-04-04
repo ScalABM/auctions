@@ -16,10 +16,18 @@
 package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.Tradable;
+import scala.collection.JavaConverters;
 
 public class Service implements Tradable {
+
+    private long tick = 1;
+
+    public Service(long _tick) {
+        tick = _tick;
+    }
+
     @Override
-    public Object tick() {
-        return null;
+    public long tick() {
+        return tick;
     }
 }
