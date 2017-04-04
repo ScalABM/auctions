@@ -103,29 +103,3 @@ result3.map(fills => fills.map(fill => fill.price).toList)
 // ...trivial to re-run the same auction with a different pricing rule!
 val (result4, _) = auction10.clear(bidQuotePricing)
 result4.map(fills => fills.map(fill => fill.price).toList)
-
-
-// example of a first-price auction for some tradable...
-class Painting extends Tradable
-
-val otherIssuer = UUID.randomUUID()
-val picasso = new Painting  // how do we know auction is for this particular Painting instance! Probably requires run-time check!
-val reservationPrice = singleunit.LimitAskOrder(otherIssuer, Price(10000000), picasso)
-
-val lowBidder = UUID.randomUUID()
-val lowBidOrder = singleunit.LimitBidOrder(lowBidder, Price(15000000), picasso)
-
-val highBidder = UUID.randomUUID()
-val highBidOrder = singleunit.LimitBidOrder(highBidder, Price(100000000), picasso)
-
-val otherAuction = Auction(reservationPrice)
-val otherAuction2 = otherAuction.insert(lowBidOrder)
-val otherAuction3 = otherAuction2.insert(highBidOrder)
-
-otherAuction3.orderBook.matchedOrders.askOrders.head
-otherAuction3.orderBook.matchedOrders.bidOrders.head
-
-// there is a BUG somewhere because the highBidOrder should win!
-val highestPriceWins = new AskQuotePricingRule[Painting]
-val (results, _) = otherAuction3.clear(highestPriceWins)
-results.map(fills => fills.map(fill => fill.price).toList)
