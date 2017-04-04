@@ -22,7 +22,7 @@ class SortedAskOrdersSpec extends FlatSpec with Matchers {
 
     // Create a revised order and update the order book
     val revised = order.withQuantity(Quantity(1))
-    val updated = nonEmpty.updated(issuer, revised)
+    val updated = nonEmpty.update(issuer, revised)
 
     // Check that update is successful!
     updated.head should be ((issuer, revised))

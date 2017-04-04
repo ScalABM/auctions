@@ -49,9 +49,15 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
 
   val isEmpty: Boolean = existing.isEmpty && sorted.isEmpty
 
+  val nonEmpty: Boolean = existing.nonEmpty && sorted.nonEmpty
+
   val ordering: Ordering[(UUID, LimitAskOrder[T])] = sorted.ordering
 
   val size: Int = existing.size
+
+  def mergeWith(other: SortedAskOrders[T]): SortedAskOrders[T] = {
+    ???
+  }
 
   def splitAt(quantity: Quantity): (SortedAskOrders[T], SortedAskOrders[T]) = {
 
@@ -68,7 +74,7 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
         loop(in + (uuid -> askOrder), out - uuid)
       } else if (unMatched < askOrder.quantity) {
         val (matched, residual) = split(askOrder, unMatched)
-        (in + (uuid -> matched), out.updated(uuid, residual))
+        (in + (uuid -> matched), out.update(uuid, residual))
       } else {
         (in + (uuid -> askOrder), out - uuid)
       }
@@ -77,7 +83,7 @@ private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[U
 
   }
 
-  def updated(uuid: UUID, order: LimitAskOrder[T]): SortedAskOrders[T] = {
+  def update(uuid: UUID, order: LimitAskOrder[T]): SortedAskOrders[T] = {
     val askOrder = this(uuid)
     val change = order.quantity - askOrder.quantity
     new SortedAskOrders(existing.updated(uuid, order), sorted - ((uuid, askOrder)) + ((uuid, order)), quantity + change)

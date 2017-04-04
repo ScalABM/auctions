@@ -27,6 +27,8 @@ case class Quantity(value: Long) extends AnyVal {
     Quantity(value - that.value)
   }
 
+  def unary_- : Quantity = Quantity(-value)  // todo consider making Quantity fully numeric to get this for free!
+
 }
 
 

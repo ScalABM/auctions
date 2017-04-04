@@ -24,18 +24,45 @@ import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
 private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
                                                                val bidOrders: SortedBidOrders[T]) {
 
-  require(askOrders.quantity == bidOrders.quantity)
-  require(bidOrders.headOption.forall{ case (_, bidOrder) => askOrders.headOption.forall{ case (_, askOrder) => bidOrder.value >= askOrder.value }})  // value of lowest bid must exceed value of highest ask!
+  assert(askOrders.quantity == bidOrders.quantity)
+  assert(bidOrders.headOption.forall{ case (_, bidOrder) => askOrders.headOption.forall{ case (_, askOrder) => bidOrder.value >= askOrder.value }})  // value of lowest bid must exceed value of highest ask!
 
-  def - (uuid: UUID): (MatchedOrders[T], Option[SortedAskOrders[T]], Option[SortedBidOrders[T]]) = {
+  val isEmpty: Boolean = askOrders.isEmpty && bidOrders.isEmpty
+
+  val nonEmpty: Boolean = askOrders.nonEmpty && bidOrders.nonEmpty
+
+  /** Add a new pair of ask and bid orders into the MatchedOrders.
+    * @note Unless the quantities of the `LimitAskOrder` and `LimitBidOrder` match exactly, then the larger order must
+    *       be rationed in order to maintain the invariant that the total quantity of supply matches the total quantity
+    *       of demand.
+    */
+  def + (kv1: (UUID, LimitAskOrder[T]), kv2: (UUID, LimitBidOrder[T])): (MatchedOrders[T], Option[UnMatchedOrders[T]]) = {
+    val ((uuid1, askOrder), (uuid2, bidOrder)) = (kv1, kv2)
+    val excessDemand = bidOrder.quantity - askOrder.quantity
+    if (excessDemand < Quantity(0)) {
+      val (matched, rationed) = (askOrder.withQuantity(bidOrder.quantity), askOrder.withQuantity(-excessDemand)) // split the askOrder into a matched and rationed component
+      val rationedOrders = UnMatchedOrders.empty[T](askOrders.ordering, bidOrders.ordering)
+      (new MatchedOrders(askOrders + (uuid1 -> matched), bidOrders + kv2), Some(rationedOrders + (uuid1, rationed)))
+    } else if (excessDemand > Quantity(0)) {
+      val (matched, rationed) = (bidOrder.withQuantity(askOrder.quantity), bidOrder.withQuantity(excessDemand)) // split the bidOrder into a matched and residual component
+      val rationedOrders = UnMatchedOrders.empty[T](askOrders.ordering, bidOrders.ordering)
+      (new MatchedOrders(askOrders + kv1, bidOrders + (uuid2 -> matched)), Some(rationedOrders + (uuid2, rationed)))
+    } else {
+      (new MatchedOrders(askOrders + kv1, bidOrders + kv2), None)
+    }
+  }
+
+  def - (uuid: UUID): (MatchedOrders[T], UnMatchedOrders[T]) = {
     if (askOrders.contains(uuid)) {
       val removedOrder = askOrders(uuid)
-      val (matched, residual) = bidOrders.splitAt(removedOrder.quantity)
-      (new MatchedOrders(askOrders - uuid, residual), None, Some(matched))
+      val (unMatched, residual) = bidOrders.splitAt(removedOrder.quantity)
+      // (new MatchedOrders(askOrders - uuid, residual), UnMatchedOrders.withEmptyAskOrders(unMatched))
+      ???
     } else {
       val removedOrder = bidOrders(uuid)
-      val (matched, residual) = askOrders.splitAt(removedOrder.quantity)
-      (new MatchedOrders(residual, bidOrders - uuid), Some(matched), None)
+      val (unMatched, residual) = askOrders.splitAt(removedOrder.quantity)
+      // (new MatchedOrders(residual, bidOrders - uuid), UnMatchedOrders.withEmptyBidOrders(unMatched))
+      ???
     }
   }
 
@@ -45,13 +72,37 @@ private[orderbooks] class MatchedOrders[T <: Tradable] private(val askOrders: So
 
   def contains(uuid: UUID): Boolean = askOrders.contains(uuid) || bidOrders.contains(uuid)
 
+  def swap(uuid: UUID, order: LimitAskOrder[T], existing: UUID): (MatchedOrders[T], UnMatchedOrders[T]) = {
+    /*val askOrder = askOrders(existing)
+    if (order.quantity > askOrder.quantity) {
+      // if order.quantity > askOrder.quantity, then we need to split the order into matched and rationed components; remove the askOrder and add it to the unmatched orders along with the rationed component or order; finally add the matched component of order to the matched orders.
+      val (matched, rationed) = (order.withQuantity(askOrder.quantity), order.withQuantity(residual))
+      val residualAskOrders = askOrders - existing
+      val empty = UnMatchedOrders.empty[T](???, ???)
+      val unMatchedOrders = empty ++ ((existing, askOrder), (uuid, rationed))
+      (new MatchedOrders(residualAskOrders + (uuid, matched), bidOrders), unMatchedOrders)
+      ???
+    } else if (order.quantity < askOrder.quantity) {
+      // if order.quantity < askOrder.quantity, then we need to remove the askOrder and split it into matched and rationed components; add the order and the match component into the matched set and then add the rationed component of askOrder into the unMatched set.
+      ???
+    } else {
+      // if quantities match then we just need to remove askOrder and add it to unmatched orders; then add order to matched orders
+      val residualAskOrders = askOrders - existing
+      (new MatchedOrders(residualAskOrders + (uuid -> order), bidOrders), UnMatchedOrders.withEmptyBidOrders(askOrder))
+    }*/
+    ???
+  }
+
+  def swap(uuid: UUID, order: LimitBidOrder[T], existing: UUID): (MatchedOrders[T], UnMatchedOrders[T]) = {
+    ???
+  }
+
   def removeAndReplace(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders - askOrder._1, bidOrders.updated(bidOrder._1, bidOrder._2))
   }
 
   def updated(askOrder: (UUID, LimitAskOrder[T]), bidOrder: (UUID, LimitBidOrder[T])): MatchedOrders[T] = {
-    val (uuid1, order1) = askOrder; val (uuid2, order2) = bidOrder
-    new MatchedOrders(askOrders.updated(uuid1, order1), bidOrders.updated(uuid2, order2))
+    new MatchedOrders(askOrders + askOrder, bidOrders + bidOrder)
   }
 
   def zipped: Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {

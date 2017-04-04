@@ -50,9 +50,15 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
 
   val isEmpty: Boolean = existing.isEmpty && sorted.isEmpty
 
+  val nonEmpty: Boolean = existing.nonEmpty && sorted.nonEmpty
+
   val ordering: Ordering[(UUID, LimitBidOrder[T])] = sorted.ordering
 
   val size: Int = existing.size
+
+  def mergeWith(other: SortedBidOrders[T]): SortedBidOrders[T] = {
+    ???
+  }
 
   def splitAt(quantity: Quantity): (SortedBidOrders[T], SortedBidOrders[T]) = {
 
