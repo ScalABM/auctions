@@ -18,4 +18,8 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.Tradable;
 
 public class Service implements Tradable {
+    @Override
+    public Object tick() {
+        return null;
+    }
 }
