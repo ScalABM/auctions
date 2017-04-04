@@ -21,11 +21,7 @@ import org.economicsl.auctions.singleunit.pricing.PricingRule
 
 
 /** Base trait for all double auction implementations. */
-trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with ReverseAuctionLike[T, DoubleAuction[T]] {
-
-  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], DoubleAuction[T])
-
-}
+trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with ReverseAuctionLike[T, DoubleAuction[T]]
 
 
 object DoubleAuction {

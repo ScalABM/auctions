@@ -15,16 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.singleunit.pricing.PricingRule
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.Tradable
 
 
-/** Mixin trait providing behaviors relevant for auctions. */
-trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
+sealed trait Painting extends Tradable
 
-  def insert(order: LimitBidOrder[T]): A
-
-  def remove(order: LimitBidOrder[T]): A
-
-  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], A)
-}
+class Guernica extends Painting
