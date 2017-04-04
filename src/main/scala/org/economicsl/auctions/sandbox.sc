@@ -122,6 +122,9 @@ val otherAuction = Auction(reservationPrice)
 val otherAuction2 = otherAuction.insert(lowBidOrder)
 val otherAuction3 = otherAuction2.insert(highBidOrder)
 
+otherAuction3.orderBook.matchedOrders.askOrders.head
+otherAuction3.orderBook.matchedOrders.bidOrders.head
+
 // there is a BUG somewhere because the highBidOrder should win!
 val highestPriceWins = new AskQuotePricingRule[Painting]
 val (results, _) = otherAuction3.clear(highestPriceWins)

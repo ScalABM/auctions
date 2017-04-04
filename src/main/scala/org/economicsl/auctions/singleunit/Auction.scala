@@ -20,7 +20,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingRule
 
 
-class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T]) extends AuctionLike[T, Auction[T]] {
+class Auction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T]) extends AuctionLike[T, Auction[T]] {
 
   def insert(order: LimitBidOrder[T]): Auction[T] = {
     new Auction(orderBook + order)
