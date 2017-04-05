@@ -21,43 +21,19 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
 /** Base trait for all quote policies. */
-sealed trait QuotePolicy[T <: Tradable] extends PartialFunction[QuoteRequest, Option[Quote]] {
+sealed trait QuotePolicy[T <: Tradable] {
+
+  def request: PartialFunction[QuoteRequest, Option[Quote]]
 
   def orderBook: FourHeapOrderBook[T] // todo consider creating a mixin?
 
 }
 
 
-/** A sealed-bid quote policy means that auction participants cannot obtain information about the current bid quote. */
-trait SealedBidPolicy[T <: Tradable] extends QuotePolicy[T] {
-
-  def isDefinedAt(request: QuoteRequest): Boolean = false
-
-  def apply(request: QuoteRequest): Option[Quote] = None
-
-}
-
-
-/** A sealed-bid quote policy means that auction participants cannot obtain information about the current ask quote. */
-trait SealedAskPolicy[T <: Tradable] extends QuotePolicy[T] {
-
-  def isDefinedAt(request: QuoteRequest): Boolean = false
-
-  def apply(request: QuoteRequest): Option[Quote] = None
-
-}
-
-
 trait AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = request match {
-    case AskPriceQuoteRequest => true
-    case _ => false
-  }
-
-  def apply(request: QuoteRequest): Option[Quote] = request match {
+  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
-    case _ => None
   }
 
 }
@@ -65,14 +41,8 @@ trait AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = request match {
-    case BidPriceQuoteRequest => true
-    case _ => false
-  }
-
-  def apply(request: QuoteRequest): Option[Quote] = request match {
+  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
-    case _ => None
   }
 
 }
@@ -80,14 +50,8 @@ trait BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = request match {
-    case SpreadQuoteRequest => true
-    case _ => false
-  }
-
-  def apply(request: QuoteRequest): Option[Quote] = request match {
+  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
-    case _ => None
   }
 
 }
@@ -95,18 +59,10 @@ trait SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = request match {
-    case AskPriceQuoteRequest => true
-    case BidPriceQuoteRequest => true
-    case SpreadQuoteRequest => true
-    case _ => false
-  }
-
-  def apply(request: QuoteRequest): Option[Quote] = request match {
+  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
-    case _ => None
   }
 
 }
