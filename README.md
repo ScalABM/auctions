@@ -14,4 +14,14 @@ Our current API design is motivated by...
 ...and our focus at present is on developing a minimal API based around the key ingredients discussed in the Wurman et al (1998) paper. 
 
 ## Motivating use cases
-Design and simulation of peer-to-peer electricity auctions; market simulation models for "Economy of Things" applications. 
+Design and simulation of electricity auctions (particularly peer-to-peer auctions); market simulation models for "Economy of Things" applications. 
+
+### Design and simulation of electricity auctions
+Wholesale electricity auctions are discrete, multi-unit, reverse auctions; electricity auctions differ in the duration for which suppliers' bids are valid; suppliers operate under binding capacity constraints. In order to model wholesale electricity auctions we need an API that supports 
+
+1. Multi-unit auctions
+2. Reverse auctions
+3. Discrete prices and quantities 
+4. Orders that can persist across multiple clearing events
+
+Much ink has been spilt about optimal pricing rules for electricity auctions. In particular, under what circumstances will uniform price auctions outperform (or underperfom!) discrimatory price auctions? In order to address this question the API needs to support both uniform and discriminatory pricing rules.
