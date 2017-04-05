@@ -18,18 +18,19 @@ package org.economicsl.auctions.singleunit.quotes
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.DoubleAuction
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
 /** Base trait for all quote policies. */
-sealed trait QuotePolicy[T <: Tradable] extends PartialFunction[QuoteRequest, Option[Quote]]
+sealed trait QuotePolicy[T <: Tradable] extends PartialFunction[(QuoteRequest, FourHeapOrderBook[T]), Option[Quote]]
 
 
 /** A sealed-bid quote policy means that auction participants cannot obtain information about the current bid quote. */
 class SealedBidPolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = false
+  def isDefinedAt(request: (QuoteRequest, FourHeapOrderBook[T])): Boolean = false
 
-  def apply(request: QuoteRequest): Option[Quote] = None
+  def apply(request: (QuoteRequest, FourHeapOrderBook[T])): Option[Quote] = None
 
 }
 
@@ -37,22 +38,22 @@ class SealedBidPolicy[T <: Tradable] extends QuotePolicy[T] {
 /** A sealed-bid quote policy means that auction participants cannot obtain information about the current ask quote. */
 class SealedAskPolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = false
+  def isDefinedAt(request: (QuoteRequest, FourHeapOrderBook[T])): Boolean = false
 
-  def apply(request: QuoteRequest): Option[Quote] = None
+  def apply(request: (QuoteRequest, FourHeapOrderBook[T])): Option[Quote] = None
 
 }
 
 
 class AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = {
-    case AskPriceQuoteRequest => true
+  def isDefinedAt(request: (QuoteRequest, FourHeapOrderBook[T])): Boolean = request match {
+    case (AskPriceQuoteRequest, _) => true
     case _ => false
   }
 
-  def apply: PartialFunction[QuoteRequest, Option[Quote]] = {
-    case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
+  def apply(request: (QuoteRequest, FourHeapOrderBook[T])): Option[Quote] = request match {
+    case (AskPriceQuoteRequest, orderBook) => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
   }
 
 }
@@ -60,13 +61,13 @@ class AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 class BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = {
-    case BidPriceQuoteRequest => true
+  def isDefinedAt(request: (QuoteRequest, FourHeapOrderBook[T])): Boolean = request match {
+    case (BidPriceQuoteRequest, _) => true
     case _ => false
   }
 
-  def apply: PartialFunction[QuoteRequest, Option[Quote]] = {
-    case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
+  def apply(request: (QuoteRequest, FourHeapOrderBook[T])): Option[Quote] = request match {
+    case (BidPriceQuoteRequest, orderBook) => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
   }
 
 }
@@ -74,13 +75,13 @@ class BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 class SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = {
-    case SpreadQuoteRequest => true
+  def isDefinedAt(request: (QuoteRequest, FourHeapOrderBook[T])): Boolean = request match {
+    case (SpreadQuoteRequest, _) => true
     case _ => false
   }
 
-  def apply: PartialFunction[QuoteRequest, Option[Quote]] = {
-    case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
+  def apply(request: (QuoteRequest, FourHeapOrderBook[T])): Option[Quote] = request match {
+    case (SpreadQuoteRequest, orderBook) => orderBook.spread.map(quote => SpreadQuote(quote))
   }
 
 }
@@ -88,17 +89,17 @@ class SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def isDefinedAt(request: QuoteRequest): Boolean = {
-    case AskPriceQuoteRequest => true
-    case BidPriceQuoteRequest => true
-    case SpreadQuoteRequest => true
+  def isDefinedAt(request: (QuoteRequest, FourHeapOrderBook[T])): Boolean = request match {
+    case (AskPriceQuoteRequest, _) => true
+    case (BidPriceQuoteRequest, _) => true
+    case (SpreadQuoteRequest, _) => true
     case _ => false
   }
 
-  def apply(request: QuoteRequest): Option[Quote] = {
-    case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
-    case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
-    case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
+  def apply(request: (QuoteRequest, FourHeapOrderBook[T])): Option[Quote] = request match {
+    case (AskPriceQuoteRequest, orderBook) => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
+    case (BidPriceQuoteRequest, orderBook) => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
+    case (SpreadQuoteRequest, orderBook) => orderBook.spread.map(quote => SpreadQuote(quote))
   }
 
 }
