@@ -15,16 +15,19 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
+import org.economicsl.auctions.Price
 
-sealed trait QuoteRequest
 
-trait PriceQuoteRequest extends QuoteRequest
+sealed trait Quote
 
-/** Used by auction participants to request the current ask price quote. */
-object AskPriceQuoteRequest extends PriceQuoteRequest
+trait PriceQuote extends Quote {
 
-/** Used by auction participants to request the current bid price quote. */
-object BidPriceQuoteRequest extends PriceQuoteRequest
+  def quote: Price
 
-/** Used by auction participants to request the current spread quote. */
-object SpreadQuoteRequest extends PriceQuoteRequest
+}
+
+case class AskPriceQuote(quote: Price) extends PriceQuote
+
+case class BidPriceQuote(quote: Price) extends PriceQuote
+
+case class SpreadQuote(quote: Price) extends PriceQuote
