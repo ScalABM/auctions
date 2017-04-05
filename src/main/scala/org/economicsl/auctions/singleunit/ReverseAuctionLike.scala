@@ -13,13 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions.singleunit
+
+import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.singleunit.pricing.PricingRule
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
 
-  /** Type used to representing currencies. */
-  type Currency = Long
+  def insert(order: LimitAskOrder[T]): A
+
+  def remove(order: LimitAskOrder[T]): A
+
+  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], A)
 
 }

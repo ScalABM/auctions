@@ -13,13 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions.singleunit.pricing
+
+import org.economicsl.auctions.Tradable
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
-
-  /** Type used to representing currencies. */
-  type Currency = Long
-
-}
+class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)

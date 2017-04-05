@@ -13,14 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.multiunit
+
+import org.economicsl.auctions._
 
 import scala.collection.immutable
 
 
 /** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price. */
-trait SinglePricePoint extends PriceQuantitySchedule {
-  this: Order =>
+trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
+  this: Order[T] =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
     *
@@ -32,6 +34,9 @@ trait SinglePricePoint extends PriceQuantitySchedule {
   def quantity: Quantity
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
+
+  /** The total value of the order */
+  val value: Currency = limit.value * quantity.value
 
 }
 
@@ -47,7 +52,9 @@ object SinglePricePoint {
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
     * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
     */
-  def ordering[O <: Order with SinglePricePoint]: Ordering[O] = Ordering.by(o => (o.limit, o.issuer))
+  def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
+    Ordering.by(o => (o.limit, o.issuer))
+  }
 
 }
 

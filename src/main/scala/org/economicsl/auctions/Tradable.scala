@@ -13,13 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
-
-  /** Type used to representing currencies. */
-  type Currency = Long
-
-}
+/** Trait used to indicate that an object can be traded via an auction. */
+trait Tradable

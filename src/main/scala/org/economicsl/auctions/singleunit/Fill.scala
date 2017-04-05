@@ -13,20 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
 
-import scala.collection.GenIterable
+import org.economicsl.auctions.{Contract, Price, Quantity, Tradable}
 
 
-/** Mixin trait providing a schedule of price-quantity pairs for an order. */
-trait PriceQuantitySchedule {
-  this: Order =>
+/** Note that a Fill is also a type of Contract! */
+case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) extends Contract {
 
-  type PricePoint = (Price, Quantity)
-
-  /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
-    * of a `Tradable` at specific, discrete price-points.
-    */
-  def schedule: GenIterable[PricePoint]
+  val quantity: Quantity = askOrder.quantity min bidOrder.quantity
 
 }

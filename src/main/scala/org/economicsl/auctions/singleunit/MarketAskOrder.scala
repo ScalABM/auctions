@@ -13,13 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions.singleunit
+
+import java.util.UUID
+
+import org.economicsl.auctions.{Price, Tradable}
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+case class MarketAskOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitAskOrder[T] {
 
-  /** Type used to representing currencies. */
-  type Currency = Long
+  /** An issuer of a `MarketAskOrder` is willing to sell at any strictly positive price. */
+  val limit: Price = Price.MinValue
 
 }
+

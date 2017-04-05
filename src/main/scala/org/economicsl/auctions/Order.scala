@@ -18,22 +18,25 @@ package org.economicsl.auctions
 import java.util.UUID
 
 
-/** Base trait defining an order for a particular tradable object. */
-sealed trait Order {
+/** Base trait defining an order for a particular tradable object.
+  *
+  * @note we think of an `Order` as being a partially complete Contract.
+  */
+sealed trait Order[+T <: Tradable] extends Contract {
 
   /** Some kind of unique identifier of the market participant that issued the order. */
   def issuer: UUID
 
   /** The type of tradable for which the order has been issued. */
-  def tradable: Tradable
+  def tradable: T
 
 }
 
 
 /** Base trait for an order to sell some `Tradable`. */
-trait AskOrder extends Order
+trait AskOrder[+T <: Tradable] extends Order[T]
 
 
 /** Base trait for an order to buy some `Tradable`. */
-trait BidOrder extends Order
+trait BidOrder[+T <: Tradable] extends Order[T]
 
