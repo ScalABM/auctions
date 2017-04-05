@@ -20,6 +20,10 @@ branches:
     
 script:
   - sbt clean compile
+
+on_success:
+  - sbt coverage test
+  - sbt coverageReport
   
 before_cache:
   # Tricks to avoid unnecessary cache updates
