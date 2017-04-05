@@ -19,7 +19,7 @@ branches:
     - develop
     
 script:
-  - sbt clean compile
+  - sbt clean compile test
   
 before_cache:
   # Tricks to avoid unnecessary cache updates
