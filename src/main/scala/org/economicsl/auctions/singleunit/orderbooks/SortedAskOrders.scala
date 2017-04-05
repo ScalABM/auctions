@@ -24,11 +24,11 @@ import scala.collection.immutable
 class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[LimitAskOrder[T]], val numberUnits: Quantity) {
 
   def + (order: LimitAskOrder[T]): SortedAskOrders[T] = {
-    new SortedAskOrders(orders + order, Quantity(numberUnits.value + order.quantity.value))
+    new SortedAskOrders(orders + order, numberUnits + order.quantity)
   }
 
   def - (order: LimitAskOrder[T]): SortedAskOrders[T] = {
-    new SortedAskOrders(orders - order, Quantity(numberUnits.value - order.quantity.value))
+    new SortedAskOrders(orders - order, numberUnits - order.quantity)
   }
 
   def contains(order: LimitAskOrder[T]): Boolean = orders.contains(order)
@@ -41,7 +41,7 @@ class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[LimitAskO
 
   val ordering: Ordering[LimitAskOrder[T]] = orders.ordering
 
-  def tail: SortedAskOrders[T] = new SortedAskOrders(orders.tail, Quantity(numberUnits.value - head.quantity.value))
+  def tail: SortedAskOrders[T] = new SortedAskOrders(orders.tail, numberUnits - head.quantity)
 
 }
 

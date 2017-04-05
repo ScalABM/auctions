@@ -88,7 +88,15 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     bidPriceQuote.flatMap(p1 => askPriceQuote.map(p2 => Price(p2.value - p1.value)))
   }
 
-  def takeWhileMatched: (Stream[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
+  def takeBestMatched: (Option[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
+    val (bestMatch, residualMatchedOrders) = matchedOrders.takeBestMatch
+    bestMatch match {
+      case result @ Some(_) => (result, new FourHeapOrderBook(residualMatchedOrders, unMatchedOrders))
+      case None => (None, this)
+    }
+  }
+
+  def takeAllMatched: (Stream[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
     (matchedOrders.zipped, withEmptyMatchedOrders)
   }
 

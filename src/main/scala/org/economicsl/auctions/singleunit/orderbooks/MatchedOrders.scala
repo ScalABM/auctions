@@ -48,6 +48,14 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
     new MatchedOrders(askOrders, bidOrders - existing + incoming)
   }
 
+  def takeBestMatch: (Option[(LimitAskOrder[T], LimitBidOrder[T])], MatchedOrders[T]) = {
+    (askOrders.headOption, bidOrders.headOption) match {
+      case (Some(askOrder), Some(bidOrder)) =>
+        (Some(askOrder, bidOrder), new MatchedOrders(askOrders - askOrder, bidOrders - bidOrder))
+      case _ => (None, this)
+    }
+  }
+
   def zipped: Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
     @annotation.tailrec
     def loop(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T], pairedOrders: Stream[(LimitAskOrder[T], LimitBidOrder[T])]): Stream[(LimitAskOrder[T], LimitBidOrder[T])] = {
