@@ -89,11 +89,20 @@ val (result2, _) = auction5.clear(askQuotePricing)
 result2.map(fills => fills.map(fill => fill.price).toList)
 
 
-// example usage of a double auction with discriminatory pricing...
+// example usage of a double auction with discriminatory pricing with price quoting
 val auction6 = DoubleAuction.withDiscriminatoryPricing[Google]
 val auction7 = auction6.insert(order3)
 val auction8 = auction7.insert(order4)
+
+// suppose that a auction participant asked for aks and/or bid quotes...
+// val askQuote = auction8.receive(AskPriceQuoteRequest)
+// val bidQuote = auction8.receive(BidPriceQuoteRequest)
+
 val auction9 = auction8.insert(order9)
+
+// suppose that another auction participant asked for a spread quote...
+// val spreadQuote = auction9.receive(SpreadQuoteRequest)
+
 val auction10 = auction9.insert(order8)
 
 // thanks to @bherd-rb we can do things like this...

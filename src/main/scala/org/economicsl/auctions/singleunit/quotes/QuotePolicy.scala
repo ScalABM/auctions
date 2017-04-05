@@ -22,8 +22,9 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 /** Base trait for all quote policies. */
 sealed trait QuotePolicy[T <: Tradable] {
+  //this: DoubleAuction[T] =>   // really I just want to to be something that has an orderBook!
 
-  def request: PartialFunction[QuoteRequest, Option[Quote]]
+  def receive: PartialFunction[QuoteRequest, Option[Quote]]
 
   def orderBook: FourHeapOrderBook[T] // todo consider creating a mixin?
 
@@ -32,7 +33,7 @@ sealed trait QuotePolicy[T <: Tradable] {
 
 trait AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
   }
 
@@ -41,7 +42,7 @@ trait AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
   }
 
@@ -50,7 +51,7 @@ trait BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
   }
 
@@ -59,7 +60,7 @@ trait SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
 trait BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def request: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
