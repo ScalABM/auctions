@@ -22,9 +22,24 @@ import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
 
   // value of lowest matched bid must exceed value of highest unmatched bid!
-  require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.value >= b2.value)))
+  require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.limit >= b2.limit)))
+
   // value of lowest unmatched ask must exceed value of highest matched ask!
-  require(unMatchedOrders.askOrders.headOption.forall(a1 => matchedOrders.askOrders.headOption.forall(a2 => a1.value >= a2.value)))
+  require(unMatchedOrders.askOrders.headOption.forall(a1 => matchedOrders.askOrders.headOption.forall(a2 => a1.limit >= a2.limit)))
+
+  val askPriceQuote: Option[Price] = (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
+    case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)
+    case (Some(bidOrder), None) => Some(bidOrder.limit)
+    case (None, Some(askOrder)) => Some(askOrder.limit)
+    case _ => None
+  }
+
+  val bidPriceQuote: Option[Price] = (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
+    case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)
+    case (Some(bidOrder), None) => Some(bidOrder.limit)
+    case (None, Some(askOrder)) => Some(askOrder.limit)
+    case _ => None
+  }
 
   def - (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     if (unMatchedOrders.contains(order)) {
@@ -46,42 +61,56 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
   def + (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-      case (Some(askOrder), Some(bidOrder)) if order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (order, bidOrder), unMatchedOrders - bidOrder)
-      case (None, Some(bidOrder)) if order.limit <= bidOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (order, bidOrder), unMatchedOrders - bidOrder)
-      case (Some(askOrder), Some(_)) if order.limit < askOrder.limit =>
-        new FourHeapOrderBook(matchedOrders.replace(askOrder, order), unMatchedOrders + askOrder)
-      case _ =>
+      case (Some(askOrder), Some(bidOrder)) =>
+        if (order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit) {
+          new FourHeapOrderBook(matchedOrders + (order, bidOrder), unMatchedOrders - bidOrder)
+        } else if (order.limit < askOrder.limit) {
+          new FourHeapOrderBook(matchedOrders.replace(askOrder, order), unMatchedOrders + askOrder)
+        } else {
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        }
+      case (None, Some(bidOrder)) =>
+        if (order.limit < bidOrder.limit) {
+          new FourHeapOrderBook(matchedOrders + (order, bidOrder), unMatchedOrders - bidOrder)
+        } else {
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        }
+      case (Some(askOrder), None) =>
+        if ( order.limit < askOrder.limit) {
+          new FourHeapOrderBook(matchedOrders.replace(askOrder, order), unMatchedOrders + askOrder)
+        } else {
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        }
+      case (None, None) =>
         new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
     }
   }
 
   def + (order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
-      case (Some(bidOrder), Some(askOrder)) if order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (askOrder, order), unMatchedOrders - askOrder)
-      case (None, Some(askOrder)) if order.limit >= askOrder.limit =>
-        new FourHeapOrderBook(matchedOrders + (askOrder, order), unMatchedOrders - askOrder)
-      case (Some(bidOrder), Some(_)) if order.limit > bidOrder.limit =>
-        new FourHeapOrderBook(matchedOrders.replace(bidOrder, order), unMatchedOrders + bidOrder)
-      case _ =>
+      case (Some(bidOrder), Some(askOrder)) =>
+        if (order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit) {
+          new FourHeapOrderBook(matchedOrders + (askOrder, order), unMatchedOrders - askOrder)
+        } else if (order.limit > bidOrder.limit) {
+          new FourHeapOrderBook(matchedOrders.replace(bidOrder, order), unMatchedOrders + bidOrder)
+        } else {
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        }
+      case (None, Some(askOrder)) =>
+        if (order.limit > askOrder.limit) {
+          new FourHeapOrderBook(matchedOrders + (askOrder, order), unMatchedOrders - askOrder)
+        } else {
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        }
+      case (Some(bidOrder), None) =>
+        if (order.limit > bidOrder.limit) {
+          new FourHeapOrderBook(matchedOrders.replace(bidOrder, order), unMatchedOrders + bidOrder)
+        } else {
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        }
+      case (None, None) =>
         new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
     }
-  }
-
-  val askPriceQuote: Option[Price] = (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
-    case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)
-    case (Some(bidOrder), None) => Some(bidOrder.limit)
-    case (None, Some(askOrder)) => Some(askOrder.limit)
-    case _ => None
-  }
-
-  val bidPriceQuote: Option[Price] = (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
-    case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)
-    case (Some(bidOrder), None) => Some(bidOrder.limit)
-    case (None, Some(askOrder)) => Some(askOrder.limit)
-    case _ => None
   }
 
   def takeBestMatched: (Option[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
