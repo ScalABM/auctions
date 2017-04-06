@@ -13,17 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.pricing
 
-import java.util.UUID
-
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.{Price, Tradable}
 
 
-case class MarketAskOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitAskOrder[T] {
+/** Mth highest price determines the fill price.
+  *
+  * @note Mth highest price is equivalent to the ask quote. It is incentive compatible for sellers to truthfully reveal
+  *       their respective valuations in single-unit auctions using this pricing rule.
+  */
+class AskQuotePricingRule[T <: Tradable] extends PricingRule[T, Price] {
 
-  /** An issuer of a `MarketAskOrder` is willing to sell at any strictly positive price. */
-  val limit: Price = Price.MinValue
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.askPriceQuote
 
 }
-

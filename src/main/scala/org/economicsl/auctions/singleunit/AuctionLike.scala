@@ -13,8 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
+
+import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Documentation for Multi-Unit Auction goes here! */
-package object multiunit
+/** Mixin trait providing behaviors relevant for auctions. */
+trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
+
+  def insert(order: LimitBidOrder[T]): A
+
+  def remove(order: LimitBidOrder[T]): A
+
+  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], A)
+}

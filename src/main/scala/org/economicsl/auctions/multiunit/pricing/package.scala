@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.multiunit
 
 
-/** Documentation for Multi-Unit Auction goes here! */
-package object multiunit
+/** Documentation for the pricing package should go here! */
+package object pricing

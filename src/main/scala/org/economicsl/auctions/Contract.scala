@@ -16,5 +16,5 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Documentation for Multi-Unit Auction goes here! */
-package object multiunit
+/** Type used to indicate that something is a contract. */
+trait Contract

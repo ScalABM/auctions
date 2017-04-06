@@ -13,8 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
+
+import org.economicsl.auctions.{Contract, Price, Quantity, Tradable}
 
 
-/** Documentation for Multi-Unit Auction goes here! */
-package object multiunit
+/** Note that a Fill is also a type of Contract! */
+case class Fill[T <: Tradable](askOrder: LimitAskOrder[T], bidOrder: LimitBidOrder[T], price: Price) extends Contract {
+
+  val quantity: Quantity = askOrder.quantity min bidOrder.quantity
+
+}
