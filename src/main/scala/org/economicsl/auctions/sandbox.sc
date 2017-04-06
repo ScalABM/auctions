@@ -73,6 +73,10 @@ val averagePrice = averagePricing(orderBook5)
 val (pairedOrders, _) = orderBook5.takeAllMatched
 pairedOrders.toList
 
+// currently all multi-unit orders are divisible...
+val residual = order7.withQuantity(Quantity(2))
+residual.quantity
+
 // example usage of a double auction with uniform pricing...
 val auction = DoubleAuction.withUniformPricing[Google]
 val auction2 = auction.insert(order3)
@@ -103,3 +107,4 @@ result3.map(fills => fills.map(fill => fill.price).toList)
 // ...trivial to re-run the same auction with a different pricing rule!
 val (result4, _) = auction10.clear(bidQuotePricing)
 result4.map(fills => fills.map(fill => fill.price).toList)
+

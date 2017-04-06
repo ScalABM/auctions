@@ -1,10 +1,9 @@
-import xsbti.compile
-
 name := "auctions"
 
 version := "0.1.0-alpha"
 
 scalaVersion := "2.12.1"
+
 
 // Useful scala compiler options
 scalacOptions ++= Seq(
@@ -20,3 +19,5 @@ libraryDependencies ++= Seq(
 
 // In our project Java depends on Scala, but not the other way round!
 compileOrder := CompileOrder.ScalaThenJava
+
+

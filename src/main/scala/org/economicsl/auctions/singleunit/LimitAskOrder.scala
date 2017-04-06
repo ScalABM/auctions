@@ -27,7 +27,6 @@ object LimitAskOrder {
 
   implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
 
-
   def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {
     SingleUnitImpl(issuer, limit, tradable)
   }

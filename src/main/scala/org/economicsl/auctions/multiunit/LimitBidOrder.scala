@@ -29,7 +29,9 @@ trait LimitBidOrder[+T <: Tradable] extends BidOrder[T] with SinglePricePoint[T]
   */
 object LimitBidOrder {
 
-  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O].reverse
+  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[(UUID, O)] = {
+    Ordering.by{case (uuid, order) => (-order.limit, uuid) }
+  }
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitBidOrder[T] = {
     SinglePricePointImpl(issuer, limit, quantity, tradable)
@@ -38,9 +40,9 @@ object LimitBidOrder {
   private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
     extends LimitBidOrder[T] {
 
-    def withQuantity(residual: Quantity): LimitBidOrder[T] = {
-      require(residual.value < quantity.value)
-      copy(quantity = residual)
+    def withQuantity(quantity: Quantity): LimitBidOrder[T] = {
+      require(quantity <= this.quantity)
+      copy(quantity = quantity)
     }
 
   }
