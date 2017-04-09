@@ -17,37 +17,51 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
 
 
-class ReverseAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T]) extends ReverseAuctionLike[T, ReverseAuction[T]] {
+class ReverseAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRule: PricingRule[T, Price])
+  extends ReverseAuctionLike[T, ReverseAuction[T]] {
 
   def insert(order: LimitAskOrder[T]): ReverseAuction[T] = {
-    new ReverseAuction(orderBook + order)
+    new ReverseAuction(orderBook + order, pricingRule)
   }
 
   def remove(order: LimitAskOrder[T]): ReverseAuction[T] = {
-    new ReverseAuction(orderBook - order)
+    new ReverseAuction(orderBook - order, pricingRule)
   }
 
-  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], ReverseAuction[T]) = {
+  def clear: (Option[Stream[Fill[T]]], ReverseAuction[T]) = {
     p(orderBook) match {
       case Some(price) =>
         val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
         val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-        (Some(fills), new ReverseAuction(newOrderBook))
-      case None => (None, new ReverseAuction(orderBook))
+        (Some(fills), new ReverseAuction(newOrderBook, pricingRule))
+      case None => (None, new ReverseAuction(orderBook, pricingRule))
     }
   }
+
+  protected val p: PricingRule[T, Price] = pricingRule
 
 }
 
 
 object ReverseAuction {
 
-  def apply[T <: Tradable](initial: LimitBidOrder[T])(implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): ReverseAuction[T] = {
+  def apply[T <: Tradable](initial: LimitBidOrder[T], pricingRule: PricingRule[T, Price])
+                          (implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](askOrdering.reverse, bidOrdering.reverse)
-    new ReverseAuction[T](orderBook + initial)
+    new ReverseAuction[T](orderBook + initial, pricingRule)
+  }
+
+  def firstPriceSealedBid[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering.reverse)
+    new ReverseAuction[T](orderBook + reservation, new AskQuotePricingRule)
+  }
+
+  def secondPriceSealedBid[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering.reverse)
+    new ReverseAuction[T](orderBook + reservation, new BidQuotePricingRule)
   }
 
 }

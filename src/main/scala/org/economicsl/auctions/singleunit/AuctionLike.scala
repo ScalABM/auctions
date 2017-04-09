@@ -26,5 +26,8 @@ trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
 
   def remove(order: LimitBidOrder[T]): A
 
-  def clear(p: PricingRule[T, Price]): (Option[Stream[Fill[T]]], A)
+  def clear: (Option[Stream[Fill[T]]], A)
+
+  protected def p: PricingRule[T, Price]
+
 }
