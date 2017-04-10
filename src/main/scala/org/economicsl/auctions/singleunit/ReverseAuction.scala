@@ -64,4 +64,34 @@ object ReverseAuction {
     new ReverseAuction[T](orderBook + reservation, new BidQuotePricingRule)
   }
 
+  def withReservationPrice[T <: Tradable](reservation: LimitBidOrder[T]): WithOrderBook[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithOrderBook(orderBook + reservation)
+  }
+
+  /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
+  class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
+
+    def insert(order: LimitAskOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook + order)
+    }
+
+    def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook + order)
+    }
+
+    def remove(order: LimitAskOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook - order)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook - order)
+    }
+
+    def withPricingRule(pricingRule: PricingRule[T, Price]): ReverseAuction[T] = {
+      new ReverseAuction(orderBook, pricingRule)
+    }
+
+  }
+
 }

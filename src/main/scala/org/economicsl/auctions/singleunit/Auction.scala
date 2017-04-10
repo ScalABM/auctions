@@ -87,7 +87,7 @@ object Auction{
       new WithOrderBook(orderBook - order)
     }
 
-    def witPricing(pricingRule: PricingRule[T, Price]): Auction[T] = {
+    def withPricingRule(pricingRule: PricingRule[T, Price]): Auction[T] = {
       new Auction(orderBook, pricingRule)
     }
 

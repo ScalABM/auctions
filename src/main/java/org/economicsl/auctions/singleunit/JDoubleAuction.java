@@ -27,11 +27,10 @@ import scala.math.Ordering;
 import java.util.List;
 import java.util.Optional;
 
-public class JDoubleAuction<T extends Tradable> {
+class JDoubleAuction<T extends Tradable> {
 
-    private DoubleAuction<T> auction = DoubleAuction$.MODULE$.withUniformPricing(
-            // this should be a pricing rule now...
-    );
+    private DoubleAuction<T> auction = null;
+
 
     public class ClearResult<T extends Tradable> {
         private JDoubleAuction<T> auction;
