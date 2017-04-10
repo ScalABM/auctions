@@ -28,6 +28,4 @@ trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
 
   def clear: (Option[Stream[Fill[T]]], A)
 
-  protected def p: PricingRule[T, Price]
-
 }

@@ -27,6 +27,4 @@ trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
 
   def clear: (Option[Stream[Fill[T]]], A)
 
-  protected def p: PricingRule[T, Price]
-
 }

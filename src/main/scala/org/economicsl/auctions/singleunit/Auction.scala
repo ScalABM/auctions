@@ -32,7 +32,7 @@ class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRul
   }
 
   def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
-    p(orderBook) match {
+    pricingRule(orderBook) match {
       case Some(price) =>
         val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
         val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
@@ -40,8 +40,6 @@ class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRul
       case None => (None, new Auction(orderBook, pricingRule))
     }
   }
-
-  protected val p: PricingRule[T, Price] = pricingRule
 
 }
 
