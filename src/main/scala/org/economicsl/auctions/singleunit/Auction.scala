@@ -48,20 +48,49 @@ class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRul
 
 object Auction{
 
-  def apply[T <: Tradable](reservation: LimitAskOrder[T], pricingRule: PricingRule[T, Price])
-                          (implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): Auction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T](askOrdering, bidOrdering)
-    new Auction[T](orderBook + reservation, pricingRule)
+  def apply[T <: Tradable](reservation: LimitAskOrder[T], pricingRule: PricingRule[T, Price]): Auction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new Auction(orderBook + reservation, pricingRule)
   }
 
   def firstPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new Auction[T](orderBook + reservation, new AskQuotePricingRule)
+    new Auction(orderBook + reservation, new AskQuotePricingRule)
   }
 
   def secondPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new Auction[T](orderBook + reservation, new BidQuotePricingRule)
+    new Auction(orderBook + reservation, new BidQuotePricingRule)
+  }
+
+  def withReservationPrice[T <: Tradable](reservation: LimitAskOrder[T]): WithOrderBook[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithOrderBook(orderBook + reservation)
+  }
+
+  /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
+  class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
+
+    def insert(order: LimitAskOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook + order)
+    }
+
+    def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook + order)
+    }
+
+    def remove(order: LimitAskOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook - order)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook - order)
+    }
+
+    def witPricing(pricingRule: PricingRule[T, Price]): Auction[T] = {
+      new Auction(orderBook, pricingRule)
+    }
+
   }
 
 }

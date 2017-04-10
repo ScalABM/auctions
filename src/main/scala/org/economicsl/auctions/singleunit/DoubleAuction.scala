@@ -26,14 +26,45 @@ trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with
 
 object DoubleAuction {
 
-  def withDiscriminatoryPricing[T <: Tradable](pricingRule: PricingRule[T, Price])
-                                              (implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): DoubleAuction[T] = {
-    new DiscriminatoryPriceImpl[T](FourHeapOrderBook.empty[T](askOrdering, bidOrdering), pricingRule)
+  def withDiscriminatoryPricing[T <: Tradable](pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+    new DiscriminatoryPriceImpl[T](FourHeapOrderBook.empty[T], pricingRule)
   }
 
-  def withUniformPricing[T <: Tradable](pricingRule: PricingRule[T, Price])
-                                       (implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): DoubleAuction[T] = {
-    new UniformPriceImpl[T](FourHeapOrderBook.empty[T](askOrdering, bidOrdering), pricingRule)
+  def withOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]): WithOrderBook[T] = {
+    new WithOrderBook(orderBook)
+  }
+
+  def withUniformPricing[T <: Tradable](pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+    new UniformPriceImpl[T](FourHeapOrderBook.empty[T], pricingRule)
+  }
+
+  /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
+  class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
+
+    def insert(order: LimitAskOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook + order)
+    }
+
+    def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook + order)
+    }
+
+    def remove(order: LimitAskOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook - order)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {
+      new WithOrderBook(orderBook - order)
+    }
+
+    def withDiscriminatoryPricing(pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+      new DiscriminatoryPriceImpl[T](orderBook, pricingRule)
+    }
+
+    def withUniformPricing(pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+      new UniformPriceImpl[T](orderBook, pricingRule)
+    }
+
   }
 
 

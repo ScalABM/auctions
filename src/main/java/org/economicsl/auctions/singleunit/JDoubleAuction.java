@@ -30,8 +30,7 @@ import java.util.Optional;
 public class JDoubleAuction<T extends Tradable> {
 
     private DoubleAuction<T> auction = DoubleAuction$.MODULE$.withUniformPricing(
-            LimitAskOrder$.MODULE$.<LimitAskOrder<T>>ordering(),
-            LimitBidOrder$.MODULE$.<LimitBidOrder<T>>ordering().reverse()
+            // this should be a pricing rule now...
     );
 
     public class ClearResult<T extends Tradable> {
@@ -75,8 +74,8 @@ public class JDoubleAuction<T extends Tradable> {
         return new JDoubleAuction<T>(auction.remove(order));
     }
 
-    public Optional<ClearResult<T>> clear(PricingRule<T, Price> p) {
-        Tuple2<Option<Stream<Fill<T>>>, DoubleAuction<T>> clear = auction.clear(p);
+    public Optional<ClearResult<T>> clear() {
+        Tuple2<Option<Stream<Fill<T>>>, DoubleAuction<T>> clear = auction.clear();
         Option<Stream<Fill<T>>> streamOption = clear._1();
         if(streamOption.isDefined()) {
             List<Fill<T>> fills = JavaConverters.seqAsJavaListConverter(clear._1().get()).asJava();
@@ -86,15 +85,11 @@ public class JDoubleAuction<T extends Tradable> {
         return Optional.empty();
     }
 
-    public static <T extends Tradable> JDoubleAuction<T> withUniformPricing(
-            Ordering<LimitAskOrder<T>> askOrdering,
-            Ordering<LimitBidOrder<T>> bidOrdering) {
-        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withUniformPricing(askOrdering, bidOrdering));
+    public static <T extends Tradable> JDoubleAuction<T> withUniformPricing(PricingRule<T, Price> p) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withUniformPricing(p));
     }
 
-    public static <T extends Tradable> JDoubleAuction<T> withDiscriminatoryPricing(
-            Ordering<LimitAskOrder<T>> askOrdering,
-            Ordering<LimitBidOrder<T>> bidOrdering) {
-        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withDiscriminatoryPricing(askOrdering, bidOrdering));
+    public static <T extends Tradable> JDoubleAuction<T> withDiscriminatoryPricing(PricingRule<T, Price> p) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withDiscriminatoryPricing(p));
     }
 }
