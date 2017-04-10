@@ -73,24 +73,26 @@ val averagePrice = averagePricing(orderBook5)
 val (pairedOrders, _) = orderBook5.takeAllMatched
 pairedOrders.toList
 
-// example usage of a double auction with uniform pricing...
-val auction = DoubleAuction.withUniformPricing[Google]
-val auction2 = auction.insert(order3)
-val auction3 = auction2.insert(order4)
-val auction4 = auction3.insert(order9)
-val auction5 = auction4.insert(order8)
+// example usage of a double auction where we don't want to define the pricing rule until later...
+val withOrderBook = DoubleAuction.withOrderBook(FourHeapOrderBook.empty[Google])
+val withOrderBook2 = withOrderBook.insert(order3)
+val withOrderBook3 = withOrderBook2.insert(order4)
+val withOrderBook4 = withOrderBook3.insert(order9)
+val withOrderBook5 = withOrderBook4.insert(order8)
 
-// thanks to @bherd-rb we can do things like this...
-val (result, _) = auction5.clear(midPointPricing)
+// after inserting orders, now we can define the pricing rule...
+val auction = withOrderBook5.withUniformPricing(midPointPricing)
+val (result, _) = auction.clear
 result.map(fills => fills.map(fill => fill.price).toList)
 
 // ...trivial to re-run the same auction with a different pricing rule!
-val (result2, _) = auction5.clear(askQuotePricing)
+val auction2 = withOrderBook5.withUniformPricing(askQuotePricing)
+val (result2, _) = auction2.clear
 result2.map(fills => fills.map(fill => fill.price).toList)
 
 
-// example usage of a double auction with discriminatory pricing with price quoting
-val auction6 = DoubleAuction.withDiscriminatoryPricing[Google]
+// example usage of a double auction with discriminatory pricing...
+val auction6 = DoubleAuction.withDiscriminatoryPricing[Google](midPointPricing)
 val auction7 = auction6.insert(order3)
 val auction8 = auction7.insert(order4)
 
@@ -105,10 +107,6 @@ val auction9 = auction8.insert(order9)
 
 val auction10 = auction9.insert(order8)
 
-// thanks to @bherd-rb we can do things like this...
-val (result3, _) = auction10.clear(midPointPricing)
+// clear
+val (result3, _) = auction10.clear
 result3.map(fills => fills.map(fill => fill.price).toList)
-
-// ...trivial to re-run the same auction with a different pricing rule!
-val (result4, _) = auction10.clear(bidQuotePricing)
-result4.map(fills => fills.map(fill => fill.price).toList)

@@ -24,8 +24,8 @@ public class JDoubleAuctionTest {
 
     public static void main( String[] args ) {
         JDoubleAuction<Service> auction = JDoubleAuction.withUniformPricing(
-                LimitAskOrder$.MODULE$.<LimitAskOrder<Service>>ordering(),
-                LimitBidOrder$.MODULE$.<LimitBidOrder<Service>>ordering().reverse());
+                new WeightedAveragePricingRule<Service>(1.0)
+        );
 
         LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 10, new Service());
         LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5, new Service());
@@ -35,7 +35,7 @@ public class JDoubleAuctionTest {
         LimitAskOrder<Service> ask2 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 12, new Service());
         auction = auction.insert(bid2);
         auction = auction.insert(ask2);
-        Optional<JDoubleAuction<Service>.ClearResult<Service>> clear = auction.clear(new WeightedAveragePricingRule<Service>(1.0));
+        Optional<JDoubleAuction<Service>.ClearResult<Service>> clear = auction.clear();
         if(clear.isPresent()) {
             JDoubleAuction<Service>.ClearResult<Service> result = clear.get();
             auction = result.getAuction();
