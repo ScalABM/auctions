@@ -71,16 +71,8 @@ object Auction{
   /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
   class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
 
-    def insert(order: LimitAskOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook + order)
-    }
-
     def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
       new WithOrderBook(orderBook + order)
-    }
-
-    def remove(order: LimitAskOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook - order)
     }
 
     def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {

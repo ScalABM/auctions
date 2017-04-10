@@ -75,15 +75,7 @@ object ReverseAuction {
       new WithOrderBook(orderBook + order)
     }
 
-    def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook + order)
-    }
-
     def remove(order: LimitAskOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook - order)
-    }
-
-    def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {
       new WithOrderBook(orderBook - order)
     }
 
