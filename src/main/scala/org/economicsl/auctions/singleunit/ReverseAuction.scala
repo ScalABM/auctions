@@ -48,9 +48,8 @@ class ReverseAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pri
 
 object ReverseAuction {
 
-  def apply[T <: Tradable](initial: LimitBidOrder[T], pricingRule: PricingRule[T, Price])
-                          (implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): ReverseAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T](askOrdering.reverse, bidOrdering.reverse)
+  def apply[T <: Tradable](initial: LimitBidOrder[T], pricingRule: PricingRule[T, Price]): ReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering.reverse)
     new ReverseAuction[T](orderBook + initial, pricingRule)
   }
 
