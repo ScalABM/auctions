@@ -26,13 +26,13 @@ class AuctionSpec extends FlatSpec with Matchers {
   
   "An Auction" should "clear matched orders" in {
 
-    val guernica = new Guernica
+    val guernica = Guernica(tick=10)
     val seller = UUID.randomUUID()
     val reservationPrice =LimitAskOrder(seller, Price(10), guernica)
 
     // add a couple of bidders...
     val lowBidder = UUID.randomUUID()
-    val lowBidOrder = LimitBidOrder(lowBidder, Price(15), guernica)
+    val lowBidOrder = LimitBidOrder(lowBidder, Price(50), guernica)
 
     val highBidder = UUID.randomUUID()
     val highBidOrder = LimitBidOrder(highBidder, Price(100), guernica)

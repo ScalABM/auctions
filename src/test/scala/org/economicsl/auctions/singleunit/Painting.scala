@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Currency, Tradable}
 
 
 sealed trait Painting extends Tradable
 
-class Guernica extends Painting
+case class Guernica(tick: Currency) extends Painting
