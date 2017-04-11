@@ -27,12 +27,12 @@ public class JDoubleAuctionTest {
                 new WeightedAveragePricingRule<Service>(1.0)
         );
 
-        LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 10, new Service());
-        LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5, new Service());
+        LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 10, new Service(1));
+        LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5, new Service(1));
         auction = auction.insert(bid1);
         auction = auction.insert(ask1);
-        LimitBidOrder<Service> bid2 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 3, new Service());
-        LimitAskOrder<Service> ask2 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 12, new Service());
+        LimitBidOrder<Service> bid2 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 3, new Service(1));
+        LimitAskOrder<Service> ask2 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 12, new Service(1));
         auction = auction.insert(bid2);
         auction = auction.insert(ask2);
         Optional<JDoubleAuction<Service>.ClearResult<Service>> clear = auction.clear();

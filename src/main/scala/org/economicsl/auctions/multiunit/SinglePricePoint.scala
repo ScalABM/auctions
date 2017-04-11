@@ -38,6 +38,8 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   /** The total value of the order */
   val value: Currency = limit.value * quantity.value
 
+  require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
+
 }
 
 

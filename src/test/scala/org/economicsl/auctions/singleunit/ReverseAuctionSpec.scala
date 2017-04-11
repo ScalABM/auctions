@@ -26,7 +26,7 @@ class ReverseAuctionSpec extends FlatSpec with Matchers {
 
   "A ReverseAuction" should "clear matched orders" in {
 
-    val energy = new Electricity
+    val energy = Electricity(tick=10)
     val buyer = UUID.randomUUID()
     val reservationPrice = MarketBidOrder(buyer, energy)
 

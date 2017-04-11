@@ -17,4 +17,9 @@ package org.economicsl.auctions
 
 
 /** Trait used to indicate that an object can be traded via an auction. */
-trait Tradable
+trait Tradable {
+
+  /** Minimum tick size. */
+  def tick: Currency
+
+}
