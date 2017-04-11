@@ -13,6 +13,12 @@ Our current API design is motivated by...
 
 ...and our focus at present is on developing a minimal API based around the key ingredients discussed in the Wurman et al (1998) paper. Longer term goals include generalizing the auctions EDSL so that auctions are thought of as a special type of social choice mechanism that use "money." 
 
+The design and imlementation of the API is heavily influences by functional programming principles and techniques. In particular we strive to...
+
+1. ...minimize (or eliminate!) side effects;
+2. ...maintain a thread-safe API in order to maximally exploit concurrency and parallelism where appropriate;
+3. ...make illegal program states unrepresentable (i.e., programs that would lead to invalid states should not compile!).
+
 ## Motivating use cases
 Design and simulation of electricity auctions (particularly peer-to-peer auctions); market simulation models for "Economy of Things" applications. 
 
