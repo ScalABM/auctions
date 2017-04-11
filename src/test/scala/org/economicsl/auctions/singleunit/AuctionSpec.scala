@@ -37,7 +37,7 @@ class AuctionSpec extends FlatSpec with Matchers {
     val highBidder = UUID.randomUUID()
     val highBidOrder = LimitBidOrder(highBidder, Price(100), guernica)
 
-    val auction = Auction(reservationPrice)
+    val auction = Auction.withReservationPrice(reservationPrice)
     val withBidders = auction.insert(lowBidOrder).insert(highBidOrder)
 
     // remove an irrelevant bid order
@@ -45,7 +45,7 @@ class AuctionSpec extends FlatSpec with Matchers {
 
     // clear!
     val highestPriceWins = new AskQuotePricingRule[Guernica]
-    val (results, _) = withSingleBidder.clear(highestPriceWins)
+    val (results, _) = withSingleBidder.withPricingRule(highestPriceWins).clear
     results.map(fills => fills.map(fill => fill.price).toList) should be (Some(List(Price(100))))
 
   }
