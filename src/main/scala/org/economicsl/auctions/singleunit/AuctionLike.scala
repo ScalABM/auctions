@@ -15,8 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.singleunit.pricing.PricingRule
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.Tradable
 
 
 /** Mixin trait providing behaviors relevant for auctions. */
@@ -27,7 +26,5 @@ trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
   def remove(order: LimitBidOrder[T]): A
 
   def clear: (Option[Stream[Fill[T]]], A)
-
-  protected def p: PricingRule[T, Price]
 
 }

@@ -15,74 +15,157 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.quotes.{Quote, QuoteRequest}
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
+import org.economicsl.auctions.singleunit.quotes.QuotePolicy
 
 
-class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRule: PricingRule[T, Price])
+class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price])
   extends AuctionLike[T, Auction[T]] {
 
   def insert(order: LimitBidOrder[T]): Auction[T] = {
-    new Auction(orderBook + order, pricingRule)
+    new Auction(orderBook + order, rule)
   }
 
   def remove(order: LimitBidOrder[T]): Auction[T] = {
-    new Auction(orderBook - order, pricingRule)
+    new Auction(orderBook - order, rule)
   }
 
   def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
-    p(orderBook) match {
+    rule(orderBook) match {
       case Some(price) =>
         val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
         val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-        (Some(fills), new Auction(newOrderBook, pricingRule))
-      case None => (None, new Auction(orderBook, pricingRule))
+        (Some(fills), new Auction(newOrderBook, rule))
+      case None => (None, new Auction(orderBook, rule))
     }
   }
-
-  protected val p: PricingRule[T, Price] = pricingRule
 
 }
 
 
-object Auction{
+object Auction {
 
-  def apply[T <: Tradable](reservation: LimitAskOrder[T], pricingRule: PricingRule[T, Price]): Auction[T] = {
+  /** Create an `Auction` with a particular reservation price and pricing rule.
+    *
+    * @param reservation
+    * @param rule
+    * @tparam T
+    * @return
+    */
+  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new Auction(orderBook + reservation, pricingRule)
+    new Auction(orderBook + reservation, rule)
   }
 
+  /** Create a first-price, sealed-bid `Auction`.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
   def firstPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new Auction(orderBook + reservation, new AskQuotePricingRule)
   }
 
+  /** Create a second-price, sealed-bid or Vickrey `Auction`.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
   def secondPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new Auction(orderBook + reservation, new BidQuotePricingRule)
   }
 
-  def withReservationPrice[T <: Tradable](reservation: LimitAskOrder[T]): WithOrderBook[T] = {
+  /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
+  def withClosedOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithClosedOrderBook[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new WithOrderBook(orderBook + reservation)
+    new WithClosedOrderBook[T](orderBook + reservation)
   }
 
-  /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
-  class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
+  /** Create an `WithReservationPrice` that encapsulates an order book containing a particular reservation price.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
+  def withOpenOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithOpenOrderBook[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithOpenOrderBook[T](orderBook + reservation)
+  }
 
-    def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook + order)
+
+  sealed trait WithOrderBook[T <: Tradable] {
+
+    def insert(order: LimitBidOrder[T]): WithOrderBook[T]
+
+    def remove(order: LimitBidOrder[T]): WithOrderBook[T]
+
+  }
+
+
+  final class WithClosedOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T] {
+
+    def insert(order: LimitBidOrder[T]): WithClosedOrderBook[T] = {
+      new WithClosedOrderBook[T](orderBook + order)
     }
 
-    def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook - order)
+    def remove(order: LimitBidOrder[T]): WithClosedOrderBook[T] = {
+      new WithClosedOrderBook[T](orderBook - order)
     }
 
-    def withPricingRule(pricingRule: PricingRule[T, Price]): Auction[T] = {
-      new Auction(orderBook, pricingRule)
+    def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
+      new Auction[T](orderBook, rule)
     }
 
+  }
+
+
+  final class WithOpenOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T] {
+
+    def insert(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
+      new WithOpenOrderBook[T](orderBook + order)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
+      new WithOpenOrderBook[T](orderBook - order)
+    }
+
+    def withQuotePolicy(policy: QuotePolicy[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook, policy)
+    }
+
+  }
+
+
+  final class WithQuotePolicy[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: QuotePolicy[T])
+    extends WithOrderBook[T] {
+
+    def receive(request: QuoteRequest): Option[Quote] = {
+      policy(orderBook, request)
+    }
+
+    def insert(order: LimitBidOrder[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook + order, policy)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook - order, policy)
+    }
+
+    def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
+      ???
+    }
   }
 
 }

@@ -21,46 +21,47 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
 /** Base trait for all quote policies. */
-sealed trait QuotePolicy[T <: Tradable] {
-  //this: DoubleAuction[T] =>   // really I just want to to be something that has an orderBook!
+sealed trait QuotePolicy[T <: Tradable] extends ((FourHeapOrderBook[T], QuoteRequest) => Option[Quote])
 
-  def receive: PartialFunction[QuoteRequest, Option[Quote]]
+class ClosedOrderBookPolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def orderBook: FourHeapOrderBook[T] // todo consider creating a mixin?
+  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
+    case _ => None
+  }
 
 }
 
 
-trait AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
+class AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
   }
 
 }
 
 
-trait BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
+class BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
   }
 
 }
 
 
-trait SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
+class SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
   }
 
 }
 
 
-trait BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
+class BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
-  def receive: PartialFunction[QuoteRequest, Option[Quote]] = {
+  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))

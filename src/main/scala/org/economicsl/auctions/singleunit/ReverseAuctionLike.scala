@@ -15,8 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Price, Tradable}
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.Tradable
 
 
 trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
@@ -26,7 +25,5 @@ trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
   def remove(order: LimitAskOrder[T]): A
 
   def clear: (Option[Stream[Fill[T]]], A)
-
-  protected def p: PricingRule[T, Price]
 
 }
