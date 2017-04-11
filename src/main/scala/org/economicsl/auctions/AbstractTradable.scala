@@ -16,10 +16,4 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Trait used to indicate that an object can be traded via an auction. */
-trait Tradable {
-
-  /** Minimum tick size. */
-  def tick: Currency
-
-}
+abstract class AbstractTradable(val tick: Currency) extends Tradable

@@ -13,13 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
+
+import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Trait used to indicate that an object can be traded via an auction. */
-trait Tradable {
+/** Mixin trait providing behaviors relevant for auctions. */
+trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
 
-  /** Minimum tick size. */
-  def tick: Currency
+  def insert(order: LimitBidOrder[T]): A
+
+  def remove(order: LimitBidOrder[T]): A
+
+  def clear: (Option[Stream[Fill[T]]], A)
+
+  protected def p: PricingRule[T, Price]
 
 }

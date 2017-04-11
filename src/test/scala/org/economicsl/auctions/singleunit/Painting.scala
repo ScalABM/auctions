@@ -13,13 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
+
+import org.economicsl.auctions.{Currency, Tradable}
 
 
-/** Trait used to indicate that an object can be traded via an auction. */
-trait Tradable {
+sealed trait Painting extends Tradable
 
-  /** Minimum tick size. */
-  def tick: Currency
-
-}
+case class Guernica(tick: Currency) extends Painting
