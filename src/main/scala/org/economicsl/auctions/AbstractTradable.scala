@@ -16,4 +16,4 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-abstract class AbstractTradable(val tick: Currency)
+abstract class AbstractTradable(val tick: Currency) extends Tradable
