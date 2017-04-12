@@ -15,73 +15,208 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
+import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
-class Auction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRule: PricingRule[T, Price])
-  extends AuctionLike[T, Auction[T]] {
-
-  def insert(order: LimitBidOrder[T]): Auction[T] = {
-    new Auction(orderBook + order, pricingRule)
-  }
-
-  def remove(order: LimitBidOrder[T]): Auction[T] = {
-    new Auction(orderBook - order, pricingRule)
-  }
-
-  def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
-    p(orderBook) match {
-      case Some(price) =>
-        val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
-        val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-        (Some(fills), new Auction(newOrderBook, pricingRule))
-      case None => (None, new Auction(orderBook, pricingRule))
-    }
-  }
-
-  protected val p: PricingRule[T, Price] = pricingRule
-
-}
+trait Auction[T <: Tradable] extends AuctionLike[T, Auction[T]]
 
 
-object Auction{
+object Auction {
 
-  def apply[T <: Tradable](reservation: LimitAskOrder[T], pricingRule: PricingRule[T, Price]): Auction[T] = {
+  /** Create an `Auction` with a particular reservation price and pricing rule.
+    *
+    * @param reservation
+    * @param rule
+    * @tparam T
+    * @return
+    */
+  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new Auction(orderBook + reservation, pricingRule)
+    new ClosedOrderBookImpl[T](orderBook + reservation, rule)
   }
 
+  /** Create an `Auction` with a particular reservation price, pricing rule, and quoting policy.
+    *
+    * @param reservation
+    * @param rule
+    * @tparam T
+    * @return
+    */
+  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): Auction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new OpenOrderBookImpl[T](orderBook + reservation, rule, policy)
+  }
+
+  /** Create a first-price, sealed-bid `Auction`.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
   def firstPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new Auction(orderBook + reservation, new AskQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook + reservation, new AskQuotePricingRule)
   }
 
+  /** Create a second-price, sealed-bid or Vickrey `Auction`.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
   def secondPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new Auction(orderBook + reservation, new BidQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook + reservation, new BidQuotePricingRule)
   }
 
-  def withReservationPrice[T <: Tradable](reservation: LimitAskOrder[T]): WithOrderBook[T] = {
+  /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
+  def withClosedOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithClosedOrderBook[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new WithOrderBook(orderBook + reservation)
+    new WithClosedOrderBook[T](orderBook + reservation)
   }
 
-  /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
-  class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
+  /** Create an `WithOrderBook` that encapsulates an order book containing a particular reservation price.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
+  def withOpenOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithOpenOrderBook[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithOpenOrderBook[T](orderBook + reservation)
+  }
 
-    def insert(order: LimitBidOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook + order)
+
+  sealed abstract class WithOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) {
+
+    def insert(order: LimitBidOrder[T]): WithOrderBook[T]
+
+    def remove(order: LimitBidOrder[T]): WithOrderBook[T]
+
+  }
+
+
+  final class WithClosedOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T](orderBook) {
+
+    def insert(order: LimitBidOrder[T]): WithClosedOrderBook[T] = {
+      new WithClosedOrderBook[T](orderBook + order)
     }
 
-    def remove(order: LimitBidOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook - order)
+    def remove(order: LimitBidOrder[T]): WithClosedOrderBook[T] = {
+      new WithClosedOrderBook[T](orderBook - order)
     }
 
-    def withPricingRule(pricingRule: PricingRule[T, Price]): Auction[T] = {
-      new Auction(orderBook, pricingRule)
+    def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
+      new ClosedOrderBookImpl[T](orderBook, rule)
     }
+
+  }
+
+
+  final class WithOpenOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T](orderBook) {
+
+    def insert(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
+      new WithOpenOrderBook[T](orderBook + order)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
+      new WithOpenOrderBook[T](orderBook - order)
+    }
+
+    def withQuotePolicy(policy: PriceQuotePolicy[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook, policy)
+    }
+
+  }
+
+
+  final class WithQuotePolicy[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: PriceQuotePolicy[T])
+    extends WithOrderBook[T](orderBook) {
+
+    def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
+      policy(orderBook, request)
+    }
+
+    def insert(order: LimitBidOrder[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook + order, policy)
+    }
+
+    def remove(order: LimitBidOrder[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook - order, policy)
+    }
+
+    def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
+      new OpenOrderBookImpl[T](orderBook, rule, policy)
+    }
+
+  }
+
+
+  private[this] class ClosedOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
+    extends Auction[T] {
+
+    def insert(order: LimitBidOrder[T]): Auction[T] = {
+      new ClosedOrderBookImpl(orderBook + order, pricingRule)
+    }
+
+    def remove(order: LimitBidOrder[T]): Auction[T] = {
+      new ClosedOrderBookImpl(orderBook - order, pricingRule)
+    }
+
+    def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
+      pricingRule(orderBook) match {
+        case Some(price) =>
+          val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
+          val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
+          (Some(fills), new ClosedOrderBookImpl(newOrderBook, pricingRule))
+        case None => (None, new ClosedOrderBookImpl(orderBook, pricingRule))
+      }
+    }
+
+    protected val orderBook: FourHeapOrderBook[T] = _orderBook
+
+    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+
+  }
+
+
+  private[this] class OpenOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], policy: PriceQuotePolicy[T])
+    extends Auction[T] {
+
+    def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
+      policy(orderBook, request)
+    }
+
+    def insert(order: LimitBidOrder[T]): Auction[T] = {
+      new OpenOrderBookImpl(orderBook + order, pricingRule, policy)
+    }
+
+    def remove(order: LimitBidOrder[T]): Auction[T] = {
+      new OpenOrderBookImpl(orderBook - order, pricingRule, policy)
+    }
+
+    def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
+      pricingRule(orderBook) match {
+        case Some(price) =>
+          val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
+          val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
+          (Some(fills), new OpenOrderBookImpl(newOrderBook, pricingRule, policy))
+        case None => (None, new OpenOrderBookImpl(orderBook, pricingRule, policy))
+      }
+    }
+
+    protected val orderBook: FourHeapOrderBook[T] = _orderBook
+
+    protected val pricingRule: PricingRule[T, Price] = _pricingRule
 
   }
 

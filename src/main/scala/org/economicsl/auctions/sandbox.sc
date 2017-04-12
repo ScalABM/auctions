@@ -1,9 +1,11 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.quotes.{AskPriceQuoteRequest, BidPriceQuoteRequest, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.DoubleAuction
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
+import org.economicsl.auctions.singleunit.quotes.BasicQuotePolicy
 
 
 /** Example `Tradable` object. */
@@ -74,7 +76,7 @@ val (pairedOrders, _) = orderBook5.takeAllMatched
 pairedOrders.toList
 
 // example usage of a double auction where we don't want to define the pricing rule until later...
-val withOrderBook = DoubleAuction.withOrderBook(FourHeapOrderBook.empty[GoogleStock])
+val withOrderBook = DoubleAuction.withClosedOrderBook(FourHeapOrderBook.empty[GoogleStock])
 val withOrderBook2 = withOrderBook.insert(order3)
 val withOrderBook3 = withOrderBook2.insert(order4)
 val withOrderBook4 = withOrderBook3.insert(order9)
@@ -90,14 +92,26 @@ val auction2 = withOrderBook5.withUniformPricing(askQuotePricing)
 val (result2, _) = auction2.clear
 result2.map(fills => fills.map(fill => fill.price).toList)
 
-
 // example usage of a double auction with discriminatory pricing...
-val auction6 = DoubleAuction.withDiscriminatoryPricing[GoogleStock](midPointPricing)
-val auction7 = auction6.insert(order3)
-val auction8 = auction7.insert(order4)
-val auction9 = auction8.insert(order9)
-val auction10 = auction9.insert(order8)
+val basicQuotePolicy = new BasicQuotePolicy[GoogleStock]
+val withQuotePolicy = DoubleAuction.withOpenOrderBook[GoogleStock]
+                                   .withQuotePolicy(basicQuotePolicy)
+val withQuotePolicy2 = withQuotePolicy.insert(order3)
+val withQuotePolicy3 = withQuotePolicy2.insert(order4)
+
+// suppose that a auction participant asked for aks and/or bid quotes...
+val askQuote = withQuotePolicy3.receive(AskPriceQuoteRequest)
+val bidQuote = withQuotePolicy3.receive(BidPriceQuoteRequest)
+
+val withQuotePolicy4 = withQuotePolicy3.insert(order9)
+
+// suppose that another auction participant asked for a spread quote...
+val spreadQuote = withQuotePolicy4.receive(SpreadQuoteRequest)
+
+val withQuotePolicy5 = withQuotePolicy4.insert(order8)
+val bidQuote2 = withQuotePolicy5.receive(BidPriceQuoteRequest)
 
 // clear
-val (result3, _) = auction10.clear
+val auction3 = withQuotePolicy5.withDiscriminatoryPricing(bidQuotePricing)
+val (result3, _) = auction3.clear
 result3.map(fills => fills.map(fill => fill.price).toList)

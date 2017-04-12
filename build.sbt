@@ -9,7 +9,9 @@ scalaVersion := "2.12.1"
 // Useful scala compiler options
 scalacOptions ++= Seq(
   "-feature",  // tells the compiler to provide information about misused language features
-  "-language:implicitConversions"  // eliminates the need to import implicit conversions for each usage
+  "-language:implicitConversions",  // eliminates the need to import implicit conversions for each usage
+  "-Ywarn-unused-import",
+  "-Ywarn-dead-code"
 )
 
 // Additional dependencies

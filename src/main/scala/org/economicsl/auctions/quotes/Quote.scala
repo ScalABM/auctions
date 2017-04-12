@@ -13,23 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.{Price, Tradable}
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.Price
 
 
-trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
+sealed trait Quote
 
-  def insert(order: LimitAskOrder[T]): A
+trait PriceQuote extends Quote {
 
-  def remove(order: LimitAskOrder[T]): A
-
-  def clear: (Option[Stream[Fill[T]]], A)
-
-  protected def orderBook: FourHeapOrderBook[T]
-
-  protected def pricingRule: PricingRule[T, Price]
+  def quote: Price
 
 }
+
+case class AskPriceQuote(quote: Price) extends PriceQuote
+
+case class BidPriceQuote(quote: Price) extends PriceQuote
+
+case class SpreadQuote(quote: Price) extends PriceQuote

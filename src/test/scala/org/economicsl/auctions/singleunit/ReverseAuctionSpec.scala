@@ -37,7 +37,7 @@ class ReverseAuctionSpec extends FlatSpec with Matchers {
     val highSeller = UUID.randomUUID()
     val highAskOrder = LimitAskOrder(highSeller, Price(200), energy)
 
-    val auction = ReverseAuction.withReservationPrice(reservationPrice)
+    val auction = ReverseAuction.withClosedOrderBook(reservationPrice)
     val withSellers = auction.insert(lowAskOrder).insert(highAskOrder)
 
     // remove an irrelevant bid order
