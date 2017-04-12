@@ -11,7 +11,9 @@ lazy val commonSettings = Seq(
   ),
   scalacOptions ++= Seq(
     "-feature",  // tells the compiler to provide information about misused language features
-    "-language:implicitConversions"  // eliminates the need to import implicit conversions for each usage
+    "-language:implicitConversions",  // eliminates the need to import implicit conversions for each usage
+    "-Ywarn-unused-import",
+    "-Ywarn-dead-code"
   ),
   compileOrder := CompileOrder.ScalaThenJava
 )

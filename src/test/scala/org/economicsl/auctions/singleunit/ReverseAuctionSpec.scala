@@ -26,7 +26,7 @@ class ReverseAuctionSpec extends FlatSpec with Matchers {
 
   "A ReverseAuction" should "clear matched orders" in {
 
-    val energy = new Electricity
+    val energy = Electricity(tick=10)
     val buyer = UUID.randomUUID()
     val reservationPrice = MarketBidOrder(buyer, energy)
 
@@ -37,7 +37,7 @@ class ReverseAuctionSpec extends FlatSpec with Matchers {
     val highSeller = UUID.randomUUID()
     val highAskOrder = LimitAskOrder(highSeller, Price(200), energy)
 
-    val auction = ReverseAuction(reservationPrice)
+    val auction = ReverseAuction.withClosedOrderBook(reservationPrice)
     val withSellers = auction.insert(lowAskOrder).insert(highAskOrder)
 
     // remove an irrelevant bid order
@@ -45,7 +45,7 @@ class ReverseAuctionSpec extends FlatSpec with Matchers {
 
     // clear!
     val lowestPriceWins = new BidQuotePricingRule[Electricity]
-    val (results, _) = withSingleSeller.clear(lowestPriceWins)
+    val (results, _) = withSingleSeller.withPricingRule(lowestPriceWins).clear
     results.map(fills => fills.map(fill => fill.price).toList) should be (Some(List(Price(150))))
 
   }

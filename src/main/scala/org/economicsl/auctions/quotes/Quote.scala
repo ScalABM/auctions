@@ -13,11 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.{Currency, Tradable}
+import org.economicsl.auctions.Price
 
 
-sealed trait Painting extends Tradable
+sealed trait Quote
 
-case class Guernica(tick: Currency) extends Painting
+trait PriceQuote extends Quote {
+
+  def quote: Price
+
+}
+
+case class AskPriceQuote(quote: Price) extends PriceQuote
+
+case class BidPriceQuote(quote: Price) extends PriceQuote
+
+case class SpreadQuote(quote: Price) extends PriceQuote
