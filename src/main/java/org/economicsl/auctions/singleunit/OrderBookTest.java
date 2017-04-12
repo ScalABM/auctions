@@ -31,7 +31,7 @@ public class OrderBookTest {
             LimitBidOrder$.MODULE$.<LimitBidOrder<Service>>ordering()
         );
 
-        Service service = new Service();
+        Service service = new Service(1);
 
         LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 5, service);
         LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5, service);

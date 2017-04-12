@@ -41,6 +41,10 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     case _ => None
   }
 
+  val spread: Option[Price] = {
+    bidPriceQuote.flatMap(p1 => askPriceQuote.map(p2 => Price(p2.value - p1.value)))
+  }
+
   def - (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     if (unMatchedOrders.contains(order)) {
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)

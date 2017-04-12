@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Currency, Tradable}
 
 
-class Electricity extends Tradable
+case class Electricity(tick: Currency) extends Tradable
