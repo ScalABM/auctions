@@ -37,7 +37,7 @@ class AuctionSpec extends FlatSpec with Matchers {
     val highBidder = UUID.randomUUID()
     val highBidOrder = LimitBidOrder(highBidder, Price(100), guernica)
 
-    val auction = Auction.withReservationPrice(reservationPrice)
+    val auction = Auction.withClosedOrderBook(reservationPrice)
     val withBidders = auction.insert(lowBidOrder).insert(highBidOrder)
 
     // remove an irrelevant bid order

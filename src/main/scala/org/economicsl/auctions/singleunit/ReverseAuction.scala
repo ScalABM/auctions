@@ -15,72 +15,170 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.quotes.{Quote, QuoteRequest}
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
+import org.economicsl.auctions.singleunit.quotes.QuotePolicy
 
 
-class ReverseAuction[T <: Tradable] private(orderBook: FourHeapOrderBook[T], pricingRule: PricingRule[T, Price])
-  extends ReverseAuctionLike[T, ReverseAuction[T]] {
-
-  def insert(order: LimitAskOrder[T]): ReverseAuction[T] = {
-    new ReverseAuction(orderBook + order, pricingRule)
-  }
-
-  def remove(order: LimitAskOrder[T]): ReverseAuction[T] = {
-    new ReverseAuction(orderBook - order, pricingRule)
-  }
-
-  def clear: (Option[Stream[Fill[T]]], ReverseAuction[T]) = {
-    p(orderBook) match {
-      case Some(price) =>
-        val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
-        val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-        (Some(fills), new ReverseAuction(newOrderBook, pricingRule))
-      case None => (None, new ReverseAuction(orderBook, pricingRule))
-    }
-  }
-
-  protected val p: PricingRule[T, Price] = pricingRule
-
-}
+trait ReverseAuction[T <: Tradable] extends ReverseAuctionLike[T, ReverseAuction[T]]
 
 
 object ReverseAuction {
 
-  def apply[T <: Tradable](initial: LimitBidOrder[T], pricingRule: PricingRule[T, Price]): ReverseAuction[T] = {
+  /** Create a `ReverseAuction` with a particular reservation price and pricing rule.
+    *
+    * @param reservation
+    * @param rule
+    * @tparam T
+    * @return
+    */
+  def apply[T <: Tradable](reservation: LimitBidOrder[T], rule: PricingRule[T, Price]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering.reverse)
-    new ReverseAuction[T](orderBook + initial, pricingRule)
+    new ClosedOrderBookImpl[T](orderBook + reservation, rule)
+  }
+
+  /** Create a `ReverseAuction` with a particular reservation price, pricing rule, and quoting policy.
+    *
+    * @param reservation
+    * @param rule
+    * @param policy
+    * @tparam T
+    * @return
+    */
+  def apply[T <: Tradable](reservation: LimitBidOrder[T], rule: PricingRule[T, Price], policy: QuotePolicy[T]): ReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new OpenOrderBookImpl[T](orderBook + reservation, rule, policy)
   }
 
   def firstPriceSealedBid[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering.reverse)
-    new ReverseAuction[T](orderBook + reservation, new AskQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook + reservation, new AskQuotePricingRule)
   }
 
   def secondPriceSealedBid[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering.reverse)
-    new ReverseAuction[T](orderBook + reservation, new BidQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook + reservation, new BidQuotePricingRule)
   }
 
-  def withReservationPrice[T <: Tradable](reservation: LimitBidOrder[T]): WithOrderBook[T] = {
+  /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    */
+  def withClosedOrderBook[T <: Tradable](reservation: LimitBidOrder[T]): WithClosedOrderBook[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new WithOrderBook(orderBook + reservation)
+    new WithClosedOrderBook[T](orderBook + reservation)
   }
 
-  /** Class that allows the user to create a `DoubleAuction` with a particular `orderBook` but leaving the pricing rule undefined. */
-  class WithOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) {
+  sealed abstract class WithOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) {
 
-    def insert(order: LimitAskOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook + order)
+    def insert(order: LimitAskOrder[T]): WithOrderBook[T]
+
+    def remove(order: LimitAskOrder[T]): WithOrderBook[T]
+
+  }
+
+
+  final class WithClosedOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T](orderBook) {
+
+    def insert(order: LimitAskOrder[T]): WithClosedOrderBook[T] = {
+      new WithClosedOrderBook[T](orderBook + order)
     }
 
-    def remove(order: LimitAskOrder[T]): WithOrderBook[T] = {
-      new WithOrderBook(orderBook - order)
+    def remove(order: LimitAskOrder[T]): WithClosedOrderBook[T] = {
+      new WithClosedOrderBook[T](orderBook - order)
     }
 
-    def withPricingRule(pricingRule: PricingRule[T, Price]): ReverseAuction[T] = {
-      new ReverseAuction(orderBook, pricingRule)
+    def withPricingRule(rule: PricingRule[T, Price]): ReverseAuction[T] = {
+      new ClosedOrderBookImpl[T](orderBook, rule)
+    }
+
+  }
+
+
+  final class WithOpenOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T](orderBook) {
+
+    def insert(order: LimitAskOrder[T]): WithOpenOrderBook[T] = {
+      new WithOpenOrderBook[T](orderBook + order)
+    }
+
+    def remove(order: LimitAskOrder[T]): WithOpenOrderBook[T] = {
+      new WithOpenOrderBook[T](orderBook - order)
+    }
+
+    def withQuotePolicy(policy: QuotePolicy[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook, policy)
+    }
+
+  }
+
+
+  final class WithQuotePolicy[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: QuotePolicy[T])
+    extends WithOrderBook[T](orderBook) {
+
+    def receive(request: QuoteRequest): Option[Quote] = {
+      policy(orderBook, request)
+    }
+
+    def insert(order: LimitAskOrder[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook + order, policy)
+    }
+
+    def remove(order: LimitAskOrder[T]): WithQuotePolicy[T] = {
+      new WithQuotePolicy[T](orderBook - order, policy)
+    }
+
+    def withPricingRule(rule: PricingRule[T, Price]): ReverseAuction[T] = {
+      new OpenOrderBookImpl[T](orderBook, rule, policy)
+    }
+  }
+
+  private[this] class ClosedOrderBookImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price])
+    extends ReverseAuction[T] {
+
+    def insert(order: LimitAskOrder[T]): ReverseAuction[T] = {
+      new ClosedOrderBookImpl(orderBook + order, rule)
+    }
+
+    def remove(order: LimitAskOrder[T]): ReverseAuction[T] = {
+      new ClosedOrderBookImpl(orderBook - order, rule)
+    }
+
+    def clear: (Option[Stream[Fill[T]]], ReverseAuction[T]) = {
+      rule(orderBook) match {
+        case Some(price) =>
+          val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
+          val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
+          (Some(fills), new ClosedOrderBookImpl(newOrderBook, rule))
+        case None => (None, new ClosedOrderBookImpl(orderBook, rule))
+      }
+    }
+
+  }
+
+
+  private[this] class OpenOrderBookImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price], policy: QuotePolicy[T])
+    extends ReverseAuction[T] {
+
+    def insert(order: LimitAskOrder[T]): ReverseAuction[T] = {
+      new OpenOrderBookImpl(orderBook + order, rule, policy)
+    }
+
+    def remove(order: LimitAskOrder[T]): ReverseAuction[T] = {
+      new OpenOrderBookImpl(orderBook - order, rule, policy)
+    }
+
+    def clear: (Option[Stream[Fill[T]]], ReverseAuction[T]) = {
+      rule(orderBook) match {
+        case Some(price) =>
+          val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
+          val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
+          (Some(fills), new OpenOrderBookImpl(newOrderBook, rule, policy))
+        case None => (None, new OpenOrderBookImpl(orderBook, rule, policy))
+      }
     }
 
   }

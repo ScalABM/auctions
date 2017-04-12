@@ -76,7 +76,7 @@ val (pairedOrders, _) = orderBook5.takeAllMatched
 pairedOrders.toList
 
 // example usage of a double auction where we don't want to define the pricing rule until later...
-val withOrderBook = DoubleAuction.withOrderBook(FourHeapOrderBook.empty[GoogleStock])
+val withOrderBook = DoubleAuction.withClosedOrderBook(FourHeapOrderBook.empty[GoogleStock])
 val withOrderBook2 = withOrderBook.insert(order3)
 val withOrderBook3 = withOrderBook2.insert(order4)
 val withOrderBook4 = withOrderBook3.insert(order9)
@@ -94,7 +94,7 @@ result2.map(fills => fills.map(fill => fill.price).toList)
 
 // example usage of a double auction with discriminatory pricing...
 val basicQuotePolicy = new BasicQuotePolicy[GoogleStock]
-val withQuotePolicy = DoubleAuction.withOrderBook(FourHeapOrderBook.empty[GoogleStock])
+val withQuotePolicy = DoubleAuction.withOpenOrderBook[GoogleStock]
                                    .withQuotePolicy(basicQuotePolicy)
 val withQuotePolicy2 = withQuotePolicy.insert(order3)
 val withQuotePolicy3 = withQuotePolicy2.insert(order4)
