@@ -28,6 +28,7 @@ class AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
+    case _ => None
   }
 
 }
@@ -37,6 +38,7 @@ class BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
+    case _ => None
   }
 
 }
@@ -46,6 +48,7 @@ class SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
+    case _ => None
   }
 
 }
@@ -57,6 +60,7 @@ class BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
     case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
     case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
     case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
+    case _ => None
   }
 
 }
