@@ -15,11 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.quotes.{Quote, QuoteRequest}
+import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
-import org.economicsl.auctions.singleunit.quotes.QuotePolicy
+import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
 trait ReverseAuction[T <: Tradable] extends ReverseAuctionLike[T, ReverseAuction[T]]
@@ -47,7 +47,7 @@ object ReverseAuction {
     * @tparam T
     * @return
     */
-  def apply[T <: Tradable](reservation: LimitBidOrder[T], rule: PricingRule[T, Price], policy: QuotePolicy[T]): ReverseAuction[T] = {
+  def apply[T <: Tradable](reservation: LimitBidOrder[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenOrderBookImpl[T](orderBook + reservation, rule, policy)
   }
@@ -109,17 +109,17 @@ object ReverseAuction {
       new WithOpenOrderBook[T](orderBook - order)
     }
 
-    def withQuotePolicy(policy: QuotePolicy[T]): WithQuotePolicy[T] = {
+    def withQuotePolicy(policy: PriceQuotePolicy[T]): WithQuotePolicy[T] = {
       new WithQuotePolicy[T](orderBook, policy)
     }
 
   }
 
 
-  final class WithQuotePolicy[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: QuotePolicy[T])
+  final class WithQuotePolicy[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: PriceQuotePolicy[T])
     extends WithOrderBook[T](orderBook) {
 
-    def receive(request: QuoteRequest): Option[Quote] = {
+    def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
       policy(orderBook, request)
     }
 
@@ -164,8 +164,12 @@ object ReverseAuction {
   }
 
 
-  private[this] class OpenOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], policy: QuotePolicy[T])
+  private[this] class OpenOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], policy: PriceQuotePolicy[T])
     extends ReverseAuction[T] {
+
+    def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
+      policy(orderBook, request)
+    }
 
     def insert(order: LimitAskOrder[T]): ReverseAuction[T] = {
       new OpenOrderBookImpl(orderBook + order, pricingRule, policy)
