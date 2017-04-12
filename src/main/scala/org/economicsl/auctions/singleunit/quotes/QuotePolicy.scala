@@ -21,45 +21,15 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
 /** Base trait for all quote policies. */
-sealed trait QuotePolicy[T <: Tradable] extends ((FourHeapOrderBook[T], QuoteRequest) => Option[Quote])
+sealed trait QuotePolicy[T <: Tradable, -R <: QuoteRequest, +Q <: Quote] extends ((FourHeapOrderBook[T], R) => Option[Q])
 
 
-class AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
+class PriceQuotePolicy[T <: Tradable] extends QuotePolicy[T, PriceQuoteRequest, PriceQuote] {
 
-  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
-    case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
-    case _ => None
-  }
-
-}
-
-
-class BidQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
-
-  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
-    case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
-    case _ => None
-  }
-
-}
-
-
-class SpreadQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
-
-  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
-    case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
-    case _ => None
-  }
-
-}
-
-
-class BasicQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
-
-  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
-    case AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
-    case BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
-    case SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
+  def apply(orderBook: FourHeapOrderBook[T], request: PriceQuoteRequest): Option[PriceQuote] = request match {
+    case _: AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
+    case _: BidPriceQuoteRequest => orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
+    case _: SpreadQuoteRequest => orderBook.spread.map(quote => SpreadQuote(quote))
     case _ => None
   }
 
