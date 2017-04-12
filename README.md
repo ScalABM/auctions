@@ -19,6 +19,8 @@ The design and imlementation of the API is heavily influences by functional prog
 2. ...maintain a thread-safe API in order to maximally exploit concurrency and parallelism where appropriate;
 3. ...make illegal program states unrepresentable (i.e., programs that would lead to invalid states should not compile!).
 
+...perhaps more succinctly, we want to push as much of the domain modeling into the type system as possible so that we can leverage to compiler to identify modeling errors at compile time (rather than forcing the user to catch modeling errors during/after runtime).
+
 ## Motivating use cases
 Design and simulation of electricity auctions (particularly peer-to-peer auctions); market simulation models for "Economy of Things" applications. 
 
