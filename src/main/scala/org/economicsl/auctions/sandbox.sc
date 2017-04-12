@@ -109,6 +109,7 @@ val withQuotePolicy4 = withQuotePolicy3.insert(order9)
 val spreadQuote = withQuotePolicy4.receive(SpreadQuoteRequest)
 
 val withQuotePolicy5 = withQuotePolicy4.insert(order8)
+val bidQuote2 = withQuotePolicy5.receive(BidPriceQuoteRequest)
 
 // clear
 val auction3 = withQuotePolicy5.withDiscriminatoryPricing(bidQuotePricing)

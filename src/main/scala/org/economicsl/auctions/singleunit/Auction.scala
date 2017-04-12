@@ -161,50 +161,58 @@ object Auction {
   }
 
 
-  private[this] class ClosedOrderBookImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price])
+  private[this] class ClosedOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
     extends Auction[T] {
 
     def insert(order: LimitBidOrder[T]): Auction[T] = {
-      new ClosedOrderBookImpl(orderBook + order, rule)
+      new ClosedOrderBookImpl(orderBook + order, pricingRule)
     }
 
     def remove(order: LimitBidOrder[T]): Auction[T] = {
-      new ClosedOrderBookImpl(orderBook - order, rule)
+      new ClosedOrderBookImpl(orderBook - order, pricingRule)
     }
 
     def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
-      rule(orderBook) match {
+      pricingRule(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new ClosedOrderBookImpl(newOrderBook, rule))
-        case None => (None, new ClosedOrderBookImpl(orderBook, rule))
+          (Some(fills), new ClosedOrderBookImpl(newOrderBook, pricingRule))
+        case None => (None, new ClosedOrderBookImpl(orderBook, pricingRule))
       }
     }
+
+    protected val orderBook: FourHeapOrderBook[T] = _orderBook
+
+    protected val pricingRule: PricingRule[T, Price] = _pricingRule
 
   }
 
 
-  private[this] class OpenOrderBookImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price], policy: QuotePolicy[T])
+  private[this] class OpenOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], policy: QuotePolicy[T])
     extends Auction[T] {
 
     def insert(order: LimitBidOrder[T]): Auction[T] = {
-      new OpenOrderBookImpl(orderBook + order, rule, policy)
+      new OpenOrderBookImpl(orderBook + order, pricingRule, policy)
     }
 
     def remove(order: LimitBidOrder[T]): Auction[T] = {
-      new OpenOrderBookImpl(orderBook - order, rule, policy)
+      new OpenOrderBookImpl(orderBook - order, pricingRule, policy)
     }
 
     def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
-      rule(orderBook) match {
+      pricingRule(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new OpenOrderBookImpl(newOrderBook, rule, policy))
-        case None => (None, new OpenOrderBookImpl(orderBook, rule, policy))
+          (Some(fills), new OpenOrderBookImpl(newOrderBook, pricingRule, policy))
+        case None => (None, new OpenOrderBookImpl(orderBook, pricingRule, policy))
       }
     }
+
+    protected val orderBook: FourHeapOrderBook[T] = _orderBook
+
+    protected val pricingRule: PricingRule[T, Price] = _pricingRule
 
   }
 

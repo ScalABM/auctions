@@ -24,15 +24,6 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 sealed trait QuotePolicy[T <: Tradable] extends ((FourHeapOrderBook[T], QuoteRequest) => Option[Quote])
 
 
-class ClosedOrderBookPolicy[T <: Tradable] extends QuotePolicy[T] {
-
-  def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
-    case _ => None
-  }
-
-}
-
-
 class AskQuotePolicy[T <: Tradable] extends QuotePolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: QuoteRequest): Option[Quote] = request match {
