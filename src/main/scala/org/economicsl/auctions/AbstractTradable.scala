@@ -13,20 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
-
-import org.economicsl.auctions.{Price, Tradable}
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+package org.economicsl.auctions
 
 
-trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
-
-  def insert(order: LimitAskOrder[T]): A
-
-  def remove(order: LimitAskOrder[T]): A
-
-  def clear: (Option[Stream[Fill[T]]], A)
-
-  protected def p: PricingRule[T, Price]
-
-}
+abstract class AbstractTradable(val tick: Currency) extends Tradable
