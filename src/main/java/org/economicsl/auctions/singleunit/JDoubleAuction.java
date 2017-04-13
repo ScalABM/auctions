@@ -17,7 +17,9 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.Price;
 import org.economicsl.auctions.Tradable;
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.PricingRule;
+import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
@@ -30,7 +32,6 @@ import java.util.Optional;
 class JDoubleAuction<T extends Tradable> {
 
     private DoubleAuction<T> auction = null;
-
 
     public class ClearResult<T extends Tradable> {
         private JDoubleAuction<T> auction;
@@ -88,7 +89,52 @@ class JDoubleAuction<T extends Tradable> {
         return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withUniformPricing(p));
     }
 
+    /*public static <T extends Tradable> JDoubleAuction<T> withUniformPricing(FourHeapOrderBook<T> o, PricingRule<T, Price> p) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withUniformPricing(o,p));
+    }
+
+    public static <T extends Tradable> JDoubleAuction<T> withUniformPricing(FourHeapOrderBook<T> o, PricingRule<T, Price> p, PriceQuotePolicy<T> q) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withUniformPricing(o,p,q));
+    }*/
+
     public static <T extends Tradable> JDoubleAuction<T> withDiscriminatoryPricing(PricingRule<T, Price> p) {
         return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withDiscriminatoryPricing(p));
     }
+
+    /*public static <T extends Tradable> JDoubleAuction<T> withDiscriminatoryPricing(FourHeapOrderBook<T> o, PricingRule<T, Price> p) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withDiscriminatoryPricing(o,p));
+    }
+
+    public static <T extends Tradable> JDoubleAuction<T> withDiscriminatoryPricing(FourHeapOrderBook<T> o, PricingRule<T, Price> p, PriceQuotePolicy<T> q) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withDiscriminatoryPricing(o,p,q));
+    }
+
+    public static <T extends Tradable> JDoubleAuction<T> withClosedOrderBook(LimitAskOrder<T> r) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withClosedOrderBook(r));
+    }
+
+    public static <T extends Tradable> JDoubleAuction<T> withOpenOrderBook(LimitAskOrder<T> r) {
+        return new JDoubleAuction<T>(DoubleAuction$.MODULE$.withOpenOrderBook(r));
+    }*/
+
+    /*private class JUniformPriceImpl<T extends Tradable> extends JDoubleAuction<T> {
+
+        DoubleAuction$.MODULE$.UniformPricing<T> auction = null;
+
+        public JUniformPriceImpl(DoubleAuction$.MODULE$.UniformPriceImpl<T> _auction) {
+            auction = _auction;
+        }
+
+    }
+
+    private class JDiscriminatoryPriceImpl<T extends Tradable> extends JDoubleAuction<T> {
+
+        DoubleAuction$class.
+        DoubleAuction$.MODULE$.DiscriminatoryPricing<T> auction = null;
+
+        public JDiscriminatoryPriceImpl(DoubleAuction$.MODULE$.DiscriminatoryPricing<T> _auction) {
+            auction = _auction;
+        }
+
+    }*/
 }
