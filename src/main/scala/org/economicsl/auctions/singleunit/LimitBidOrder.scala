@@ -25,7 +25,7 @@ trait LimitBidOrder[+T <: Tradable] extends BidOrder[T] with SingleUnit[T]
 
 object LimitBidOrder {
 
-  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O].reverse
+  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitBidOrder[T] = {
     SingleUnitImpl(issuer, limit, tradable)

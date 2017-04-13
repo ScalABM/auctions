@@ -35,7 +35,7 @@ object Auction {
     * @return
     */
   def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price]): Auction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
     new ClosedOrderBookImpl[T](orderBook + reservation, rule)
   }
 
@@ -47,7 +47,7 @@ object Auction {
     * @return
     */
   def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): Auction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
     new OpenOrderBookImpl[T](orderBook + reservation, rule, policy)
   }
 
@@ -58,7 +58,7 @@ object Auction {
     * @return
     */
   def firstPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
     new ClosedOrderBookImpl[T](orderBook + reservation, new AskQuotePricingRule)
   }
 
@@ -69,7 +69,7 @@ object Auction {
     * @return
     */
   def secondPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
     new ClosedOrderBookImpl[T](orderBook + reservation, new BidQuotePricingRule)
   }
 
@@ -80,7 +80,7 @@ object Auction {
     * @return
     */
   def withClosedOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithClosedOrderBook[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
     new WithClosedOrderBook[T](orderBook + reservation)
   }
 
@@ -91,7 +91,7 @@ object Auction {
     * @return
     */
   def withOpenOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithOpenOrderBook[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
     new WithOpenOrderBook[T](orderBook + reservation)
   }
 

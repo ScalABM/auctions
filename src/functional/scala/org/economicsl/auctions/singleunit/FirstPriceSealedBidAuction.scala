@@ -35,7 +35,7 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
 
     // winner should be the bidder that submitted the highest bid
     val (results, _) = insert(bids, fpsba).clear
-    results.map(fills => fills.map(fill => fill.bidOrder)) should be (Some(Stream(bids.min)))  // this is weird want to write bids.max
+    results.map(fills => fills.map(fill => fill.bidOrder)) should be (Some(Stream(bids.max)))
 
   }
 
