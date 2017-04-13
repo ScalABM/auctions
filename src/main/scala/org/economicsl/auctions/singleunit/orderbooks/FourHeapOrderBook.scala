@@ -140,8 +140,8 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 object FourHeapOrderBook {
 
   def empty[T <: Tradable](implicit askOrdering: Ordering[LimitAskOrder[T]], bidOrdering: Ordering[LimitBidOrder[T]]): FourHeapOrderBook[T] = {
-    val matchedOrders = MatchedOrders.empty(askOrdering.reverse, bidOrdering.reverse)
-    val unMatchedOrders = UnMatchedOrders.empty(askOrdering, bidOrdering)
+    val matchedOrders = MatchedOrders.empty(askOrdering.reverse, bidOrdering)
+    val unMatchedOrders = UnMatchedOrders.empty(askOrdering, bidOrdering.reverse)
     new FourHeapOrderBook(matchedOrders, unMatchedOrders)
   }
 
