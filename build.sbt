@@ -17,7 +17,8 @@ scalacOptions ++= Seq(
 // Additional dependencies
 libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % "3.0.1",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
+  "org.typelevel"  %% "squants"  % "1.2.0"
 )
 
 // In our project Java depends on Scala, but not the other way round!
