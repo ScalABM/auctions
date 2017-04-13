@@ -17,22 +17,19 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{AskOrder, Price, Tradable}
+import org.economicsl.auctions.{Price, Tradable}
 
 
-trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SingleUnit[T]
+class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends LimitAskOrderLike[T]
 
 
 object LimitAskOrder {
 
   implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
 
-
   def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {
-    SingleUnitImpl(issuer, limit, tradable)
+    new LimitAskOrder(issuer, limit, tradable)
   }
-
-  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T) extends LimitAskOrder[T]
 
 }
 

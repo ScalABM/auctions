@@ -39,8 +39,8 @@ public class Sandbox {
         org.economicsl.auctions.multiunit.MarketAskOrder<GoogleStock> order2 = org.economicsl.auctions.multiunit.MarketAskOrder$.MODULE$.apply(issuer, 100, google);
 
         // Create some single-unit limit ask orders...
-        LimitAskOrder<GoogleStock> order3 = LimitAskOrder$.MODULE$.apply(issuer, 5, google);
-        LimitAskOrder<GoogleStock> order4 = LimitAskOrder$.MODULE$.apply(issuer, 6, google);
+        LimitAskOrder<GoogleStock> order3 = new LimitAskOrder<>(issuer, 5, google);
+        LimitAskOrder<GoogleStock> order4 = new LimitAskOrder<>(issuer, 6, google);
 
         // Create a multi-unit limit bid order...
         org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order5 = org.economicsl.auctions.multiunit.LimitBidOrder$.MODULE$.apply(issuer, 10, 100, google);

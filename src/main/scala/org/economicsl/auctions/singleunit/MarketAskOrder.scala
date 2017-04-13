@@ -20,10 +20,14 @@ import java.util.UUID
 import org.economicsl.auctions.{Price, Tradable}
 
 
-case class MarketAskOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitAskOrder[T] {
+class MarketAskOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitAskOrder[T](issuer, Price.MinValue, tradable)
 
-  /** An issuer of a `MarketAskOrder` is willing to sell at any strictly positive price. */
-  val limit: Price = Price.MinValue
+
+object MarketAskOrder {
+
+  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketAskOrder[T] = {
+    new MarketAskOrder(issuer, tradable)
+  }
 
 }
 

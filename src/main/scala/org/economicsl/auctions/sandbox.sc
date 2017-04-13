@@ -1,11 +1,9 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.quotes.{AskPriceQuoteRequest, BidPriceQuoteRequest, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.DoubleAuction
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
-import org.economicsl.auctions.singleunit.quotes.BasicQuotePolicy
 
 
 /** Example `Tradable` object. */
