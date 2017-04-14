@@ -36,8 +36,8 @@ public class OrderBookTest {
         LimitBidOrder<Service> bid1 = LimitBidOrder$.MODULE$.apply(UUID.randomUUID(), 5, service);
         LimitAskOrder<Service> ask1 = LimitAskOrder$.MODULE$.apply(UUID.randomUUID(), 5, service);
 
-        orderbook = orderbook.$plus(bid1);
-        orderbook = orderbook.$plus(ask1);
+        orderbook = orderbook.insert(bid1);
+        orderbook = orderbook.insert(ask1);
 
         Tuple2<Stream<Tuple2<LimitAskOrder<Service>, LimitBidOrder<Service>>>, FourHeapOrderBook<Service>> tuple = orderbook.takeAllMatched();
         List<Tuple2<LimitAskOrder<Service>, LimitBidOrder<Service>>> matchedOrders = JavaConverters.seqAsJavaList(tuple._1());

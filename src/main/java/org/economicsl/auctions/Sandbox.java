@@ -61,10 +61,10 @@ public class Sandbox {
                 LimitAskOrder$.MODULE$.ordering(),
                 LimitBidOrder$.MODULE$.ordering());
 
-        FourHeapOrderBook<GoogleStock> orderBook2 = orderBook1.$plus(order3);
-        FourHeapOrderBook<GoogleStock> orderBook3 = orderBook2.$plus(order4);
-        FourHeapOrderBook<GoogleStock> orderBook4 = orderBook3.$plus(order9);
-        FourHeapOrderBook<GoogleStock> orderBook5 = orderBook4.$plus(order8);
+        FourHeapOrderBook<GoogleStock> orderBook2 = orderBook1.insert(order3);
+        FourHeapOrderBook<GoogleStock> orderBook3 = orderBook2.insert(order4);
+        FourHeapOrderBook<GoogleStock> orderBook4 = orderBook3.insert(order9);
+        FourHeapOrderBook<GoogleStock> orderBook5 = orderBook4.insert(order8);
 
         // example of a uniform price auction that would be incentive compatible for the sellers...
         AskQuotePricingRule<GoogleStock> askQuotePricing = new AskQuotePricingRule<>();
@@ -81,7 +81,7 @@ public class Sandbox {
         }
 
         // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-        MidPointPricingRule midPointPricing = new MidPointPricingRule<GoogleStock>();
+        MidPointPricingRule<GoogleStock> midPointPricing = new MidPointPricingRule<GoogleStock>();
         Option<Price> midPrice = midPointPricing.apply(orderBook5);
         if(midPrice.isDefined()) {
             System.out.println(midPrice.get().value());
