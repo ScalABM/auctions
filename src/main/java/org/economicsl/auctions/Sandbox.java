@@ -33,28 +33,28 @@ public class Sandbox {
         UUID issuer = UUID.randomUUID();
         GoogleStock google = new GoogleStock(1);
 
-        org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order1 = org.economicsl.auctions.multiunit.LimitBidOrder$.MODULE$.apply(issuer, 10, 100, google);
+        org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order1 = new org.economicsl.auctions.multiunit.LimitBidOrder<>(issuer, 10, 100, google);
 
         // Create a multi-unit market ask order
-        org.economicsl.auctions.multiunit.MarketAskOrder<GoogleStock> order2 = org.economicsl.auctions.multiunit.MarketAskOrder$.MODULE$.apply(issuer, 100, google);
+        org.economicsl.auctions.multiunit.MarketAskOrder<GoogleStock> order2 = new org.economicsl.auctions.multiunit.MarketAskOrder<>(issuer, 100, google);
 
         // Create some single-unit limit ask orders...
         LimitAskOrder<GoogleStock> order3 = new LimitAskOrder<>(issuer, 5, google);
         LimitAskOrder<GoogleStock> order4 = new LimitAskOrder<>(issuer, 6, google);
 
         // Create a multi-unit limit bid order...
-        org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order5 = org.economicsl.auctions.multiunit.LimitBidOrder$.MODULE$.apply(issuer, 10, 100, google);
+        org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order5 = new org.economicsl.auctions.multiunit.LimitBidOrder<>(issuer, 10, 100, google);
 
         // Create a multi-unit market bid order...
-        org.economicsl.auctions.multiunit.MarketBidOrder<GoogleStock> order7 = org.economicsl.auctions.multiunit.MarketBidOrder$.MODULE$.apply(issuer, 100, google);
+        org.economicsl.auctions.multiunit.MarketBidOrder<GoogleStock> order7 = new org.economicsl.auctions.multiunit.MarketBidOrder<>(issuer, 100, google);
 
         // Create some single-unit limit bid orders...
-        LimitBidOrder<GoogleStock> order8 = LimitBidOrder$.MODULE$.apply(issuer, 10, google);
-        LimitBidOrder<GoogleStock> order9 = LimitBidOrder$.MODULE$.apply(issuer, 6, google);
+        LimitBidOrder<GoogleStock> order8 = new LimitBidOrder<>(issuer, 10, google);
+        LimitBidOrder<GoogleStock> order9 = new LimitBidOrder<>(issuer, 6, google);
 
         // Create an order for some other tradable
         AppleStock apple = new AppleStock(2);
-        LimitBidOrder<AppleStock> order10 = LimitBidOrder$.MODULE$.apply(issuer, 10, apple);
+        LimitBidOrder<AppleStock> order10 = new LimitBidOrder<>(issuer, 10, apple);
 
         // Create a four-heap order book and add some orders...
         FourHeapOrderBook<GoogleStock> orderBook1 = FourHeapOrderBook.empty(
