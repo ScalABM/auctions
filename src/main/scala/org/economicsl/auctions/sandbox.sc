@@ -1,9 +1,11 @@
 import java.util.UUID
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.quotes.{AskPriceQuoteRequest, BidPriceQuoteRequest, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.DoubleAuction
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
+import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
 /** Example `Tradable` object. */
@@ -91,23 +93,23 @@ val (result2, _) = auction2.clear
 result2.map(fills => fills.map(fill => fill.price).toList)
 
 // example usage of a double auction with discriminatory pricing...
-val basicQuotePolicy = new BasicQuotePolicy[GoogleStock]
+val basicQuotePolicy = new PriceQuotePolicy[GoogleStock]
 val withQuotePolicy = DoubleAuction.withOpenOrderBook[GoogleStock]
                                    .withQuotePolicy(basicQuotePolicy)
 val withQuotePolicy2 = withQuotePolicy.insert(order3)
 val withQuotePolicy3 = withQuotePolicy2.insert(order4)
 
 // suppose that a auction participant asked for aks and/or bid quotes...
-val askQuote = withQuotePolicy3.receive(AskPriceQuoteRequest)
-val bidQuote = withQuotePolicy3.receive(BidPriceQuoteRequest)
+val askQuote = withQuotePolicy3.receive(new AskPriceQuoteRequest)
+val bidQuote = withQuotePolicy3.receive(new BidPriceQuoteRequest)
 
 val withQuotePolicy4 = withQuotePolicy3.insert(order9)
 
 // suppose that another auction participant asked for a spread quote...
-val spreadQuote = withQuotePolicy4.receive(SpreadQuoteRequest)
+val spreadQuote = withQuotePolicy4.receive(new SpreadQuoteRequest)
 
 val withQuotePolicy5 = withQuotePolicy4.insert(order8)
-val bidQuote2 = withQuotePolicy5.receive(BidPriceQuoteRequest)
+val bidQuote2 = withQuotePolicy5.receive(new BidPriceQuoteRequest)
 
 // clear
 val auction3 = withQuotePolicy5.withDiscriminatoryPricing(bidQuotePricing)

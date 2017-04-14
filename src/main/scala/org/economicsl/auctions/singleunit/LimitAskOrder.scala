@@ -17,10 +17,11 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.{AskOrder, Price, Tradable}
 
 
-class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends LimitAskOrderLike[T]
+/** An order to sell a single-unit of a tradable at a price greater than or equal to the limit price. */
+class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends AskOrder[T] with SingleUnit[T]
 
 
 object LimitAskOrder {
