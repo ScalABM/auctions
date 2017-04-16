@@ -8,9 +8,9 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
-class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
+class SecondPriceSealedBidAuction extends FlatSpec with Matchers {
 
-  "A First-Price, Sealed-Bid Auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price" in {
+  "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price" in {
 
     case class ParkingSpace(tick: Currency) extends Tradable
 
@@ -18,8 +18,9 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
     val seller = UUID.randomUUID()
     val parkingSpace = ParkingSpace(tick = 1)
 
+    // seller is willing to sell at any positive price
     val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-    val fpsba = Auction.firstPriceSealedBid(reservationPrice)
+    val spsba = Auction.secondPriceSealedBid(reservationPrice)
 
     // suppose that there are lots of bidders
     val prng = new Random(42)
@@ -34,8 +35,16 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
     }
 
     // winner should be the bidder that submitted the highest bid
-    val (results, _) = insert(bids, fpsba).clear
-    results.map(fills => fills.map(fill => fill.bidOrder)) should be (Some(Stream(bids.max)))
+    val auction = insert(bids, spsba)
+    val (results, _) = auction.clear
+    val winningBids = results.map(fills => fills.map(fill => fill.bidOrder))
+    val winningPrice = results.map(fills => fills.map(fill => fill.price))
+    winningBids should be (Some(Stream(bids.max)))
+
+    // winning price should be the price of the second highest bid
+    val auction2 = auction.remove(bids.max)
+    val (results2, _) = auction2.clear
+    results2.map(fills => fills.map(fill => fill.bidOrder.limit)) should be (winningPrice)
 
   }
 

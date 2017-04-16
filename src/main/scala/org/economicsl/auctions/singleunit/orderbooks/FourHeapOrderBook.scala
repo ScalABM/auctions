@@ -50,7 +50,11 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
     } else {
       val bidOrder = matchedOrders.bidOrders.head
-      new FourHeapOrderBook(matchedOrders - (order, bidOrder), unMatchedOrders + bidOrder)
+      unMatchedOrders.askOrders.headOption match {
+        case Some(askOrder) if askOrder.limit <= bidOrder.limit =>  // askOrder was rationed!
+          new FourHeapOrderBook(matchedOrders.replace(order, askOrder), unMatchedOrders - askOrder)
+        case _ => new FourHeapOrderBook(matchedOrders - (order, bidOrder), unMatchedOrders + bidOrder)
+      }
     }
   }
 
@@ -59,7 +63,11 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
     } else {
       val askOrder = matchedOrders.askOrders.head
-      new FourHeapOrderBook(matchedOrders - (askOrder, order), unMatchedOrders + askOrder)
+      unMatchedOrders.bidOrders.headOption match {
+        case Some(bidOrder) if bidOrder.limit >= askOrder.limit =>  // bidOrder was rationed!
+          new FourHeapOrderBook(matchedOrders.replace(order, bidOrder), unMatchedOrders - bidOrder)
+        case _ => new FourHeapOrderBook(matchedOrders - (askOrder, order), unMatchedOrders + askOrder)
+      }
     }
   }
 

@@ -18,7 +18,7 @@ class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers {
     val seller = UUID.randomUUID()
     val parkingSpace = ParkingSpace(tick = 1)
 
-    val reservationPrice = MarketBidOrder(seller, parkingSpace)
+    val reservationPrice = LimitBidOrder(seller, Price.MaxValue, parkingSpace)
     val fpsara = ReverseAuction.firstPriceSealedAsk(reservationPrice)
 
     // suppose that there are lots of bidders
