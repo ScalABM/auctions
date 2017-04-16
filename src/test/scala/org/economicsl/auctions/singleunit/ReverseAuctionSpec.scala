@@ -28,7 +28,7 @@ class ReverseAuctionSpec extends FlatSpec with Matchers {
 
     val energy = Electricity(tick=10)
     val buyer = UUID.randomUUID()
-    val reservationPrice = MarketBidOrder(buyer, energy)
+    val reservationPrice = LimitBidOrder(buyer, Price(250), energy)
 
     // add a couple of bidders...
     val lowSeller = UUID.randomUUID()

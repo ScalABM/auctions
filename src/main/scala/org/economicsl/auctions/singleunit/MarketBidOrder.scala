@@ -17,12 +17,21 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.{BidOrder, Price, Tradable}
 
 
-case class MarketBidOrder[+T <: Tradable](issuer: UUID, tradable: T) extends LimitBidOrder[T] {
+/** An order to buy a single-unit of a tradable at any positive price. */
+class MarketBidOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends BidOrder[T] with SingleUnit[T] {
 
-  /** An issuer of a `MarketBidOrder` is willing to pay any finite price. */
   val limit: Price = Price.MaxValue
+
+}
+
+
+object MarketBidOrder {
+
+  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketBidOrder[T] = {
+    new MarketBidOrder[T](issuer, tradable)
+  }
 
 }

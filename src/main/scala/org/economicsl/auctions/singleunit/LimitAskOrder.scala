@@ -20,19 +20,17 @@ import java.util.UUID
 import org.economicsl.auctions.{AskOrder, Price, Tradable}
 
 
-trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SingleUnit[T]
+/** An order to sell a single-unit of a tradable at a price greater than or equal to the limit price. */
+class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends AskOrder[T] with SingleUnit[T]
 
 
 object LimitAskOrder {
 
   implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
 
-
   def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {
-    SingleUnitImpl(issuer, limit, tradable)
+    new LimitAskOrder(issuer, limit, tradable)
   }
-
-  private[this] case class SingleUnitImpl[+T <: Tradable](issuer: UUID, limit: Price, tradable: T) extends LimitAskOrder[T]
 
 }
 
