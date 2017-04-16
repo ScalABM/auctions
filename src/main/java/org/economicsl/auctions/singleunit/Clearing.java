@@ -16,8 +16,6 @@
 package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.DoubleAuction;
-import org.economicsl.auctions.singleunit.Fill;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;

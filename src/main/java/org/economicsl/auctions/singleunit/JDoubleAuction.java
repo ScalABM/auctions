@@ -17,14 +17,11 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.Price;
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.PricingRule;
-import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 import scala.collection.immutable.Stream;
-import scala.math.Ordering;
 
 import java.util.List;
 import java.util.Optional;
