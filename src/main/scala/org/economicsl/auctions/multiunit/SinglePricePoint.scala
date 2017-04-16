@@ -36,7 +36,7 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
 
   /** The total value of the order */
-  val value: Currency = limit.value * quantity.value
+  val value: Currency = limit.value * quantity.value // todo sort out units!
 
   require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
 

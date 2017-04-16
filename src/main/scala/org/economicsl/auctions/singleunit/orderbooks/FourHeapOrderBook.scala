@@ -45,7 +45,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     bidPriceQuote.flatMap(p1 => askPriceQuote.map(p2 => Price(p2.value - p1.value)))
   }
 
-  def - (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
+  def remove(order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     if (unMatchedOrders.contains(order)) {
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
     } else {
@@ -54,7 +54,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  def - (order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
+  def remove(order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
     if (unMatchedOrders.contains(order)) {
       new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
     } else {
@@ -63,7 +63,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  def + (order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
+  def insert(order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
       case (Some(askOrder), Some(bidOrder)) =>
         if (order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit) {
@@ -90,7 +90,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  def + (order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
+  def insert(order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
       case (Some(bidOrder), Some(askOrder)) =>
         if (order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit) {

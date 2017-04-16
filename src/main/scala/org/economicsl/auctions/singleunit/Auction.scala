@@ -36,7 +36,7 @@ object Auction {
     */
   def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook + reservation, rule)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), rule)
   }
 
   /** Create an `Auction` with a particular reservation price, pricing rule, and quoting policy.
@@ -48,7 +48,7 @@ object Auction {
     */
   def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new OpenOrderBookImpl[T](orderBook + reservation, rule, policy)
+    new OpenOrderBookImpl[T](orderBook.insert(reservation), rule, policy)
   }
 
   /** Create a first-price, sealed-bid `Auction`.
@@ -59,7 +59,7 @@ object Auction {
     */
   def firstPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook + reservation, new AskQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new AskQuotePricingRule)
   }
 
   /** Create a second-price, sealed-bid or Vickrey `Auction`.
@@ -70,7 +70,7 @@ object Auction {
     */
   def secondPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook + reservation, new BidQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new BidQuotePricingRule)
   }
 
   /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
@@ -81,7 +81,7 @@ object Auction {
     */
   def withClosedOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithClosedOrderBook[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new WithClosedOrderBook[T](orderBook + reservation)
+    new WithClosedOrderBook[T](orderBook.insert(reservation))
   }
 
   /** Create an `WithOrderBook` that encapsulates an order book containing a particular reservation price.
@@ -92,7 +92,7 @@ object Auction {
     */
   def withOpenOrderBook[T <: Tradable](reservation: LimitAskOrder[T]): WithOpenOrderBook[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new WithOpenOrderBook[T](orderBook + reservation)
+    new WithOpenOrderBook[T](orderBook.insert(reservation))
   }
 
 
@@ -108,11 +108,11 @@ object Auction {
   final class WithClosedOrderBook[T <: Tradable] (orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T](orderBook) {
 
     def insert(order: LimitBidOrder[T]): WithClosedOrderBook[T] = {
-      new WithClosedOrderBook[T](orderBook + order)
+      new WithClosedOrderBook[T](orderBook insert order)
     }
 
     def remove(order: LimitBidOrder[T]): WithClosedOrderBook[T] = {
-      new WithClosedOrderBook[T](orderBook - order)
+      new WithClosedOrderBook[T](orderBook remove order)
     }
 
     def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
@@ -125,11 +125,11 @@ object Auction {
   final class WithOpenOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) extends WithOrderBook[T](orderBook) {
 
     def insert(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
-      new WithOpenOrderBook[T](orderBook + order)
+      new WithOpenOrderBook[T](orderBook insert order)
     }
 
     def remove(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
-      new WithOpenOrderBook[T](orderBook - order)
+      new WithOpenOrderBook[T](orderBook remove order)
     }
 
     def withQuotePolicy(policy: PriceQuotePolicy[T]): WithQuotePolicy[T] = {
@@ -147,11 +147,11 @@ object Auction {
     }
 
     def insert(order: LimitBidOrder[T]): WithQuotePolicy[T] = {
-      new WithQuotePolicy[T](orderBook + order, policy)
+      new WithQuotePolicy[T](orderBook insert order, policy)
     }
 
     def remove(order: LimitBidOrder[T]): WithQuotePolicy[T] = {
-      new WithQuotePolicy[T](orderBook - order, policy)
+      new WithQuotePolicy[T](orderBook remove order, policy)
     }
 
     def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
@@ -165,11 +165,11 @@ object Auction {
     extends Auction[T] {
 
     def insert(order: LimitBidOrder[T]): Auction[T] = {
-      new ClosedOrderBookImpl(orderBook + order, pricingRule)
+      new ClosedOrderBookImpl(orderBook insert order, pricingRule)
     }
 
     def remove(order: LimitBidOrder[T]): Auction[T] = {
-      new ClosedOrderBookImpl(orderBook - order, pricingRule)
+      new ClosedOrderBookImpl(orderBook remove order, pricingRule)
     }
 
     def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
@@ -197,11 +197,11 @@ object Auction {
     }
 
     def insert(order: LimitBidOrder[T]): Auction[T] = {
-      new OpenOrderBookImpl(orderBook + order, pricingRule, policy)
+      new OpenOrderBookImpl(orderBook insert order, pricingRule, policy)
     }
 
     def remove(order: LimitBidOrder[T]): Auction[T] = {
-      new OpenOrderBookImpl(orderBook - order, pricingRule, policy)
+      new OpenOrderBookImpl(orderBook remove order, pricingRule, policy)
     }
 
     def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
