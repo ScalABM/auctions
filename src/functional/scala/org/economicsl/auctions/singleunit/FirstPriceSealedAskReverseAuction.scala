@@ -24,7 +24,7 @@ import scala.util.Random
 
 
 class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers {
-  
+
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(tick = 1)
