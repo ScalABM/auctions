@@ -20,9 +20,9 @@ branches:
     
 script:
   - sbt clean compile
+  - sbt coverage functional:test
 
-on_success:
-  - sbt coverage test
+after_success:
   - sbt coverageReport
   
 before_cache:
