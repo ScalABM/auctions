@@ -56,7 +56,7 @@ class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers {
 
   "The winning price of a First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "be the lowest submitted ask price" in {
 
-    results.map(fills => fills.map(fill => fill.askOrder.limit)) should be (Some(Stream(offers.min.limit)))
+    results.map(fills => fills.map(fill => fill.price)) should be (Some(Stream(offers.min.limit)))
 
   }
 

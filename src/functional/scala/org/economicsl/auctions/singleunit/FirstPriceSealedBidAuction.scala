@@ -56,7 +56,7 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
 
   "The winning price of a First-Price, Sealed-Bid Auction (FPSBA)" should "be the highest submitted bid price." in {
 
-    results.map(fills => fills.map(fill => fill.bidOrder.limit)) should be(Some(Stream(bids.max.limit)))
+    results.map(fills => fills.map(fill => fill.price)) should be(Some(Stream(bids.max.limit)))
 
   }
 

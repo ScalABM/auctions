@@ -52,14 +52,30 @@ object ReverseAuction {
     new OpenOrderBookImpl[T](orderBook.insert(reservation), rule, policy)
   }
 
+  /** Create a first-price, sealed-aks reverse auction (FPSARA).
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    * @note The winner of a FPSARA is the seller who submitted the lowest priced ask order; the winner receives an
+    *       amount equal to its own ask price.
+    */
   def firstPriceSealedAsk[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new AskQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new BidQuotePricingRule)
   }
 
+  /** Create a second-price, sealed-ask reverse auction (SPSARA).
+    *
+    * @param reservation
+    * @tparam T
+    * @return
+    * @note The winner of a SPSARA is the seller who submitted the lowest priced ask order; the winner receives an
+    *       amount equal to the minimum of the second lowest submitted ask price and the buyer's `reservation` price.
+    */
   def secondPriceSealedAsk[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook insert reservation, new BidQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook insert reservation, ???)
   }
 
   /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
