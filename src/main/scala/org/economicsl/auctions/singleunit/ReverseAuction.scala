@@ -75,7 +75,7 @@ object ReverseAuction {
     */
   def secondPriceSealedAsk[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook insert reservation, ???)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), ???)
   }
 
   /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
