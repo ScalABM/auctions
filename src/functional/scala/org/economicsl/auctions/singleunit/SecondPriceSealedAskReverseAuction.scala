@@ -23,20 +23,21 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
-class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers {
+class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers {
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(tick = 1)
 
+  // seller is willing to sell at any positive price
   val reservationPrice = LimitBidOrder(seller, Price.MaxValue, parkingSpace)
-  val fpsara: ReverseAuction[ParkingSpace] = ReverseAuction.firstPriceSealedAsk(reservationPrice)
+  val spsbra: ReverseAuction[ParkingSpace] = ReverseAuction.secondPriceSealedAsk(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
   val offers: Iterable[LimitAskOrder[ParkingSpace]] = {
     for (i <- 1 to 100) yield {
-      val price = Price(prng.nextInt(1000))
+      val price = Price(prng.nextInt(Int.MaxValue))
       LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
     }
   }
@@ -46,17 +47,25 @@ class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers {
     if (orders.isEmpty) auction else insert(orders.tail, auction.insert(orders.head))
   }
 
-  val (results, _) = insert(offers, fpsara).clear
+  val auction: ReverseAuction[ParkingSpace] = insert(offers, spsbra)
+  val (results, _) = auction.clear
 
-  "A First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "allocate the Tradable to the seller that submits the ask with the lowest price" in {
+  "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "allocate the Tradable to the seller that submitted the ask with the lowest price." in {
 
-    results.map(fills => fills.map(fill => fill.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
+    val winner = results.map(fills => fills.map(fill => fill.askOrder.issuer))
+    winner should be(Some(Stream(offers.min.issuer)))
 
   }
 
-  "The winning price of a First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "be the lowest submitted ask price" in {
+  "The winning price of a Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "be the second-lowest submitted ask price" in {
 
-    results.map(fills => fills.map(fill => fill.askOrder.limit)) should be (Some(Stream(offers.min.limit)))
+    // winning price from the original auction...
+    val winningPrice = results.map(fills => fills.map(fill => fill.price))
+
+    // remove the winning offer and then find the ask price of the winner of this new auction...
+    val auction2 = auction.remove(offers.min)
+    val (results2, _) = auction2.clear
+    results2.map(fills => fills.map(fill => fill.askOrder.limit)) should be (winningPrice)
 
   }
 
