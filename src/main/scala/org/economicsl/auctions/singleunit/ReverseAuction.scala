@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
+import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingRule, PricingRule}
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
@@ -75,7 +75,12 @@ object ReverseAuction {
     */
   def secondPriceSealedAsk[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    new ClosedOrderBookImpl[T](orderBook.insert(reservation), ???)
+    val pricingRule = new PricingRule[T, Price] {
+      def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
+        orderBook.unMatchedOrders.askOrders.headOption.map(order => order.limit)
+      }
+    }
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), pricingRule)
   }
 
   /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
