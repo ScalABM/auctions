@@ -75,9 +75,11 @@ object ReverseAuction {
     */
   def secondPriceSealedAsk[T <: Tradable](reservation: LimitBidOrder[T]): ReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering, LimitBidOrder.ordering.reverse)
-    val pricingRule = new PricingRule[T, Price] {
+    val pricingRule = new PricingRule[T, Price] { // todo can this pricing rule be generalized?
       def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
-        orderBook.unMatchedOrders.askOrders.headOption.map(order => order.limit)
+        orderBook.matchedOrders.bidOrders.headOption.flatMap {
+          bidOrder => orderBook.unMatchedOrders.askOrders.headOption.map(askOrder => bidOrder.limit min askOrder.limit)
+        }
       }
     }
     new ClosedOrderBookImpl[T](orderBook.insert(reservation), pricingRule)
