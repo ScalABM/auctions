@@ -32,34 +32,39 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
   val withDiscriminatoryPricing: DoubleAuction[GoogleStock] = DoubleAuction.withOpenOrderBook(orderBook)
                                                                            .withQuotePolicy(quotePolicy)
                                                                            .withDiscriminatoryPricing(pricingRule)
+
+  // generate a very large stream of random orders...
   val prng = new Random(42)
   val orders: Stream[Either[LimitAskOrder[GoogleStock], LimitBidOrder[GoogleStock]]] = {
-    randomOrders(10000, google, prng)
+    randomOrders(100000, google, prng)
   }
-
 
   // this shortens type signatures quite a bit...
-  type ClearResult = (Option[Stream[Fill[GoogleStock]]], DoubleAuction[GoogleStock])
+  type ClearResult[T <: Tradable] = (Option[Stream[Fill[T]]], DoubleAuction[T])
 
-  // A continuous double auction is a composition of an insert and a clear...can this be made tail recursive???
-  def continuous(auction: DoubleAuction[GoogleStock])(incoming: Stream[Either[LimitAskOrder[GoogleStock], LimitBidOrder[GoogleStock]]]): Stream[ClearResult] = {
-    incoming match {
-      case Stream.Empty => Stream((None, auction))
-      case head #:: tail => head match {
-        case Left(askOrder) =>
-          val (results, residual) = auction.insert(askOrder).clear
-          (results, residual) #:: continuous(residual)(tail)
-        case Right(bidOrder) =>
-          val (results, residual) = auction.insert(bidOrder).clear
-          (results, residual) #:: continuous(residual)(tail)
+  // A lazy, tail-recursive implementation of a continuous double auction!
+  def continuous[T <: Tradable](auction: DoubleAuction[T])(incoming: Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]]): Stream[ClearResult[T]] = {
+    @annotation.tailrec
+    def loop(da: DoubleAuction[T], in: Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]], out: Stream[ClearResult[T]]): Stream[ClearResult[T]] = {
+      in match {
+        case Stream.Empty => out
+        case head #:: tail => head match {
+          case Left(askOrder) =>
+            val (results, residual) = da.insert(askOrder).clear
+            loop(residual, tail, (results, residual) #:: out)
+          case Right(bidOrder) =>
+            val (results, residual) = da.insert(bidOrder).clear
+            loop(residual, tail, (results, residual) #:: out)
+        }
       }
     }
+    loop(auction, incoming, Stream.empty[ClearResult[T]])
   }
 
-  println(orders)
-  // without rationing, the number of fills should match the number of orders
-  val results = continuous(withDiscriminatoryPricing)(orders)
-  val prices = results.flatMap{ case (fills, _) => fills }.reduce(_ append _).map(fill => fill.price)
-  // prices.toList this will generate a stackoverflow! 
+  val clearResults = continuous(withDiscriminatoryPricing)(orders)
+  val prices: Stream[Price] = clearResults.flatMap{ case (fills, auction) => fills }
+                                          .flatMap(fills => fills.headOption)
+                                          .map(fill => fill.price)
+  println(prices.toList)
 
 }

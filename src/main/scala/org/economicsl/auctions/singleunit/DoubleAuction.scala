@@ -107,10 +107,6 @@ object DoubleAuction {
       new DiscriminatoryPriceImpl[T](orderBook, rule)
     }
 
-    def withQuotePolicy(policy: PriceQuotePolicy[T]): WithQuotePolicy[T] = {
-      new WithQuotePolicy(orderBook, policy)
-    }
-
     def withUniformPricing(rule: PricingRule[T, Price]): DoubleAuction[T] = {
       new UniformPriceImpl[T](orderBook, rule)
     }
