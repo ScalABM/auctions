@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule
-import org.economicsl.auctions.{ParkingSpace, Price, Tradable}
+import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -26,48 +26,42 @@ import scala.util.Random
 
 class ClosedDoubleAuction extends FlatSpec with Matchers {
 
-  // suppose that seller must sell the parking space at any positive price...
-  val parkingSpace = ParkingSpace(tick = 1)
-
   val pricingRule = new WeightedAveragePricingRule[ParkingSpace](weight = 0.5)
-  val emptyAuction: DoubleAuction[ParkingSpace] = DoubleAuction.withDiscriminatoryPricing(pricingRule)
+  val withDiscriminatoryPricing: DoubleAuction[ParkingSpace] = DoubleAuction.withDiscriminatoryPricing(pricingRule)
+  val withUniformPricing: DoubleAuction[ParkingSpace] = DoubleAuction.withUniformPricing(pricingRule)
 
-  // suppose that there are lots of bidders
   val prng = new Random(42)
-  val bids: Iterable[LimitBidOrder[ParkingSpace]] = {
-    for (i <- 1 to 100) yield {
-      val price = Price(prng.nextInt(Int.MaxValue))
-      LimitBidOrder(UUID.randomUUID(), price, parkingSpace)
+
+  "A DoubleAuction (DA)" should "generate the same number of fills as orders." in {
+
+    val parkingSpace = ParkingSpace(tick = 1)
+
+    // how many ask and bid orders should be generated...
+    val numberOrders = 100
+
+    // create some ask orders...
+    val offers = {
+      for (i <- 1 to numberOrders) yield {
+        val price = Price(prng.nextInt(Int.MaxValue))
+        LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
+      }
     }
-  }
 
-  val offers: Iterable[LimitAskOrder[ParkingSpace]] = {
-    for (i <- 1 to 100) yield {
-      val price = Price(prng.nextInt(Int.MaxValue))
-      LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
+    // create some bid orders (making sure that there will be no rationing)...
+    val bids = {
+      for (i <- 1 to numberOrders) yield {
+        val price = offers.max.limit + Price(prng.nextInt(Int.MaxValue))
+        LimitBidOrder(UUID.randomUUID(), price, parkingSpace)
+      }
     }
-  }
 
-  @annotation.tailrec
-  final def insert1[T <: Tradable](orders: Iterable[LimitBidOrder[T]], auction: DoubleAuction[T]): DoubleAuction[T] = {
-    if (orders.isEmpty) auction else insert1(orders.tail, auction.insert(orders.head))
-  }
+    // insert all of the orders...
+    val withBids = bids.foldLeft(withDiscriminatoryPricing)((auction, bidOrder) => auction.insert(bidOrder))
+    val withOrders = offers.foldLeft(withBids)((auction, askOrder) => auction.insert(askOrder))
 
-  @annotation.tailrec
-  final def insert2[T <: Tradable](orders: Iterable[LimitAskOrder[T]], auction: DoubleAuction[T]): DoubleAuction[T] = {
-    if (orders.isEmpty) auction else insert2(orders.tail, auction.insert(orders.head))
-  }
-
-  // todo this is a bit awkward to work with!
-  val withOrders: DoubleAuction[ParkingSpace] = insert2(offers, insert1(bids, emptyAuction))
-  withOrders
-  val (results, _) = withOrders.clear
-
-  "A DoubleAuction (DA)" should "allocate the Tradable units to the bidders that submit the bids with the highest prices." in {
-
-    results.foreach(fills => println(fills.map(fill => (0.5 * fill.askOrder.limit.value + 0.5 * fill.bidOrder.limit.value).round).toList))
-    results.foreach(fills => println(fills.map(fill => fill.price.value).toList))
-    results.map(fills => fills.length) should be(100)
+    // without rationing, the number of fills should match the number of orders
+    val (results, _) = withOrders.clear
+    results.map(fills => fills.length) should be(Some(numberOrders))
 
   }
 

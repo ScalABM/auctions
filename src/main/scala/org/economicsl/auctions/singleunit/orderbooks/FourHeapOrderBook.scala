@@ -33,7 +33,7 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     * @note The ask price quote should be equal to the Mth highest price (where M is the total number of ask orders in
     *       the order book). The ask price quote should be undefined if there are no ask orders in the order book.
     */
-  val askPriceQuote: Option[Price] = (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
+  def askPriceQuote: Option[Price] = (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
     case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit min askOrder.limit)  // askOrder might have been rationed!
     case (Some(bidOrder), None) => Some(bidOrder.limit)
     case (None, Some(askOrder)) => Some(askOrder.limit)
@@ -46,14 +46,14 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     * @note The bid price quote should be equal to the (M+1)th highest price (where M is the total number of ask orders
     *       in the order book). The bid price quote should be undefined if there are no bid orders in the order book.
     */
-  val bidPriceQuote: Option[Price] = (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
+  def bidPriceQuote: Option[Price] = (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
     case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)  // bid Order might have been rationed!
     case (Some(bidOrder), None) => Some(bidOrder.limit)
     case (None, Some(askOrder)) => Some(askOrder.limit)
     case (None, None) => None
   }
 
-  val spread: Option[Price] = {
+  def spread: Option[Price] = {
     bidPriceQuote.flatMap(p1 => askPriceQuote.map(p2 => Price(p2.value - p1.value)))
   }
 

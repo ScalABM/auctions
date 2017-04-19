@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{ParkingSpace, Price, Tradable}
+import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -42,12 +42,7 @@ class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers {
     }
   }
 
-  @annotation.tailrec
-  final def insert[T <: Tradable](orders: Iterable[LimitAskOrder[T]], auction: ReverseAuction[T]): ReverseAuction[T] = {
-    if (orders.isEmpty) auction else insert(orders.tail, auction.insert(orders.head))
-  }
-
-  val auction: ReverseAuction[ParkingSpace] = insert(offers, spsbra)
+  val auction: ReverseAuction[ParkingSpace] = offers.foldLeft(spsbra)((auction, askOrder) => auction.insert(askOrder))
   val (results, _) = auction.clear
 
   "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "allocate the Tradable to the seller that submitted the ask with the lowest price." in {

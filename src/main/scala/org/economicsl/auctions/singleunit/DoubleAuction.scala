@@ -273,10 +273,10 @@ object DoubleAuction {
 
       @annotation.tailrec
       def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+        val currentPrice = pricingRule(ob)
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
-            val currentPrice = pricingRule(ob)
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
           case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
