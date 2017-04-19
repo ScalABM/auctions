@@ -17,8 +17,8 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder, TestTradable}
-import org.economicsl.auctions.{Price, Quantity}
+import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.{Price, Quantity, TestTradable}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
