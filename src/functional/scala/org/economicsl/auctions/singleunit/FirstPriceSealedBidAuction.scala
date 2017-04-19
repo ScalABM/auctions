@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -28,8 +28,9 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(tick = 1)
-
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
+
+  // seller uses a first-priced, sealed bid auction...
   val fpsba: Auction[ParkingSpace] = Auction.firstPriceSealedBid(reservationPrice)
 
   // suppose that there are lots of bidders
@@ -41,12 +42,8 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers {
     }
   }
 
-  @annotation.tailrec
-  final def insert[T <: Tradable](orders: Iterable[LimitBidOrder[T]], auction: Auction[T]): Auction[T] = {
-    if (orders.isEmpty) auction else insert(orders.tail, auction.insert(orders.head))
-  }
-
-  val (results, _) = insert(bids, fpsba).clear
+  val withBids: Auction[ParkingSpace] = bids.foldLeft(fpsba)((auction, bidOrder) => auction.insert(bidOrder))
+  val (results, _) = withBids.clear
 
   "A First-Price, Sealed-Bid Auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 

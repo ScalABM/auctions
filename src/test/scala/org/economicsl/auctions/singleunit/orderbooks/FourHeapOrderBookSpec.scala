@@ -17,8 +17,8 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder, ParkingSpace}
-import org.economicsl.auctions.{Price, Quantity, Tradable}
+import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder, TestTradable}
+import org.economicsl.auctions.{Price, Quantity}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -27,27 +27,27 @@ import scala.util.Random
 class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
   // suppose that seller must sell the parking space at any positive price...
-  val parkingSpace = ParkingSpace(tick = 1)
+  val tradable = TestTradable(tick = 1)
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
-  val bids: Iterable[LimitBidOrder[ParkingSpace]] = {
+  val bids: Iterable[LimitBidOrder[TestTradable]] = {
     for (i <- 1 to 100) yield {
       val price = Price(prng.nextInt(Int.MaxValue))
-      LimitBidOrder(UUID.randomUUID(), price, parkingSpace)
+      LimitBidOrder(UUID.randomUUID(), price, tradable)
     }
   }
 
-  val offers: Iterable[LimitAskOrder[ParkingSpace]] = {
+  val offers: Iterable[LimitAskOrder[TestTradable]] = {
     for (i <- 1 to 100) yield {
       val price = Price(prng.nextInt(Int.MaxValue))
-      LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
+      LimitAskOrder(UUID.randomUUID(), price, tradable)
     }
   }
 
-  val initial: FourHeapOrderBook[ParkingSpace] = FourHeapOrderBook.empty[ParkingSpace]
-  val withBids: FourHeapOrderBook[ParkingSpace] = bids.foldLeft(initial)((orderBook, bidOrder) => orderBook.insert(bidOrder))
-  val withOffers: FourHeapOrderBook[ParkingSpace] = offers.foldLeft(initial)((orderBook, askOrder) => orderBook.insert(askOrder))
+  val initial: FourHeapOrderBook[TestTradable] = FourHeapOrderBook.empty[TestTradable]
+  val withBids: FourHeapOrderBook[TestTradable] = bids.foldLeft(initial)((orderBook, bidOrder) => orderBook.insert(bidOrder))
+  val withOffers: FourHeapOrderBook[TestTradable] = offers.foldLeft(initial)((orderBook, askOrder) => orderBook.insert(askOrder))
 
   "A FourHeapOrderBook" should "be able to insert bid orders" in {
 

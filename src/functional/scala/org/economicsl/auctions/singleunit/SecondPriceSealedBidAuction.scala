@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -42,13 +42,8 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers {
     }
   }
 
-  @annotation.tailrec
-  final def insert[T <: Tradable](orders: Iterable[LimitBidOrder[T]], auction: Auction[T]): Auction[T] = {
-    if (orders.isEmpty) auction else insert(orders.tail, auction.insert(orders.head))
-  }
-
   // winner should be the bidder that submitted the highest bid
-  val auction: Auction[ParkingSpace] = insert(bids, spsba)
+  val auction: Auction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))
   val (results, _) = auction.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {

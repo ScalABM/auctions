@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.{ParkingSpace, Price, Tradable}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
