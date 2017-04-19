@@ -29,7 +29,7 @@ trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with
 object DoubleAuction {
 
   def withDiscriminatoryPricing[T <: Tradable](rule: PricingRule[T, Price]): DoubleAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering)
+    val orderBook = FourHeapOrderBook.empty[T]
     new DiscriminatoryPriceImpl[T](orderBook, rule)
   }
 
@@ -42,7 +42,7 @@ object DoubleAuction {
   }
 
   def withClosedOrderBook[T <: Tradable]: WithClosedOrderBook[T] = {
-    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering)
+    val orderBook = FourHeapOrderBook.empty[T]
     new WithClosedOrderBook[T](orderBook)
   }
 
@@ -51,7 +51,7 @@ object DoubleAuction {
   }
 
   def withOpenOrderBook[T <: Tradable]: WithOpenOrderBook[T] = {
-    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering)
+    val orderBook = FourHeapOrderBook.empty[T]
     new WithOpenOrderBook[T](orderBook)
   }
 
@@ -60,7 +60,7 @@ object DoubleAuction {
   }
 
   def withUniformPricing[T <: Tradable](rule: PricingRule[T, Price]): DoubleAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering)
+    val orderBook = FourHeapOrderBook.empty[T]
     new UniformPriceImpl[T](orderBook, rule)
   }
 
@@ -214,6 +214,10 @@ object DoubleAuction {
 
   private[this] class UniformPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], _policy: PriceQuotePolicy[T])
     extends DoubleAuction[T] {
+
+    def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
+      policy(orderBook, request)
+    }
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
       new UniformPriceImpl2(orderBook.insert(order), pricingRule, policy)

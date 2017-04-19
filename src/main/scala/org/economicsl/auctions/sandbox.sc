@@ -49,8 +49,6 @@ val orderBook3 = orderBook2 + order4
 val orderBook4 = orderBook3 + order9
 val orderBook5 = orderBook4 + order8
 
-val (matchedOrders, _) = orderBook5.takeAllMatched
-matchedOrders.toList
 
 // this should not compile...and it doesn't!
 // orderBook5 + order10
@@ -70,10 +68,6 @@ val midPrice = midPointPricing(orderBook5)
 // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
 val averagePricing = new WeightedAveragePricingRule[GoogleStock](0.75)
 val averagePrice = averagePricing(orderBook5)
-
-// take a look at paired orders
-val (pairedOrders, _) = orderBook5.takeAllMatched
-pairedOrders.toList
 
 // example usage of a double auction where we don't want to define the pricing rule until later...
 val withOrderBook = DoubleAuction.withClosedOrderBook(FourHeapOrderBook.empty[GoogleStock])

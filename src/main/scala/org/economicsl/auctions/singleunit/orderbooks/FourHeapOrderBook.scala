@@ -54,7 +54,7 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
   }
 
   def spread: Option[Price] = {
-    bidPriceQuote.flatMap(p1 => askPriceQuote.map(p2 => Price(p2.value - p1.value)))
+    bidPriceQuote.flatMap(bidPrice => askPriceQuote.map(askPrice => Price(bidPrice.value - askPrice.value)))
   }
 
   def remove(order: LimitAskOrder[T]): FourHeapOrderBook[T] = {

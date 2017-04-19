@@ -40,7 +40,7 @@ class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers with Ask
   val auction: ReverseAuction[Service] = offers.foldLeft(spsara)((auction, askOrder) => auction.insert(askOrder))
   val (results, _) = auction.clear
 
-  "A Second-Price, Sealed-Ask Reverse Auction (SPSARA)" should "purchse the Service from the seller who offers it at the lowest price." in {
+  "A Second-Price, Sealed-Ask Reverse Auction (SPSARA)" should "purchase the Service from the seller who offers it at the lowest price." in {
 
     val winner = results.map(fills => fills.map(fill => fill.askOrder.issuer))
     winner should be(Some(Stream(offers.min.issuer)))
