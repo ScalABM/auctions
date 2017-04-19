@@ -23,7 +23,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
-class SecondPriceSealedBidAuction extends FlatSpec with Matchers {
+class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
@@ -34,13 +34,9 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers {
   val spsba: Auction[ParkingSpace] = Auction.secondPriceSealedBid(reservationPrice)
 
   // suppose that there are lots of bidders
-  val prng = new Random(42)
-  val bids: Iterable[LimitBidOrder[ParkingSpace]] = {
-    for (i <- 1 to 100) yield {
-      val price = Price(prng.nextInt(Int.MaxValue))
-      LimitBidOrder(UUID.randomUUID(), price, parkingSpace)
-    }
-  }
+  val prng: Random = new Random(42)
+  val numberBidOrders = 1000
+  val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
   // winner should be the bidder that submitted the highest bid
   val auction: Auction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))

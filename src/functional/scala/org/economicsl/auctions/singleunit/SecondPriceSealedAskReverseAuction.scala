@@ -17,42 +17,37 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
-class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers {
+class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers with AskOrderGenerator {
 
-  // suppose that seller must sell the parking space at any positive price...
-  val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace(tick = 1)
+  // suppose that buyer must procure some service...
+  val buyer: UUID = UUID.randomUUID()
+  val service = Service(tick=1)
 
-  // seller is willing to sell at any positive price
-  val reservationPrice = LimitBidOrder(seller, Price.MaxValue, parkingSpace)
-  val spsbra: ReverseAuction[ParkingSpace] = ReverseAuction.secondPriceSealedAsk(reservationPrice)
+  val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
+  val spsara: ReverseAuction[Service] = ReverseAuction.secondPriceSealedAsk(reservationPrice)
 
-  // suppose that there are lots of bidders
+  // suppose that there are lots of sellers
   val prng = new Random(42)
-  val offers: Iterable[LimitAskOrder[ParkingSpace]] = {
-    for (i <- 1 to 100) yield {
-      val price = Price(prng.nextInt(Int.MaxValue))
-      LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
-    }
-  }
+  val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
 
-  val auction: ReverseAuction[ParkingSpace] = offers.foldLeft(spsbra)((auction, askOrder) => auction.insert(askOrder))
+
+  val auction: ReverseAuction[Service] = offers.foldLeft(spsara)((auction, askOrder) => auction.insert(askOrder))
   val (results, _) = auction.clear
 
-  "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "allocate the Tradable to the seller that submitted the ask with the lowest price." in {
+  "A Second-Price, Sealed-Ask Reverse Auction (SPSARA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
     val winner = results.map(fills => fills.map(fill => fill.askOrder.issuer))
     winner should be(Some(Stream(offers.min.issuer)))
 
   }
 
-  "The winning price of a Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "be the second-lowest submitted ask price" in {
+  "The price paid (received) by the buyer (seller) when using a SPSARA" should "be the second-lowest offered price" in {
 
     // winning price from the original auction...
     val winningPrice = results.map(fills => fills.map(fill => fill.price))

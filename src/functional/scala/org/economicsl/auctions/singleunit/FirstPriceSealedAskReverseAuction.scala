@@ -17,40 +17,35 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
-class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers {
+class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers with AskOrderGenerator {
 
-  // suppose that seller must sell the parking space at any positive price...
-  val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace(tick = 1)
+  // suppose that buyer must procure some service...
+  val buyer: UUID = UUID.randomUUID()
+  val service = Service(tick=1)
 
-  val reservationPrice = LimitBidOrder(seller, Price.MaxValue, parkingSpace)
-  val fpsara: ReverseAuction[ParkingSpace] = ReverseAuction.firstPriceSealedAsk(reservationPrice)
+  val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
+  val fpsara: ReverseAuction[Service] = ReverseAuction.firstPriceSealedAsk(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
-  val offers: Iterable[LimitAskOrder[ParkingSpace]] = {
-    for (i <- 1 to 100) yield {
-      val price = Price(prng.nextInt(1000))
-      LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
-    }
-  }
+  val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
 
-  val withAsks: ReverseAuction[ParkingSpace] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
+  val withAsks: ReverseAuction[Service] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
   val (results, _) = withAsks.clear
 
-  "A First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "allocate the Tradable to the seller that submits the ask with the lowest price" in {
+  "A First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
     results.map(fills => fills.map(fill => fill.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
 
   }
 
-  "The winning price of a First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "be the lowest submitted ask price" in {
+  "The price paid (received) by the buyer (seller) when using a FPSARA" should "be the lowest offered price" in {
 
     results.map(fills => fills.map(fill => fill.price)) should be (Some(Stream(offers.min.limit)))
 

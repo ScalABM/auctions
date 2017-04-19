@@ -15,4 +15,6 @@
 
 package org.economicsl.auctions;
 
+import org.economicsl.auctions.Tradable;
+
 public abstract class Security implements Tradable {}
