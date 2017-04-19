@@ -15,7 +15,7 @@
 
 package org.economicsl.auctions;
 
-public class AppleStock extends Security {
+public class AppleStock implements Security {
 
     private long tick = 1;
 
