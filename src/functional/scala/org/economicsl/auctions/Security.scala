@@ -16,4 +16,5 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-case class Service(tick: Currency) extends Tradable
+trait Security extends Tradable
+
