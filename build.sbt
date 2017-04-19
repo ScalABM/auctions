@@ -21,7 +21,6 @@ lazy val commonSettings = Seq(
 
 // Define additional testing configurations
 lazy val Functional = config("functional") extend Test
-lazy val Performance = config("performance") extend Test
 
 
 // finally define the full project build settings
@@ -33,12 +32,5 @@ lazy val core = (project in file(".")).
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.0.1" % "functional, test"
     ),
-    parallelExecution in Functional := false
-  ).
-  configs(Performance).
-  settings(inConfig(Performance)(Defaults.testSettings): _*).
-  settings(
-    testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework"),
-    libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.8.2" % "performance",
-    parallelExecution in Performance := false
+    parallelExecution in Functional := true
   )
