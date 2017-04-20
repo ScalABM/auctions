@@ -55,7 +55,7 @@ object SinglePricePoint {
     * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
     */
   def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer))
+    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
   }
 
 }

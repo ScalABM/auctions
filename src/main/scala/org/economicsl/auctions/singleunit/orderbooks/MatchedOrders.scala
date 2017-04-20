@@ -63,7 +63,7 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
         pairedOrders
       } else {
         val pair = (askOrders.head, bidOrders.head)
-        loop(askOrders.tail, bidOrders.tail, Stream.cons(pair, pairedOrders))
+        loop(askOrders.tail, bidOrders.tail, pair #:: pairedOrders)
       }
     }
     loop(askOrders, bidOrders, Stream.empty[(LimitAskOrder[T], LimitBidOrder[T])])

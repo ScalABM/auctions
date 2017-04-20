@@ -13,11 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
-
-import org.economicsl.auctions.{Currency, Tradable}
+package org.economicsl.auctions
 
 
-sealed trait Painting extends Tradable
+trait Security extends Tradable
 
-case class Guernica(tick: Currency) extends Painting

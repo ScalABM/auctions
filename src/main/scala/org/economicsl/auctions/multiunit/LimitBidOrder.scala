@@ -31,7 +31,7 @@ class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quan
   */
 object LimitBidOrder {
 
-  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O].reverse
+  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitBidOrder[T] = {
     new LimitBidOrder[T](issuer, limit, quantity, tradable)

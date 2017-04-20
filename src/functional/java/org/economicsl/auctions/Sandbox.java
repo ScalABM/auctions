@@ -15,6 +15,7 @@
 
 package org.economicsl.auctions;
 
+import org.economicsl.auctions.Price;
 import org.economicsl.auctions.singleunit.*;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingRule;

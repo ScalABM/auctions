@@ -15,11 +15,11 @@
 
 package org.economicsl.auctions;
 
-public class GoogleStock extends Security {
+public class AppleStock implements Security {
 
     private long tick = 1;
 
-    public GoogleStock(long _tick) {
+    public AppleStock(long _tick) {
         tick = _tick;
     }
 
