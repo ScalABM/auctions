@@ -19,34 +19,36 @@ import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingRule
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
-object PeriodicDoubleAuction extends App with AskOrderGenerator with BidOrderGenerator {
+class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
+  // generate a stream of random orders...
+  type Orders[T <: Tradable] = Either[LimitAskOrder[T], LimitBidOrder[T]]
   val google: GoogleStock = GoogleStock(tick=1)
-  val orderBook = FourHeapOrderBook.empty[GoogleStock]
-  val quotePolicy = new PriceQuotePolicy[GoogleStock]
-  val pricingRule = new MidPointPricingRule[GoogleStock]
-  val withUniformPricing: DoubleAuction[GoogleStock] = DoubleAuction.withOpenOrderBook(orderBook)
-                                                                    .withQuotePolicy(quotePolicy)
-                                                                    .withUniformPricing(pricingRule)
-
-
   val prng = new Random(42)
-  val offers = randomAskOrders(100, google, prng)
-  val bids = randomBidOrders(100, google, prng)
+  val orders: Stream[Orders[GoogleStock]] = {
+    randomOrders(100, google, prng)
+  }
 
-  // insert all of the orders...this can be done concurrently using Akka or (if no removing orders) in parallel)
-  val withBids = bids.foldLeft(withUniformPricing)((auction, bidOrder) => auction.insert(bidOrder))
-  val withOrders = offers.foldLeft(withBids)((auction, askOrder) => auction.insert(askOrder))
+  "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
-  // without rationing, the number of fills should match the number of orders
-  val (results, _) = withOrders.clear
+    val pricingRule = new MidPointPricingRule[GoogleStock]
+    val withUniformPricing: DoubleAuction[GoogleStock] = DoubleAuction.withUniformPricing(pricingRule)
 
-  val unitsSold: Option[Quantity] = results.map(fills => fills.foldLeft(Quantity(0))((total, fill) => total + fill.quantity))
-  println(results.map(fills => fills.map(fill => fill.price).toSet))  // should contain only one value!
-  println(unitsSold)
+    val withOrders: DoubleAuction[GoogleStock] = orders.foldLeft(withUniformPricing) { case (auction, order) =>
+      order match {
+        case Left(askOrder) => auction.insert(askOrder)
+        case Right(bidOrder) => auction.insert(bidOrder)
+      }
+    }
+
+    val (results, _) = withOrders.clear
+    results.map(fills => fills.map(fill => fill.price).toSet).size should be(1)
+
+  }
 
 }
