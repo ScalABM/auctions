@@ -21,10 +21,8 @@ import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 
 class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T], val unMatchedOrders: UnMatchedOrders[T]) {
 
-  // value of lowest matched bid must exceed value of highest unmatched bid!
   require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.limit >= b2.limit)))
 
-  // value of lowest unmatched ask must exceed value of highest matched ask!
   require(unMatchedOrders.askOrders.headOption.forall(a1 => matchedOrders.askOrders.headOption.forall(a2 => a1.limit >= a2.limit)))
 
   /** The ask price quote is the price that a buyer would need to exceed in order for its bid to be matched had the
