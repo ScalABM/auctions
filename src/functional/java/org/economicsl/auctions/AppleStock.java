@@ -13,9 +13,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.economicsl.auctions.singleunit;
+package org.economicsl.auctions;
 
-import org.economicsl.auctions.Tradable;
+public class AppleStock implements Security {
 
-public class Service implements Tradable {
+    private long tick = 1;
+
+    public AppleStock(long _tick) {
+        tick = _tick;
+    }
+
+    @Override
+    public long tick() {
+        return tick;
+    }
 }

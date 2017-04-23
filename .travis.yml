@@ -19,7 +19,11 @@ branches:
     - develop
     
 script:
-  - sbt clean compile test
+  - sbt clean compile
+  - sbt coverage test functional:test
+
+after_success:
+  - sbt coverageReport
   
 before_cache:
   # Tricks to avoid unnecessary cache updates

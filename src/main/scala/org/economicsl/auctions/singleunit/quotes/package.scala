@@ -15,23 +15,5 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import java.util.UUID
 
-import org.economicsl.auctions.{BidOrder, Price, Tradable}
-
-
-/** An order to buy a single-unit of a tradable at any positive price. */
-class MarketBidOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends BidOrder[T] with SingleUnit[T] {
-
-  val limit: Price = Price.MaxValue
-
-}
-
-
-object MarketBidOrder {
-
-  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketBidOrder[T] = {
-    new MarketBidOrder[T](issuer, tradable)
-  }
-
-}
+package object quotes
