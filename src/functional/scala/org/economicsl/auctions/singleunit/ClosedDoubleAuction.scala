@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule
+import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
 import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -26,7 +26,7 @@ import scala.util.Random
 
 class ClosedDoubleAuction extends FlatSpec with Matchers {
 
-  val pricingRule = new WeightedAveragePricingRule[ParkingSpace](weight = 0.5)
+  val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
   val withDiscriminatoryPricing: DoubleAuction[ParkingSpace] = DoubleAuction.withDiscriminatoryPricing(pricingRule)
   val withUniformPricing: DoubleAuction[ParkingSpace] = DoubleAuction.withUniformPricing(pricingRule)
 

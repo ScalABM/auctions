@@ -16,8 +16,16 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.pricing
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Base trait for all pricing rules. */
-trait PricingRule[T <: Tradable, +V <: AnyVal] extends ((FourHeapOrderBook[T]) => Option[V])
+/** (M+1)th highest price determines the fill price.
+  *
+  * @note (M+1)th highest price is equivalent to the bid quote. It is incentive compatible for buyers to truthfully
+  *       reveal their respective valuations in single-unit auctions using this pricing rule.
+  */
+class BidQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
+
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.bidPriceQuote
+
+}

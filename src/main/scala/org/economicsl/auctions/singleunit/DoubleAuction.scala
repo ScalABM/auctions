@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
-import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
@@ -28,16 +28,16 @@ trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with
 
 object DoubleAuction {
 
-  def withDiscriminatoryPricing[T <: Tradable](rule: PricingRule[T, Price]): DoubleAuction[T] = {
+  def withDiscriminatoryPricing[T <: Tradable](rule: PricingPolicy[T]): DoubleAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new DiscriminatoryPriceImpl[T](orderBook, rule)
   }
 
-  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price]): DoubleAuction[T] = {
+  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingPolicy[T]): DoubleAuction[T] = {
     new DiscriminatoryPriceImpl[T](orderBook, rule)
   }
 
-  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): DoubleAuction[T] = {
+  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingPolicy[T], policy: PriceQuotePolicy[T]): DoubleAuction[T] = {
     new DiscriminatoryPriceImpl2[T](orderBook, rule, policy)
   }
 
@@ -59,16 +59,16 @@ object DoubleAuction {
     new WithOpenOrderBook[T](orderBook)
   }
 
-  def withUniformPricing[T <: Tradable](rule: PricingRule[T, Price]): DoubleAuction[T] = {
+  def withUniformPricing[T <: Tradable](rule: PricingPolicy[T]): DoubleAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new UniformPriceImpl[T](orderBook, rule)
   }
 
-  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price]): DoubleAuction[T] = {
+  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingPolicy[T]): DoubleAuction[T] = {
     new UniformPriceImpl[T](orderBook,rule)
   }
 
-  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): DoubleAuction[T] = {
+  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingPolicy[T], policy: PriceQuotePolicy[T]): DoubleAuction[T] = {
     new UniformPriceImpl2[T](orderBook, rule, policy)
   }
 
@@ -103,11 +103,11 @@ object DoubleAuction {
       new WithClosedOrderBook(orderBook.remove(order))
     }
 
-    def withDiscriminatoryPricing(rule: PricingRule[T, Price]): DoubleAuction[T] = {
+    def withDiscriminatoryPricing(rule: PricingPolicy[T]): DoubleAuction[T] = {
       new DiscriminatoryPriceImpl[T](orderBook, rule)
     }
 
-    def withUniformPricing(rule: PricingRule[T, Price]): DoubleAuction[T] = {
+    def withUniformPricing(rule: PricingPolicy[T]): DoubleAuction[T] = {
       new UniformPriceImpl[T](orderBook, rule)
     }
 
@@ -161,18 +161,18 @@ object DoubleAuction {
       new WithQuotePolicy(orderBook.remove(order), policy)
     }
 
-    def withDiscriminatoryPricing(pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+    def withDiscriminatoryPricing(pricingRule: PricingPolicy[T]): DoubleAuction[T] = {
       new DiscriminatoryPriceImpl2[T](orderBook, pricingRule, policy)
     }
 
-    def withUniformPricing(pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+    def withUniformPricing(pricingRule: PricingPolicy[T]): DoubleAuction[T] = {
       new UniformPriceImpl2[T](orderBook, pricingRule, policy)
     }
 
   }
 
 
-  private[this] class UniformPriceImpl[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
+  private[this] class UniformPriceImpl[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingPolicy[T])
     extends DoubleAuction[T] {
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
@@ -203,12 +203,12 @@ object DoubleAuction {
 
     protected val orderBook: FourHeapOrderBook[T] = _orderBook
 
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+    protected val pricingRule: PricingPolicy[T] = _pricingRule
 
   }
 
 
-  private[this] class UniformPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], _policy: PriceQuotePolicy[T])
+  private[this] class UniformPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingPolicy[T], _policy: PriceQuotePolicy[T])
     extends DoubleAuction[T] {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
@@ -245,12 +245,12 @@ object DoubleAuction {
 
     protected val policy: PriceQuotePolicy[T] = _policy
 
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+    protected val pricingRule: PricingPolicy[T] = _pricingRule
 
   }
 
 
-  private[this] class DiscriminatoryPriceImpl[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
+  private[this] class DiscriminatoryPriceImpl[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingPolicy[T])
     extends DoubleAuction[T] {
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
@@ -288,12 +288,12 @@ object DoubleAuction {
 
     protected val orderBook: FourHeapOrderBook[T] = _orderBook
 
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+    protected val pricingRule: PricingPolicy[T] = _pricingRule
 
   }
 
 
-  private[this] class DiscriminatoryPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], _policy: PriceQuotePolicy[T])
+  private[this] class DiscriminatoryPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingPolicy[T], _policy: PriceQuotePolicy[T])
     extends DoubleAuction[T] {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
@@ -337,7 +337,7 @@ object DoubleAuction {
 
     protected val policy: PriceQuotePolicy[T] = _policy
 
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+    protected val pricingRule: PricingPolicy[T] = _pricingRule
 
   }
 

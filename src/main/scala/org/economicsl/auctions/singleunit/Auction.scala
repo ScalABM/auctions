@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
-import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuotePricingRule, PricingRule}
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
@@ -34,7 +34,7 @@ object Auction {
     * @tparam T
     * @return
     */
-  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price]): Auction[T] = {
+  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingPolicy[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](LimitAskOrder.ordering.reverse, LimitBidOrder.ordering)
     new ClosedOrderBookImpl[T](orderBook.insert(reservation), rule)
   }
@@ -46,7 +46,7 @@ object Auction {
     * @tparam T
     * @return
     */
-  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): Auction[T] = {
+  def apply[T <: Tradable](reservation: LimitAskOrder[T], rule: PricingPolicy[T], policy: PriceQuotePolicy[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenOrderBookImpl[T](orderBook.insert(reservation), rule, policy)
   }
@@ -59,7 +59,7 @@ object Auction {
     */
   def firstPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new AskQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new AskQuotePricingPolicy)
   }
 
   /** Create a second-price, sealed-bid or Vickrey `Auction`.
@@ -70,7 +70,7 @@ object Auction {
     */
   def secondPriceSealedBid[T <: Tradable](reservation: LimitAskOrder[T]): Auction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new BidQuotePricingRule)
+    new ClosedOrderBookImpl[T](orderBook.insert(reservation), new BidQuotePricingPolicy)
   }
 
   /** Create `WithClosedOrderBook` that encapsulates an order book containing a particular reservation price.
@@ -115,7 +115,7 @@ object Auction {
       new WithClosedOrderBook[T](orderBook.remove(order))
     }
 
-    def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
+    def withPricingRule(rule: PricingPolicy[T]): Auction[T] = {
       new ClosedOrderBookImpl[T](orderBook, rule)
     }
 
@@ -154,14 +154,14 @@ object Auction {
       new WithQuotePolicy[T](orderBook.remove(order), policy)
     }
 
-    def withPricingRule(rule: PricingRule[T, Price]): Auction[T] = {
+    def withPricingRule(rule: PricingPolicy[T]): Auction[T] = {
       new OpenOrderBookImpl[T](orderBook, rule, policy)
     }
 
   }
 
 
-  private[this] class ClosedOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
+  private[this] class ClosedOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingPolicy[T])
     extends Auction[T] {
 
     def insert(order: LimitBidOrder[T]): Auction[T] = {
@@ -184,12 +184,12 @@ object Auction {
 
     protected val orderBook: FourHeapOrderBook[T] = _orderBook
 
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+    protected val pricingRule: PricingPolicy[T] = _pricingRule
 
   }
 
 
-  private[this] class OpenOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], policy: PriceQuotePolicy[T])
+  private[this] class OpenOrderBookImpl[T <: Tradable](_orderBook: FourHeapOrderBook[T], _pricingRule: PricingPolicy[T], policy: PriceQuotePolicy[T])
     extends Auction[T] {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
@@ -216,7 +216,7 @@ object Auction {
 
     protected val orderBook: FourHeapOrderBook[T] = _orderBook
 
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
+    protected val pricingRule: PricingPolicy[T] = _pricingRule
 
   }
 

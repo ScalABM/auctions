@@ -18,10 +18,10 @@ package org.economicsl.auctions;
 import org.economicsl.auctions.Price;
 import org.economicsl.auctions.singleunit.*;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
-import org.economicsl.auctions.singleunit.pricing.AskQuotePricingRule;
-import org.economicsl.auctions.singleunit.pricing.BidQuotePricingRule;
-import org.economicsl.auctions.singleunit.pricing.MidPointPricingRule;
-import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule;
+import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy;
 import scala.Option;
 
 import java.util.Optional;
@@ -68,28 +68,28 @@ public class Sandbox {
         FourHeapOrderBook<GoogleStock> orderBook5 = orderBook4.insert(order8);
 
         // example of a uniform price auction that would be incentive compatible for the sellers...
-        AskQuotePricingRule<GoogleStock> askQuotePricing = new AskQuotePricingRule<>();
+        AskQuotePricingPolicy<GoogleStock> askQuotePricing = new AskQuotePricingPolicy<>();
         Option<Price> price1 = askQuotePricing.apply(orderBook5);
         if(price1.isDefined()) {
             System.out.println(price1.get().value());
         }
 
         // example of a uniform price auction that would be incentive compatible for the buyers...
-        BidQuotePricingRule<GoogleStock> bidQuotePricing = new BidQuotePricingRule<GoogleStock>();
+        BidQuotePricingPolicy<GoogleStock> bidQuotePricing = new BidQuotePricingPolicy<GoogleStock>();
         Option<Price> price2 = bidQuotePricing.apply(orderBook5);
         if(price2.isDefined()) {
             System.out.println(price2.get().value());
         }
 
         // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-        MidPointPricingRule<GoogleStock> midPointPricing = new MidPointPricingRule<GoogleStock>();
+        MidPointPricingPolicy<GoogleStock> midPointPricing = new MidPointPricingPolicy<GoogleStock>();
         Option<Price> midPrice = midPointPricing.apply(orderBook5);
         if(midPrice.isDefined()) {
             System.out.println(midPrice.get().value());
         }
 
         // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-        WeightedAveragePricingRule<GoogleStock> averagePricing = new WeightedAveragePricingRule<GoogleStock>(0.75);
+        WeightedAveragePricingPolicy<GoogleStock> averagePricing = new WeightedAveragePricingPolicy<GoogleStock>(0.75);
         Option<Price> averagePrice = averagePricing.apply(orderBook5);
         if(averagePrice.isDefined()) {
             System.out.println(averagePrice.get().value());
