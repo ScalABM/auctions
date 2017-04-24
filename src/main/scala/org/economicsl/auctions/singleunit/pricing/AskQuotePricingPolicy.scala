@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.economicsl.auctions.{Price, Tradable}
   * @note Mth highest price is equivalent to the ask quote. It is incentive compatible for sellers to truthfully reveal
   *       their respective valuations in single-unit auctions using this pricing rule.
   */
-class AskQuotePricingRule[T <: Tradable] extends PricingRule[T, Price] {
+class AskQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.askPriceQuote
 

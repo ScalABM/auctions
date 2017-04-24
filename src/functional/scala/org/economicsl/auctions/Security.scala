@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,11 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.pricing
-
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.Tradable
+package org.economicsl.auctions
 
 
-/** Base trait for all pricing rules. */
-trait PricingRule[T <: Tradable, +V <: AnyVal] extends ((FourHeapOrderBook[T]) => Option[V])
+trait Security extends Tradable
+

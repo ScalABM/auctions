@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,9 +15,15 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Currency, Tradable}
+
+import org.economicsl.auctions.{AskOrder, Tradable}
 
 
-sealed trait Painting extends Tradable
+trait LimitAskOrderLike[+T <: Tradable] extends AskOrder[T] with SingleUnit[T]
 
-case class Guernica(tick: Currency) extends Painting
+
+object LimitAskOrderLike {
+
+  implicit def ordering[O <: LimitAskOrderLike[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
+
+}

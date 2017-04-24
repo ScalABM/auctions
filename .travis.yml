@@ -19,8 +19,17 @@ branches:
     - develop
     
 script:
-  - sbt clean compile test
+  - sbt clean compile
+  - sbt coverage test functional:test
+
+after_success:
+  - sbt coverageReport
+  - sbt codacyCoverage
   
+env:
+  global:
+    - secure: "V7vhWyyrZMQOf1ANHKHgbjUK6XlztR/fG5o6MxW/MUmdEuR05HaswS10IXs+GEXkduqRXTl4JNPMG2rnc5RAjZmLOxMsvPvhzvSFM9lr9SAHHNRQpthWtsqTc2XGGzEk61ARGHpaEbPH+N+XYB0mdu1x39ZE9TWUj5+F5wxoBH2ZGfFRDzppeIvFT2EmhfS51b9X5on2fM0Dw1uB1PzK1OR9XL42wFXeOtf125s7Sw6dAIDWQ4dyB7XYpflZxK8H3hvsripNQ4X6z503Od7NlkWF1wkfpdk/B6unJFiu3YlpI7XArYigL89OXNRA4gtiUQeayYmEHzVPfN3bLkRv2gm7+kwPiMlHXRvQ/Cz5wCzS0CF88WlSrQCGabcsRtC4YLXEfh+MORji/3aa7o1IYLjHgfe7N8uxjBCv0wtUVcnbk69HgPNqm6RSPnil9eH92FVONJfAowo8AvLwLU2A+iGYyl8fmRrQGz/OLCrvpJpsJzQzwE67K1VI+pTovpL2yjL+imuQmmCje3Wq9drxwcYHisTln57mpImtw8rgBg/bHxczuvH8XEwzqOGIJi3jP4mtX1PEqtpek5T0khcm8O2GPlZtT1RNGV+NMptFFTctier5I5ww20FazoI1P9PjFtike3MiiBCFMBJYlIUoweuTLMi5agohYOsU9Ju/Z3Q="
+
 before_cache:
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.ivy2 -name "ivydata-*.properties" -delete

@@ -13,16 +13,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package org.economicsl.auctions.singleunit;
+package org.economicsl.auctions;
 
-import org.economicsl.auctions.Tradable;
-import scala.collection.JavaConverters;
-
-public class Service implements Tradable {
+public class AppleStock implements Security {
 
     private long tick = 1;
 
-    public Service(long _tick) {
+    public AppleStock(long _tick) {
         tick = _tick;
     }
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
         pairedOrders
       } else {
         val pair = (askOrders.head, bidOrders.head)
-        loop(askOrders.tail, bidOrders.tail, Stream.cons(pair, pairedOrders))
+        loop(askOrders.tail, bidOrders.tail, pair #:: pairedOrders)
       }
     }
     loop(askOrders, bidOrders, Stream.empty[(LimitAskOrder[T], LimitBidOrder[T])])

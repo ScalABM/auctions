@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
 
   /** The total value of the order */
-  val value: Currency = limit.value * quantity.value
+  val value: Currency = limit.value * quantity.value // todo sort out units!
 
   require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
 
@@ -55,7 +55,7 @@ object SinglePricePoint {
     * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
     */
   def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer))
+    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
   }
 
 }

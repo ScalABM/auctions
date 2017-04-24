@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,24 +20,22 @@ import java.util.UUID
 import org.economicsl.auctions.{AskOrder, Price, Quantity, Tradable}
 
 
-/** Base trait for a limit order to sell some `Tradable`. */
-trait LimitAskOrder[+T <: Tradable] extends AskOrder[T] with SinglePricePoint[T]
+/** An order to sell multiple units of a tradable at a per-unit price greater than or equal to the limit price. */
+class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quantity: Quantity, val tradable: T)
+  extends AskOrder[T] with SinglePricePoint[T]
 
 
 /** Companion object for `LimitAskOrder`.
   *
-  * Provides default ordering as well as constructor for default implementation of `LimitAskOrder` trait.
+  * Provides default ordering for the multi-unit `LimitAskOrder` type.
   */
 object LimitAskOrder {
 
   implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitAskOrder[T] = {
-    SinglePricePointImpl(issuer, limit, quantity, tradable)
+    new LimitAskOrder[T](issuer, limit, quantity, tradable)
   }
-
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
-    extends LimitAskOrder[T]
 
 }
 

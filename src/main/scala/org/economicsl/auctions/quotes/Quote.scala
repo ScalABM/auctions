@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,9 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.pricing
+package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.Price
 
 
-class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)
+sealed trait Quote
+
+trait PriceQuote extends Quote {
+
+  def quote: Price
+
+}
+
+case class AskPriceQuote(quote: Price) extends PriceQuote
+
+case class BidPriceQuote(quote: Price) extends PriceQuote
+
+case class SpreadQuote(quote: Price) extends PriceQuote
