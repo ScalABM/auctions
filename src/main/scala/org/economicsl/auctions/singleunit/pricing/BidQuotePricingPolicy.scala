@@ -19,13 +19,13 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Mth highest price determines the fill price.
+/** (M+1)th highest price determines the fill price.
   *
-  * @note Mth highest price is equivalent to the ask quote. It is incentive compatible for sellers to truthfully reveal
-  *       their respective valuations in single-unit auctions using this pricing rule.
+  * @note (M+1)th highest price is equivalent to the bid quote. It is incentive compatible for buyers to truthfully
+  *       reveal their respective valuations in single-unit auctions using this pricing rule.
   */
-class AskQuotePricingRule[T <: Tradable] extends PricingRule[T, Price] {
+class BidQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 
-  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.askPriceQuote
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.bidPriceQuote
 
 }

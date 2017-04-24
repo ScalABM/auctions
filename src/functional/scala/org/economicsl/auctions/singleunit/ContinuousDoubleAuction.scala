@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.MidPointPricingRule
+import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 import scala.util.Random
@@ -28,7 +28,7 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
   val google: GoogleStock = GoogleStock(tick=1)
   val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val quotePolicy = new PriceQuotePolicy[GoogleStock]
-  val pricingRule = new MidPointPricingRule[GoogleStock]
+  val pricingRule = new MidPointPricingPolicy[GoogleStock]
   val withDiscriminatoryPricing: DoubleAuction[GoogleStock] = DoubleAuction.withOpenOrderBook(orderBook)
                                                                            .withQuotePolicy(quotePolicy)
                                                                            .withDiscriminatoryPricing(pricingRule)
