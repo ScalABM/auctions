@@ -22,7 +22,7 @@ import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingRule, BidQuote
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
-trait Auction[T <: Tradable] extends AuctionLike[T, Auction[T]]
+trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]]
 
 
 object Auction {
@@ -172,13 +172,13 @@ object Auction {
       new ClosedOrderBookImpl(orderBook.remove(order), pricingRule)
     }
 
-    def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
+    def clear: ClearResult[T, Auction[T]] = {
       pricingRule(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new ClosedOrderBookImpl(newOrderBook, pricingRule))
-        case None => (None, new ClosedOrderBookImpl(orderBook, pricingRule))
+          ClearResult(Some(fills), new ClosedOrderBookImpl(newOrderBook, pricingRule))
+        case None => ClearResult(None, new ClosedOrderBookImpl(orderBook, pricingRule))
       }
     }
 
@@ -204,13 +204,13 @@ object Auction {
       new OpenOrderBookImpl(orderBook.remove(order), pricingRule, policy)
     }
 
-    def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
+    def clear: ClearResult[T, Auction[T]] = {
       pricingRule(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new OpenOrderBookImpl(newOrderBook, pricingRule, policy))
-        case None => (None, new OpenOrderBookImpl(orderBook, pricingRule, policy))
+          ClearResult(Some(fills), new OpenOrderBookImpl(newOrderBook, pricingRule, policy))
+        case None => ClearResult(None, new OpenOrderBookImpl(orderBook, pricingRule, policy))
       }
     }
 

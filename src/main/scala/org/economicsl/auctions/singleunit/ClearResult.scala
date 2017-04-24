@@ -15,9 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Price, Tradable}
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.Tradable
 
 
-trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] extends AuctionLike[T, LimitAskOrder[T], A]
+case class ClearResult[T <: Tradable, A <: AuctionLike[T, A]](fills: Option[Stream[Fill[T]]], auctionLike: A)

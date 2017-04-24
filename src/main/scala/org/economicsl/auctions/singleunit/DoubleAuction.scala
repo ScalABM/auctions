@@ -23,7 +23,7 @@ import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
 /** Base trait for all double auction implementations. */
-trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with ReverseAuctionLike[T, DoubleAuction[T]]
+trait DoubleAuction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], DoubleAuction[T]] with ReverseAuctionLike[T, DoubleAuction[T]]
 
 
 object DoubleAuction {
@@ -191,13 +191,13 @@ object DoubleAuction {
       new UniformPriceImpl(orderBook.remove(order), pricingRule)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
       pricingRule(orderBook) match {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new UniformPriceImpl(residual, pricingRule))
-        case None => (None, this)
+          ClearResult(Some(fills), new UniformPriceImpl(residual, pricingRule))
+        case None => ClearResult(None, this)
       }
     }
 
@@ -231,13 +231,13 @@ object DoubleAuction {
       new UniformPriceImpl2(orderBook.remove(order), pricingRule, policy)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
       pricingRule(orderBook) match {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new UniformPriceImpl2(residual, pricingRule, policy))
-        case None => (None, this)
+          ClearResult(Some(fills), new UniformPriceImpl2(residual, pricingRule, policy))
+        case None => ClearResult(None, this)
       }
     }
 
@@ -269,17 +269,18 @@ object DoubleAuction {
       new DiscriminatoryPriceImpl(orderBook.remove(order), pricingRule)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
 
       @annotation.tailrec
-      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): ClearResult[T, DoubleAuction[T]] = {
         val currentPrice = pricingRule(ob)
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
-          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
+          case None =>
+            ClearResult(if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
         }
       }
       loop(Stream.empty, orderBook)
@@ -316,17 +317,18 @@ object DoubleAuction {
       new DiscriminatoryPriceImpl2(orderBook.remove(order), pricingRule, policy)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
 
       @annotation.tailrec
-      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): ClearResult[T, DoubleAuction[T]] = {
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
             val currentPrice = pricingRule(ob)
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
-          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
+          case None =>
+            ClearResult(if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
         }
       }
       loop(Stream.empty, orderBook)
