@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.{Price, Tradable}
 
 
-class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)
+/** Base trait for all pricing rules. */
+trait PricingPolicy[T <: Tradable] extends ((FourHeapOrderBook[T]) => Option[Price])

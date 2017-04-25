@@ -13,24 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Mixin trait providing behaviors relevant for auctions. */
-trait AuctionLike[T <: Tradable, A <: AuctionLike[T, A]] {
+/** (M+1)th highest price determines the fill price.
+  *
+  * @note (M+1)th highest price is equivalent to the bid quote. It is incentive compatible for buyers to truthfully
+  *       reveal their respective valuations in single-unit auctions using this pricing rule.
+  */
+class BidQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 
-  def insert(order: LimitBidOrder[T]): A
-
-  def remove(order: LimitBidOrder[T]): A
-
-  def clear: (Option[Stream[Fill[T]]], A)
-
-  protected def orderBook: FourHeapOrderBook[T]
-
-  protected def pricing: PricingPolicy[T]
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.bidPriceQuote
 
 }

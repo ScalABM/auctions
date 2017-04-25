@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
-import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
@@ -28,17 +28,17 @@ trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with
 
 object DoubleAuction {
 
-  def withDiscriminatoryPricing[T <: Tradable](rule: PricingRule[T, Price]): DoubleAuction[T] = {
+  def withDiscriminatoryPricing[T <: Tradable](policy: PricingPolicy[T]): DoubleAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new DiscriminatoryPriceImpl[T](orderBook, rule)
+    new DiscriminatoryPriceImpl[T](orderBook, policy)
   }
 
-  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price]): DoubleAuction[T] = {
-    new DiscriminatoryPriceImpl[T](orderBook, rule)
+  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: PricingPolicy[T]): DoubleAuction[T] = {
+    new DiscriminatoryPriceImpl[T](orderBook, policy)
   }
 
-  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): DoubleAuction[T] = {
-    new DiscriminatoryPriceImpl2[T](orderBook, rule, policy)
+  def withDiscriminatoryPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], pricing: PricingPolicy[T], quoting: PriceQuotePolicy[T]): DoubleAuction[T] = {
+    new DiscriminatoryPriceImpl2[T](orderBook, pricing, quoting)
   }
 
   def withClosedOrderBook[T <: Tradable]: WithClosedOrderBook[T] = {
@@ -59,17 +59,17 @@ object DoubleAuction {
     new WithOpenOrderBook[T](orderBook)
   }
 
-  def withUniformPricing[T <: Tradable](rule: PricingRule[T, Price]): DoubleAuction[T] = {
+  def withUniformPricing[T <: Tradable](policy: PricingPolicy[T]): DoubleAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new UniformPriceImpl[T](orderBook, rule)
+    new UniformPriceImpl[T](orderBook, policy)
   }
 
-  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price]): DoubleAuction[T] = {
-    new UniformPriceImpl[T](orderBook,rule)
+  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], policy: PricingPolicy[T]): DoubleAuction[T] = {
+    new UniformPriceImpl[T](orderBook, policy)
   }
 
-  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], rule: PricingRule[T, Price], policy: PriceQuotePolicy[T]): DoubleAuction[T] = {
-    new UniformPriceImpl2[T](orderBook, rule, policy)
+  def withUniformPricing[T <: Tradable](orderBook: FourHeapOrderBook[T], pricing: PricingPolicy[T], quoting: PriceQuotePolicy[T]): DoubleAuction[T] = {
+    new UniformPriceImpl2[T](orderBook, pricing, quoting)
   }
 
   sealed abstract class WithOrderBook[T <: Tradable](orderBook: FourHeapOrderBook[T]) {
@@ -103,12 +103,12 @@ object DoubleAuction {
       new WithClosedOrderBook(orderBook.remove(order))
     }
 
-    def withDiscriminatoryPricing(rule: PricingRule[T, Price]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl[T](orderBook, rule)
+    def withDiscriminatoryPricing(policy: PricingPolicy[T]): DoubleAuction[T] = {
+      new DiscriminatoryPriceImpl[T](orderBook, policy)
     }
 
-    def withUniformPricing(rule: PricingRule[T, Price]): DoubleAuction[T] = {
-      new UniformPriceImpl[T](orderBook, rule)
+    def withUniformPricing(policy: PricingPolicy[T]): DoubleAuction[T] = {
+      new UniformPriceImpl[T](orderBook, policy)
     }
 
   }
@@ -128,7 +128,7 @@ object DoubleAuction {
       new WithOpenOrderBook(orderBook.remove(order))
     }
 
-    def remove(order: LimitBidOrder[T]):WithOpenOrderBook[T] = {
+    def remove(order: LimitBidOrder[T]): WithOpenOrderBook[T] = {
       new WithOpenOrderBook(orderBook.remove(order))
     }
 
@@ -161,159 +161,151 @@ object DoubleAuction {
       new WithQuotePolicy(orderBook.remove(order), policy)
     }
 
-    def withDiscriminatoryPricing(pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+    def withDiscriminatoryPricing(pricingRule: PricingPolicy[T]): DoubleAuction[T] = {
       new DiscriminatoryPriceImpl2[T](orderBook, pricingRule, policy)
     }
 
-    def withUniformPricing(pricingRule: PricingRule[T, Price]): DoubleAuction[T] = {
+    def withUniformPricing(pricingRule: PricingPolicy[T]): DoubleAuction[T] = {
       new UniformPriceImpl2[T](orderBook, pricingRule, policy)
     }
 
   }
 
 
-  private[this] class UniformPriceImpl[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
+  private[this] class UniformPriceImpl[T <: Tradable] (protected val orderBook: FourHeapOrderBook[T],
+                                                       protected val pricing: PricingPolicy[T])
     extends DoubleAuction[T] {
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl(orderBook.insert(order), pricingRule)
+      new UniformPriceImpl(orderBook.insert(order), pricing)
     }
 
     def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl(orderBook.insert(order), pricingRule)
+      new UniformPriceImpl(orderBook.insert(order), pricing)
     }
 
     def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl(orderBook.remove(order), pricingRule)
+      new UniformPriceImpl(orderBook.remove(order), pricing)
     }
 
     def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl(orderBook.remove(order), pricingRule)
+      new UniformPriceImpl(orderBook.remove(order), pricing)
     }
 
     def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
-      pricingRule(orderBook) match {
+      pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new UniformPriceImpl(residual, pricingRule))
+          (Some(fills), new UniformPriceImpl(residual, pricing))
         case None => (None, this)
       }
     }
 
-    protected val orderBook: FourHeapOrderBook[T] = _orderBook
-
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
-
   }
 
 
-  private[this] class UniformPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], _policy: PriceQuotePolicy[T])
+  private[this] class UniformPriceImpl2[T <: Tradable] (protected val orderBook: FourHeapOrderBook[T],
+                                                        protected val pricing: PricingPolicy[T],
+                                                        protected val quoting: PriceQuotePolicy[T])
     extends DoubleAuction[T] {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
-      policy(orderBook, request)
+      quoting(orderBook, request)
     }
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl2(orderBook.insert(order), pricingRule, policy)
+      new UniformPriceImpl2(orderBook.insert(order), pricing, quoting)
     }
 
     def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl2(orderBook.insert(order), pricingRule, policy)
+      new UniformPriceImpl2(orderBook.insert(order), pricing, quoting)
     }
 
     def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl2(orderBook.remove(order), pricingRule, policy)
+      new UniformPriceImpl2(orderBook.remove(order), pricing, quoting)
     }
 
     def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new UniformPriceImpl2(orderBook.remove(order), pricingRule, policy)
+      new UniformPriceImpl2(orderBook.remove(order), pricing, quoting)
     }
 
     def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
-      pricingRule(orderBook) match {
+      pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new UniformPriceImpl2(residual, pricingRule, policy))
+          (Some(fills), new UniformPriceImpl2(residual, pricing, quoting))
         case None => (None, this)
       }
     }
 
-    protected val orderBook: FourHeapOrderBook[T] = _orderBook
-
-    protected val policy: PriceQuotePolicy[T] = _policy
-
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
-
   }
 
 
-  private[this] class DiscriminatoryPriceImpl[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price])
+  private[this] class DiscriminatoryPriceImpl[T <: Tradable] (protected val orderBook: FourHeapOrderBook[T],
+                                                              protected val pricing: PricingPolicy[T])
     extends DoubleAuction[T] {
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl(orderBook.insert(order), pricingRule)
+      new DiscriminatoryPriceImpl(orderBook.insert(order), pricing)
     }
 
     def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl(orderBook.insert(order), pricingRule)
+      new DiscriminatoryPriceImpl(orderBook.insert(order), pricing)
     }
 
     def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl(orderBook.remove(order), pricingRule)
+      new DiscriminatoryPriceImpl(orderBook.remove(order), pricing)
     }
 
     def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl(orderBook.remove(order), pricingRule)
+      new DiscriminatoryPriceImpl(orderBook.remove(order), pricing)
     }
 
     def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
 
       @annotation.tailrec
       def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
-        val currentPrice = pricingRule(ob)
+        val currentPrice = pricing(ob)
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
-          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
+          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricing))
         }
       }
       loop(Stream.empty, orderBook)
 
     }
 
-    protected val orderBook: FourHeapOrderBook[T] = _orderBook
-
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
-
   }
 
 
-  private[this] class DiscriminatoryPriceImpl2[T <: Tradable] (_orderBook: FourHeapOrderBook[T], _pricingRule: PricingRule[T, Price], _policy: PriceQuotePolicy[T])
+  private[this] class DiscriminatoryPriceImpl2[T <: Tradable] (protected val orderBook: FourHeapOrderBook[T],
+                                                               protected val pricing: PricingPolicy[T],
+                                                               protected val quoting: PriceQuotePolicy[T])
     extends DoubleAuction[T] {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
-      policy(orderBook, request)
+      quoting(orderBook, request)
     }
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl2(orderBook.insert(order), pricingRule, policy)
+      new DiscriminatoryPriceImpl2(orderBook.insert(order), pricing, quoting)
     }
 
     def insert(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl2(orderBook.insert(order), pricingRule, policy)
+      new DiscriminatoryPriceImpl2(orderBook.insert(order), pricing, quoting)
     }
 
     def remove(order: LimitAskOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl2(orderBook.remove(order), pricingRule, policy)
+      new DiscriminatoryPriceImpl2(orderBook.remove(order), pricing, quoting)
     }
 
     def remove(order: LimitBidOrder[T]): DoubleAuction[T] = {
-      new DiscriminatoryPriceImpl2(orderBook.remove(order), pricingRule, policy)
+      new DiscriminatoryPriceImpl2(orderBook.remove(order), pricing, quoting)
     }
 
     def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
@@ -323,21 +315,15 @@ object DoubleAuction {
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
-            val currentPrice = pricingRule(ob)
+            val currentPrice = pricing(ob)
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
-          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricingRule))
+          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricing))
         }
       }
       loop(Stream.empty, orderBook)
 
     }
-
-    protected val orderBook: FourHeapOrderBook[T] = _orderBook
-
-    protected val policy: PriceQuotePolicy[T] = _policy
-
-    protected val pricingRule: PricingRule[T, Price] = _pricingRule
 
   }
 

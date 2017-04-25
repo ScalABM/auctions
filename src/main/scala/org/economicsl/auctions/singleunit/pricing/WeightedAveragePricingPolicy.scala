@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,13 +19,15 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.{Price, Tradable}
 
 
-/** (M+1)th highest price determines the fill price.
-  *
-  * @note (M+1)th highest price is equivalent to the bid quote. It is incentive compatible for buyers to truthfully
-  *       reveal their respective valuations in single-unit auctions using this pricing rule.
-  */
-class BidQuotePricingRule[T <: Tradable] extends PricingRule[T, Price] {
+class WeightedAveragePricingPolicy[T <: Tradable](weight: Double) extends PricingPolicy[T] {
+  require(0 <= weight && weight <= 1.0)  // individual rationality requirement!
 
-  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.bidPriceQuote
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
+    orderBook.askPriceQuote.flatMap(askPrice => orderBook.bidPriceQuote.map(bidPrice=> average(weight)(bidPrice, askPrice)))
+  }
 
+  private[this] def average(k: Double)(bid: Price, ask: Price): Price = {
+    val weightedAverage = k * bid.value.toDouble + (1 - k) * ask.value.toDouble
+    Price(weightedAverage.round)  // be mindful of possible overflow!
+  }
 }

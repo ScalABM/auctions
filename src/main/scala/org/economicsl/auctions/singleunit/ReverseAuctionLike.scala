@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
 trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
@@ -30,6 +30,6 @@ trait ReverseAuctionLike[T <: Tradable, A <: ReverseAuctionLike[T, A]] {
 
   protected def orderBook: FourHeapOrderBook[T]
 
-  protected def pricingRule: PricingRule[T, Price]
+  protected def pricing: PricingPolicy[T]
 
 }
