@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Order, Tradable}
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -23,7 +23,7 @@ import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
 /** Base trait for all double auction implementations. */
-trait DoubleAuction[T <: Tradable] extends AuctionLike[T, DoubleAuction[T]] with ReverseAuctionLike[T, DoubleAuction[T]]
+trait DoubleAuction[T <: Tradable] extends AuctionLike[T, Order[T] with SingleUnit[T], DoubleAuction[T]]
 
 
 object DoubleAuction {
@@ -175,6 +175,11 @@ object DoubleAuction {
   private[this] class UniformPriceImpl[T <: Tradable] (protected val orderBook: FourHeapOrderBook[T],
                                                        protected val pricing: PricingPolicy[T])
     extends DoubleAuction[T] {
+
+
+    def insert(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = {
+      new UniformPriceImpl(orderBook.insert(order), pricing)
+    }
 
     def insert(order: LimitAskOrder[T]): DoubleAuction[T] = {
       new UniformPriceImpl(orderBook.insert(order), pricing)
