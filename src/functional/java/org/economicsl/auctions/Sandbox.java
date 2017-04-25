@@ -58,9 +58,7 @@ public class Sandbox {
         LimitBidOrder<AppleStock> order10 = new LimitBidOrder<>(issuer, 10, apple);
 
         // Create a four-heap order book and add some orders...
-        FourHeapOrderBook<GoogleStock> orderBook1 = FourHeapOrderBook.empty(
-                LimitAskOrder$.MODULE$.ordering(),
-                LimitBidOrder$.MODULE$.ordering());
+        FourHeapOrderBook<GoogleStock> orderBook1 = FourHeapOrderBook.empty();
 
         FourHeapOrderBook<GoogleStock> orderBook2 = orderBook1.insert(order3);
         FourHeapOrderBook<GoogleStock> orderBook3 = orderBook2.insert(order4);
