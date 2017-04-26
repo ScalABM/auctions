@@ -38,7 +38,7 @@ object SingleUnit {
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
     * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
     */
-  def ordering[O <: Order[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
+  implicit def ordering[O <: Order[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
     multiunit.SinglePricePoint.ordering
   }
 
