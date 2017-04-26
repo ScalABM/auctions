@@ -17,7 +17,7 @@ package org.economicsl.auctions.multiunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{AskOrder, Price, Quantity, Tradable}
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
 /** An order to sell a multiple units of a tradable at any positive price. */

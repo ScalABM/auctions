@@ -15,30 +15,30 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.{AskOrder, BidOrder, Tradable}
-import org.economicsl.auctions.singleunit.SingleUnit
+import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.{AskOrder, BidOrder}
 
 
 private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   // highest bid order value must not exceed the lowest ask order value!
-  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.value <= askOrder.value)))
+  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.limit <= askOrder.limit)))
 
-  def + (order: AskOrder[T] with SingleUnit[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
+  def + (order: AskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
 
-  def + (order: BidOrder[T] with SingleUnit[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders + order)
+  def + (order: BidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders + order)
 
-  def - (order: AskOrder[T] with SingleUnit[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders - order, bidOrders)
+  def - (order: AskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders - order, bidOrders)
 
-  def - (order: BidOrder[T] with SingleUnit[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders - order)
+  def - (order: BidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders - order)
 
-  val askOrdering: Ordering[AskOrder[T] with SingleUnit[T]] = askOrders.ordering
+  val askOrdering: Ordering[AskOrder[T]] = askOrders.ordering
 
-  val bidOrdering: Ordering[BidOrder[T] with SingleUnit[T]] = bidOrders.ordering
+  val bidOrdering: Ordering[BidOrder[T]] = bidOrders.ordering
 
-  def contains(order: AskOrder[T] with SingleUnit[T]): Boolean = askOrders.contains(order)
+  def contains(order: AskOrder[T]): Boolean = askOrders.contains(order)
 
-  def contains(order: BidOrder[T] with SingleUnit[T]): Boolean = bidOrders.contains(order)
+  def contains(order: BidOrder[T]): Boolean = bidOrders.contains(order)
 
 }
 
@@ -54,7 +54,7 @@ private[orderbooks] object UnMatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from high to low based on `limit` price.
     */
-  def empty[T <: Tradable](askOrdering: Ordering[AskOrder[T] with SingleUnit[T]], bidOrdering: Ordering[BidOrder[T] with SingleUnit[T]]): UnMatchedOrders[T] = {
+  def empty[T <: Tradable](askOrdering: Ordering[AskOrder[T]], bidOrdering: Ordering[BidOrder[T]]): UnMatchedOrders[T] = {
     new UnMatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 

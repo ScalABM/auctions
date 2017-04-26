@@ -16,5 +16,18 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Base trait for an order to sell some `Tradable`. */
-trait AskOrder[+T <: Tradable] extends Order[T]
+/** Mixin trait indicating that a `Contract` is `OrderLke`. */
+trait OrderLike[+T <: Tradable] {
+  this: Contract =>
+
+  /** The type of tradable for which the order has been issued. */
+  def tradable: T
+
+}
+
+
+
+
+
+
+
