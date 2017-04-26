@@ -180,7 +180,7 @@ object Auction {
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
           ClearResult(Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
-        case None => ClearResult(None, new ClosedOrderBookImpl(orderBook, pricing))
+        case None => ClearResult(None, this)
       }
     }
 

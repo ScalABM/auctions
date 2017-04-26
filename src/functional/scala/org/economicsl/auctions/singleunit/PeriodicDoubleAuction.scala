@@ -44,8 +44,8 @@ class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
       }
     }
 
-    val (results, _) = withOrders.clear
-    results.map(fills => fills.map(fill => fill.price).toSet).size should be(1)
+    val results = withOrders.clear
+    results.fills.map(_.map(_.price).toSet).size should be(1)
 
   }
 

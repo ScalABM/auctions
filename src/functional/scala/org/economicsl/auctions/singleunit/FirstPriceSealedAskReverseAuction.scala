@@ -37,17 +37,17 @@ class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers with AskO
   val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
 
   val withAsks: ReverseAuction[Service] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
-  val (results, _) = withAsks.clear
+  val results: ClearResult[Service, ReverseAuction[Service]] = withAsks.clear
 
   "A First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
-    results.map(fills => fills.map(fill => fill.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
+    results.fills.map(_.map(_.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
 
   }
 
   "The price paid (received) by the buyer (seller) when using a FPSARA" should "be the lowest offered price" in {
 
-    results.map(fills => fills.map(fill => fill.price)) should be (Some(Stream(offers.min.limit)))
+    results.fills.map(_.map(_.price)) should be (Some(Stream(offers.min.limit)))
 
   }
 

@@ -102,22 +102,17 @@ public class Sandbox {
         DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook4 = withOrderBook3.insert(order9);
         DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook5 = withOrderBook4.insert(order8);
 
-        Clearing<GoogleStock> clearing = new Clearing<GoogleStock>();
-
         // after inserting orders, now we can define the pricing rule...
         DoubleAuction<GoogleStock> auction = withOrderBook5.withUniformPricing(midPointPricing);
-        Optional<Clearing<GoogleStock>.ClearResult<GoogleStock>> result = clearing.clear(auction);
-        result.ifPresent(res -> {
-            res.getFills().forEach(fill -> System.out.println(fill));
-        });
+        ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result = auction.clear();
+        result.fills().map(fills -> fills.foreach(fill -> System.out.println(fill)));
 
         // ...trivial to re-run the same auction with a different pricing rule!
         DoubleAuction<GoogleStock> auction2 = withOrderBook5.withUniformPricing(askQuotePricing);
-        Optional<Clearing<GoogleStock>.ClearResult<GoogleStock>> result2 = clearing.clear(auction2);
-        result2.ifPresent(res -> {
-            res.getFills().forEach(fill -> System.out.println(fill));
-        });
+        ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result2 = auction2.clear();
+        result2.fills().map(fills -> fills.foreach(fill -> System.out.println(fill)));
 
         // TODO: extend with quotes
     }
+    
 }
