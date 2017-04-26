@@ -8,7 +8,7 @@
    "oss.sonatype.org", 
    username,
    password)
-).getOrElse(credentials ++= Seq())
+).getOrElse(credentials ++= Seq());
 
 // To sync with Maven central, you need to supply the following information...
 pomExtra in Global := {
