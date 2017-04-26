@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,17 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.{Price, Tradable}
 
 
-class MidPointPricingRule[T <: Tradable] extends WeightedAveragePricingRule[T](0.5)
+/** Mth highest price determines the fill price.
+  *
+  * @note Mth highest price is equivalent to the ask quote. It is incentive compatible for sellers to truthfully reveal
+  *       their respective valuations in single-unit auctions using this pricing rule.
+  */
+class AskQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
+
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.askPriceQuote
+
+}

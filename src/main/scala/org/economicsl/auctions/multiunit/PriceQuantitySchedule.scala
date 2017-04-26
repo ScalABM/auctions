@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.{Order, Price, Quantity, Tradable}
+import org.economicsl.auctions._
 
 import scala.collection.GenIterable
 

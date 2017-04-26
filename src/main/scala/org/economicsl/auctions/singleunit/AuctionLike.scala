@@ -1,27 +1,12 @@
-/*
-Copyright 2017 EconomicSL
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Order, Price, Tradable}
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingRule
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
 /** Mixin trait providing behaviors relevant for auctions. */
-trait AuctionLike[T <: Tradable, O <: Order[T] with SingleUnit[T], A <: AuctionLike[T, O, A]] {
+trait AuctionLike[T <: Tradable, O <: Order[T], +A <: AuctionLike[T, O, A]] {
 
   def insert(order: O): A
 
@@ -31,6 +16,6 @@ trait AuctionLike[T <: Tradable, O <: Order[T] with SingleUnit[T], A <: AuctionL
 
   protected def orderBook: FourHeapOrderBook[T]
 
-  protected def pricingRule: PricingRule[T, Price]
+  protected def pricing: PricingPolicy[T]
 
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,32 +15,22 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Order, Quantity, Tradable, multiunit}
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
-/** Mixin trait that restricts the quantity of an `Order with SinglePricePoint` to a single unit of a `Tradable`. */
-trait SingleUnit[+T <: Tradable] extends multiunit.SinglePricePoint[T] {
+/** Mixin trait that restricts the quantity of an `Order` to a single unit of a `Tradable`. */
+trait SingleUnit[+T <: Tradable] {
   this: Order[T]  =>
+
+  /** Limit price (per unit of the `Tradable`) for the Order.
+    *
+    * The limit price imposes an upper (lower) bound on a bid (ask) order.
+    */
+  def limit: Price
 
   val quantity = Quantity(1)
 
-}
-
-
-/** Companion object for the `SingleUnit` trait.
-  *
-  * Defines a basic ordering for anything that mixes in the `SingleUnit` trait.
-  */
-object SingleUnit {
-
-  /** All `Order` instances that mixin `SingleUnit` are ordered by `limit` from lowest to highest.
-    *
-    * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
-    */
-  def ordering[O <: Order[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
-    multiunit.SinglePricePoint.ordering
-  }
+  require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
 
 }
 

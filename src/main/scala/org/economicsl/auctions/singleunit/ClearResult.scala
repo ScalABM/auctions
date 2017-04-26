@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,4 +18,4 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions.Tradable
 
 
-case class ClearResult[T <: Tradable, A <: AuctionLike[T, A]](fills: Option[Stream[Fill[T]]], auctionLike: A)
+case class ClearResult[T <: Tradable, +A <: AuctionLike[T, _ <: Order[T], A]](fills: Option[Stream[Fill[T]]], auction: A)

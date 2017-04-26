@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,9 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.MidPointPricingRule
-import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
+import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -36,7 +34,7 @@ class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
-    val pricingRule = new MidPointPricingRule[GoogleStock]
+    val pricingRule = new MidPointPricingPolicy[GoogleStock]
     val withUniformPricing: DoubleAuction[GoogleStock] = DoubleAuction.withUniformPricing(pricingRule)
 
     val withOrders: DoubleAuction[GoogleStock] = orders.foldLeft(withUniformPricing) { case (auction, order) =>

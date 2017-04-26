@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,6 +15,13 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import java.util.UUID
+
 
 /** Type used to indicate that something is a contract. */
-trait Contract
+trait Contract {
+
+  /** Some kind of unique identifier indicating the actor for whom this `Contract` is a liability. */
+  def issuer: UUID
+
+}

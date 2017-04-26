@@ -19,7 +19,6 @@ case class AppleStock(tick: Currency) extends Security
 val issuer = UUID.randomUUID()
 val google = GoogleStock(tick=1)
 val order1: multiunit.LimitAskOrder[GoogleStock] = multiunit.LimitAskOrder(issuer, Price(10), Quantity(100), google)
-order1.value
 
 // Create a multi-unit market ask order...
 val order2: multiunit.MarketAskOrder[GoogleStock] = multiunit.MarketAskOrder(issuer, Quantity(100), google)
@@ -44,29 +43,29 @@ val order10: singleunit.LimitBidOrder[AppleStock] = singleunit.LimitBidOrder(iss
 
 // Create a four-heap order book and add some orders...
 val orderBook = FourHeapOrderBook.empty[GoogleStock]
-val orderBook2 = orderBook + order3
-val orderBook3 = orderBook2 + order4
-val orderBook4 = orderBook3 + order9
-val orderBook5 = orderBook4 + order8
+val orderBook2 = orderBook.insert(order3)
+val orderBook3 = orderBook2.insert(order4)
+val orderBook4 = orderBook3.insert(order9)
+val orderBook5 = orderBook4.insert(order8)
 
 
 // this should not compile...and it doesn't!
 // orderBook5 + order10
 
 // example of a uniform price auction that would be incentive compatible for the sellers...
-val askQuotePricing = new AskQuotePricingRule[GoogleStock]()
+val askQuotePricing = new AskQuotePricingPolicy[GoogleStock]()
 val price1 = askQuotePricing(orderBook5)
 
 // example of a uniform price auction that would be incentive compatible for the buyers...
-val bidQuotePricing = new BidQuotePricingRule[GoogleStock]()
+val bidQuotePricing = new BidQuotePricingPolicy[GoogleStock]()
 val price2 = bidQuotePricing(orderBook5)
 
 // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-val midPointPricing = new MidPointPricingRule[GoogleStock]
+val midPointPricing = new MidPointPricingPolicy[GoogleStock]
 val midPrice = midPointPricing(orderBook5)
 
 // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-val averagePricing = new WeightedAveragePricingRule[GoogleStock](0.75)
+val averagePricing = new WeightedAveragePricingPolicy[GoogleStock](0.75)
 val averagePrice = averagePricing(orderBook5)
 
 // example usage of a double auction where we don't want to define the pricing rule until later...
