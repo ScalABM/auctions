@@ -1,3 +1,12 @@
+// Necessary in order for Travis to find the encrypted Sonatype credentials
+val username = Option(System.getenv().get("SONATYPE_USERNAME"))
+val password = Option(System.getenv().get("SONATYPE_PASSWORD"))
+credentials += Credentials(
+  "Sonatype Nexus Repository Manager",
+  "oss.sonatype.org",
+  username,
+  password)
+
 // To sync with Maven central, you need to supply the following information...
 pomExtra in Global :=
   <url>https://github.com/EconomicSL/auctions</url>
