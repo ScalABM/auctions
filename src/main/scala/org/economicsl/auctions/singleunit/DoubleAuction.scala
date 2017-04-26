@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{AskOrder, BidOrder, Order, Tradable}
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -177,16 +177,16 @@ object DoubleAuction {
     extends DoubleAuction[T] {
 
     def insert(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new UniformPriceImpl(orderBook.insert(offer), pricing)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new UniformPriceImpl(orderBook.insert(bid), pricing)
     }
 
     def remove(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new UniformPriceImpl(orderBook.remove(offer), pricing)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new UniformPriceImpl(orderBook.remove(bid), pricing)
     }
 
@@ -213,16 +213,16 @@ object DoubleAuction {
     }
 
     def insert(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new UniformPriceImpl2(orderBook.insert(offer), pricing, quoting)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new UniformPriceImpl2(orderBook.insert(bid), pricing, quoting)
     }
 
     def remove(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new UniformPriceImpl2(orderBook.remove(offer), pricing, quoting)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new UniformPriceImpl2(orderBook.remove(bid), pricing, quoting)
     }
 
@@ -244,16 +244,16 @@ object DoubleAuction {
     extends DoubleAuction[T] {
 
     def insert(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new DiscriminatoryPriceImpl(orderBook.insert(offer), pricing)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new DiscriminatoryPriceImpl(orderBook.insert(bid), pricing)
     }
 
     def remove(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new DiscriminatoryPriceImpl(orderBook.remove(offer), pricing)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new DiscriminatoryPriceImpl(orderBook.remove(bid), pricing)
     }
 
@@ -287,16 +287,16 @@ object DoubleAuction {
     }
 
     def insert(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new DiscriminatoryPriceImpl2(orderBook.insert(offer), pricing, quoting)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new DiscriminatoryPriceImpl2(orderBook.insert(bid), pricing, quoting)
     }
 
     def remove(order: Order[T] with SingleUnit[T]): DoubleAuction[T] = order match {
-      case offer: AskOrder[T] with SingleUnit[T] =>
+      case offer: AskOrder[T] =>
         new DiscriminatoryPriceImpl2(orderBook.remove(offer), pricing, quoting)
-      case bid: BidOrder[T] with SingleUnit[T] =>
+      case bid: BidOrder[T] =>
         new DiscriminatoryPriceImpl2(orderBook.remove(bid), pricing, quoting)
     }
 

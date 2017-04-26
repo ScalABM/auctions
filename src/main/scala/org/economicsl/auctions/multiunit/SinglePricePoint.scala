@@ -35,9 +35,6 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
 
-  /** The total value of the order */
-  val value: Currency = limit.value * quantity.value // todo sort out units!
-
   require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
 
 }
@@ -52,7 +49,7 @@ object SinglePricePoint {
   /** All `Order` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
     *
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
+    * @return `Ordering` defined over `Order[T] with SinglePricePoint[T]` instances.
     */
   def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
     Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!

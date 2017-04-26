@@ -15,15 +15,18 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions._
+import java.util.UUID
+
+import org.economicsl.auctions.{Contract, Price, Tradable}
 
 
 /** Note that a Fill is also a type of Contract! */
-case class Fill[T <: Tradable](askOrder: AskOrder[T] with SingleUnit[T], bidOrder: BidOrder[T] with SingleUnit[T], price: Price) extends Contract {
+case class Fill[T <: Tradable](askOrder: AskOrder[T], bidOrder: BidOrder[T], price: Price) extends Contract {
+
+  /** By convention a `Fill` represents a liability of the buyer */
+  val issuer: UUID = bidOrder.issuer
 
   require(askOrder.limit <= price, s"Fill price of $price, is not greater than seller's limit price of ${askOrder.limit}.")
-  require(price <= bidOrder.limit,  s"Fill price of $price, is not less than buyer's limit price of ${askOrder.limit}.")
-
-  val quantity: Quantity = askOrder.quantity min bidOrder.quantity
+  require(price <= bidOrder.limit,  s"Fill price of $price, is not less than buyer's limit price of ${bidOrder.limit}.")
 
 }
