@@ -25,6 +25,7 @@ script:
 after_success:
   - sbt coverageReport
   - sbt codacyCoverage
+  - "[[ $TRAVIS_BRANCH == \"develop\" ]] && { sbt publish; };"
   
 env:
   global:
