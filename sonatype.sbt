@@ -1,7 +1,7 @@
 // Necessary in order for Travis to find the encrypted Sonatype credentials
 (for {
-  username = Option(System.getenv().get("SONATYPE_USERNAME"))
-  password = Option(System.getenv().get("SONATYPE_PASSWORD"))
+  username <- Option(System.getenv().get("SONATYPE_USERNAME"))
+  password <- Option(System.getenv().get("SONATYPE_PASSWORD"))
 } yield
  credentials += Credentials(
    "Sonatype Nexus Repository Manager",
