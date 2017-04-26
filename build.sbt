@@ -9,6 +9,19 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalactic" %% "scalactic" % "3.0.1"
   ),
+  resolvers ++= Seq(
+    "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases"
+  ),
+  publishTo := {
+    val nexus = "https://oss.sonatype.org/"
+    if (isSnapshot.value) {
+      Some("snapshots" at nexus + "content/repositories/snapshots")
+    } else {
+      Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    }
+  },
+  publishMavenStyle := true,
   scalacOptions ++= Seq(
     "-feature",  // tells the compiler to provide information about misused language features
     "-language:implicitConversions",  // eliminates the need to import implicit conversions for each usage
