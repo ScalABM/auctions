@@ -1,7 +1,7 @@
 // define some common build settings used by core auctions API as well as the various testing configurations
 lazy val commonSettings = Seq(
   scalaVersion := "2.12.1" ,
-  name := "auctions",
+  name := "esl-auctions",
   version := "0.1.0-SNAPSHOT",
   organization := "org.economicsl",
   organizationName := "EconomicSL",
