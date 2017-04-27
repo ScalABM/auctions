@@ -3,8 +3,6 @@
 #if [ $TRAVIS_BRANCH == "develop" && $TRAVIS_EVENT_TYPE == "cron" ]; then
 if [ $TRAVIS_BRANCH == "develop" ]; then
 
-  REALM="Sonatype Nexus Repository Manager"
-  HOST="oss.sonatype.org"
-  sbt 'set credentials += Credentials("'$REALM'", "'$HOST'", "'$SONATYPE_USERNAME'", "'$SONATYPE_PASSWORD'")' publish
+  sbt 'set credentials += Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", System.getenv("SONATYPE_USERNAME"), System.getenv("SONATYPE_USERNAME"))' publish
 
 fi
