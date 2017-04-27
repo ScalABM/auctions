@@ -24,8 +24,6 @@ after_success:
   - sbt coverageReport
   - sbt codacyCoverage
   - scripts/publish.sh
-  #- "[[ $TRAVIS_BRANCH == \"develop\" ]] && { sbt 'set credentials += Credentials(\"Sonatype Nexus Repository Manager\", \"oss.sonatype.org\", System.getenv(\"SONATYPE_USERNAME\"), System.getenv(\"SONATYPE_PASSWORD\"))'; sbt publish };"
-  #- sbt publish
   
 env:
   global:
