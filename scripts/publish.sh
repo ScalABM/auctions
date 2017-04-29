@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 set -e  # Needed in order for Travis CI to report failure if publish.sh fails!
 
 if [ $TRAVIS_BRANCH == "develop" ] && [ $TRAVIS_EVENT_TYPE == "cron" ]; then
