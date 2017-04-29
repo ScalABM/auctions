@@ -25,9 +25,9 @@ trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
 }
 
 
-/** Companion object for the `SinglePricePoint` trait.
+/** Companion object for the `SingleUnit` trait.
   *
-  * Defines a basic ordering for anything that mixes in the `SinglePricePoint` trait.
+  * Defines a basic ordering for anything that mixes in the `SingleUnit` trait.
   */
 object SingleUnit {
 
