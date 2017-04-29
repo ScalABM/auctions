@@ -1,13 +1,17 @@
 // define some common build settings used by core auctions API as well as the various testing configurations
 lazy val commonSettings = Seq(
   scalaVersion := "2.12.1" ,
-  name := "auctions",
-  version := "0.1.0-alpha-SNAPSHOT",
+  name := "esl-auctions",
+  version := "0.1.0-SNAPSHOT",
   organization := "org.economicsl",
   organizationName := "EconomicSL",
   organizationHomepage := Some(url("https://economicsl.github.io/")),
   libraryDependencies ++= Seq(
     "org.scalactic" %% "scalactic" % "3.0.1"
+  ),
+  resolvers ++= Seq(
+    "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+    "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases"
   ),
   scalacOptions ++= Seq(
     "-feature",  // tells the compiler to provide information about misused language features
