@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Contract, OrderLike, Tradable}
+import org.economicsl.auctions.{Contract, OrderLike, SingleUnit, Tradable}
 
 
 sealed trait Order[+T <: Tradable] extends Contract with OrderLike[T] with SingleUnit[T]
@@ -33,7 +33,7 @@ object Order {
     * @return an `Ordering` defined over `Order` instances.
     */
   implicit def ordering[O <: Order[_ <: Tradable]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
+    SingleUnit.ordering
   }
 
 }

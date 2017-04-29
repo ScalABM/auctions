@@ -13,16 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit
-
-import org.economicsl.auctions._
+package org.economicsl.auctions
 
 import scala.collection.GenIterable
 
 
 /** Mixin trait providing a schedule of price-quantity pairs for an order. */
 trait PriceQuantitySchedule[+T <: Tradable] {
-  this: Order[T] =>
+  this: Contract with OrderLike[T] =>
 
   type PricePoint = (Price, Quantity)
 
