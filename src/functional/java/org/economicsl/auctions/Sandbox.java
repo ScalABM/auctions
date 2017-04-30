@@ -15,7 +15,6 @@
 
 package org.economicsl.auctions;
 
-import org.economicsl.auctions.Price;
 import org.economicsl.auctions.singleunit.*;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
@@ -23,8 +22,8 @@ import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy;
 import scala.Option;
+import scala.collection.JavaConverters;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class Sandbox {
@@ -105,12 +104,14 @@ public class Sandbox {
         // after inserting orders, now we can define the pricing rule...
         DoubleAuction<GoogleStock> auction = withOrderBook5.withUniformPricing(midPointPricing);
         ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result = auction.clear();
-        result.fills().map(fills -> fills.foreach(fill -> System.out.println(fill)));
+        java.util.List<Fill<GoogleStock>> fills = JavaConverters.seqAsJavaList(result.fills().get().toList());
+        fills.forEach(System.out::println);
 
         // ...trivial to re-run the same auction with a different pricing rule!
         DoubleAuction<GoogleStock> auction2 = withOrderBook5.withUniformPricing(askQuotePricing);
         ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result2 = auction2.clear();
-        result2.fills().map(fills -> fills.foreach(fill -> System.out.println(fill)));
+        java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(result.fills().get().toList());
+        fills2.forEach(System.out::println);
 
         // TODO: extend with quotes
     }
