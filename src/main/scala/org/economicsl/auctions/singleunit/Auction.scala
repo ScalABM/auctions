@@ -22,7 +22,7 @@ import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuo
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
-trait Auction[T <: Tradable] extends AuctionLike[T, Auction[T]]
+trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]]
 
 
 object Auction {

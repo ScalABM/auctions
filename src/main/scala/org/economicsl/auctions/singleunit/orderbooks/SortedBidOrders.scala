@@ -15,31 +15,31 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.{BidOrder, Quantity, Tradable}
-import org.economicsl.auctions.singleunit.SingleUnit
+import org.economicsl.auctions.{Quantity, Tradable}
+import org.economicsl.auctions.singleunit.BidOrder
 
 import scala.collection.immutable
 
 
-class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[T] with SingleUnit[T]], val numberUnits: Quantity) {
+class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[T]], val numberUnits: Quantity) {
 
-  def + (order: BidOrder[T] with SingleUnit[T]): SortedBidOrders[T] = {
+  def + (order: BidOrder[T]): SortedBidOrders[T] = {
     new SortedBidOrders(orders + order, numberUnits + order.quantity)
   }
 
-  def - (order: BidOrder[T] with SingleUnit[T]): SortedBidOrders[T] = {
+  def - (order: BidOrder[T]): SortedBidOrders[T] = {
     new SortedBidOrders(orders - order, numberUnits - order.quantity)
   }
 
-  def contains(order: BidOrder[T] with SingleUnit[T]): Boolean = orders.contains(order)
+  def contains(order: BidOrder[T]): Boolean = orders.contains(order)
 
-  def  head: BidOrder[T] with SingleUnit[T] = orders.head
+  def  head: BidOrder[T] = orders.head
 
-  val headOption: Option[BidOrder[T] with SingleUnit[T]] = orders.headOption
+  val headOption: Option[BidOrder[T]] = orders.headOption
 
   val isEmpty: Boolean = orders.isEmpty
 
-  val ordering: Ordering[BidOrder[T] with SingleUnit[T]] = orders.ordering
+  val ordering: Ordering[BidOrder[T]] = orders.ordering
 
   def tail: SortedBidOrders[T] = new SortedBidOrders(orders.tail, numberUnits - head.quantity)
 
@@ -47,8 +47,8 @@ class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[
 
 object SortedBidOrders {
 
-  def empty[T <: Tradable](ordering: Ordering[BidOrder[T] with SingleUnit[T]]): SortedBidOrders[T] = {
-    new SortedBidOrders(immutable.TreeSet.empty[BidOrder[T] with SingleUnit[T]](ordering), Quantity(0))
+  def empty[T <: Tradable](ordering: Ordering[BidOrder[T]]): SortedBidOrders[T] = {
+    new SortedBidOrders(immutable.TreeSet.empty[BidOrder[T]](ordering), Quantity(0))
   }
 
 }

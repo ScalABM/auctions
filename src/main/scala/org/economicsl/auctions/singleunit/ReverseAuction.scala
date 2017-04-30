@@ -22,7 +22,7 @@ import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, Pricin
 import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
 
 
-trait ReverseAuction[T <: Tradable] extends ReverseAuctionLike[T, ReverseAuction[T]]
+trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]]
 
 
 object ReverseAuction {

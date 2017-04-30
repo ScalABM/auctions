@@ -15,5 +15,18 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import scala.collection.GenIterable
 
-abstract class AbstractTradable(val tick: Currency) extends Tradable
+
+/** Mixin trait providing a schedule of price-quantity pairs for an order. */
+trait PriceQuantitySchedule[+T <: Tradable] {
+  this: Contract with OrderLike[T] =>
+
+  type PricePoint = (Price, Quantity)
+
+  /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
+    * of a `Tradable` at specific, discrete price-points.
+    */
+  def schedule: GenIterable[PricePoint]
+
+}

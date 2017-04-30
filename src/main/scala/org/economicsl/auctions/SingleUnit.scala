@@ -13,14 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
-
-import org.economicsl.auctions.{Order, Quantity, Tradable, multiunit}
+package org.economicsl.auctions
 
 
-/** Mixin trait that restricts the quantity of an `Order with SinglePricePoint` to a single unit of a `Tradable`. */
-trait SingleUnit[+T <: Tradable] extends multiunit.SinglePricePoint[T] {
-  this: Order[T]  =>
+/** Mixin trait that restricts the quantity of an `Order` to a single unit of a `Tradable`. */
+trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
+  this: Contract with OrderLike[T] =>
 
   val quantity = Quantity(1)
 
@@ -33,14 +31,13 @@ trait SingleUnit[+T <: Tradable] extends multiunit.SinglePricePoint[T] {
   */
 object SingleUnit {
 
-  /** All `Order` instances that mixin `SingleUnit` are ordered by `limit` from lowest to highest.
+  /** All `Contract with OrderLike` instances that mixin `SingleUnit` are ordered by `limit` from lowest to highest.
     *
-    * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
+    * @tparam O the sub-type of `Contract with OrderLike[_] with SingleUnit[_]` that is being ordered.
+    * @return `Ordering` defined over `Contract with OrderLike[_] with SingleUnit[_]` instances.
     */
-  implicit def ordering[O <: Order[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
-    multiunit.SinglePricePoint.ordering
+  def ordering[O <: Contract with OrderLike[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
+    SinglePricePoint.ordering
   }
 
 }
-
