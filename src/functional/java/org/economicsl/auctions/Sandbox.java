@@ -110,7 +110,7 @@ public class Sandbox {
         // ...trivial to re-run the same auction with a different pricing rule!
         DoubleAuction<GoogleStock> auction2 = withOrderBook5.withUniformPricing(askQuotePricing);
         ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result2 = auction2.clear();
-        java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(result.fills().get().toList());
+        java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(result2.fills().get().toList());
         fills2.forEach(System.out::println);
 
         // TODO: extend with quotes
