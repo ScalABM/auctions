@@ -17,6 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.singleunit.reverse.ReverseAuction
 import org.economicsl.auctions.{Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 

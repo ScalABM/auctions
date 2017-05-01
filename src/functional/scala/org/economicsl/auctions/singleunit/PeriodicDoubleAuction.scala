@@ -17,6 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
+import org.economicsl.auctions.singleunit.twosided.DoubleAuction
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random

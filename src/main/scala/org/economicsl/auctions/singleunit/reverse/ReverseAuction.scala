@@ -13,13 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.singleunit._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, PricingPolicy}
 import org.economicsl.auctions.singleunit.quoting.PriceQuotePolicy
+import org.economicsl.auctions.{Price, Tradable}
 
 
 trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]]
