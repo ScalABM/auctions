@@ -19,7 +19,7 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
-import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
+import org.economicsl.auctions.singleunit.quoting.PriceQuotePolicy
 
 
 trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]]

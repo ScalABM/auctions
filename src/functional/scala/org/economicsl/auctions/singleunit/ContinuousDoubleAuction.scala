@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
-import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
+import org.economicsl.auctions.singleunit.quoting.PriceQuotePolicy
 
 import scala.util.Random
 

@@ -5,7 +5,7 @@ import org.economicsl.auctions.quotes.{AskPriceQuoteRequest, BidPriceQuoteReques
 import org.economicsl.auctions.singleunit.DoubleAuction
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing._
-import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
+import org.economicsl.auctions.singleunit.quoting.PriceQuotePolicy
 
 
 /** Example `Tradable` object. */

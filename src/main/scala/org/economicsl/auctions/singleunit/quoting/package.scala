@@ -16,4 +16,4 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 
-package object quotes
+package object quoting
