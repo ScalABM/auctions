@@ -169,8 +169,8 @@ object DoubleAuction {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          ClearResult(Some(fills), new UniformPriceImpl(residual, pricing))
-        case None => ClearResult(None, this)
+          ClearResult[T, DoubleAuction[T]](Some(fills), new UniformPriceImpl(residual, pricing))
+        case None => ClearResult[T, DoubleAuction[T]](None, this)
       }
     }
 
@@ -201,8 +201,8 @@ object DoubleAuction {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          ClearResult(Some(fills), new UniformPriceImpl2(residual, pricing, quoting))
-        case None => ClearResult(None, this)
+          ClearResult[T, DoubleAuction[T] with PriceQuoting](Some(fills), new UniformPriceImpl2(residual, pricing, quoting))
+        case None => ClearResult[T, DoubleAuction[T] with PriceQuoting](None, this)
       }
     }
 
@@ -234,7 +234,8 @@ object DoubleAuction {
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
           case None =>
-            ClearResult(if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricing))
+            val results = if (fills.nonEmpty) Some(fills) else None
+            ClearResult[T, DoubleAuction[T]](results, new DiscriminatoryPriceImpl(residual, pricing))
         }
       }
       loop(Stream.empty, orderBook)
@@ -274,7 +275,8 @@ object DoubleAuction {
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
           case None =>
-            ClearResult(if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl2(residual, pricing, quoting))
+            val results = if (fills.nonEmpty) Some(fills) else None
+            ClearResult[T, DoubleAuction[T] with PriceQuoting](results, new DiscriminatoryPriceImpl2(residual, pricing, quoting))
         }
       }
       loop(Stream.empty, orderBook)
