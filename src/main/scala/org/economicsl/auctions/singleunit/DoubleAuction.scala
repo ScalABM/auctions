@@ -164,13 +164,13 @@ object DoubleAuction {
       case bid: BidOrder[T] => new UniformPriceImpl(orderBook.remove(bid), pricing)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]]  = {
       pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new UniformPriceImpl(residual, pricing))
-        case None => (None, this)
+          ClearResult(Some(fills), new UniformPriceImpl(residual, pricing))
+        case None => ClearResult(None, this)
       }
     }
 
@@ -196,13 +196,13 @@ object DoubleAuction {
       case bid: BidOrder[T] => new UniformPriceImpl2(orderBook.remove(bid), pricing, quoting)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
       pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new UniformPriceImpl2(residual, pricing, quoting))
-        case None => (None, this)
+          ClearResult(Some(fills), new UniformPriceImpl2(residual, pricing, quoting))
+        case None => ClearResult(None, this)
       }
     }
 
@@ -223,17 +223,18 @@ object DoubleAuction {
       case bid: BidOrder[T] => new DiscriminatoryPriceImpl(orderBook.remove(bid), pricing)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
 
       @annotation.tailrec
-      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): ClearResult[T, DoubleAuction[T]] = {
         val currentPrice = pricing(ob)
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
-          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricing))
+          case None =>
+            ClearResult(if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl(residual, pricing))
         }
       }
       loop(Stream.empty, orderBook)
@@ -262,17 +263,18 @@ object DoubleAuction {
       case bid: BidOrder[T] => new DiscriminatoryPriceImpl2(orderBook.remove(bid), pricing, quoting)
     }
 
-    def clear: (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+    def clear: ClearResult[T, DoubleAuction[T]] = {
 
       @annotation.tailrec
-      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Option[Stream[Fill[T]]], DoubleAuction[T]) = {
+      def loop(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): ClearResult[T, DoubleAuction[T]] = {
         val (bestMatch, residual) = ob.takeBestMatched
         bestMatch match {
           case Some((askOrder, bidOrder)) =>
             val currentPrice = pricing(ob)
             val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
             loop(fill.fold(fills)(_ #:: fills), residual)
-          case None => (if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl2(residual, pricing, quoting))
+          case None =>
+            ClearResult(if (fills.nonEmpty) Some(fills) else None, new DiscriminatoryPriceImpl2(residual, pricing, quoting))
         }
       }
       loop(Stream.empty, orderBook)

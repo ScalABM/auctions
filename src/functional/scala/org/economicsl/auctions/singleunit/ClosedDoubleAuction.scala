@@ -60,8 +60,8 @@ class ClosedDoubleAuction extends FlatSpec with Matchers {
     val withOrders = offers.foldLeft(withBids)((auction, askOrder) => auction.insert(askOrder))
 
     // without rationing, the number of fills should match the number of orders
-    val (results, _) = withOrders.clear
-    results.map(fills => fills.length) should be(Some(numberOrders))
+    val results = withOrders.clear
+    results.fills.map(_.length) should be(Some(numberOrders))
 
   }
 

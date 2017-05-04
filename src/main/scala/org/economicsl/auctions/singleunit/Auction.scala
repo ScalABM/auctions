@@ -174,13 +174,13 @@ object Auction {
       new ClosedOrderBookImpl(orderBook.remove(order), pricing)
     }
 
-    def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
+    def clear: ClearResult[T, Auction[T]] = {
       pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
-        case None => (None, new ClosedOrderBookImpl(orderBook, pricing))
+          ClearResult(Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
+        case None => ClearResult(None, this)
       }
     }
 
@@ -204,13 +204,13 @@ object Auction {
       new OpenOrderBookImpl(orderBook.remove(order), pricing, quoting)
     }
 
-    def clear: (Option[Stream[Fill[T]]], Auction[T]) = {
+    def clear: ClearResult[T, Auction[T]] = {
       pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          (Some(fills), new OpenOrderBookImpl(newOrderBook, pricing, quoting))
-        case None => (None, new OpenOrderBookImpl(orderBook, pricing, quoting))
+          ClearResult(Some(fills), new OpenOrderBookImpl(newOrderBook, pricing, quoting))
+        case None => ClearResult(None, new OpenOrderBookImpl(orderBook, pricing, quoting))
       }
     }
 
