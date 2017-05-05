@@ -19,7 +19,7 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
-import org.economicsl.auctions.singleunit.quoting.PriceQuotePolicy
+import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
 trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]]
@@ -179,8 +179,8 @@ object Auction {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          ClearResult(Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
-        case None => ClearResult(None, this)
+          ClearResult[T, Auction[T]](Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
+        case None => ClearResult[T, Auction[T]](None, this)
       }
     }
 
@@ -190,27 +190,27 @@ object Auction {
   private[this] class OpenOrderBookImpl[T <: Tradable](protected val orderBook: FourHeapOrderBook[T],
                                                        protected val pricing: PricingPolicy[T],
                                                        protected val quoting: PriceQuotePolicy[T])
-    extends Auction[T] {
+    extends Auction[T] with PriceQuoting {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
       quoting(orderBook, request)
     }
 
-    def insert(order: LimitBidOrder[T]): Auction[T] = {
+    def insert(order: LimitBidOrder[T]): Auction[T] with PriceQuoting = {
       new OpenOrderBookImpl(orderBook.insert(order), pricing, quoting)
     }
 
-    def remove(order: LimitBidOrder[T]): Auction[T] = {
+    def remove(order: LimitBidOrder[T]): Auction[T] with PriceQuoting = {
       new OpenOrderBookImpl(orderBook.remove(order), pricing, quoting)
     }
 
-    def clear: ClearResult[T, Auction[T]] = {
+    def clear: ClearResult[T, Auction[T] with PriceQuoting] = {
       pricing(orderBook) match {
         case Some(price) =>
-          val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
+          val (pairedOrders, residual) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          ClearResult(Some(fills), new OpenOrderBookImpl(newOrderBook, pricing, quoting))
-        case None => ClearResult(None, new OpenOrderBookImpl(orderBook, pricing, quoting))
+          ClearResult[T, Auction[T] with PriceQuoting](Some(fills), new OpenOrderBookImpl(residual, pricing, quoting))
+        case None => ClearResult[T, Auction[T] with PriceQuoting](None, new OpenOrderBookImpl(orderBook, pricing, quoting))
       }
     }
 
