@@ -19,4 +19,3 @@ import org.economicsl.auctions.Tradable
 
 
 case class ClearResult[T <: Tradable, +A <: Auction[T]](fills: Option[Stream[Fill[T]]], residual: A)
-  extends ClearResultLike[T, BidOrder[T], A]

@@ -24,7 +24,7 @@ import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuotin
 
 
 /** Base trait for all double auction implementations. */
-trait DoubleAuction[T <: Tradable] extends AuctionLike[T, Order[T], DoubleAuction[T]]
+trait DoubleAuction[T <: Tradable] extends DoubleAuctionLike[T, _ <: DoubleAuction[T]]
 
 
 object DoubleAuction {

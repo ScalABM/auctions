@@ -23,7 +23,11 @@ import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, Pricin
 import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
-trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]]
+trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]] {
+
+  def clear: ClearResult[T, ReverseAuction[T]]
+
+}
 
 
 object ReverseAuction {
