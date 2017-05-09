@@ -19,5 +19,5 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.Fill
 
 
-case class ClearResult[T <: Tradable, +A <: DoubleAuctionLike[T, A]](fills: Option[Stream[Fill[T]]], residual: A)
+case class ClearResult[T <: Tradable, +A <: DoubleAuction[T]](fills: Option[Stream[Fill[T]]], residual: A)
 
