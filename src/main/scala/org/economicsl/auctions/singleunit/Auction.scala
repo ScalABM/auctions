@@ -22,7 +22,11 @@ import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuo
 import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
-trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]]
+trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]] {
+
+  def clear: ClearResult[T, Auction[T]]
+  
+}
 
 
 object Auction {

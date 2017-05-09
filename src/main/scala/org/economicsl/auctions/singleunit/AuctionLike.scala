@@ -12,8 +12,6 @@ trait AuctionLike[T <: Tradable, O <: Order[T], +A <: AuctionLike[T, O, A]] {
 
   def remove(order: O): A
 
-  def clear: ClearResult[T, A]
-
   protected def orderBook: FourHeapOrderBook[T]
 
   protected def pricing: PricingPolicy[T]

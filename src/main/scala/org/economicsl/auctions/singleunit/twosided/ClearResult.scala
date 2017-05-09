@@ -13,9 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.Fill
 
 
-case class ClearResult[T <: Tradable, +A <: Auction[T]](fills: Option[Stream[Fill[T]]], residual: A)
+case class ClearResult[T <: Tradable, +A <: DoubleAuction[T]](fills: Option[Stream[Fill[T]]], residual: A)
+
