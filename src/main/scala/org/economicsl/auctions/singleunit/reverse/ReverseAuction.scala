@@ -13,16 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
 import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
+import org.economicsl.auctions.singleunit.{AuctionLike, Fill, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, PricingPolicy}
-import org.economicsl.auctions.singleunit.quotes.PriceQuotePolicy
+import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
-trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]]
+trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]] {
+
+  def clear: ClearResult[T, ReverseAuction[T]]
+
+}
 
 
 object ReverseAuction {
@@ -177,8 +182,8 @@ object ReverseAuction {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          ClearResult(Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
-        case None => ClearResult(None, this)
+          ClearResult[T, ReverseAuction[T]](Some(fills), new ClosedOrderBookImpl(newOrderBook, pricing))
+        case None => ClearResult[T, ReverseAuction[T]](None, this)
       }
     }
 
@@ -188,27 +193,27 @@ object ReverseAuction {
   private[this] class OpenOrderBookImpl[T <: Tradable](protected val orderBook: FourHeapOrderBook[T],
                                                        protected val pricing: PricingPolicy[T],
                                                        protected val quoting: PriceQuotePolicy[T])
-    extends ReverseAuction[T] {
+    extends ReverseAuction[T] with PriceQuoting {
 
     def receive(request: PriceQuoteRequest): Option[PriceQuote] = {
       quoting(orderBook, request)
     }
 
-    def insert(order: LimitAskOrder[T]): ReverseAuction[T] = {
+    def insert(order: LimitAskOrder[T]): ReverseAuction[T] with PriceQuoting = {
       new OpenOrderBookImpl(orderBook.insert(order), pricing, quoting)
     }
 
-    def remove(order: LimitAskOrder[T]): ReverseAuction[T] = {
+    def remove(order: LimitAskOrder[T]): ReverseAuction[T] with PriceQuoting = {
       new OpenOrderBookImpl(orderBook.remove(order), pricing, quoting)
     }
 
-    def clear: ClearResult[T, ReverseAuction[T]] = {
+    def clear: ClearResult[T, ReverseAuction[T] with PriceQuoting] = {
       pricing(orderBook) match {
         case Some(price) =>
           val (pairedOrders, newOrderBook) = orderBook.takeAllMatched
           val fills = pairedOrders.map { case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-          ClearResult(Some(fills), new OpenOrderBookImpl(newOrderBook, pricing, quoting))
-        case None => ClearResult(None, this)
+          ClearResult[T, ReverseAuction[T] with PriceQuoting](Some(fills), new OpenOrderBookImpl(newOrderBook, pricing, quoting))
+        case None => ClearResult[T, ReverseAuction[T] with PriceQuoting](None, this)
       }
     }
 

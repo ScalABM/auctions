@@ -15,7 +15,5 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Tradable
 
-
-case class ClearResult[T <: Tradable, +A <: Auction[T]](fills: Option[Stream[Fill[T]]], residual: A)
+package object quoting

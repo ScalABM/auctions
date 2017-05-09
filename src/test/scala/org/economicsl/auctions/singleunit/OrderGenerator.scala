@@ -24,20 +24,20 @@ import scala.util.Random
 
 trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
 
-  def randomOrder[T <: Tradable](tradable: T, prng: Random): Either[LimitAskOrder[T], LimitBidOrder[T]] = {
+  def randomOrder[T <: Tradable](tradable: T, prng: Random): Order[T] = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val limit = Price(prng.nextInt(Int.MaxValue))
     if (prng.nextDouble() <= 0.5) {
-      Left(LimitAskOrder(issuer, limit, tradable))
+      LimitAskOrder(issuer, limit, tradable)
     } else {
-      Right(LimitBidOrder(issuer, limit, tradable))
+      LimitBidOrder(issuer, limit, tradable)
     }
   }
 
 
-  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]] = {
+  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[Order[T]] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]], remaining: Int): Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]] = {
+    def loop(accumulated: Stream[Order[T]], remaining: Int): Stream[Order[T]] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -45,7 +45,7 @@ trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
         loop(order #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[Either[LimitAskOrder[T], LimitBidOrder[T]]], n)
+    loop(Stream.empty[Order[T]], n)
   }
 
 }
