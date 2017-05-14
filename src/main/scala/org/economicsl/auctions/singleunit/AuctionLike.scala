@@ -14,6 +14,6 @@ trait AuctionLike[T <: Tradable, O <: Order[T], +A <: AuctionLike[T, O, A]] {
 
   protected def orderBook: FourHeapOrderBook[T]
 
-  protected def pricing: PricingPolicy[T]
+  protected def pricingPolicy: PricingPolicy[T]
 
 }

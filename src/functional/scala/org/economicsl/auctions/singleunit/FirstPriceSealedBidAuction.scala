@@ -31,15 +31,15 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGen
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
 
   // seller uses a first-priced, sealed bid auction...
-  val fpsba: Auction[ParkingSpace] = Auction.firstPriceSealedBid(reservationPrice)
+  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.firstPriceSealedBid(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
-  val withBids: Auction[ParkingSpace] = bids.foldLeft(fpsba)((auction, bidOrder) => auction.insert(bidOrder))
-  val results: ClearResult[ParkingSpace, Auction[ParkingSpace]] = withBids.clear
+  val withBids: SealedBidAuction[ParkingSpace] = bids.foldLeft(fpsba)((auction, bidOrder) => auction.insert(bidOrder))
+  val results: ClearResult[ParkingSpace, SealedBidAuction[ParkingSpace]] = withBids.clear
 
   "A First-Price, Sealed-Bid Auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 

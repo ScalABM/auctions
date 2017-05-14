@@ -31,7 +31,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   // seller is willing to sell at any positive price
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spsba: Auction[ParkingSpace] = Auction.secondPriceSealedBid(reservationPrice)
+  val spsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.secondPriceSealedBid(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
@@ -39,8 +39,8 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
   // winner should be the bidder that submitted the highest bid
-  val auction: Auction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))
-  val results: ClearResult[ParkingSpace, Auction[ParkingSpace]] = auction.clear
+  val auction: SealedBidAuction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))
+  val results: ClearResult[ParkingSpace, SealedBidAuction[ParkingSpace]] = auction.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
