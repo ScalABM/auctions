@@ -21,10 +21,28 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
 /** Base trait for all quote policies. */
-sealed trait QuotePolicy[T <: Tradable, -R <: QuoteRequest, +Q <: Quote] extends ((FourHeapOrderBook[T], R) => Option[Q])
+sealed trait QuotingPolicy[T <: Tradable, -R <: QuoteRequest, +Q <: Quote] extends ((FourHeapOrderBook[T], R) => Option[Q])
 
 
-class PriceQuotePolicy[T <: Tradable] extends QuotePolicy[T, PriceQuoteRequest, PriceQuote] {
+class AskPriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, AskPriceQuoteRequest, AskPriceQuote] {
+
+  def apply(orderBook: FourHeapOrderBook[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
+    orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
+  }
+
+}
+
+
+class BidPriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, BidPriceQuoteRequest, BidPriceQuote] {
+
+  def apply(orderBook: FourHeapOrderBook[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
+    orderBook.bidPriceQuote.map(quote => BidPriceQuote(quote))
+  }
+
+}
+
+
+class PriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, PriceQuoteRequest, PriceQuote] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: PriceQuoteRequest): Option[PriceQuote] = request match {
     case _: AskPriceQuoteRequest => orderBook.askPriceQuote.map(quote => AskPriceQuote(quote))
@@ -36,3 +54,10 @@ class PriceQuotePolicy[T <: Tradable] extends QuotePolicy[T, PriceQuoteRequest, 
 }
 
 
+class SpreadQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, SpreadQuoteRequest, SpreadQuote] {
+
+  def apply(orderBook: FourHeapOrderBook[T], request: SpreadQuoteRequest): Option[SpreadQuote] = {
+    orderBook.spread.map(quote => SpreadQuote(quote))
+  }
+
+}

@@ -17,7 +17,8 @@ package org.economicsl.auctions.singleunit.reverse
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.{AskOrderGenerator, LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.{AskOrderGenerator, LimitBidOrder}
 import org.economicsl.auctions.{Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 

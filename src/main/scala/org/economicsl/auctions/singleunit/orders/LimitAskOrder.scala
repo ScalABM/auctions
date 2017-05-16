@@ -13,13 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.orders
 
-import org.economicsl.auctions.Tradable
+import java.util.UUID
+
+import org.economicsl.auctions.{Price, Tradable}
 
 
-trait Auction[T <: Tradable, +A <: Auction[T, A]] extends AuctionLike[T, LimitBidOrder[T], A] {
+/** An order to sell a single-unit of a tradable at a price greater than or equal to the limit price. */
+class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends AskOrder[T]
 
-  def clear: ClearResult[T, A]
+
+object LimitAskOrder {
+
+  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {
+    new LimitAskOrder(issuer, limit, tradable)
+  }
 
 }
+
