@@ -27,8 +27,8 @@ class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderB
 
 object OpenBidReverseAuction {
 
-  implicit def openReverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenReverseAuctionLikeOps[T, OpenBidReverseAuction[T]] = {
-    new OpenReverseAuctionLikeOps[T, OpenBidReverseAuction[T]](a)
+  implicit def openReverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
+    new OpenReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]](a)
   }
 
   implicit def openReverseAuctionLike[T <: Tradable]: OpenReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {

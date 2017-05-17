@@ -16,11 +16,37 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.ClearResult
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.orders.AskOrder
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 
 
 trait OpenReverseAuctionLike[T <: Tradable, A] extends ReverseAuctionLike[T, A] with AskPriceQuoting[T, A] {
 
   protected val askPriceQuotingPolicy: AskPriceQuotingPolicy[T] = new AskPriceQuotingPolicy[T]
+
+}
+
+
+object OpenReverseAuctionLike {
+
+  class Ops[T <: Tradable, A](a: A)(implicit ev: OpenReverseAuctionLike[T, A]) {
+
+    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+
+    def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = ev.receive(a, request)
+
+    def remove(order: AskOrder[T]): A = ev.remove(a, order)
+
+    def clear: ClearResult[T, A] = ev.clear(a)
+
+    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
+
+    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
+
+  }
 
 }
