@@ -5,28 +5,27 @@ import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing}
-import org.economicsl.auctions.singleunit.quoting.AskPriceQuotingPolicy
 
 
-class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T]) {
-  
-  def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
-    quotingPolicy(orderBook, request)
-  }
-
-  private[this] val quotingPolicy = new AskPriceQuotingPolicy[T]
-
-}
+class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
 
 
 object OpenBidReverseAuction {
 
-  implicit def auction[T <: Tradable]: ReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
+  implicit def openReverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenReverseAuctionLikeOps[T, OpenBidReverseAuction[T]] = {
+    new OpenReverseAuctionLikeOps[T, OpenBidReverseAuction[T]](a)
+  }
 
-    new ReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]]{
+  implicit def openReverseAuctionLike[T <: Tradable]: OpenReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
+
+    new OpenReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] {
 
       def insert(a: OpenBidReverseAuction[T], order: AskOrder[T]): OpenBidReverseAuction[T] = {
         new OpenBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy)
+      }
+
+      def receive(a: OpenBidReverseAuction[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
+        askPriceQuotingPolicy(a.orderBook, request)
       }
       
       def remove(a: OpenBidReverseAuction[T], order: AskOrder[T]): OpenBidReverseAuction[T] = {

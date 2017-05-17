@@ -17,6 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.quotes.BidPriceQuoteRequest
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
@@ -24,7 +25,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
-class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
+class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
@@ -32,7 +33,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   // seller is willing to sell at any positive price
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withSecondHighestPricingPolicy(reservationPrice)
+  val spoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withSecondHighestPricingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
@@ -40,24 +41,32 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
   // winner should be the bidder that submitted the highest bid
-  val auction: SealedBidAuction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))
-  val results: ClearResult[ParkingSpace, SealedBidAuction[ParkingSpace]] = auction.clear
+  val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(spoba)((auction, bidOrder) => auction.insert(bidOrder))
+  val results: ClearResult[ParkingSpace, OpenBidAuction[ParkingSpace]] = withBids.clear
 
-  "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
+
+  "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process bid price quote requests" in {
+
+    val bidPriceQuote = withBids.receive(new BidPriceQuoteRequest)
+    bidPriceQuote should be(Some(bids.max.limit))
+
+  }
+
+  "A Second-Price, Open-Bid Auction (SPOBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
     val winner = results.fills.map(_.map(_.bidOrder.issuer))
     winner should be(Some(Stream(bids.max.issuer)))
 
   }
 
-  "The winning price of a Second-Price, Sealed-Bid Auction (SPSBA)" should "be the second-highest submitted bid price" in {
+  "The winning price of a Second-Price, Open-Bid Auction (SPOBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
     val winningPrice = results.fills.map(_.map(_.price))
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
-    val auction2 = auction.remove(bids.max)
-    val results2 = auction2.clear
+    val withHighestBidRemoved = withBids.remove(bids.max)
+    val results2 = withHighestBidRemoved.clear
     results2.fills.map(_.map(_.bidOrder.limit)) should be (winningPrice)
 
   }

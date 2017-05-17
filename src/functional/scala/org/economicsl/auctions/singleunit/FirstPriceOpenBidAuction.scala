@@ -17,6 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.quotes.BidPriceQuoteRequest
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
@@ -24,7 +25,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
-class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
+class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
@@ -32,23 +33,30 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGen
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
 
   // seller uses a first-priced, sealed bid auction...
-  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withHighestPricingPolicy(reservationPrice)
+  val fpoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withHighestPricingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
-  val withBids: SealedBidAuction[ParkingSpace] = bids.foldLeft(fpsba)((auction, bidOrder) => auction.insert(bidOrder))
-  val results: ClearResult[ParkingSpace, SealedBidAuction[ParkingSpace]] = withBids.clear
+  val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(fpoba)((auction, bidOrder) => auction.insert(bidOrder))
+  val results: ClearResult[ParkingSpace, OpenBidAuction[ParkingSpace]] = withBids.clear
 
-  "A First-Price, Sealed-Bid Auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
+  "A First-Price, Open-Bid Auction (FPSBA)" should "be able to process bid price quote requests" in {
+
+    val bidPriceQuote = withBids.receive(new BidPriceQuoteRequest)
+    bidPriceQuote should be(Some(bids.max.limit))
+
+  }
+
+  "A First-Price, Open-Bid Auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
     results.fills.map(_.map(_.bidOrder.issuer)) should be(Some(Stream(bids.max.issuer)))
 
   }
 
-  "The winning price of a First-Price, Sealed-Bid Auction (FPSBA)" should "be the highest submitted bid price." in {
+  "The winning price of a First-Price, Open-Bid Auction (FPSBA)" should "be the highest submitted bid price." in {
 
     results.fills.map(_.map(_.price)) should be(Some(Stream(bids.max.limit)))
 

@@ -11,7 +11,11 @@ class SealedBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T
 
 object SealedBidAuction {
 
-  implicit def auction[T <: Tradable]: AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] = {
+  implicit def auctionLikeOps[T <: Tradable](a: SealedBidAuction[T]): AuctionLikeOps[T, SealedBidAuction[T]] = {
+    new AuctionLikeOps[T, SealedBidAuction[T]](a)
+  }
+
+  implicit def auctionLike[T <: Tradable]: AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] = {
 
     new AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] {
 

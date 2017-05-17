@@ -5,29 +5,27 @@ import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
-import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 
 
 class OpenBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
-  extends BidPriceQuoting {
-
-  def receive(request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
-    quotingPolicy(orderBook, request)
-  }
-
-  private[this] val quotingPolicy = new BidPriceQuotingPolicy[T]
-
-}
 
 
 object OpenBidAuction {
 
-  implicit def auction[T <: Tradable]: AuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] = {
+  implicit def openAuctionLikeOps[T <: Tradable](a: OpenBidAuction[T]): OpenAuctionLikeOps[T, OpenBidAuction[T]] = {
+    new OpenAuctionLikeOps[T, OpenBidAuction[T]](a)
+  }
 
-    new AuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] {
+  implicit def openAuctionLike[T <: Tradable]: OpenAuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] = {
+
+    new OpenAuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] {
 
       def insert(a: OpenBidAuction[T], order: BidOrder[T]): OpenBidAuction[T] = {
         new OpenBidAuction[T](a.orderBook.insert(order), a.pricingPolicy)
+      }
+
+      def receive(a: OpenBidAuction[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
+        bidPriceQuotingPolicy(a.orderBook, request)
       }
 
       def remove(a: OpenBidAuction[T], order: BidOrder[T]): OpenBidAuction[T] = {

@@ -16,8 +16,8 @@
 package org.economicsl.auctions;
 
 import org.economicsl.auctions.singleunit.Fill;
-import org.economicsl.auctions.singleunit.LimitAskOrder;
-import org.economicsl.auctions.singleunit.LimitBidOrder;
+import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
+import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
