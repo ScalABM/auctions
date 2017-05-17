@@ -23,9 +23,6 @@ import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy;
-import org.economicsl.auctions.singleunit.twosided.ClearResult;
-import org.economicsl.auctions.singleunit.twosided.DoubleAuction;
-import org.economicsl.auctions.singleunit.twosided.DoubleAuction$;
 import scala.Option;
 import scala.collection.JavaConverters;
 
