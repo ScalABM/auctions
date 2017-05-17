@@ -13,25 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions
 
-import java.util.UUID
-
-import org.economicsl.auctions.{Price, Tradable}
+import scala.collection.GenIterable
 
 
-/** An order to buy a single-unit of a tradable at any positive price. */
-class MarketBidOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends BidOrder[T] {
+/** Mixin trait providing a schedule of price-quantity pairs for an order. */
+trait PriceQuantitySchedule[+T <: Tradable] {
+  this: Contract with OrderLike[T] =>
 
-  val limit: Price = Price.MaxValue
+  type PricePoint = (Price, Quantity)
 
-}
-
-
-object MarketBidOrder {
-
-  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketBidOrder[T] = {
-    new MarketBidOrder[T](issuer, tradable)
-  }
+  /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
+    * of a `Tradable` at specific, discrete price-points.
+    */
+  def schedule: GenIterable[PricePoint]
 
 }

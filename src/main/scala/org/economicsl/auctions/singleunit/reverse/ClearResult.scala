@@ -13,22 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit
+package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.{Order, Price, Quantity, Tradable}
+import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.Fill
 
-import scala.collection.GenIterable
 
-
-/** Mixin trait providing a schedule of price-quantity pairs for an order. */
-trait PriceQuantitySchedule[+T <: Tradable] {
-  this: Order[T] =>
-
-  type PricePoint = (Price, Quantity)
-
-  /** A schedule is a step-wise specification of an `Order` to buy (or sell) various quantities
-    * of a `Tradable` at specific, discrete price-points.
-    */
-  def schedule: GenIterable[PricePoint]
-
-}
+case class ClearResult[T <: Tradable, +A <: ReverseAuction[T]](fills: Option[Stream[Fill[T]]], residual: A)

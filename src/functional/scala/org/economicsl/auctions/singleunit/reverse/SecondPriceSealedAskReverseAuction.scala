@@ -13,10 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.reverse
 
 import java.util.UUID
 
+import org.economicsl.auctions.singleunit.{AskOrderGenerator, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -38,11 +39,11 @@ class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers with Ask
 
 
   val auction: ReverseAuction[Service] = offers.foldLeft(spsara)((auction, askOrder) => auction.insert(askOrder))
-  val (results, _) = auction.clear
+  val results: ClearResult[Service, ReverseAuction[Service]] = auction.clear
 
   "A Second-Price, Sealed-Ask Reverse Auction (SPSARA)" should "purchase the Service from the seller who offers it at the lowest price." in {
 
-    val winner = results.map(fills => fills.map(fill => fill.askOrder.issuer))
+    val winner = results.fills.map(_.map(_.askOrder.issuer))
     winner should be(Some(Stream(offers.min.issuer)))
 
   }
@@ -50,12 +51,12 @@ class SecondPriceSealedAskReverseAuction extends FlatSpec with Matchers with Ask
   "The price paid (received) by the buyer (seller) when using a SPSARA" should "be the second-lowest offered price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.map(fills => fills.map(fill => fill.price))
+    val winningPrice = results.fills.map(_.map(_.price))
 
     // remove the winning offer and then find the ask price of the winner of this new auction...
     val auction2 = auction.remove(offers.min)
-    val (results2, _) = auction2.clear
-    results2.map(fills => fills.map(fill => fill.askOrder.limit)) should be (winningPrice)
+    val results2 = auction2.clear
+    results2.fills.map(_.map(_.askOrder.limit)) should be (winningPrice)
 
   }
 

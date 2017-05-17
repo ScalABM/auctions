@@ -40,11 +40,11 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   // winner should be the bidder that submitted the highest bid
   val auction: Auction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))
-  val (results, _) = auction.clear
+  val results: ClearResult[ParkingSpace, Auction[ParkingSpace]] = auction.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val winner = results.map(fills => fills.map(fill => fill.bidOrder.issuer))
+    val winner = results.fills.map(_.map(_.bidOrder.issuer))
     winner should be(Some(Stream(bids.max.issuer)))
 
   }
@@ -52,12 +52,12 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
   "The winning price of a Second-Price, Sealed-Bid Auction (SPSBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.map(fills => fills.map(fill => fill.price))
+    val winningPrice = results.fills.map(_.map(_.price))
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
     val auction2 = auction.remove(bids.max)
-    val (results2, _) = auction2.clear
-    results2.map(fills => fills.map(fill => fill.bidOrder.limit)) should be (winningPrice)
+    val results2 = auction2.clear
+    results2.fills.map(_.map(_.bidOrder.limit)) should be (winningPrice)
 
   }
 

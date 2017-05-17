@@ -13,16 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit
-
-import org.economicsl.auctions._
+package org.economicsl.auctions
 
 import scala.collection.immutable
 
 
 /** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price. */
 trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
-  this: Order[T] =>
+  this: Contract with OrderLike[T] =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
     *
@@ -35,9 +33,6 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
 
-  /** The total value of the order */
-  val value: Currency = limit.value * quantity.value // todo sort out units!
-
   require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
 
 }
@@ -49,12 +44,12 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   */
 object SinglePricePoint {
 
-  /** All `Order` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
+  /** All `Contract with OrderLike` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
     *
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
+    * @return `Ordering` defined over `Order[T] with SinglePricePoint[T]` instances.
     */
-  def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
+  def ordering[O <: Contract with OrderLike[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
     Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
   }
 

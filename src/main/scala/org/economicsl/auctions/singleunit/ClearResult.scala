@@ -15,15 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-
-import org.economicsl.auctions.{AskOrder, Tradable}
-
-
-trait LimitAskOrderLike[+T <: Tradable] extends AskOrder[T] with SingleUnit[T]
+import org.economicsl.auctions.Tradable
 
 
-object LimitAskOrderLike {
-
-  implicit def ordering[O <: LimitAskOrderLike[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
-
-}
+case class ClearResult[T <: Tradable, +A <: Auction[T]](fills: Option[Stream[Fill[T]]], residual: A)

@@ -17,16 +17,14 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{BidOrder, Price, Tradable}
+import org.economicsl.auctions.{Price, Tradable}
 
 
 /** An order to buy a single-unit of a tradable at a price less than or equal to the limit price. */
-class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends BidOrder[T] with SingleUnit[T]
+class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends BidOrder[T]
 
 
 object LimitBidOrder {
-
-  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SingleUnit.ordering[O]
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitBidOrder[T] = {
     new LimitBidOrder(issuer, limit, tradable)
