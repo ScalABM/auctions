@@ -15,6 +15,7 @@
 
 package org.economicsl.auctions;
 
+import org.economicsl.auctions.singleunit.ClearResult;
 import org.economicsl.auctions.singleunit.Fill;
 import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
 import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
@@ -23,6 +24,8 @@ import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy;
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy;
+import org.economicsl.auctions.singleunit.twosided.SealedBidDoubleAuction;
+import org.economicsl.auctions.singleunit.twosided.SealedBidDoubleAuction$;
 import scala.Option;
 import scala.collection.JavaConverters;
 
@@ -86,23 +89,22 @@ public class Sandbox {
         // TODO: take a look at paired orders
 
         // example usage of a double auction where we don't want to define the pricing rule until later...
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook = DoubleAuction$.MODULE$.withClosedOrderBook(orderBook1);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook2 = withOrderBook.insert(order3);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook3 = withOrderBook2.insert(order4);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook4 = withOrderBook3.insert(order9);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook5 = withOrderBook4.insert(order8);
+        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> auction = SealedBidDoubleAuction$.MODULE$.withUniformPricing(midPointPricing);
+        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> auction2 = auction.insert(order3);
+        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> auction3 = auction2.insert(order4);
+        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> auction4 = auction3.insert(order9);
+        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> auction5 = auction4.insert(order8);
 
         // after inserting orders, now we can define the pricing rule...
-        DoubleAuction<GoogleStock> auction = withOrderBook5.withUniformPricing(midPointPricing);
-        ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result = auction.clear();
+        ClearResult<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> result = auction5.clear();
         java.util.List<Fill<GoogleStock>> fills = JavaConverters.seqAsJavaList(result.fills().get().toList());
         fills.forEach(System.out::println);
 
         // ...trivial to re-run the same auction with a different pricing rule!
-        DoubleAuction<GoogleStock> auction2 = withOrderBook5.withUniformPricing(askQuotePricing);
-        ClearResult<GoogleStock, DoubleAuction<GoogleStock>> result2 = auction2.clear();
-        java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(result2.fills().get().toList());
-        fills2.forEach(System.out::println);
+        // SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> auction6 = withOrderBook5.withUniformPricing(askQuotePricing);
+        // ClearResult<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> result2 = auction6.clear();
+        // java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(result2.fills().get().toList());
+        // fills2.forEach(System.out::println);
 
         // TODO: extend with quotes
     }
