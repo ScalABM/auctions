@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.{ClearResult, OrderGenerator}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
@@ -62,11 +63,21 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
     */
   val results = continuous[GoogleStock](withDiscriminatoryPricing)(orders)
 
-  val prices: Stream[Price] = results.flatMap(result => result.fills)
-                                     .flatMap(fills => fills.headOption)
-                                     .map(fill => fill.price)
+  val prices: Stream[Price] = {
+    results.flatMap(result => result.fills)
+      .flatMap(fills => fills.headOption)
+      .map(fill => fill.price)
+  }
+
+  val spreadQuotes: Stream[SpreadQuote] = {
+    results.map(result => result.residual)
+      .flatMap(auction => auction.receive(new SpreadQuoteRequest))
+  }
 
   // print off the first 10 prices...
   println(prices.take(10).toList)
+
+  // print off the first 10 spread quotes...
+  println(spreadQuotes.take(100).toList)
 
 }
