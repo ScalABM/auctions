@@ -4,22 +4,27 @@
 # auctions
 An embedded domain specific language for auction simulation written in Scala and Java 8. 
 
-# API Design
-Our current API design is motivated by...
+## API Design
+Our current API design is based loosely on ideas gleaned from the following.
 
 * Wurman et al (1998) [_Flexible double auctions for electronic commerce: theory and implementation_](http://wewalsh.com/papers/dss98.pdf)
 * Wellman and Walsh (2001) [_A Parametrization of the Auction Design Space_](https://pdfs.semanticscholar.org/88eb/648f4c74c9e8ee50fd818a266b6f1b3b2ca3.pdf)
 * Nisan et al (2007) [_Algorithmic Game Theory_](http://www.cs.cmu.edu/~sandholm/cs15-892F13/algorithmic-game-theory.pdf)
 
-...and our focus at present is on developing a minimal API based around the key ingredients discussed in the Wurman et al (1998) paper. Longer term goals include generalizing the auctions EDSL so that auctions are thought of as a special type of social choice mechanism that use "money." 
+Primary focus for version 0.1.0 is on developing a minimal API based around the key ingredients discussed in the Wurman et al (1998) paper. Rough road map that should take us through the end of 2017:
 
-The design and imlementation of the API is heavily influences by functional programming principles and techniques. In particular we strive to...
+* Version 0.2.0: extend the API to allow for multi-unit auctions. Incentive structures in multi-unit auctions often differ in important ways from the incentive structures in single unit auctions. Multi-unit auctions are critical for modeling electricity auctions which are a key use case. 
+* Version 0.3.0 will extend the API to incorporate single unit combinatorial auctions. 
+
+In the longer term, we would like to generalize the auctions API so that auctions can eb thought of as a special type of social choice mechanism that use "money" (see chapter 10 from Nisan et al (2007) for discussion and details). 
+
+The design and imlementation of our API is heavily influences by functional programming principles and techniques. In particular we strive to...
 
 1. ...minimize (or eliminate!) side effects;
 2. ...maintain a thread-safe API in order to maximally exploit concurrency and parallelism where appropriate;
 3. ...make illegal program states unrepresentable (i.e., programs that would lead to invalid states should not compile!).
 
-...perhaps more succinctly, we want to push as much of the domain modeling into the type system as possible so that we can leverage to compiler to identify modeling errors at compile time (rather than forcing the user to catch modeling errors during/after runtime).
+...perhaps more succinctly, we want to push as much of the auction domain modeling into the type system as possible so that we can leverage to compiler to identify modeling errors at compile time (rather than forcing the user to catch modeling errors during/after runtime).
 
 ## Motivating use cases
 Design and simulation of electricity auctions (particularly peer-to-peer auctions); market simulation models for "Economy of Things" applications. 
@@ -37,7 +42,7 @@ Wholesale electricity auctions are discrete, multi-unit, reverse auctions; elect
 
 Much ink has been spilt about optimal pricing rules for electricity auctions. In particular, under what circumstances will uniform price auctions outperform (or underperfom!) discrimatory price auctions? In order to address this question the API needs to support both uniform and discriminatory pricing rules.
 
-### Peer-to-peer electricity auctions
+#### Peer-to-peer electricity auctions
 Currently a number of startups involved in developing technologies that allow individual households to trade electricity with one another using Blockchain-based technologies to process payments. A non-exhaustive list of examples would be...
 
 * [Power Ledger](https://powerledger.io/) Perth, Australia.
