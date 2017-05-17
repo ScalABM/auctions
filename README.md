@@ -57,4 +57,4 @@ Currently auctions for electricity are independent of auctions for ancillary ene
 
 ## "Economy of Things"
 
-TBD
+We have started implementing a [proof-of-concept trading platform](https://github.com/EconomicSL/auctions-remote-example) that would allow Internet-of-Things (IoT) enabled devices to trade with one another using our auctions mechanisms.
