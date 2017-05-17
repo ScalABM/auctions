@@ -16,7 +16,9 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.singleunit.OpenAuctionLike
+import org.economicsl.auctions.quotes._
+import org.economicsl.auctions.singleunit.{ClearResult, OpenAuctionLike}
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting, SpreadQuotingPolicy}
 import org.economicsl.auctions.singleunit.reverse.OpenReverseAuctionLike
 
@@ -25,5 +27,30 @@ trait OpenDoubleAuctionLike[T <: Tradable, A] extends OpenAuctionLike[T, A] with
   with AskPriceQuoting[T, A] with BidPriceQuoting[T, A] with SpreadQuoting[T, A] {
 
   protected val spreadQuotingPolicy: SpreadQuotingPolicy[T] = new SpreadQuotingPolicy[T]
+
+}
+
+
+object OpenDoubleAuctionLike {
+
+  class Ops[T <: Tradable, A](a: A)(implicit ev: OpenDoubleAuctionLike[T, A]) {
+
+    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+
+    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+
+    def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = ev.receive(a, request)
+
+    def receive(request: BidPriceQuoteRequest): Option[BidPriceQuote] = ev.receive(a, request)
+
+    def receive(request: SpreadQuoteRequest): Option[SpreadQuote] = ev.receive(a, request)
+
+    def remove(order: AskOrder[T]): A = ev.remove(a, order)
+
+    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+
+    def clear: ClearResult[T, A] = ev.clear(a)
+
+  }
 
 }

@@ -15,34 +15,6 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.BidOrder
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
-
 
 /**Documentation for the Single Unit Auctions goes here! */
-package object singleunit {
-
-  class AuctionLikeOps[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {
-
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
-
-    def remove(order: BidOrder[T]): A = ev.remove(a, order)
-
-    def clear: ClearResult[T, A] = ev.clear(a)
-
-    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
-
-    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
-
-  }
-
-  class OpenAuctionLikeOps[T <: Tradable, A](a: A)(implicit ev: OpenAuctionLike[T, A])
-    extends AuctionLikeOps(a)(ev) {
-
-    def receive(request: BidPriceQuoteRequest): Option[BidPriceQuote] = ev.receive(a, request)
-
-  }
-
-}
+package object singleunit

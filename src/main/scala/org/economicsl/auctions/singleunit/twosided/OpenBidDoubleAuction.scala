@@ -20,6 +20,7 @@ import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
+import org.economicsl.auctions.singleunit.twosided.OpenDoubleAuctionLike.Ops
 
 
 trait OpenBidDoubleAuction[T <: Tradable] extends SealedBidDoubleAuction[T]
@@ -41,8 +42,8 @@ object OpenBidDoubleAuction {
 
   object DiscriminatoryPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): OpenDoubleAuctionLikeOps[T, DiscriminatoryPricingImpl[T]] = {
-      new OpenDoubleAuctionLikeOps[T, DiscriminatoryPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): Ops[T, DiscriminatoryPricingImpl[T]] = {
+      new Ops[T, DiscriminatoryPricingImpl[T]](a)
     }
 
     implicit def doubleAuctionLike[T <: Tradable]: OpenDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
@@ -98,8 +99,8 @@ object OpenBidDoubleAuction {
 
   object UniformPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): OpenDoubleAuctionLikeOps[T, UniformPricingImpl[T]] = {
-      new OpenDoubleAuctionLikeOps[T, UniformPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): Ops[T, UniformPricingImpl[T]] = {
+      new Ops[T, UniformPricingImpl[T]](a)
     }
 
     implicit def doubleAuctionLike[T <: Tradable]: OpenDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {

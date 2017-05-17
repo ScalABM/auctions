@@ -45,8 +45,8 @@ object SealedBidDoubleAuction {
 
   object DiscriminatoryPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): DoubleAuctionLikeOps[T, DiscriminatoryPricingImpl[T]] = {
-      new DoubleAuctionLikeOps[T, DiscriminatoryPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): DoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
+      new DoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]](a)
     }
 
     implicit def doubleAuctionLike[T <: Tradable]: DoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
@@ -90,8 +90,8 @@ object SealedBidDoubleAuction {
 
   object UniformPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): DoubleAuctionLikeOps[T, UniformPricingImpl[T]] = {
-      new DoubleAuctionLikeOps[T, UniformPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): DoubleAuctionLike.Ops[T, UniformPricingImpl[T]] = {
+      new DoubleAuctionLike.Ops[T, UniformPricingImpl[T]](a)
     }
 
     implicit def doubleAuctionLike[T <: Tradable]: DoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {

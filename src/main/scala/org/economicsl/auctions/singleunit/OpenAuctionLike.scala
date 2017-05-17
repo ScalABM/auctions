@@ -16,11 +16,36 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.orders.BidOrder
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 
 
 trait OpenAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with BidPriceQuoting[T, A] {
 
   protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
+
+}
+
+
+object OpenAuctionLike {
+
+  class Ops[T <: Tradable, A](a: A)(implicit ev: OpenAuctionLike[T, A]) {
+
+    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+
+    def receive(request: BidPriceQuoteRequest): Option[BidPriceQuote] = ev.receive(a, request)
+
+    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+
+    def clear: ClearResult[T, A] = ev.clear(a)
+
+    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
+
+    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
+
+  }
 
 }

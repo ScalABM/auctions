@@ -34,3 +34,22 @@ trait AuctionLike[T <: Tradable, A] {
   def pricingPolicy(a: A): PricingPolicy[T]
 
 }
+
+
+object AuctionLike {
+
+  class Ops[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {
+
+    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+
+    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+
+    def clear: ClearResult[T, A] = ev.clear(a)
+
+    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
+
+    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
+
+  }
+
+}
