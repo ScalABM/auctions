@@ -23,6 +23,8 @@ import org.economicsl.auctions.{Price, Tradable}
   *
   * @note Mth highest price is equivalent to the ask quote. It is incentive compatible for sellers to truthfully reveal
   *       their respective valuations in single-unit auctions using this pricing rule.
+  * @author davidrpugh
+  * @since 0.1.0
   */
 class AskQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 

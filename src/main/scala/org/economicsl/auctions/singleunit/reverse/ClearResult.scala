@@ -19,4 +19,13 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.Fill
 
 
+/** Class representing the results of clearing a `ReverseAuction`.
+  *
+  * @param fills
+  * @param residual
+  * @tparam T
+  * @tparam A
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 case class ClearResult[T <: Tradable, +A <: ReverseAuction[T]](fills: Option[Stream[Fill[T]]], residual: A)

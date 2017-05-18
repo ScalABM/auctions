@@ -16,7 +16,11 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Mixin trait indicating that a `Contract` is `OrderLke`. */
+/** Mixin trait indicating that a `Contract` is `OrderLke`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OrderLike[+T <: Tradable] {
   this: Contract =>
 

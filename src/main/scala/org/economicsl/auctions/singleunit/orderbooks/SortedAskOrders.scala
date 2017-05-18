@@ -21,6 +21,14 @@ import org.economicsl.auctions.singleunit.AskOrder
 import scala.collection.immutable
 
 
+/** Class for storing a set of `AskOrder` instances in sorted order.
+  *
+  * @param orders
+  * @param numberUnits
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[T]], val numberUnits: Quantity) {
 
   def + (order: AskOrder[T]): SortedAskOrders[T] = {
@@ -45,6 +53,12 @@ class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[
 
 }
 
+
+/** Companion object for `SortedAskOrders`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object SortedAskOrders {
 
   def empty[T <: Tradable](ordering: Ordering[AskOrder[T]]): SortedAskOrders[T] = {

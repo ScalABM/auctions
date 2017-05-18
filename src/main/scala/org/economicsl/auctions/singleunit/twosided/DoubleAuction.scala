@@ -23,7 +23,11 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
-/** Base trait for all double auction implementations. */
+/** Base trait for all single-unit double auction implementations.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait DoubleAuction[T <: Tradable] extends AuctionLike[T, Order[T], DoubleAuction[T]] {
 
   def clear: ClearResult[T, DoubleAuction[T]]
@@ -31,6 +35,11 @@ trait DoubleAuction[T <: Tradable] extends AuctionLike[T, Order[T], DoubleAuctio
 }
 
 
+/** Companion object for `DoubleAuction`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object DoubleAuction {
 
   def withDiscriminatoryPricing[T <: Tradable](policy: PricingPolicy[T]): DoubleAuction[T] = {

@@ -23,6 +23,12 @@ import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, Pricin
 import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
+/** Base trait for all reverse auction implementations.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait ReverseAuction[T <: Tradable] extends AuctionLike[T, LimitAskOrder[T], ReverseAuction[T]] {
 
   def clear: ClearResult[T, ReverseAuction[T]]

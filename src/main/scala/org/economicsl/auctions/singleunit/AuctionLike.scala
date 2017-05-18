@@ -5,7 +5,14 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
-/** Mixin trait providing behaviors relevant for auctions. */
+/** Mixin trait providing behaviors relevant for auctions.
+  *
+  * @tparam T
+  * @tparam O
+  * @tparam A
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait AuctionLike[T <: Tradable, O <: Order[T], +A <: AuctionLike[T, O, A]] {
 
   def insert(order: O): A

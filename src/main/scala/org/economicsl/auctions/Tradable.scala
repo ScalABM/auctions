@@ -16,7 +16,11 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Trait used to indicate that an object can be traded via an auction. */
+/** Trait used to indicate that an object can be traded via an auction.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait Tradable extends Serializable {
 
   /** Minimum tick size. */

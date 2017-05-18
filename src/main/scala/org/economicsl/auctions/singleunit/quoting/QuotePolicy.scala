@@ -20,10 +20,20 @@ import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
-/** Base trait for all quote policies. */
+/** Base trait for all quote policy implementations
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 sealed trait QuotePolicy[T <: Tradable, -R <: QuoteRequest, +Q <: Quote] extends ((FourHeapOrderBook[T], R) => Option[Q])
 
 
+/** Class implementing a price quote policy.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class PriceQuotePolicy[T <: Tradable] extends QuotePolicy[T, PriceQuoteRequest, PriceQuote] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: PriceQuoteRequest): Option[PriceQuote] = request match {
