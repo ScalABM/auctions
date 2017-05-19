@@ -28,7 +28,7 @@ import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
   * @param tradable
   * @tparam T the type of `Tradable` for which the `Order` is being issued.
   * @author davidrpugh
-  * @since 0.1.0           
+  * @since 0.1.0
   */
 class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quantity: Quantity, val tradable: T)
   extends AskOrder[T] with SinglePricePoint[T]
