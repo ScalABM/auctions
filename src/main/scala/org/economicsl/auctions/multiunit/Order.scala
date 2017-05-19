@@ -18,10 +18,28 @@ package org.economicsl.auctions.multiunit
 import org.economicsl.auctions.{Contract, OrderLike, Tradable}
 
 
+/** Base trait for all multi-unit orders.
+  *
+  * @tparam T the type of `Tradable` for which the `Order` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 sealed trait Order[+T <: Tradable] extends Contract with OrderLike[T]
 
 
+/** Base trait for all multi-unit orders to sell a particular `Tradable`.
+  *
+  * @tparam T the type of `Tradable` for which the `Order` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait AskOrder[+T <: Tradable] extends Order[T]
 
 
+/** Base trait for all multi-unit orders to buy a particular `Tradable`
+  *
+  * @tparam T the type of `Tradable` for which the `Order` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait BidOrder[+T <: Tradable] extends Order[T]

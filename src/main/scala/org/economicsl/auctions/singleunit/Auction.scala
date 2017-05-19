@@ -22,6 +22,12 @@ import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuo
 import org.economicsl.auctions.singleunit.quoting.{PriceQuotePolicy, PriceQuoting}
 
 
+/** Base trait for all single-unit auction mechanisms.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]] {
 
   def clear: ClearResult[T, Auction[T]]
@@ -29,6 +35,11 @@ trait Auction[T <: Tradable] extends AuctionLike[T, LimitBidOrder[T], Auction[T]
 }
 
 
+/** Companion object for `Auction`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object Auction {
 
   /** Create an `Auction` with a particular reservation price and pricing rule.

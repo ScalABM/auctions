@@ -18,7 +18,11 @@ package org.economicsl.auctions
 import scala.collection.immutable
 
 
-/** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price. */
+/** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   this: Contract with OrderLike[T] =>
 
@@ -41,6 +45,9 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
 /** Companion object for the `SinglePricePoint` trait.
   *
   * Defines a basic ordering for anything that mixes in the `SinglePricePoint` trait.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
   */
 object SinglePricePoint {
 

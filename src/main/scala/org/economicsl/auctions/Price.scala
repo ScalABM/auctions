@@ -16,7 +16,11 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Value class representing prices. */
+/** Value class representing prices.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 case class Price(value: Currency) extends AnyVal {
 
   def + (that: Price): Price = {
@@ -26,7 +30,11 @@ case class Price(value: Currency) extends AnyVal {
 }
 
 
-/** Companion object for the Price value class. */
+/** Companion object for the Price value class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object Price {
 
   /** Default ordering for `Price` instances is low to high based on the underlying value. */
@@ -41,7 +49,11 @@ object Price {
 }
 
 
-/** Default ordering for `Price` instances is low to high based on the underlying value. */
+/** Default ordering for `Price` instances is low to high based on the underlying value.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object PriceOrdering extends Ordering[Price] {
 
   /** Instances of `Price` are compared using their underlying values.

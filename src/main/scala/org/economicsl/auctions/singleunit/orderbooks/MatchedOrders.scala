@@ -19,6 +19,14 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.{AskOrder, BidOrder}
 
 
+/** Class for storing sets of matched `AskOrder` and `BidOrder` instances.
+  *
+  * @param askOrders
+  * @param bidOrders
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
