@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.quoting
 
-import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest, Quote}
+import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest, Quote, QuoteRequest}
 
 
 /** Base trait for all `Quoting` implementations.
