@@ -17,6 +17,7 @@ package org.economicsl.auctions;
 
 import org.economicsl.auctions.singleunit.ClearResult;
 import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.singleunit.JSealedBidAuction;
 import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
 import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
@@ -25,6 +26,7 @@ import org.economicsl.auctions.singleunit.twosided.*;
 import scala.Option;
 import scala.collection.JavaConverters;
 
+import java.util.List;
 import java.util.UUID;
 
 public class Sandbox {
@@ -104,6 +106,14 @@ public class Sandbox {
         ClearResult<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> result = ops5.clear();
         java.util.List<Fill<GoogleStock>> fills = JavaConverters.seqAsJavaList(result.fills().get().toList());
         fills.forEach(System.out::println);
+
+        // try using the Java API?
+        JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<>(order3, askQuotePricing);
+        JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8);
+        JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9);
+        ClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
+        java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(results.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
+        fills2.forEach(System.out::println);
 
     }
     
