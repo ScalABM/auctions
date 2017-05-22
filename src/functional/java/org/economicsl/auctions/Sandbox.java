@@ -82,8 +82,6 @@ public class Sandbox {
             System.out.println(averagePrice.get().value());
         };
 
-        // TODO: take a look at paired orders
-
         // example usage of a double auction where we don't want to define the pricing rule until later...
         SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl1 = SealedBidDoubleAuction$.MODULE$.withUniformPricing(midPointPricing);
         DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl1);
@@ -95,19 +93,18 @@ public class Sandbox {
         DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops4 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl4);
         SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl5 = ops4.insert(order8);
 
-        // should not be able to access these from a sealed bid auction!
+        // TODO: should not be able to access these from a sealed bid auction!
         System.out.println(impl5.orderBook().matchedOrders().askOrders().headOption());
         System.out.println(impl5.orderBook().matchedOrders().bidOrders().headOption());
         System.out.println(impl5.orderBook().askPriceQuote());
         System.out.println(impl5.orderBook().bidPriceQuote());
 
-        // after inserting orders, now we can define the pricing rule...
+        // after inserting orders, now we can now clear the auction!
         DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops5 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl5);
         ClearResult<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> result = ops5.clear();
         java.util.List<Fill<GoogleStock>> fills = JavaConverters.seqAsJavaList(result.fills().get().toList());
         fills.forEach(System.out::println);
 
-        // TODO: extend with quotes
     }
     
 }
