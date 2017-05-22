@@ -15,6 +15,8 @@
 
 package org.economicsl.auctions;
 
+import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
+import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.ClearResult;
 import org.economicsl.auctions.singleunit.Fill;
 import org.economicsl.auctions.singleunit.JSealedBidAuction;
@@ -105,15 +107,28 @@ public class Sandbox {
         DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops5 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl5);
         ClearResult<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> result = ops5.clear();
         java.util.List<Fill<GoogleStock>> fills = JavaConverters.seqAsJavaList(result.fills().get().toList());
-        fills.forEach(System.out::println);
+        System.out.println(fills);
 
-        // try using the Java API?
+        // try using the new Java API?
         JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<>(order3, askQuotePricing);
         JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8);
         JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9);
         ClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
         java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(results.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
         fills2.forEach(System.out::println);
+
+        JOpenBidDoubleAuction<GoogleStock> da = new JOpenBidDoubleAuction<>(midPointPricing);
+        JOpenBidDoubleAuction<GoogleStock> da2 = da.insert(order3);
+        JOpenBidDoubleAuction<GoogleStock> da3 = da2.insert(order4);
+        JOpenBidDoubleAuction<GoogleStock> da4 = da3.insert(order8);
+
+        System.out.println(da4.receive(new AskPriceQuoteRequest()));
+        System.out.println(da4.receive(new BidPriceQuoteRequest()));
+
+        JOpenBidDoubleAuction<GoogleStock> da5 = da4.insert(order9);
+        ClearResult<GoogleStock, JOpenBidDoubleAuction<GoogleStock>> results3 = da5.clear();
+        java.util.List<Fill<GoogleStock>> fills3 = JavaConverters.seqAsJavaList(results3.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
+        System.out.println(fills3);
 
     }
     
