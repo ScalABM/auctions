@@ -32,7 +32,7 @@ class FirstPriceSealedBidReverseAuction extends FlatSpec with Matchers with AskO
   val service = Service(tick=1)
 
   val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
-  val fpsara: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withLowestPricingPolicy(reservationPrice)
+  val fpsara: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withBidQuotePricingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
@@ -41,7 +41,7 @@ class FirstPriceSealedBidReverseAuction extends FlatSpec with Matchers with AskO
   val withAsks: SealedBidReverseAuction[Service] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
   val results: ClearResult[Service, SealedBidReverseAuction[Service]] = withAsks.clear
 
-  "A First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "purchse the Service from the seller who offers it at the lowest price." in {
+  "A First-Price, Sealed-Bid Reverse Auction (FPSBRA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
     results.fills.map(_.map(_.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
 

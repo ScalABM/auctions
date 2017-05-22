@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing}
@@ -39,8 +39,8 @@ object OpenBidReverseAuction {
         new OpenBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy)
       }
 
-      def receive(a: OpenBidReverseAuction[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
-        askPriceQuotingPolicy(a.orderBook, request)
+      def receive(a: OpenBidReverseAuction[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
+        bidPriceQuotingPolicy(a.orderBook, request)
       }
       
       def remove(a: OpenBidReverseAuction[T], order: AskOrder[T]): OpenBidReverseAuction[T] = {

@@ -16,16 +16,16 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
-import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
+import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 
 
-trait OpenAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with BidPriceQuoting[T, A] {
+trait OpenAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with AskPriceQuoting[T, A] {
 
-  protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
+  protected val askPriceQuotingPolicy: AskPriceQuotingPolicy[T] = new AskPriceQuotingPolicy[T]
 
 }
 
@@ -36,7 +36,7 @@ object OpenAuctionLike {
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
 
-    def receive(request: BidPriceQuoteRequest): Option[BidPriceQuote] = ev.receive(a, request)
+    def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = ev.receive(a, request)
 
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 

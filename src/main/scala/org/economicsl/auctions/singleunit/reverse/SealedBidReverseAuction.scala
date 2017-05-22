@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit.reverse
 import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, PricingPolicy, UniformPricing}
+import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
 class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
@@ -68,9 +68,9 @@ object SealedBidReverseAuction {
     * @note The winner of a FPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to its own ask price.
     */
-  def withLowestPricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
+  def withBidQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy)
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy)
   }
 
   /** Create a second-price, sealed-ask reverse auction (SPSARA).

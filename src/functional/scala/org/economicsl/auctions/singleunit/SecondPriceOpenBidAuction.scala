@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.quotes.BidPriceQuoteRequest
+import org.economicsl.auctions.quotes.{AskPriceQuoteRequest, AskPriceQuote}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
@@ -33,7 +33,7 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
 
   // seller is willing to sell at any positive price
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withSecondHighestPricingPolicy(reservationPrice)
+  val spoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withBidQuotePricingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
@@ -45,10 +45,10 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
   val results: ClearResult[ParkingSpace, OpenBidAuction[ParkingSpace]] = withBids.clear
 
 
-  "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process bid price quote requests" in {
+  "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process ask price quote requests" in {
 
-    val bidPriceQuote = withBids.receive(new BidPriceQuoteRequest)
-    bidPriceQuote should be(Some(bids.max.limit))
+    val askPriceQuote = withBids.receive(new AskPriceQuoteRequest)
+    askPriceQuote should be(Some(AskPriceQuote(bids.max.limit)))
 
   }
 

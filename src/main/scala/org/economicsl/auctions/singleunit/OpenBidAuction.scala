@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
@@ -39,8 +39,8 @@ object OpenBidAuction {
         new OpenBidAuction[T](a.orderBook.insert(order), a.pricingPolicy)
       }
 
-      def receive(a: OpenBidAuction[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
-        bidPriceQuotingPolicy(a.orderBook, request)
+      def receive(a: OpenBidAuction[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
+        askPriceQuotingPolicy(a.orderBook, request)
       }
 
       def remove(a: OpenBidAuction[T], order: BidOrder[T]): OpenBidAuction[T] = {
@@ -64,12 +64,12 @@ object OpenBidAuction {
     new OpenBidAuction[T](orderBook.insert(reservation), pricingPolicy)
   }
 
-  def withHighestPricingPolicy[T <: Tradable](reservation: AskOrder[T]): OpenBidAuction[T] = {
+  def withAskQuotePricingPolicy[T <: Tradable](reservation: AskOrder[T]): OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T])
   }
 
-  def withSecondHighestPricingPolicy[T <: Tradable](reservation: AskOrder[T]): OpenBidAuction[T] = {
+  def withBidQuotePricingPolicy[T <: Tradable](reservation: AskOrder[T]): OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T])
   }
