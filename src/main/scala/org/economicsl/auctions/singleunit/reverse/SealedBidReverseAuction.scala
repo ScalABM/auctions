@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
-import org.economicsl.auctions.singleunit.pricing.{BidQuotePricingPolicy, PricingPolicy, UniformPricing}
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
 class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
@@ -73,24 +73,17 @@ object SealedBidReverseAuction {
     new SealedBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy)
   }
 
-  /** Create a second-price, sealed-ask reverse auction (SPSARA).
+  /** Create a second-price, sealed-bid reverse auction (SPSBRA).
     *
     * @param reservation
     * @tparam T
     * @return
-    * @note The winner of a SPSARA is the seller who submitted the lowest priced ask order; the winner receives an
+    * @note The winner of a SPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to the minimum of the second lowest submitted ask price and the buyer's `reservation` price.
     */
   def withSecondLowestPricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    val pricingPolicy = new PricingPolicy[T] { // todo can this pricing policy be generalized?
-      def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
-        orderBook.matchedOrders.bidOrders.headOption.flatMap {
-          bidOrder => orderBook.unMatchedOrders.askOrders.headOption.map(askOrder => bidOrder.limit min askOrder.limit)
-        }
-      }
-    }
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy)
   }
   
 }
