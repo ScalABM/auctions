@@ -20,10 +20,19 @@ import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
-/** Base trait for all quote policies. */
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 sealed trait QuotingPolicy[T <: Tradable, -R <: QuoteRequest, +Q <: Quote] extends ((FourHeapOrderBook[T], R) => Option[Q])
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class AskPriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, AskPriceQuoteRequest, AskPriceQuote] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
@@ -33,6 +42,11 @@ class AskPriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, AskPriceQuot
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class BidPriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, BidPriceQuoteRequest, BidPriceQuote] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
@@ -42,6 +56,11 @@ class BidPriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, BidPriceQuot
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class PriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, PriceQuoteRequest, PriceQuote] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: PriceQuoteRequest): Option[PriceQuote] = request match {
@@ -54,6 +73,11 @@ class PriceQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, PriceQuoteReque
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class SpreadQuotingPolicy[T <: Tradable] extends QuotingPolicy[T, SpreadQuoteRequest, SpreadQuote] {
 
   def apply(orderBook: FourHeapOrderBook[T], request: SpreadQuoteRequest): Option[SpreadQuote] = {

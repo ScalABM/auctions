@@ -19,6 +19,11 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait SpreadQuoting[T <: Tradable, -A] {
 
   def receive(a: A, request: SpreadQuoteRequest): Option[SpreadQuote]

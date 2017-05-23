@@ -23,6 +23,11 @@ import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuot
 import org.economicsl.auctions.singleunit.reverse.OpenReverseAuctionLike
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OpenDoubleAuctionLike[T <: Tradable, A] extends OpenAuctionLike[T, A] with OpenReverseAuctionLike[T, A]
   with AskPriceQuoting[T, A] with BidPriceQuoting[T, A] with SpreadQuoting[T, A] {
 
@@ -31,6 +36,11 @@ trait OpenDoubleAuctionLike[T <: Tradable, A] extends OpenAuctionLike[T, A] with
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenDoubleAuctionLike {
 
   class Ops[T <: Tradable, A](a: A)(implicit ev: OpenDoubleAuctionLike[T, A]) {

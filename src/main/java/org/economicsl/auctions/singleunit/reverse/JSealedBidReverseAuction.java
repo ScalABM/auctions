@@ -26,7 +26,7 @@ import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 
 
-/** Class implementing a sealed-bid auction.
+/** Class implementing a sealed-bid, reverse auction.
  *
  * @param <T>
  * @author davidrpugh

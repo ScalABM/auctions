@@ -24,6 +24,11 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OpenReverseAuctionLike[T <: Tradable, A] extends ReverseAuctionLike[T, A] with BidPriceQuoting[T, A] {
 
   protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
@@ -31,6 +36,11 @@ trait OpenReverseAuctionLike[T <: Tradable, A] extends ReverseAuctionLike[T, A] 
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenReverseAuctionLike {
 
   class Ops[T <: Tradable, A](a: A)(implicit ev: OpenReverseAuctionLike[T, A]) {

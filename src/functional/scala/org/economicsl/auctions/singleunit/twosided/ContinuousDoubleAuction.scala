@@ -25,6 +25,11 @@ import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object ContinuousDoubleAuction extends App with OrderGenerator {
 
   val google: GoogleStock = GoogleStock(tick=1)

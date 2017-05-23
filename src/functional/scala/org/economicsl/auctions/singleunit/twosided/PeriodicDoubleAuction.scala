@@ -24,6 +24,11 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
   // generate a stream of random orders...

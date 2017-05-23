@@ -23,6 +23,11 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OpenAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with AskPriceQuoting[T, A] {
 
   protected val askPriceQuotingPolicy: AskPriceQuotingPolicy[T] = new AskPriceQuotingPolicy[T]
@@ -30,6 +35,11 @@ trait OpenAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with AskPriceQ
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenAuctionLike {
 
   class Ops[T <: Tradable, A](a: A)(implicit ev: OpenAuctionLike[T, A]) {

@@ -21,6 +21,11 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait SealedBidDoubleAuction[T <: Tradable] {
 
   def orderBook: FourHeapOrderBook[T]
@@ -30,6 +35,11 @@ trait SealedBidDoubleAuction[T <: Tradable] {
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object SealedBidDoubleAuction {
 
   def withDiscriminatoryPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): DiscriminatoryPricingImpl[T] = {

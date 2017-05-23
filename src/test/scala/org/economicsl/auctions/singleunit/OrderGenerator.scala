@@ -23,6 +23,11 @@ import org.economicsl.auctions.singleunit.orders._
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
 
   def randomOrder[T <: Tradable](tradable: T, prng: Random): Either[AskOrder[T], BidOrder[T]] = {

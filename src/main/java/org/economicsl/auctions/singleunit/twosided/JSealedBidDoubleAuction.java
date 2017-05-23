@@ -26,7 +26,7 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
 
 
-/** Class implementing an open-bid, discriminatory price double auction.
+/** Class implementing a sealed-bid, discriminatory price double auction.
  *
  * @param <T>
  * @author davidrpugh

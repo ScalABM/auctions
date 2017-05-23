@@ -25,6 +25,11 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class FirstPriceSealedBidReverseAuction extends FlatSpec with Matchers with AskOrderGenerator {
 
   // suppose that buyer must procure some service...

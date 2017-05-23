@@ -22,9 +22,19 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing}
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenBidReverseAuction {
 
   implicit def openReverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]] = {

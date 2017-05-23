@@ -23,9 +23,19 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.reverse.ReverseAuctionLike
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait DoubleAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with ReverseAuctionLike[T, A]
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object DoubleAuctionLike {
 
   class Ops[T <: Tradable, A](a: A)(implicit ev: DoubleAuctionLike[T, A]) {

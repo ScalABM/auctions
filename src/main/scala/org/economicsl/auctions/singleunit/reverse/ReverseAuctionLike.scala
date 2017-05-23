@@ -22,6 +22,7 @@ import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
+
 trait ReverseAuctionLike[T <: Tradable, A] {
 
   def insert(a: A, order: AskOrder[T]): A

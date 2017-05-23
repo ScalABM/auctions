@@ -25,6 +25,12 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
 
 
+/** Class implementing a sealed-bid, reverse auction.
+ *
+ * @param <T>
+ * @author davidrpugh
+ * @since 0.1.0
+ */
 public class JOpenBidAuction<T extends Tradable> {
 
     private OpenBidAuction<T> auction;

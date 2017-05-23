@@ -19,6 +19,11 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait AskPriceQuoting[T <: Tradable, -A] {
 
   def receive(a: A, request: AskPriceQuoteRequest): Option[AskPriceQuote]

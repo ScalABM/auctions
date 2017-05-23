@@ -21,11 +21,28 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
+/** Type class for implementing sealed-bid auctions.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class SealedBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
 
 
+/** Companion object for the `SealedBidAuction` type class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object SealedBidAuction {
 
+  /** Defines `AuctionLike` methods for the `SealedBidAuction` type class.
+    *
+    * @param a an instance of the `SealedBidAuction` type class.
+    * @tparam T a type of `Tradable`.
+    * @return an instance of `AuctionLike.Ops` that is used by the compiler to generate `AuctionLike` methods for
+    *         instances of the `SealedBudAuction` class.
+    */
   implicit def auctionLikeOps[T <: Tradable](a: SealedBidAuction[T]): AuctionLike.Ops[T, SealedBidAuction[T]] = {
     new AuctionLike.Ops[T, SealedBidAuction[T]](a)
   }

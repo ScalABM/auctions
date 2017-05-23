@@ -5,6 +5,11 @@ import org.economicsl.auctions.singleunit.{ClearResult, Fill}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 sealed trait Pricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }] {
 
   def clear(a: A): ClearResult[T, A]
@@ -14,6 +19,11 @@ sealed trait Pricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; 
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }]
   extends Pricing[T, A] {
 
@@ -40,6 +50,11 @@ trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPoli
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait UniformPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }]
   extends Pricing[T, A] {
 

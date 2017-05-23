@@ -21,6 +21,11 @@ import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait AuctionLike[T <: Tradable, A] {
 
   def insert(a: A, order: BidOrder[T]): A
@@ -36,6 +41,11 @@ trait AuctionLike[T <: Tradable, A] {
 }
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object AuctionLike {
 
   class Ops[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {

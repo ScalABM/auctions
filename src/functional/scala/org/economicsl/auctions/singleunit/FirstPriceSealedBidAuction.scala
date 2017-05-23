@@ -24,6 +24,11 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
 
   // suppose that seller must sell the parking space at any positive price...

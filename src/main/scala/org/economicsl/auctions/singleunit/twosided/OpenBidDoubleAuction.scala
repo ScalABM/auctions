@@ -22,7 +22,11 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
 import org.economicsl.auctions.singleunit.twosided.OpenDoubleAuctionLike.Ops
 
-
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OpenBidDoubleAuction[T <: Tradable] extends SealedBidDoubleAuction[T]
 
 
