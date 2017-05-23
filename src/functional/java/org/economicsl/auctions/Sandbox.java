@@ -28,7 +28,6 @@ import org.economicsl.auctions.singleunit.twosided.*;
 import scala.Option;
 import scala.collection.JavaConverters;
 
-import java.util.List;
 import java.util.UUID;
 
 public class Sandbox {
@@ -86,29 +85,6 @@ public class Sandbox {
             System.out.println(averagePrice.get().value());
         };
 
-        // example usage of a double auction where we don't want to define the pricing rule until later...
-        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl1 = SealedBidDoubleAuction$.MODULE$.withUniformPricing(midPointPricing);
-        DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl1);
-        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl2 = ops.insert(order3);
-        DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops2 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl2);
-        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl3 = ops2.insert(order4);
-        DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> op3 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl3);
-        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl4 = op3.insert(order9);
-        DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops4 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl4);
-        SealedBidDoubleAuction.UniformPricingImpl<GoogleStock> impl5 = ops4.insert(order8);
-
-        // TODO: should not be able to access these from a sealed bid auction!
-        System.out.println(impl5.orderBook().matchedOrders().askOrders().headOption());
-        System.out.println(impl5.orderBook().matchedOrders().bidOrders().headOption());
-        System.out.println(impl5.orderBook().askPriceQuote());
-        System.out.println(impl5.orderBook().bidPriceQuote());
-
-        // after inserting orders, now we can now clear the auction!
-        DoubleAuctionLike.Ops<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> ops5 = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(impl5);
-        ClearResult<GoogleStock, SealedBidDoubleAuction.UniformPricingImpl<GoogleStock>> result = ops5.clear();
-        java.util.List<Fill<GoogleStock>> fills = JavaConverters.seqAsJavaList(result.fills().get().toList());
-        System.out.println(fills);
-
         // try using the new Java API?
         JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<>(order3, askQuotePricing);
         JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8);
@@ -117,18 +93,31 @@ public class Sandbox {
         java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(results.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
         fills2.forEach(System.out::println);
 
-        JOpenBidDoubleAuction<GoogleStock> da = new JOpenBidDoubleAuction<>(midPointPricing);
-        JOpenBidDoubleAuction<GoogleStock> da2 = da.insert(order3);
-        JOpenBidDoubleAuction<GoogleStock> da3 = da2.insert(order4);
-        JOpenBidDoubleAuction<GoogleStock> da4 = da3.insert(order8);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da2 = da.insert(order3);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da3 = da2.insert(order4);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da4 = da3.insert(order8);
 
         System.out.println(da4.receive(new AskPriceQuoteRequest()));
         System.out.println(da4.receive(new BidPriceQuoteRequest()));
 
-        JOpenBidDoubleAuction<GoogleStock> da5 = da4.insert(order9);
-        ClearResult<GoogleStock, JOpenBidDoubleAuction<GoogleStock>> results3 = da5.clear();
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9);
+        ClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
         java.util.List<Fill<GoogleStock>> fills3 = JavaConverters.seqAsJavaList(results3.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
         System.out.println(fills3);
+
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da7 = da6.insert(order3);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da8 = da7.insert(order4);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da9 = da8.insert(order8);
+
+        System.out.println(da9.receive(new AskPriceQuoteRequest()));
+        System.out.println(da9.receive(new BidPriceQuoteRequest()));
+
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9);
+        ClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
+        java.util.List<Fill<GoogleStock>> fills4 = JavaConverters.seqAsJavaList(results4.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
+        System.out.println(fills4);
 
     }
     

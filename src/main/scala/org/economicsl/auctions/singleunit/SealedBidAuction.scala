@@ -76,12 +76,12 @@ object SealedBidAuction {
     new SealedBidAuction[T](orderBook.insert(reservation), pricingPolicy)
   }
 
-  def withHighestPricingPolicy[T <: Tradable](reservation: AskOrder[T]): SealedBidAuction[T] = {
+  def withAskPriceQuotingPolicy[T <: Tradable](reservation: AskOrder[T]): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new SealedBidAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T])
   }
 
-  def withSecondHighestPricingPolicy[T <: Tradable](reservation: AskOrder[T]): SealedBidAuction[T] = {
+  def withBidPriceQuotingPolicy[T <: Tradable](reservation: AskOrder[T]): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new SealedBidAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T])
   }

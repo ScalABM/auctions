@@ -37,7 +37,7 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGen
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
 
   // seller uses a first-priced, sealed bid auction...
-  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withHighestPricingPolicy(reservationPrice)
+  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withAskPriceQuotingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)

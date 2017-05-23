@@ -37,7 +37,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   // seller is willing to sell at any positive price
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withSecondHighestPricingPolicy(reservationPrice)
+  val spsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withBidPriceQuotingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
