@@ -17,8 +17,6 @@ package org.economicsl.auctions;
 
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.JSealedBidAuction;
 import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
@@ -27,7 +25,6 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.*;
 import org.economicsl.auctions.singleunit.twosided.*;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import java.util.UUID;
 
