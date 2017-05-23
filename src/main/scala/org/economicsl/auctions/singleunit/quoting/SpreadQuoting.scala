@@ -24,6 +24,3 @@ trait SpreadQuoting[T <: Tradable, -A] {
   def receive(a: A, request: SpreadQuoteRequest): Option[SpreadQuote]
 
 }
-
-
-

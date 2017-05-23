@@ -16,7 +16,11 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Mixin trait that restricts the quantity of an `Order` to a single unit of a `Tradable`. */
+/** Mixin trait that restricts the quantity of an `Order` to a single unit of a `Tradable`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
   this: Contract with OrderLike[T] =>
 
@@ -28,6 +32,9 @@ trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
 /** Companion object for the `SingleUnit` trait.
   *
   * Defines a basic ordering for anything that mixes in the `SingleUnit` trait.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
   */
 object SingleUnit {
 

@@ -18,7 +18,11 @@ package org.economicsl.auctions
 import java.util.UUID
 
 
-/** Type used to indicate that something is a contract. */
+/** Type used to indicate that something is a contract.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait Contract extends Serializable {
 
   /** Some kind of unique identifier indicating the actor for whom this `Contract` is a liability. */

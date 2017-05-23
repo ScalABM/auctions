@@ -18,4 +18,13 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions.Tradable
 
 
+/** Class used to represent the results from clearing an auction.
+  *
+  * @param fills
+  * @param residual
+  * @tparam T
+  * @tparam A
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 case class ClearResult[T <: Tradable, A](fills: Option[Stream[Fill[T]]], residual: A)

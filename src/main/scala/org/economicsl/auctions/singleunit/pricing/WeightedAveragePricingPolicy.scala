@@ -19,6 +19,13 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.{Price, Tradable}
 
 
+/** Class implementing a weighted average pricing policy.
+  *
+  * @param weight
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class WeightedAveragePricingPolicy[T <: Tradable](weight: Double) extends PricingPolicy[T] {
   require(0 <= weight && weight <= 1.0)  // individual rationality requirement!
 

@@ -20,7 +20,14 @@ import java.util.UUID
 import org.economicsl.auctions.{Price, Tradable}
 
 
-/** An order to sell a single-unit of a tradable at any positive price. */
+/** An order to sell a single-unit of a tradable at any positive price.
+  *
+  * @param issuer
+  * @param tradable
+  * @tparam T the type of `Tradable` for which the `AskOrder` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class MarketAskOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends AskOrder[T] {
 
   val limit: Price = Price.MinValue
@@ -28,6 +35,11 @@ class MarketAskOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends 
 }
 
 
+/** Companion object for `MarketAskOrder`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object MarketAskOrder {
 
   def apply[T <: Tradable](issuer: UUID, tradable: T): MarketAskOrder[T] = {

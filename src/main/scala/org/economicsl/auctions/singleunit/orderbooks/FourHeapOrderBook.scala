@@ -19,6 +19,14 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
 import org.economicsl.auctions.{Price, Tradable}
 
 
+/** Class implementing the four-heap order book algorithm.
+  *
+  * @param matchedOrders
+  * @param unMatchedOrders
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T], val unMatchedOrders: UnMatchedOrders[T]) {
 
   require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.limit >= b2.limit)))
@@ -155,6 +163,11 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
 }
 
 
+/** Companion object for `FourHeapOrderBook`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object FourHeapOrderBook {
 
   def empty[T <: Tradable]: FourHeapOrderBook[T] = {

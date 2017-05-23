@@ -20,10 +20,23 @@ import java.util.UUID
 import org.economicsl.auctions.{Price, Tradable}
 
 
-/** An order to sell a single-unit of a tradable at a price greater than or equal to the limit price. */
+/** An order to sell a single-unit of a tradable at a price greater than or equal to the limit price.
+  *
+  * @param issuer
+  * @param limit
+  * @param tradable
+  * @tparam T the type of `Tradable` for which the `AskOrder` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends AskOrder[T]
 
 
+/** Companion object for `LimitAskOrder`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object LimitAskOrder {
 
   def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitAskOrder[T] = {

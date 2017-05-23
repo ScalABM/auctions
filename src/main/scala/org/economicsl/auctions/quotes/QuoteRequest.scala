@@ -16,5 +16,41 @@ limitations under the License.
 package org.economicsl.auctions.quotes
 
 
-/** Base trait for all quote requests. */
-trait QuoteRequest
+/** Base trait for all quote requests.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+sealed trait QuoteRequest
+
+
+/** Base trait for all price quote requests.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+sealed trait PriceQuoteRequest extends QuoteRequest
+
+
+/** Used by auction participants to request the current ask price quote.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+class AskPriceQuoteRequest extends PriceQuoteRequest
+
+
+/** Used by auction participants to request the current bid price quote.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+class BidPriceQuoteRequest extends PriceQuoteRequest
+
+
+/** Used by auction participants to request the current spread quote.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+class SpreadQuoteRequest extends PriceQuoteRequest

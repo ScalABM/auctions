@@ -19,6 +19,14 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 
 
+/** Class for storing sets of unmatched orders.
+  *
+  * @param askOrders
+  * @param bidOrders
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 private[orderbooks] class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
 
   // highest bid order value must not exceed the lowest ask order value!
