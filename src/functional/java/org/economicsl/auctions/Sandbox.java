@@ -19,6 +19,7 @@ import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.ClearResult;
 import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.JSealedBidAuction;
 import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
 import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
@@ -89,9 +90,8 @@ public class Sandbox {
         JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<>(order3, askQuotePricing);
         JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8);
         JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9);
-        ClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
-        java.util.List<Fill<GoogleStock>> fills2 = JavaConverters.seqAsJavaList(results.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
-        fills2.forEach(System.out::println);
+        JClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
+        System.out.println(results.getFills().get());  // TODO: is Stream the best collection to use here?
 
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing);
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da2 = da.insert(order3);
