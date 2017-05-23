@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit.reverse
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.AskOrder
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing}
 
 
@@ -57,6 +57,11 @@ object OpenBidReverseAuction {
 
     }
 
+  }
+
+  def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): OpenBidReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new OpenBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)
   }
 
 }
