@@ -17,8 +17,8 @@ branches:
     - develop
     
 script:
-  - sbt clean compile
-  - sbt coverage test functional:test
+  - sbt ++$TRAVIS_SCALA_VERSION clean compile
+  - sbt ++$TRAVIS_SCALA_VERSION coverage test functional:test
 
 after_success:
   - sbt coverageReport
