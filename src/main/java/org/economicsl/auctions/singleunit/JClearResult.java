@@ -22,6 +22,13 @@ import scala.Option;
 import java.util.stream.Stream;
 
 
+/**
+ *
+ * @param <T>
+ * @param <A>
+ * @author davidrpugh
+ * @since 0.1.0
+ */
 public class JClearResult<T extends Tradable, A> {
 
     final private Option<Stream<Fill<T>>> fills;

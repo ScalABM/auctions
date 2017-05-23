@@ -23,6 +23,10 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
+import scala.collection.JavaConverters;
+
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 /** Class implementing a sealed-bid, reverse auction.
@@ -54,10 +58,11 @@ public class JOpenBidAuction<T extends Tradable> {
         return new JOpenBidAuction<>(ops.remove(order));
     }
 
-    public ClearResult<T, JOpenBidAuction<T>> clear() {
+    public JClearResult<T, JOpenBidAuction<T>> clear() {
         OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        return new ClearResult<>(results.fills(), new JOpenBidAuction<>(results.residual()));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));
     }
 
     private JOpenBidAuction(OpenBidAuction<T> a) {

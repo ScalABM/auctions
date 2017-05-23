@@ -17,13 +17,15 @@ package org.economicsl.auctions.singleunit.reverse;
 
 
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.AuctionLike;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.SealedBidAuction;
-import org.economicsl.auctions.singleunit.SealedBidAuction$;
+import org.economicsl.auctions.singleunit.*;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import scala.Option;
+import scala.collection.JavaConverters;
+
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 /** Class implementing a sealed-bid, reverse auction.
@@ -50,10 +52,11 @@ public class JSealedBidReverseAuction<T extends Tradable> {
         return new JSealedBidReverseAuction<>(ops.remove(order));
     }
 
-    public ClearResult<T, JSealedBidReverseAuction<T>> clear() {
+    public JClearResult<T, JSealedBidReverseAuction<T>> clear() {
         ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();
-        return new ClearResult<>(results.fills(), new JSealedBidReverseAuction<>(results.residual()));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        return new JClearResult<>(fills, new JSealedBidReverseAuction<>(results.residual()));
     }
 
     private JSealedBidReverseAuction(SealedBidReverseAuction<T> a) {

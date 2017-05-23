@@ -20,10 +20,16 @@ import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.BidPriceQuote;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.ClearResult;
+import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
+import scala.collection.JavaConverters;
+
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 /** Class implementing an open-bid, reverse auction.
@@ -55,10 +61,11 @@ public class JOpenBidReverseAuction<T extends Tradable> {
         return new JOpenBidReverseAuction<>(ops.remove(order));
     }
 
-    public ClearResult<T, JOpenBidReverseAuction<T>> clear() {
+    public JClearResult<T, JOpenBidReverseAuction<T>> clear() {
         OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
-        return new ClearResult<>(results.fills(), new JOpenBidReverseAuction<>(results.residual()));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        return new JClearResult<>(fills, new JOpenBidReverseAuction<>(results.residual()));
     }
 
     private JOpenBidReverseAuction(OpenBidReverseAuction<T> a) {

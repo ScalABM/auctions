@@ -19,11 +19,17 @@ package org.economicsl.auctions.singleunit.twosided;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.*;
 import org.economicsl.auctions.singleunit.ClearResult;
+import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
+import scala.collection.JavaConverters;
+
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
 /** Class for creating sealed-bid double auctions.
@@ -89,10 +95,11 @@ public class JSealedBidDoubleAuction {
             return new DiscriminatoryPricingImpl<>(ops.remove(order));
         }
 
-        public ClearResult<T, DiscriminatoryPricingImpl<T>> clear() {
+        public JClearResult<T, DiscriminatoryPricingImpl<T>> clear() {
             DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             ClearResult<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
-            return new ClearResult<>(results.fills(), new DiscriminatoryPricingImpl<>(results.residual()));
+            Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+            return new JClearResult<>(fills, new DiscriminatoryPricingImpl<>(results.residual()));
         }
 
         private DiscriminatoryPricingImpl(SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> a) {
@@ -141,10 +148,11 @@ public class JSealedBidDoubleAuction {
             return new UniformPricingImpl<>(ops.remove(order));
         }
 
-        public ClearResult<T, UniformPricingImpl<T>> clear() {
+        public JClearResult<T, UniformPricingImpl<T>> clear() {
             DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             ClearResult<T, SealedBidDoubleAuction.UniformPricingImpl<T>> results = ops.clear();
-            return new ClearResult<>(results.fills(), new UniformPricingImpl<>(results.residual()));
+            Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+            return new JClearResult<>(fills, new UniformPricingImpl<>(results.residual()));
         }
 
         private UniformPricingImpl(SealedBidDoubleAuction.UniformPricingImpl<T> a) {

@@ -102,9 +102,8 @@ public class Sandbox {
         System.out.println(da4.receive(new BidPriceQuoteRequest()));
 
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9);
-        ClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
-        java.util.List<Fill<GoogleStock>> fills3 = JavaConverters.seqAsJavaList(results3.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
-        System.out.println(fills3);
+        JClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
+        System.out.println(results3.getFills().get());
 
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing);
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da7 = da6.insert(order3);
@@ -115,9 +114,8 @@ public class Sandbox {
         System.out.println(da9.receive(new BidPriceQuoteRequest()));
 
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9);
-        ClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
-        java.util.List<Fill<GoogleStock>> fills4 = JavaConverters.seqAsJavaList(results4.fills().get().toList()); // TODO: this conversion should be done inside the clear method?
-        System.out.println(fills4);
+        JClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
+        System.out.println(results4.getFills().get());
 
     }
     
