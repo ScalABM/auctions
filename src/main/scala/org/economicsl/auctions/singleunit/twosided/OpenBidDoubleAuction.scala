@@ -62,15 +62,15 @@ object OpenBidDoubleAuction {
           new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy)
         }
 
-        def receive(a: DiscriminatoryPricingImpl[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
+        def receive(a: DiscriminatoryPricingImpl[T], request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = {
           askPriceQuotingPolicy(a.orderBook, request)
         }
 
-        def receive(a: DiscriminatoryPricingImpl[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
+        def receive(a: DiscriminatoryPricingImpl[T], request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = {
           bidPriceQuotingPolicy(a.orderBook, request)
         }
 
-        def receive(a: DiscriminatoryPricingImpl[T], request: SpreadQuoteRequest): Option[SpreadQuote] = {
+        def receive(a: DiscriminatoryPricingImpl[T], request: SpreadQuoteRequest[T]): Option[SpreadQuote] = {
           spreadQuotingPolicy(a.orderBook, request)
         }
 
@@ -119,15 +119,15 @@ object OpenBidDoubleAuction {
           new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy)
         }
 
-        def receive(a: UniformPricingImpl[T], request: AskPriceQuoteRequest): Option[AskPriceQuote] = {
+        def receive(a: UniformPricingImpl[T], request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = {
           askPriceQuotingPolicy(a.orderBook, request)
         }
 
-        def receive(a: UniformPricingImpl[T], request: BidPriceQuoteRequest): Option[BidPriceQuote] = {
+        def receive(a: UniformPricingImpl[T], request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = {
           bidPriceQuotingPolicy(a.orderBook, request)
         }
 
-        def receive(a: UniformPricingImpl[T], request: SpreadQuoteRequest): Option[SpreadQuote] = {
+        def receive(a: UniformPricingImpl[T], request: SpreadQuoteRequest[T]): Option[SpreadQuote] = {
           spreadQuotingPolicy(a.orderBook, request)
         }
 
