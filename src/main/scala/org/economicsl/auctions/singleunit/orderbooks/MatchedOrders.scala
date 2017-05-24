@@ -67,11 +67,10 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
   def zipped: Stream[(AskOrder[T], BidOrder[T])] = {
     @annotation.tailrec
     def loop(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T], pairedOrders: Stream[(AskOrder[T], BidOrder[T])]): Stream[(AskOrder[T], BidOrder[T])] = {
-      if (askOrders.isEmpty || bidOrders.isEmpty) {
-        pairedOrders
-      } else {
-        val pair = (askOrders.head, bidOrders.head)
-        loop(askOrders.tail, bidOrders.tail, pair #:: pairedOrders)
+      (askOrders.headOption, bidOrders.headOption) match {
+        case (Some(askOrder), Some(bidOrder)) =>
+          loop(askOrders.tail, bidOrders.tail, (askOrder, bidOrder) #:: pairedOrders)
+        case _ => pairedOrders
       }
     }
     loop(askOrders, bidOrders, Stream.empty[(AskOrder[T], BidOrder[T])])
