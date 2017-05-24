@@ -49,11 +49,11 @@ object OpenDoubleAuctionLike {
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
 
-    def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = ev.receive(a, request)
+    def receive(request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = ev.receive(a, request)
 
-    def receive(request: BidPriceQuoteRequest): Option[BidPriceQuote] = ev.receive(a, request)
+    def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
 
-    def receive(request: SpreadQuoteRequest): Option[SpreadQuote] = ev.receive(a, request)
+    def receive(request: SpreadQuoteRequest[T]): Option[SpreadQuote] = ev.receive(a, request)
 
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 

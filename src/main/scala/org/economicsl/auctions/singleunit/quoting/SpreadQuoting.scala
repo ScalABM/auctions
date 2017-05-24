@@ -26,6 +26,6 @@ import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
   */
 trait SpreadQuoting[T <: Tradable, -A] {
 
-  def receive(a: A, request: SpreadQuoteRequest): Option[SpreadQuote]
+  def receive(a: A, request: SpreadQuoteRequest[T]): Option[SpreadQuote]
 
 }
