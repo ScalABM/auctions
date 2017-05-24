@@ -46,7 +46,7 @@ object OpenAuctionLike {
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
 
-    def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = ev.receive(a, request)
+    def receive(request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = ev.receive(a, request)
 
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 

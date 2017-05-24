@@ -15,13 +15,15 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
+import org.economicsl.auctions.Tradable
+
 
 /** Base trait for all quote requests.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait QuoteRequest
+sealed trait QuoteRequest[T <: Tradable]
 
 
 /** Base trait for all price quote requests.
@@ -29,7 +31,7 @@ sealed trait QuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait PriceQuoteRequest extends QuoteRequest
+sealed trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T]
 
 
 /** Used by auction participants to request the current ask price quote.
@@ -37,7 +39,7 @@ sealed trait PriceQuoteRequest extends QuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-class AskPriceQuoteRequest extends PriceQuoteRequest
+case class AskPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
 
 
 /** Used by auction participants to request the current bid price quote.
@@ -45,7 +47,7 @@ class AskPriceQuoteRequest extends PriceQuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-class BidPriceQuoteRequest extends PriceQuoteRequest
+case class BidPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
 
 
 /** Used by auction participants to request the current spread quote.
@@ -53,4 +55,4 @@ class BidPriceQuoteRequest extends PriceQuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-class SpreadQuoteRequest extends PriceQuoteRequest
+case class SpreadQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]

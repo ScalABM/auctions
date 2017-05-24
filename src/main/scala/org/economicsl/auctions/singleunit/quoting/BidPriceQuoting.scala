@@ -26,6 +26,6 @@ import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
   */
 trait BidPriceQuoting[T <: Tradable, -A] {
 
-  def receive(a: A, request: BidPriceQuoteRequest): Option[BidPriceQuote]
+  def receive(a: A, request: BidPriceQuoteRequest[T]): Option[BidPriceQuote]
 
 }
