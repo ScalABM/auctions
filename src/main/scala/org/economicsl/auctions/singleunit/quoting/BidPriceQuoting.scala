@@ -15,27 +15,17 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.quoting
 
-import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest, Quote, QuoteRequest}
+import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 
 
-/** Base trait for all `Quoting` implementations.
+/**
   *
-  * @tparam R
-  * @tparam Q
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Quoting[-R <: QuoteRequest, +Q <: Quote] {
+trait BidPriceQuoting[T <: Tradable, -A] {
 
-  def receive(request: R): Option[Q]
+  def receive(a: A, request: BidPriceQuoteRequest): Option[BidPriceQuote]
 
 }
-
-
-/** Base trait for all `PriceQuoting` implementations.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-trait PriceQuoting extends Quoting[PriceQuoteRequest, PriceQuote]
-

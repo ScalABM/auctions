@@ -17,30 +17,36 @@ package org.economicsl.auctions.singleunit.reverse
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.{AskOrderGenerator, LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.{AskOrderGenerator, ClearResult}
 import org.economicsl.auctions.{Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
-class FirstPriceSealedAskReverseAuction extends FlatSpec with Matchers with AskOrderGenerator {
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+class FirstPriceSealedBidReverseAuction extends FlatSpec with Matchers with AskOrderGenerator {
 
   // suppose that buyer must procure some service...
   val buyer: UUID = UUID.randomUUID()
   val service = Service(tick=1)
 
   val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
-  val fpsara: ReverseAuction[Service] = ReverseAuction.firstPriceSealedAsk(reservationPrice)
+  val fpsara: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withBidQuotePricingPolicy(reservationPrice)
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
   val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
 
-  val withAsks: ReverseAuction[Service] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
-  val results: ClearResult[Service, ReverseAuction[Service]] = withAsks.clear
+  val withAsks: SealedBidReverseAuction[Service] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
+  val results: ClearResult[Service, SealedBidReverseAuction[Service]] = withAsks.clear
 
-  "A First-Price, Sealed-Ask Reverse Auction (FPSARA)" should "purchse the Service from the seller who offers it at the lowest price." in {
+  "A First-Price, Sealed-Bid Reverse Auction (FPSBRA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
     results.fills.map(_.map(_.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
 

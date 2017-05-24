@@ -27,4 +27,4 @@ import org.economicsl.auctions.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-case class ClearResult[T <: Tradable, +A <: Auction[T]](fills: Option[Stream[Fill[T]]], residual: A)
+case class ClearResult[T <: Tradable, A](fills: Option[Stream[Fill[T]]], residual: A)

@@ -18,22 +18,31 @@ package org.economicsl.auctions.singleunit.twosided
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
-import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
-class ClosedDoubleAuction extends FlatSpec with Matchers {
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
-  val withDiscriminatoryPricing: DoubleAuction[ParkingSpace] = DoubleAuction.withDiscriminatoryPricing(pricingRule)
-  val withUniformPricing: DoubleAuction[ParkingSpace] = DoubleAuction.withUniformPricing(pricingRule)
+  val withDiscriminatoryPricing: SealedBidDoubleAuction.DiscriminatoryPricingImpl[ParkingSpace] = {
+    SealedBidDoubleAuction.withDiscriminatoryPricing(pricingRule)
+  }
+  val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[ParkingSpace] = {
+    SealedBidDoubleAuction.withUniformPricing(pricingRule)
+  }
 
   val prng = new Random(42)
 
-  "A DoubleAuction (DA)" should "generate the same number of fills as orders." in {
+  "A Sealed-Bid, DoubleAuction (SBDA)" should "generate the same number of fills as orders." in {
 
     val parkingSpace = ParkingSpace(tick = 1)
 

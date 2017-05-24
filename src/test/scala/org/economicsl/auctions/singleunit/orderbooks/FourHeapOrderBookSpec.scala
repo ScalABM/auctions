@@ -17,13 +17,18 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{Price, Quantity, TestTradable}
+import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
   // suppose that seller must sell the parking space at any positive price...
@@ -57,9 +62,6 @@ class FourHeapOrderBookSpec extends FlatSpec with Matchers {
     withBids.unMatchedOrders.askOrders.numberUnits should be(Quantity(0))
     withBids.unMatchedOrders.bidOrders.numberUnits should be(Quantity(100))
 
-    // insert bids into a non-empty order book
-    val withOrders = bids.foldLeft(withOffers)((orderBook, bidOrder) => orderBook.insert(bidOrder))
-
   }
 
   "A FourHeapOrderBook" should "be able to insert ask orders" in {
@@ -69,9 +71,6 @@ class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
     withOffers.unMatchedOrders.askOrders.numberUnits should be(Quantity(100))
     withOffers.unMatchedOrders.bidOrders.numberUnits should be(Quantity(0))
-
-    // insert offers into a non-empty order book
-    val withOrders = offers.foldLeft(withBids)((orderBook, askOrder) => orderBook.insert(askOrder))
 
   }
 

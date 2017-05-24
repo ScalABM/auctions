@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.singleunit.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 
 
 /** Class for storing sets of unmatched orders.

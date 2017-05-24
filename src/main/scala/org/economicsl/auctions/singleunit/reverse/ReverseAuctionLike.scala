@@ -13,24 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.singleunit.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.BidOrder
+import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
-/**
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-trait AuctionLike[T <: Tradable, A] {
 
-  def insert(a: A, order: BidOrder[T]): A
+trait ReverseAuctionLike[T <: Tradable, A] {
 
-  def remove(a: A, order: BidOrder[T]): A
+  def insert(a: A, order: AskOrder[T]): A
+
+  def remove(a: A, order: AskOrder[T]): A
 
   def clear(a: A): ClearResult[T, A]
 
@@ -41,18 +38,13 @@ trait AuctionLike[T <: Tradable, A] {
 }
 
 
-/**
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object AuctionLike {
+object ReverseAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {
+  class Ops[T <: Tradable, A](a: A)(implicit ev: ReverseAuctionLike[T, A]) {
 
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
-    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+    def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
     def clear: ClearResult[T, A] = ev.clear(a)
 

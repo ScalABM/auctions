@@ -14,8 +14,10 @@ lazy val commonSettings = Seq(
     "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases"
   ),
   scalacOptions ++= Seq(
+    "-deprecation",  // issue warning if we use any deprecated API features
     "-feature",  // tells the compiler to provide information about misused language features
     "-language:implicitConversions",  // eliminates the need to import implicit conversions for each usage
+    "-language:reflectiveCalls",  // needed in order to enable structural (or duck) typing
     "-Ywarn-unused-import",
     "-Ywarn-dead-code"
   ),

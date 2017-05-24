@@ -13,12 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.BidOrder
+import org.economicsl.auctions.singleunit.{AuctionLike, ClearResult}
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.reverse.ReverseAuctionLike
 
 
 /**
@@ -26,19 +28,7 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
   * @author davidrpugh
   * @since 0.1.0
   */
-trait AuctionLike[T <: Tradable, A] {
-
-  def insert(a: A, order: BidOrder[T]): A
-
-  def remove(a: A, order: BidOrder[T]): A
-
-  def clear(a: A): ClearResult[T, A]
-
-  def orderBook(a: A): FourHeapOrderBook[T]
-
-  def pricingPolicy(a: A): PricingPolicy[T]
-
-}
+trait DoubleAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with ReverseAuctionLike[T, A]
 
 
 /**
@@ -46,11 +36,15 @@ trait AuctionLike[T <: Tradable, A] {
   * @author davidrpugh
   * @since 0.1.0
   */
-object AuctionLike {
+object DoubleAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {
+  class Ops[T <: Tradable, A](a: A)(implicit ev: DoubleAuctionLike[T, A]) {
+
+    def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
+
+    def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 

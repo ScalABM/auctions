@@ -16,9 +16,11 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 
 
 /**
@@ -26,17 +28,9 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
   * @author davidrpugh
   * @since 0.1.0
   */
-trait AuctionLike[T <: Tradable, A] {
+trait OpenAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with AskPriceQuoting[T, A] {
 
-  def insert(a: A, order: BidOrder[T]): A
-
-  def remove(a: A, order: BidOrder[T]): A
-
-  def clear(a: A): ClearResult[T, A]
-
-  def orderBook(a: A): FourHeapOrderBook[T]
-
-  def pricingPolicy(a: A): PricingPolicy[T]
+  protected val askPriceQuotingPolicy: AskPriceQuotingPolicy[T] = new AskPriceQuotingPolicy[T]
 
 }
 
@@ -46,11 +40,13 @@ trait AuctionLike[T <: Tradable, A] {
   * @author davidrpugh
   * @since 0.1.0
   */
-object AuctionLike {
+object OpenAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {
+  class Ops[T <: Tradable, A](a: A)(implicit ev: OpenAuctionLike[T, A]) {
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
+
+    def receive(request: AskPriceQuoteRequest): Option[AskPriceQuote] = ev.receive(a, request)
 
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 

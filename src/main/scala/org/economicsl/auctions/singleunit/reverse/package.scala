@@ -13,20 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.twosided
-
-import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.singleunit.Fill
+package org.economicsl.auctions.singleunit
 
 
-/** Class representing the results of clearing a `DoubleAuction`.
-  *
-  * @param fills
-  * @param residual
-  * @tparam T
-  * @tparam A
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-case class ClearResult[T <: Tradable, +A <: DoubleAuction[T]](fills: Option[Stream[Fill[T]]], residual: A)
-
+package object reverse

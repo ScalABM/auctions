@@ -13,37 +13,34 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.orders
 
 import java.util.UUID
 
 import org.economicsl.auctions.{Price, Tradable}
 
 
-/** An order to sell a single-unit of a tradable at any positive price.
+/** An order to buy a single-unit of a tradable at a price less than or equal to the limit price.
   *
   * @param issuer
+  * @param limit
   * @param tradable
-  * @tparam T the type of `Tradable` for which the `AskOrder` is being issued.
+  * @tparam T the type of `Tradable` for which the `BidOrder` is being issued.
   * @author davidrpugh
   * @since 0.1.0
   */
-class MarketAskOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends AskOrder[T] {
-
-  val limit: Price = Price.MinValue
-
-}
+class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends BidOrder[T]
 
 
-/** Companion object for `MarketAskOrder`.
+/** Companion object for `LimitBidOrder`.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-object MarketAskOrder {
+object LimitBidOrder {
 
-  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketAskOrder[T] = {
-    new MarketAskOrder[T](issuer, tradable)
+  def apply[T <: Tradable](issuer: UUID, limit: Price, tradable: T): LimitBidOrder[T] = {
+    new LimitBidOrder(issuer, limit, tradable)
   }
 
 }
