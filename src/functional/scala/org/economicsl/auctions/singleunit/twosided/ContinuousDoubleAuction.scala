@@ -76,7 +76,7 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
 
   val spreadQuotes: Stream[SpreadQuote] = {
     results.map(result => result.residual)
-      .flatMap(auction => auction.receive(new SpreadQuoteRequest))
+      .flatMap(auction => auction.receive(SpreadQuoteRequest[GoogleStock]()))
   }
 
   // print off the first 10 prices...
