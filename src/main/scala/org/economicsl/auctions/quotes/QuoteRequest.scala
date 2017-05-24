@@ -37,7 +37,7 @@ sealed trait PriceQuoteRequest extends QuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-class AskPriceQuoteRequest extends PriceQuoteRequest
+case object AskPriceQuoteRequest extends PriceQuoteRequest
 
 
 /** Used by auction participants to request the current bid price quote.
@@ -45,7 +45,7 @@ class AskPriceQuoteRequest extends PriceQuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-class BidPriceQuoteRequest extends PriceQuoteRequest
+case object BidPriceQuoteRequest extends PriceQuoteRequest
 
 
 /** Used by auction participants to request the current spread quote.
@@ -53,4 +53,4 @@ class BidPriceQuoteRequest extends PriceQuoteRequest
   * @author davidrpugh
   * @since 0.1.0
   */
-class SpreadQuoteRequest extends PriceQuoteRequest
+case object SpreadQuoteRequest extends PriceQuoteRequest
