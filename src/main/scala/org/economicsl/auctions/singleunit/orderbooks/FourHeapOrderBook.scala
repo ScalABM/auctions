@@ -190,15 +190,6 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     }
   }
 
-  def takeAllMatched: (Stream[(AskOrder[T], BidOrder[T])], FourHeapOrderBook[T]) = {
-    (matchedOrders.zipped, withEmptyMatchedOrders)
-  }
-
-  private[this] def withEmptyMatchedOrders: FourHeapOrderBook[T] = {
-    val (askOrdering, bidOrdering) = (matchedOrders.askOrdering, matchedOrders.bidOrdering)
-    new FourHeapOrderBook[T](MatchedOrders.empty(askOrdering, bidOrdering), unMatchedOrders)
-  }
-
 }
 
 

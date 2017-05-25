@@ -32,11 +32,11 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
   require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
   require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.limit >= askOrder.limit)))  // value of lowest bid must exceed value of highest ask!
 
-  protected[orderbooks] def + (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
+  def + (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)
   }
 
-  protected[orderbooks] def - (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
+  def - (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders - orders._1, bidOrders - orders._2)
   }
 
@@ -62,18 +62,6 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
         (Some((askOrder, bidOrder)), new MatchedOrders(askOrders - askOrder, bidOrders - bidOrder))
       case _ => (None, this)
     }
-  }
-
-  def zipped: Stream[(AskOrder[T], BidOrder[T])] = {
-    @annotation.tailrec
-    def loop(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T], pairedOrders: Stream[(AskOrder[T], BidOrder[T])]): Stream[(AskOrder[T], BidOrder[T])] = {
-      (askOrders.headOption, bidOrders.headOption) match {
-        case (Some(askOrder), Some(bidOrder)) =>
-          loop(askOrders.tail, bidOrders.tail, (askOrder, bidOrder) #:: pairedOrders)
-        case _ => pairedOrders
-      }
-    }
-    loop(askOrders, bidOrders, Stream.empty[(AskOrder[T], BidOrder[T])])
   }
 
 }

@@ -49,8 +49,6 @@ class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[
 
   val ordering: Ordering[BidOrder[T]] = orders.ordering
 
-  def tail: SortedBidOrders[T] = new SortedBidOrders(orders.tail, numberUnits - head.quantity)
-
 }
 
 

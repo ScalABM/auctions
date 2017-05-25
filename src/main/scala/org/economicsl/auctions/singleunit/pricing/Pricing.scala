@@ -1,6 +1,6 @@
 package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.{ClearResult, Fill}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 
@@ -58,13 +58,25 @@ trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPoli
 trait UniformPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }]
   extends Pricing[T, A] {
 
-  def clear(a: A): ClearResult[T, A] = { // todo this should be refactored to be tail recursive!
+  def clear(a: A): ClearResult[T, A] = {
     a.pricingPolicy.apply(a.orderBook) match {
       case Some(price) =>
-        val (matchedOrders, residualOrderBook) = a.orderBook.takeAllMatched
-        val fills = matchedOrders.map{ case (askOrder, bidOrder) => Fill(askOrder, bidOrder, price) }
-        ClearResult(Some(fills), withOrderBook(a, residualOrderBook))
+        val (fills, residualOrderBook) = accumulate(price)(Stream.empty, a.orderBook)
+        val results = if (fills.nonEmpty) Some(fills) else None
+        ClearResult(results, withOrderBook(a, residualOrderBook))
       case None => ClearResult(None, a)
+    }
+  }
+
+  @annotation.tailrec
+  private[this] def accumulate(price: Price)(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Stream[Fill[T]], FourHeapOrderBook[T]) = {
+    val (bestMatch, residualOrderBook) = ob.takeBestMatched
+    bestMatch match {
+      case Some((askOrder, bidOrder)) =>
+        val fill = Fill(askOrder, bidOrder, price)
+        accumulate(price)(fill #:: fills, residualOrderBook)
+      case None =>
+        (fills, ob)
     }
   }
 
