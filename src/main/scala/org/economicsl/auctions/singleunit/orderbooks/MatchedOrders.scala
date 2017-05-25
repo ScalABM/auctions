@@ -32,11 +32,11 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
   require(askOrders.numberUnits == bidOrders.numberUnits)  // number of units must be the same!
   require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.limit >= askOrder.limit)))  // value of lowest bid must exceed value of highest ask!
 
-  def + (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
+  protected[orderbooks] def + (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders + orders._1, bidOrders + orders._2)
   }
 
-  def - (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
+  protected[orderbooks] def - (orders: (AskOrder[T], BidOrder[T])): MatchedOrders[T] = {
     new MatchedOrders(askOrders - orders._1, bidOrders - orders._2)
   }
 
@@ -59,7 +59,7 @@ class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], va
   def takeBestMatch: (Option[(AskOrder[T], BidOrder[T])], MatchedOrders[T]) = {
     (askOrders.headOption, bidOrders.headOption) match {
       case (Some(askOrder), Some(bidOrder)) =>
-        (Some(askOrder, bidOrder), new MatchedOrders(askOrders - askOrder, bidOrders - bidOrder))
+        (Some((askOrder, bidOrder)), new MatchedOrders(askOrders - askOrder, bidOrders - bidOrder))
       case _ => (None, this)
     }
   }
