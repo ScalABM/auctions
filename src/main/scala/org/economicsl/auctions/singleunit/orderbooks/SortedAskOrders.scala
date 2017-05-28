@@ -21,35 +21,66 @@ import org.economicsl.auctions.{Quantity, Tradable}
 import scala.collection.immutable
 
 
-/** Class for storing a set of `AskOrder` instances in sorted order.
+/** Class that stores a set of single-unit `AskOrder` instances in sorted order.
   *
-  * @param orders
-  * @param numberUnits
-  * @tparam T
+  * @param orders a heap of single-unit `AskOrder` instances.
+  * @param numberUnits the total number of `Tradablle` units supplied by the issuers of the `AskOrder` instances
+  *                    contained in this `SortedAskOrders` instance. Since this `SortedAskOrders` instance contains only
+  *                    single-unit `AskOrder` instances, the `numberUnits` is also equal to the total number of
+  *                    `AskOrder` instances.
+  * @tparam T all `AskOrder` instances stored in the heap should be for the same type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
-class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[T]], val numberUnits: Quantity) {
+final class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[T]], val numberUnits: Quantity) {
 
+  /** The ordering used to sort the `AskOrder` instances contained in this `SortedAskOrders` instance. */
+  val ordering: Ordering[AskOrder[T]] = orders.ordering
+
+  /** Create a new `SortedAskOrders` instance containing the additional `AskOrder`.
+    *
+    * @param order an `AskOrder` that should be added.
+    * @return a new `SortedAskOrder` instance that contains all of the `AskOrder` instances of this instance and that
+    *         also contains the `order`.
+    */
   def + (order: AskOrder[T]): SortedAskOrders[T] = {
     new SortedAskOrders(orders + order, numberUnits + order.quantity)
   }
 
+  /** Create a new `SortedAskOrders` instance with the given `AskOrder` removed from this `SortedAskOrders` instance.
+    *
+    * @param order an `AskOrder` that should be removed.
+    * @return a new `SortedAskOrders` instance that contains all of the `AskOrder` instances of this instance and that
+    *         also contains the `order`.
+    */
   def - (order: AskOrder[T]): SortedAskOrders[T] = {
     new SortedAskOrders(orders - order, numberUnits - order.quantity)
   }
 
+  /** Tests whether some `AskOrder` instance is contained in this `SortedAskOrders` instance.
+    *
+    * @param order the `AskOrder` instance to test for membership.
+    * @return `true` if the `order` is contained in this `SortedAskOrders` instance; `false` otherwise.
+    */
   def contains(order: AskOrder[T]): Boolean = orders.contains(order)
 
-  def head: AskOrder[T] = orders.head
+  /** Selects the first `AskOrder` instance contained in this `SortedAskOrders` instance.
+    *
+    * @return the first `AskOrder` instance contained in this `SortedAskOrders` instance.
+    */
+  def  head: AskOrder[T] = orders.head
 
-  val headOption: Option[AskOrder[T]] = orders.headOption
+  /** Optionally selects the first `AskOrder` instance contained in this `SortedAskOrders` instance.
+    *
+    * @return Some `AskOrder` instance if this `SortedAskOrders` instance is non empty; `None` otherwise.
+    */
+  def headOption: Option[AskOrder[T]] = orders.headOption
 
-  val isEmpty: Boolean = orders.isEmpty
-
-  val ordering: Ordering[AskOrder[T]] = orders.ordering
-
-  def tail: SortedAskOrders[T] = new SortedAskOrders(orders.tail, numberUnits - head.quantity)
+  /** Tests whether this `SortedAskOrder` instance is empty.
+    *
+    * @return `true` is there is no `AskOrder` instance in this `SortedAskOrders` instance; `false` otherwise.
+    */
+  def isEmpty: Boolean = orders.isEmpty
 
 }
 
@@ -61,6 +92,12 @@ class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[
   */
 object SortedAskOrders {
 
+  /** Create an instance of `SortedAskOrders` that does not contain any `AskOrder` instances.
+    *
+    * @param ordering the ordering used to sort the underlying heap of `AskOrder` instances.
+    * @tparam T all `AskOrder` instances stored in the heap should be for the same type of `Tradable`.
+    * @return an instance of `SortedAskOrders`.
+    */
   def empty[T <: Tradable](ordering: Ordering[AskOrder[T]]): SortedAskOrders[T] = {
     new SortedAskOrders(immutable.TreeSet.empty[AskOrder[T]](ordering), Quantity(0))
   }
