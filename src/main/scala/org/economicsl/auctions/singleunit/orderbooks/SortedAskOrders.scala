@@ -32,7 +32,10 @@ import scala.collection.immutable
   * @author davidrpugh
   * @since 0.1.0
   */
-class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[T]], val numberUnits: Quantity) {
+final class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[T]], val numberUnits: Quantity) {
+
+  /** The ordering used to sort the `AskOrder` instances contained in this `SortedAskOrders` instance. */
+  val ordering: Ordering[AskOrder[T]] = orders.ordering
 
   /** Create a new `SortedAskOrders` instance containing the additional `AskOrder`.
     *
@@ -47,7 +50,7 @@ class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[
   /** Create a new `SortedAskOrders` instance with the given `AskOrder` removed from this `SortedAskOrders` instance.
     *
     * @param order an `AskOrder` that should be removed.
-    * @return a new `SortedAskOrder` instance that contains all of the `AskOrder` instances of this instance and that
+    * @return a new `SortedAskOrders` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
   def - (order: AskOrder[T]): SortedAskOrders[T] = {
@@ -78,9 +81,6 @@ class SortedAskOrders[T <: Tradable] private(orders: immutable.TreeSet[AskOrder[
     * @return `true` is there is no `AskOrder` instance in this `SortedAskOrders` instance; `false` otherwise.
     */
   def isEmpty: Boolean = orders.isEmpty
-
-  /** The ordering used to sort the `AskOrder` instances contained in this `SortedAskOrders` instance. */
-  val ordering: Ordering[AskOrder[T]] = orders.ordering
 
 }
 

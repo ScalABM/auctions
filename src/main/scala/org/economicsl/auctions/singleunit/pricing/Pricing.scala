@@ -59,7 +59,8 @@ trait UniformPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; 
   extends Pricing[T, A] {
 
   def clear(a: A): ClearResult[T, A] = {
-    a.pricingPolicy.apply(a.orderBook) match {
+    val uniformPrice = a.pricingPolicy.apply(a.orderBook)
+    uniformPrice match {
       case Some(price) =>
         val (fills, residualOrderBook) = accumulate(price)(Stream.empty, a.orderBook)
         val results = if (fills.nonEmpty) Some(fills) else None

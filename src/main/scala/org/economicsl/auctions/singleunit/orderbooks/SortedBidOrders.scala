@@ -32,7 +32,10 @@ import scala.collection.immutable
   * @author davidrpugh
   * @since 0.1.0
   */
-class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[T]], val numberUnits: Quantity) {
+final class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[T]], val numberUnits: Quantity) {
+
+  /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
+  val ordering: Ordering[BidOrder[T]] = orders.ordering
 
   /** Create a new `SortedBidOrders` instance containing the additional `BidOrder`.
     *
@@ -78,9 +81,6 @@ class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[
     * @return `true` is there is no `BidOrder` instance in this `SortedBidOrders` instance; `false` otherwise.
     */
   def isEmpty: Boolean = orders.isEmpty
-
-  /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
-  val ordering: Ordering[BidOrder[T]] = orders.ordering
 
 }
 

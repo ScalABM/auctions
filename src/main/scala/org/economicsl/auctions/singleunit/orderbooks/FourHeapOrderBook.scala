@@ -21,22 +21,23 @@ import org.economicsl.auctions.{Price, Tradable}
 
 /** Class implementing the four-heap order book algorithm.
   *
-  * @param matchedOrders contains two heaps of orders, one for `AskOrder` instances and one for `BidOrder` instances,
-  *                      that comprise the current matched set.
-  * @param unMatchedOrders contains two heaps of orders, one for `AskOrder` instances and one for `BidOrder` instances,
-  *                        that comprise the current unmatched set.
-  * @tparam T orders inserted into the order book must be for the same type of `Tradable`.
+  * @param matched contains two heaps of orders, one for `AskOrder` instances and one for `BidOrder` instances, that
+  *                comprise the current matched set.
+  * @param unMatched contains two heaps of orders, one for `AskOrder` instances and one for `BidOrder` instances, that
+  *                  comprise the current unmatched set.
+  * @tparam T all `AskOrder` and `BidOrder` instances stored in this `FourHeapOrderBook` should be for the same type
+  *           of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   * @note Implementation taken from Wurman et al (1998). Algorithm uses four heaps to organize the submitted orders.
-  *       Orders are distinguished by whether or not they are buy or sell orders, and whether or not they are in the
-  *       current matched set.
+  *       Orders are distinguished by whether or not they are `AskOrder` or `BidOrder` instances, and whether or not
+  *       they are in the current matched set.
   */
-class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T], val unMatchedOrders: UnMatchedOrders[T]) {
+final class FourHeapOrderBook[T <: Tradable] private(val matched: MatchedOrders[T], val unMatched: UnMatchedOrders[T]) {
 
-  require(matchedOrders.bidOrders.headOption.forall(b1 => unMatchedOrders.bidOrders.headOption.forall(b2 => b1.limit >= b2.limit)))
+  require(matched.bidOrders.headOption.forall(b1 => unMatched.bidOrders.headOption.forall(b2 => b1.limit >= b2.limit)))
 
-  require(unMatchedOrders.askOrders.headOption.forall(a1 => matchedOrders.askOrders.headOption.forall(a2 => a1.limit >= a2.limit)))
+  require(unMatched.askOrders.headOption.forall(a1 => matched.askOrders.headOption.forall(a2 => a1.limit >= a2.limit)))
 
   /** The ask price quote is the price that a buyer would need to exceed in order for its bid to be matched had the
     * auction cleared at the time the quote was issued.
@@ -44,7 +45,7 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     * @note The ask price quote should be equal to the Mth highest price (where M is the total number of ask orders in
     *       the order book). The ask price quote should be undefined if there are no ask orders in the order book.
     */
-  def askPriceQuote: Option[Price] = (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
+  def askPriceQuote: Option[Price] = (matched.bidOrders.headOption, unMatched.askOrders.headOption) match {
     case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit min askOrder.limit)  // askOrder might have been rationed!
     case (Some(bidOrder), None) => Some(bidOrder.limit)
     case (None, Some(askOrder)) => Some(askOrder.limit)
@@ -57,7 +58,7 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     * @note The bid price quote should be equal to the (M+1)th highest price (where M is the total number of ask orders
     *       in the order book). The bid price quote should be undefined if there are no bid orders in the order book.
     */
-  def bidPriceQuote: Option[Price] = (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
+  def bidPriceQuote: Option[Price] = (unMatched.bidOrders.headOption, matched.askOrders.headOption) match {
     case (Some(bidOrder), Some(askOrder)) => Some(bidOrder.limit max askOrder.limit)  // bid Order might have been rationed!
     case (Some(bidOrder), None) => Some(bidOrder.limit)
     case (None, Some(askOrder)) => Some(askOrder.limit)
@@ -76,29 +77,29 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     *        `AskOrder` instances contained in both the matched and unmatched sets.
     */
   def insert(order: AskOrder[T]): FourHeapOrderBook[T] = {
-    (matchedOrders.askOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
+    (matched.askOrders.headOption, unMatched.bidOrders.headOption) match {
       case (Some(askOrder), Some(bidOrder)) =>
         if (order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit) {  // bidOrder was rationed!
-          new FourHeapOrderBook(matchedOrders + ((order, bidOrder)), unMatchedOrders - bidOrder)
+          new FourHeapOrderBook(matched + ((order, bidOrder)), unMatched - bidOrder)
         } else if (order.limit < askOrder.limit) {
-          new FourHeapOrderBook(matchedOrders.replace(askOrder, order), unMatchedOrders + askOrder)
+          new FourHeapOrderBook(matched.replace(askOrder, order), unMatched + askOrder)
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+          new FourHeapOrderBook(matched, unMatched + order)
         }
       case (None, Some(bidOrder)) =>
         if (order.limit < bidOrder.limit) {
-          new FourHeapOrderBook(matchedOrders + ((order, bidOrder)), unMatchedOrders - bidOrder)
+          new FourHeapOrderBook(matched + ((order, bidOrder)), unMatched - bidOrder)
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+          new FourHeapOrderBook(matched, unMatched + order)
         }
       case (Some(askOrder), None) =>
         if ( order.limit < askOrder.limit) {
-          new FourHeapOrderBook(matchedOrders.replace(askOrder, order), unMatchedOrders + askOrder)
+          new FourHeapOrderBook(matched.replace(askOrder, order), unMatched + askOrder)
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+          new FourHeapOrderBook(matched, unMatched + order)
         }
       case (None, None) =>
-        new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        new FourHeapOrderBook(matched, unMatched + order)
     }
   }
 
@@ -110,29 +111,29 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     *        `BidOrder` instances contained in both the matched and unmatched sets.
     */
   def insert(order: BidOrder[T]): FourHeapOrderBook[T] = {
-    (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
+    (matched.bidOrders.headOption, unMatched.askOrders.headOption) match {
       case (Some(bidOrder), Some(askOrder)) =>
         if (order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit) { // askOrder was rationed!
-          new FourHeapOrderBook(matchedOrders + ((askOrder, order)), unMatchedOrders - askOrder)
+          new FourHeapOrderBook(matched + ((askOrder, order)), unMatched - askOrder)
         } else if (order.limit > bidOrder.limit) { // no rationing!
-          new FourHeapOrderBook(matchedOrders.replace(bidOrder, order), unMatchedOrders + bidOrder)
+          new FourHeapOrderBook(matched.replace(bidOrder, order), unMatched + bidOrder)
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+          new FourHeapOrderBook(matched, unMatched + order)
         }
       case (None, Some(askOrder)) =>
         if (order.limit > askOrder.limit) {
-          new FourHeapOrderBook(matchedOrders + ((askOrder, order)), unMatchedOrders - askOrder)
+          new FourHeapOrderBook(matched + ((askOrder, order)), unMatched - askOrder)
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+          new FourHeapOrderBook(matched, unMatched + order)
         }
       case (Some(bidOrder), None) =>
         if (order.limit > bidOrder.limit) {
-          new FourHeapOrderBook(matchedOrders.replace(bidOrder, order), unMatchedOrders + bidOrder)
+          new FourHeapOrderBook(matched.replace(bidOrder, order), unMatched + bidOrder)
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+          new FourHeapOrderBook(matched, unMatched + order)
         }
       case (None, None) =>
-        new FourHeapOrderBook(matchedOrders, unMatchedOrders + order)
+        new FourHeapOrderBook(matched, unMatched + order)
     }
   }
 
@@ -145,14 +146,14 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     *       instances contained in both the matched and unmatched sets.
     */
   def remove(order: AskOrder[T]): FourHeapOrderBook[T] = {
-    if (unMatchedOrders.contains(order)) {
-      new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
-    } else if (matchedOrders.contains(order)) {
-      val bidOrder = matchedOrders.bidOrders.head
-      unMatchedOrders.askOrders.headOption match {
+    if (unMatched.contains(order)) {
+      new FourHeapOrderBook(matched, unMatched - order)
+    } else if (matched.contains(order)) {
+      val bidOrder = matched.bidOrders.head
+      unMatched.askOrders.headOption match {
         case Some(askOrder) if askOrder.limit <= bidOrder.limit =>  // askOrder was rationed!
-          new FourHeapOrderBook(matchedOrders.replace(order, askOrder), unMatchedOrders - askOrder)
-        case _ => new FourHeapOrderBook(matchedOrders - ((order, bidOrder)), unMatchedOrders + bidOrder)
+          new FourHeapOrderBook(matched.replace(order, askOrder), unMatched - askOrder)
+        case _ => new FourHeapOrderBook(matched - ((order, bidOrder)), unMatched + bidOrder)
       }
     } else {
       this
@@ -168,14 +169,14 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
     *       instances contained in both the matched and unmatched sets.
     */
   def remove(order: BidOrder[T]): FourHeapOrderBook[T] = {
-    if (unMatchedOrders.contains(order)) {
-      new FourHeapOrderBook(matchedOrders, unMatchedOrders - order)
-    } else if (matchedOrders.contains(order)) {
-      val askOrder = matchedOrders.askOrders.head
-      unMatchedOrders.bidOrders.headOption match {
+    if (unMatched.contains(order)) {
+      new FourHeapOrderBook(matched, unMatched - order)
+    } else if (matched.contains(order)) {
+      val askOrder = matched.askOrders.head
+      unMatched.bidOrders.headOption match {
         case Some(bidOrder) if bidOrder.limit >= askOrder.limit =>  // bidOrder was rationed!
-          new FourHeapOrderBook(matchedOrders.replace(order, bidOrder), unMatchedOrders - bidOrder)
-        case _ => new FourHeapOrderBook(matchedOrders - ((askOrder, order)), unMatchedOrders + askOrder)
+          new FourHeapOrderBook(matched.replace(order, bidOrder), unMatched - bidOrder)
+        case _ => new FourHeapOrderBook(matched - ((askOrder, order)), unMatched + askOrder)
       }
     } else {
       this
@@ -183,9 +184,9 @@ class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[
   }
 
   def takeBestMatched: (Option[(AskOrder[T], BidOrder[T])], FourHeapOrderBook[T]) = {
-    val (bestMatch, residualMatchedOrders) = matchedOrders.takeBestMatch
+    val (bestMatch, residualMatchedOrders) = matched.splitAtBestMatch
     bestMatch match {
-      case result @ Some(_) => (result, new FourHeapOrderBook(residualMatchedOrders, unMatchedOrders))
+      case result @ Some(_) => (result, new FourHeapOrderBook(residualMatchedOrders, unMatched))
       case None => (None, this)
     }
   }

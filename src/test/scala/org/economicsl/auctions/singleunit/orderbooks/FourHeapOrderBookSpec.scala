@@ -56,35 +56,35 @@ class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
   "A FourHeapOrderBook" should "be able to insert bid orders" in {
 
-    withBids.matchedOrders.askOrders.numberUnits should be(Quantity(0))
-    withBids.matchedOrders.bidOrders.numberUnits should be(Quantity(0))
+    withBids.matched.askOrders.numberUnits should be(Quantity(0))
+    withBids.matched.bidOrders.numberUnits should be(Quantity(0))
 
-    withBids.unMatchedOrders.askOrders.numberUnits should be(Quantity(0))
-    withBids.unMatchedOrders.bidOrders.numberUnits should be(Quantity(100))
+    withBids.unMatched.askOrders.numberUnits should be(Quantity(0))
+    withBids.unMatched.bidOrders.numberUnits should be(Quantity(100))
 
   }
 
   "A FourHeapOrderBook" should "be able to insert ask orders" in {
 
-    withOffers.matchedOrders.askOrders.numberUnits should be(Quantity(0))
-    withOffers.matchedOrders.bidOrders.numberUnits should be(Quantity(0))
+    withOffers.matched.askOrders.numberUnits should be(Quantity(0))
+    withOffers.matched.bidOrders.numberUnits should be(Quantity(0))
 
-    withOffers.unMatchedOrders.askOrders.numberUnits should be(Quantity(100))
-    withOffers.unMatchedOrders.bidOrders.numberUnits should be(Quantity(0))
+    withOffers.unMatched.askOrders.numberUnits should be(Quantity(100))
+    withOffers.unMatched.bidOrders.numberUnits should be(Quantity(0))
 
   }
 
   "A FourHeapOrderBook" should "be able to remove ask orders" in {
 
     val withOutOffers = offers.foldLeft(withOffers)((orderBook, askOrder) => orderBook.remove(askOrder))
-    assert(withOutOffers.unMatchedOrders.askOrders.isEmpty)
+    assert(withOutOffers.unMatched.askOrders.isEmpty)
 
   }
 
   "A FourHeapOrderBook" should "be able to remove bid orders" in {
 
     val withOutBids = bids.foldLeft(withBids)((orderBook, bidOrder) => orderBook.remove(bidOrder))
-    assert(withOutBids.unMatchedOrders.bidOrders.isEmpty)
+    assert(withOutBids.unMatched.bidOrders.isEmpty)
 
   }
 
