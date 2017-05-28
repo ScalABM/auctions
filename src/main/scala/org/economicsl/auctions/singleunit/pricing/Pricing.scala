@@ -32,7 +32,7 @@ trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPoli
     @annotation.tailrec
     def loop(pricingPolicy: PricingPolicy[T])(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): ClearResult[T, A] = {
       val currentPrice = pricingPolicy(ob)
-      val (bestMatch, residualOrderBook) = ob.takeBestMatched
+      val (bestMatch, residualOrderBook) = ob.splitAtBestMatch
       bestMatch match {
         case Some((askOrder, bidOrder)) =>
           val fill = currentPrice.map(price => Fill(askOrder, bidOrder, price))
@@ -71,7 +71,7 @@ trait UniformPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; 
 
   @annotation.tailrec
   private[this] def accumulate(price: Price)(fills: Stream[Fill[T]], ob: FourHeapOrderBook[T]): (Stream[Fill[T]], FourHeapOrderBook[T]) = {
-    val (bestMatch, residualOrderBook) = ob.takeBestMatched
+    val (bestMatch, residualOrderBook) = ob.splitAtBestMatch
     bestMatch match {
       case Some((askOrder, bidOrder)) =>
         val fill = Fill(askOrder, bidOrder, price)

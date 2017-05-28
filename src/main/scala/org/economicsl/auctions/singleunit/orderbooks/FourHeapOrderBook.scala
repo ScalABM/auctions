@@ -183,10 +183,17 @@ final class FourHeapOrderBook[T <: Tradable] private(val matched: MatchedOrders[
     }
   }
 
-  def takeBestMatched: (Option[(AskOrder[T], BidOrder[T])], FourHeapOrderBook[T]) = {
-    val (bestMatch, residualMatchedOrders) = matched.splitAtBestMatch
+  /** Split this `FourHeapOrderBook` instance into an optional pair of matched `AskOrder` and `BidOrder` instances and a
+    * residual `FourHeapOrderBook` instance.
+    *
+    * @return a `Tuple` whose first element is some matched pair of `(AskOrder, BidOrder)` instances if the underlying
+    *         `MatchedOrders` instance is non-empty (first element is `None` otherwise), and whose second element is
+    *         the residual `FourHeapOrderBook` instance.
+    */
+  def splitAtBestMatch: (Option[(AskOrder[T], BidOrder[T])], FourHeapOrderBook[T]) = {
+    val (bestMatch, residual) = matched.splitAtBestMatch
     bestMatch match {
-      case result @ Some(_) => (result, new FourHeapOrderBook(residualMatchedOrders, unMatched))
+      case result @ Some(_) => (result, new FourHeapOrderBook(residual, unMatched))
       case None => (None, this)
     }
   }
