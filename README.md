@@ -16,7 +16,7 @@ Primary focus for version 0.1.0 is on developing a minimal API based around the 
 * Version 0.2.0: extend the API to allow for multi-unit auctions. Incentive structures in multi-unit auctions often differ in important ways from the incentive structures in single unit auctions. Multi-unit auctions are critical for modeling electricity auctions which are a key use case. 
 * Version 0.3.0 will extend the API to incorporate single unit combinatorial auctions. 
 
-In the longer term, we would like to generalize the auctions API so that auctions can eb thought of as a special type of social choice mechanism that use "money" (see chapter 10 from Nisan et al (2007) for discussion and details). 
+In the longer term, we would like to generalize the auctions API so that auctions can be thought of as special types of social choice mechanisms that use "money" (see chapter 10 from Nisan et al (2007) for discussion and details). 
 
 The design and imlementation of our API is heavily influences by functional programming principles and techniques. In particular we strive to...
 
@@ -40,17 +40,19 @@ Wholesale electricity auctions are discrete, multi-unit, reverse auctions; elect
 3. Discrete prices and quantities (units matter!)
 4. Orders that can persist across multiple clearing events
 
-Much ink has been spilt about optimal pricing rules for electricity auctions. In particular, under what circumstances will uniform price auctions outperform (or underperfom!) discrimatory price auctions? In order to address this question the API needs to support both uniform and discriminatory pricing rules.
+Much ink has been spilt about optimal pricing rules for wholesale electricity auctions. In particular, under what circumstances will uniform price auctions outperform (or underperfom!) discrimatory price auctions? In order to address this question the API needs to support both uniform and discriminatory pricing rules.
+
+#### Intra-day, real-time electricity markets
+Intra-day, real-time electricity auctions are typically operated as continuous double auctions (much like financial markets). Far from obvious that continuous double auctions are optimal auction design for intra-day electricity markets. If real-time auctions should not clear continuously, what is the optimal clearing frequency of intra-day electricity markets?
 
 #### Peer-to-peer electricity auctions
-Currently a number of startups involved in developing technologies that allow individual households to trade electricity with one another using Blockchain-based technologies to process payments. A non-exhaustive list of examples would be...
+Currently a number of energy sector startups involved in developing technologies that allow individual households to trade electricity with one another using Blockchain-based technologies to process payments. A non-exhaustive list of examples would be...
 
 * [Power Ledger](https://powerledger.io/) Perth, Australia.
-* [Grid Singularity](http://gridsingularity.com/)
-* [L03 Energy](http://lo3energy.com/)
-* [Electron](http://www.electron.org.uk/) London, UK.
+* [Grid Singularity](http://gridsingularity.com/), Vienna, Austria.
+* [L03 Energy](http://lo3energy.com/), New Yoork, USA.
 
-...how can we optimally design auction mechanisms to facilitate efficient pricing and allocation of electricity in these markets?
+...how can we optimally design auction mechanisms to facilitate efficient pricing and allocation of electricity in peer-to-peer markets? How relevant is research done at Google, Amazon, et al on design of ecommerce auctions? 
 
 #### Combinatoric electricity auctions
 Currently auctions for electricity are independent of auctions for ancillary energy services, such as storage. In the future, electricity auctions could be combined so that electricity as well as supporting ancillary services can be auctioned together as bundles. This requires that our API be able to handle multi-dimensional or combinatorial auctions.
