@@ -17,33 +17,40 @@ package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes._
-import org.economicsl.auctions.singleunit.{ClearResult, OpenAuctionLike}
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.{ClearResult, OpenBidAuctionLike}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting, SpreadQuotingPolicy}
-import org.economicsl.auctions.singleunit.reverse.OpenReverseAuctionLike
+import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuctionLike
 
 
-/**
+/** Base trait defining "reverse auction-like" behavior.
   *
+  * @tparam T all `BidOrder` instances must be for the same type of `Tradable`.
+  * @tparam A type `A` for which auction-like operations should be defined.
   * @author davidrpugh
   * @since 0.1.0
   */
-trait OpenDoubleAuctionLike[T <: Tradable, A] extends OpenAuctionLike[T, A] with OpenReverseAuctionLike[T, A]
-  with AskPriceQuoting[T, A] with BidPriceQuoting[T, A] with SpreadQuoting[T, A] {
+trait OpenBidDoubleAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
+  extends OpenBidAuctionLike[T, A]
+  with OpenBidReverseAuctionLike[T, A]
+  with AskPriceQuoting[T, A]
+  with BidPriceQuoting[T, A]
+  with SpreadQuoting[T, A] {
 
   protected val spreadQuotingPolicy: SpreadQuotingPolicy[T] = new SpreadQuotingPolicy[T]
 
 }
 
 
-/**
+/** Companion object for `OpenBidDoubleAuctionLike` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-object OpenDoubleAuctionLike {
+object OpenBidDoubleAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: OpenDoubleAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidDoubleAuctionLike[T, A]) {
 
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 

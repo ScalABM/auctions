@@ -36,13 +36,13 @@ class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrde
   */
 object SealedBidReverseAuction {
 
-  implicit def reverseAuctionLikeOps[T <: Tradable](a: SealedBidReverseAuction[T]): ReverseAuctionLike.Ops[T, SealedBidReverseAuction[T]] = {
-    new ReverseAuctionLike.Ops[T, SealedBidReverseAuction[T]](a)
+  implicit def reverseAuctionLikeOps[T <: Tradable](a: SealedBidReverseAuction[T]): SealedBidReverseAuctionLike.Ops[T, SealedBidReverseAuction[T]] = {
+    new SealedBidReverseAuctionLike.Ops[T, SealedBidReverseAuction[T]](a)
   }
 
-  implicit def reverseAuctionLike[T <: Tradable]: ReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] = {
+  implicit def reverseAuctionLike[T <: Tradable]: SealedBidReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] = {
 
-    new ReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] {
+    new SealedBidReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] {
 
       def insert(a: SealedBidReverseAuction[T], order: AskOrder[T]): SealedBidReverseAuction[T] = {
         new SealedBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy)
@@ -51,10 +51,6 @@ object SealedBidReverseAuction {
       def remove(a: SealedBidReverseAuction[T], order: AskOrder[T]): SealedBidReverseAuction[T] = {
         new SealedBidReverseAuction[T](a.orderBook.remove(order), a.pricingPolicy)
       }
-
-      def orderBook(a: SealedBidReverseAuction[T]): FourHeapOrderBook[T] = a.orderBook
-
-      def pricingPolicy(a: SealedBidReverseAuction[T]): PricingPolicy[T] = a.pricingPolicy
 
       protected def withOrderBook(a: SealedBidReverseAuction[T], orderBook: FourHeapOrderBook[T]): SealedBidReverseAuction[T] = {
         new SealedBidReverseAuction[T](orderBook, a.pricingPolicy)

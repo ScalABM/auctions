@@ -42,17 +42,17 @@ public class JSealedBidAuction<T extends Tradable> {
     }
 
     public JSealedBidAuction<T> insert(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.auctionLikeOps(this.sealedBidAuction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.mkAuctionOps(this.sealedBidAuction);
         return new JSealedBidAuction<>(ops.insert(order));
     }
 
     public JSealedBidAuction<T> remove(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.auctionLikeOps(this.sealedBidAuction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.mkAuctionOps(this.sealedBidAuction);
         return new JSealedBidAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JSealedBidAuction<T>> clear() {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.auctionLikeOps(this.sealedBidAuction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.mkAuctionOps(this.sealedBidAuction);
         ClearResult<T, SealedBidAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JSealedBidAuction<>(results.residual()));

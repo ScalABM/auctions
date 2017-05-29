@@ -17,28 +17,30 @@ package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.{AuctionLike, ClearResult}
+import org.economicsl.auctions.singleunit.{ClearResult, SealedBidAuctionLike}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
-import org.economicsl.auctions.singleunit.reverse.ReverseAuctionLike
+import org.economicsl.auctions.singleunit.reverse.SealedBidReverseAuctionLike
 
 
-/**
+/** Base trait defining "sealed-bid double auction-like" behavior.
+  *
+  * @tparam T all `AskOrder` and `BidOrder` instances must be for the same type of `Tradable`.
+  * @tparam A type `A` for which sealed-bid double auction-like operations should be defined.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+trait SealedBidDoubleAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
+  extends SealedBidAuctionLike[T, A] with SealedBidReverseAuctionLike[T, A]
+
+
+/** Companion object for the `DoubleAuctionLike` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-trait DoubleAuctionLike[T <: Tradable, A] extends AuctionLike[T, A] with ReverseAuctionLike[T, A]
+object SealedBidDoubleAuctionLike {
 
-
-/**
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object DoubleAuctionLike {
-
-  class Ops[T <: Tradable, A](a: A)(implicit ev: DoubleAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidDoubleAuctionLike[T, A]) {
 
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
@@ -49,10 +51,6 @@ object DoubleAuctionLike {
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 
     def clear: ClearResult[T, A] = ev.clear(a)
-
-    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
-
-    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
 
   }
 

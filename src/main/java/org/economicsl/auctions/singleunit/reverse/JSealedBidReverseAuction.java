@@ -43,17 +43,17 @@ public class JSealedBidReverseAuction<T extends Tradable> {
     }
 
     public JSealedBidReverseAuction<T> insert(AskOrder<T> order) {
-        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
+        SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         return new JSealedBidReverseAuction<>(ops.insert(order));
     }
 
     public JSealedBidReverseAuction<T> remove(AskOrder<T> order) {
-        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
+        SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         return new JSealedBidReverseAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JSealedBidReverseAuction<T>> clear() {
-        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
+        SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JSealedBidReverseAuction<>(results.residual()));

@@ -20,30 +20,34 @@ import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 
 
-/**
+/** Trait extends sealed-bid reverse auction-like behavior to include the ability to process bid price quote requests.
   *
+  * @tparam T all `AskOrder` instances must be for the same type of `Tradable`.
+  * @tparam A type class `A` for which sealed-bid reverse auction-like operations should be defined.
   * @author davidrpugh
   * @since 0.1.0
   */
-trait OpenReverseAuctionLike[T <: Tradable, A] extends ReverseAuctionLike[T, A] with BidPriceQuoting[T, A] {
+trait OpenBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
+  extends SealedBidReverseAuctionLike[T, A]
+  with BidPriceQuoting[T, A] {
 
+  /* Defines how an `OpenBidReverseAuctionLike` instance will respond to `BidPriceQuoteRequests`. */
   protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
 
 }
 
 
-/**
+/** Companion object for the `OpenBidReverseAuctionLike` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-object OpenReverseAuctionLike {
+object OpenBidReverseAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: OpenReverseAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidReverseAuctionLike[T, A]) {
 
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
@@ -52,10 +56,6 @@ object OpenReverseAuctionLike {
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
     def clear: ClearResult[T, A] = ev.clear(a)
-
-    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
-
-    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
 
   }
 

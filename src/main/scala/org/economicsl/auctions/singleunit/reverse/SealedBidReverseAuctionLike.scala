@@ -19,38 +19,41 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.singleunit.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 
 
+/** Base trait defining "reverse auction-like" behavior.
+  *
+  * @tparam T all `BidOrder` instances must be for the same type of `Tradable`.
+  * @tparam A type `A` for which auction-like operations should be defined.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }] {
 
-trait ReverseAuctionLike[T <: Tradable, A] {
-
+  /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+    *
+    * @param a
+    * @param order
+    * @return
+    */
   def insert(a: A, order: AskOrder[T]): A
 
   def remove(a: A, order: AskOrder[T]): A
 
   def clear(a: A): ClearResult[T, A]
 
-  def orderBook(a: A): FourHeapOrderBook[T]
-
-  def pricingPolicy(a: A): PricingPolicy[T]
-
 }
 
 
-object ReverseAuctionLike {
+object SealedBidReverseAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: ReverseAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidReverseAuctionLike[T, A]) {
 
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
     def clear: ClearResult[T, A] = ev.clear(a)
-
-    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
-
-    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
 
   }
 

@@ -44,22 +44,22 @@ public class JOpenBidAuction<T extends Tradable> {
     }
 
     public JOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.insert(order));
     }
 
     public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
     public JOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JOpenBidAuction<T>> clear() {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));

@@ -17,7 +17,6 @@ package org.economicsl.auctions.singleunit.twosided;
 
 
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.quotes.*;
 import org.economicsl.auctions.singleunit.ClearResult;
 import org.economicsl.auctions.singleunit.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
@@ -76,27 +75,27 @@ public class JSealedBidDoubleAuction {
         }
 
         public DiscriminatoryPricingImpl<T> insert(AskOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
         }
 
         public DiscriminatoryPricingImpl<T> insert(BidOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
         }
 
         public DiscriminatoryPricingImpl<T> remove(AskOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.remove(order));
         }
 
         public DiscriminatoryPricingImpl<T> remove(BidOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.remove(order));
         }
 
         public JClearResult<T, DiscriminatoryPricingImpl<T>> clear() {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             ClearResult<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
             Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
             return new JClearResult<>(fills, new DiscriminatoryPricingImpl<>(results.residual()));
@@ -129,27 +128,27 @@ public class JSealedBidDoubleAuction {
         }
 
         public UniformPricingImpl<T> insert(AskOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.insert(order));
         }
 
         public UniformPricingImpl<T> insert(BidOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.insert(order));
         }
 
         public UniformPricingImpl<T> remove(AskOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.remove(order));
         }
 
         public UniformPricingImpl<T> remove(BidOrder<T> order) {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.remove(order));
         }
 
         public JClearResult<T, UniformPricingImpl<T>> clear() {
-            DoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(this.auction);
             ClearResult<T, SealedBidDoubleAuction.UniformPricingImpl<T>> results = ops.clear();
             Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
             return new JClearResult<>(fills, new UniformPricingImpl<>(results.residual()));

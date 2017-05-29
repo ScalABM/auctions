@@ -16,49 +16,43 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 
 
-/**
+/** Trait that extends "auction-like" behavior to include the ability to process ask price quote requests.
   *
+  * @tparam T all `BidOrder` instances must be for the same type of `Tradable`.
+  * @tparam A type `A` for which auction-like operations should be defined.
   * @author davidrpugh
   * @since 0.1.0
   */
-trait AuctionLike[T <: Tradable, A] {
+trait OpenBidAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
+  extends SealedBidAuctionLike[T, A] with AskPriceQuoting[T, A] {
 
-  def insert(a: A, order: BidOrder[T]): A
-
-  def remove(a: A, order: BidOrder[T]): A
-
-  def clear(a: A): ClearResult[T, A]
-
-  def orderBook(a: A): FourHeapOrderBook[T]
-
-  def pricingPolicy(a: A): PricingPolicy[T]
+  protected val askPriceQuotingPolicy: AskPriceQuotingPolicy[T] = new AskPriceQuotingPolicy[T]
 
 }
 
 
-/**
+/** Companion object for the `OpenBidDoubleAuctionLike` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-object AuctionLike {
+object OpenBidAuctionLike {
 
-  class Ops[T <: Tradable, A](a: A)(implicit ev: AuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidAuctionLike[T, A]) {
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
+
+    def receive(request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = ev.receive(a, request)
 
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 
     def clear: ClearResult[T, A] = ev.clear(a)
-
-    protected val orderBook: FourHeapOrderBook[T] = ev.orderBook(a)
-
-    protected val pricingPolicy: PricingPolicy[T] = ev.pricingPolicy(a)
 
   }
 

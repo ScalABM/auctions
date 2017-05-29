@@ -55,13 +55,13 @@ object SealedBidDoubleAuction {
 
   object DiscriminatoryPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): DoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
-      new DoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): SealedBidDoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
+      new SealedBidDoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: DoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
+    implicit def doubleAuctionLike[T <: Tradable]: SealedBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
 
-      new DoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
+      new SealedBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
 
         def insert(a: DiscriminatoryPricingImpl[T], order: AskOrder[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy)
@@ -78,10 +78,6 @@ object SealedBidDoubleAuction {
         def remove(a: DiscriminatoryPricingImpl[T], order: BidOrder[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy)
         }
-
-        def orderBook(a: DiscriminatoryPricingImpl[T]): FourHeapOrderBook[T] = a.orderBook
-
-        def pricingPolicy(a: DiscriminatoryPricingImpl[T]): PricingPolicy[T] = a.pricingPolicy
 
         protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](orderBook, a.pricingPolicy)
@@ -100,13 +96,13 @@ object SealedBidDoubleAuction {
 
   object UniformPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): DoubleAuctionLike.Ops[T, UniformPricingImpl[T]] = {
-      new DoubleAuctionLike.Ops[T, UniformPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): SealedBidDoubleAuctionLike.Ops[T, UniformPricingImpl[T]] = {
+      new SealedBidDoubleAuctionLike.Ops[T, UniformPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: DoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
+    implicit def doubleAuctionLike[T <: Tradable]: SealedBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
 
-      new DoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
+      new SealedBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
 
         def insert(a: UniformPricingImpl[T], order: AskOrder[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy)
@@ -123,10 +119,6 @@ object SealedBidDoubleAuction {
         def remove(a: UniformPricingImpl[T], order: BidOrder[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy)
         }
-
-        def orderBook(a: UniformPricingImpl[T]): FourHeapOrderBook[T] = a.orderBook
-
-        def pricingPolicy(a: UniformPricingImpl[T]): PricingPolicy[T] = a.pricingPolicy
 
         protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](orderBook, a.pricingPolicy)
