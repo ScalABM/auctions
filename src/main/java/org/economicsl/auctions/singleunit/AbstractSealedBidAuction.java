@@ -31,11 +31,11 @@ import java.util.stream.StreamSupport;
  */
 abstract class AbstractSealedBidAuction<T extends Tradable, A> {
 
-    abstract A insert(BidOrder<T> order);
+    public abstract A insert(BidOrder<T> order);
 
-    abstract A remove(BidOrder<T> order);
+    public abstract A remove(BidOrder<T> order);
 
-    abstract JClearResult<T, A> clear();
+    public abstract JClearResult<T, A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */
     Stream<Fill<T>> toJavaStream(Iterable<Fill<T>> input, boolean parallel) {
