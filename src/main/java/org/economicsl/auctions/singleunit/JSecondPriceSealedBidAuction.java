@@ -20,11 +20,10 @@ import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
+import org.economicsl.auctions.singleunit.reverse.JSecondPriceSealedBidReverseAuction;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 
 /** Class implementing a second-price, sealed-bid auction.
@@ -33,33 +32,38 @@ import java.util.stream.StreamSupport;
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JSecondPriceSealedBidAuction<T extends Tradable> {
-
-    private SealedBidAuction<T> sealedBidAuction;
+public class JSecondPriceSealedBidAuction<T extends Tradable>
+        extends AbstractSealedBidAuction<T, JSecondPriceSealedBidAuction<T>> {
 
     public JSecondPriceSealedBidAuction(AskOrder<T> reservation) {
-        this.sealedBidAuction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
+        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
     }
 
     public JSecondPriceSealedBidAuction<T> insert(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.auctionLikeOps(this.sealedBidAuction);
+        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSecondPriceSealedBidAuction<>(ops.insert(order));
     }
 
     public JSecondPriceSealedBidAuction<T> remove(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.auctionLikeOps(this.sealedBidAuction);
+        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSecondPriceSealedBidAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JSecondPriceSealedBidAuction<T>> clear() {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = SealedBidAuction$.MODULE$.auctionLikeOps(this.sealedBidAuction);
+        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JSecondPriceSealedBidAuction<>(results.residual()));
     }
 
+    private SealedBidAuction<T> auction;
+
     private JSecondPriceSealedBidAuction(SealedBidAuction<T> a) {
-        this.sealedBidAuction = a;
+        this.auction = a;
+    }
+
+    private AuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {
+        return SealedBidAuction$.MODULE$.auctionLikeOps(a);
     }
 
 }

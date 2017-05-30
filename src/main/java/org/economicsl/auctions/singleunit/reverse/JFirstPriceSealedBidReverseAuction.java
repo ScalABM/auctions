@@ -38,31 +38,31 @@ import java.util.stream.StreamSupport;
  */
 public class JFirstPriceSealedBidReverseAuction<T extends Tradable> {
 
-    private SealedBidReverseAuction<T> sealedBidAuction;
+    private SealedBidReverseAuction<T> auction;
 
     public JFirstPriceSealedBidReverseAuction(BidOrder<T> reservation) {
-        this.sealedBidAuction = SealedBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
+        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
     }
 
     public JFirstPriceSealedBidReverseAuction<T> insert(AskOrder<T> order) {
-        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.sealedBidAuction);
+        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         return new JFirstPriceSealedBidReverseAuction<>(ops.insert(order));
     }
 
     public JFirstPriceSealedBidReverseAuction<T> remove(AskOrder<T> order) {
-        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.sealedBidAuction);
+        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         return new JFirstPriceSealedBidReverseAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JFirstPriceSealedBidReverseAuction<T>> clear() {
-        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.sealedBidAuction);
+        ReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JFirstPriceSealedBidReverseAuction<>(results.residual()));
     }
 
     private JFirstPriceSealedBidReverseAuction(SealedBidReverseAuction<T> a) {
-        this.sealedBidAuction = a;
+        this.auction = a;
     }
 
 }

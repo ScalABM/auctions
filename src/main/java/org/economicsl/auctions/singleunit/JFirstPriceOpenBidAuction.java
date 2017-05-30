@@ -23,10 +23,8 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 
 /** Class implementing a first-price, open-bid auction.
@@ -35,38 +33,43 @@ import java.util.stream.StreamSupport;
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JFirstPriceOpenBidAuction<T extends Tradable> {
-
-    private OpenBidAuction<T> auction;
+public class JFirstPriceOpenBidAuction<T extends Tradable>
+        extends AbstractOpenBidAuction<T, JFirstPriceOpenBidAuction<T>> {
 
     public JFirstPriceOpenBidAuction(AskOrder<T> reservation) {
         this.auction = OpenBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy());
     }
 
     public JFirstPriceOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidAuction<>(ops.insert(order));
     }
 
     public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
     public JFirstPriceOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JFirstPriceOpenBidAuction<T>> clear() {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JFirstPriceOpenBidAuction<>(results.residual()));
     }
 
+    private OpenBidAuction<T> auction;
+
     private JFirstPriceOpenBidAuction(OpenBidAuction<T> a) {
         this.auction = a;
+    }
+
+    private OpenAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
+        return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
     }
 
 }

@@ -23,50 +23,52 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 
-/** Class implementing a sealed-bid, reverse auction.
+/** Class implementing an open-bid, auction.
  *
  * @param <T>
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JOpenBidAuction<T extends Tradable> {
-
-    private OpenBidAuction<T> auction;
+public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<T, JOpenBidAuction<T>> {
 
     public JOpenBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
         this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
     public JOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.insert(order));
     }
 
     public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
     public JOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JOpenBidAuction<T>> clear() {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
         return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));
     }
 
+    private OpenBidAuction<T> auction;
+
     private JOpenBidAuction(OpenBidAuction<T> a) {
         this.auction = a;
+    }
+
+    private OpenAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
+      return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
     }
     
 }

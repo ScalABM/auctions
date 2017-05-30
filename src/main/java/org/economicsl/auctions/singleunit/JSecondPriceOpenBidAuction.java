@@ -23,10 +23,8 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 
 /** Class implementing a second-price, open-bid auction.
@@ -35,9 +33,8 @@ import java.util.stream.StreamSupport;
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JSecondPriceOpenBidAuction<T extends Tradable> {
-
-    private OpenBidAuction<T> auction;
+public class JSecondPriceOpenBidAuction<T extends Tradable>
+        extends AbstractOpenBidAuction<T, JSecondPriceOpenBidAuction<T>> {
 
     public JSecondPriceOpenBidAuction(AskOrder<T> reservation) {
         this.auction = OpenBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
@@ -59,14 +56,20 @@ public class JSecondPriceOpenBidAuction<T extends Tradable> {
     }
 
     public JClearResult<T, JSecondPriceOpenBidAuction<T>> clear() {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JSecondPriceOpenBidAuction<>(results.residual()));
     }
 
+    private OpenBidAuction<T> auction;
+
     private JSecondPriceOpenBidAuction(OpenBidAuction<T> a) {
         this.auction = a;
+    }
+
+    private OpenAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
+        return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
     }
 
 }
