@@ -43,23 +43,40 @@ public class JOpenBidReverseAuction<T extends Tradable>
         this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
+    /** Create a new instance of `JOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
+     *
+     * @param order the `AskOrder` that should be added to the `orderBook`.
+     * @return an instance of `JOpenBidReverseAuction` whose order book contains all previously submitted `AskOrder`
+     * instances.
+     */
     public JOpenBidReverseAuction<T> insert(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JOpenBidReverseAuction<>(ops.insert(order));
     }
 
-    public Option<BidPriceQuote> receive(BidPriceQuoteRequest request) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
+    public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
+    /** Create a new instance of `JOpenBidReverseAuction` whose order book contains all previously submitted `AskOrder`
+     * instances except the `order`.
+     *
+     * @param order the `AskOrder` that should be added to the order Book.
+     * @return an instance of type `JOpenBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances except the `order`.
+     */
     public JOpenBidReverseAuction<T> remove(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JOpenBidReverseAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JOpenBidReverseAuction<T>> clear() {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JOpenBidReverseAuction<>(results.residual()));
@@ -71,7 +88,7 @@ public class JOpenBidReverseAuction<T extends Tradable>
         this.auction = a;
     }
 
-    private OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
+    private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
         return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);
     }
 

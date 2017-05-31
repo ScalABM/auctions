@@ -24,6 +24,6 @@ import scala.Option;
 
 abstract class AbstractOpenBidReverseAuction<T extends Tradable, A> extends AbstractSealedBidReverseAuction<T, A> {
 
-    public abstract Option<BidPriceQuote> receive(BidPriceQuoteRequest request);
+    public abstract Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request);
 
 }

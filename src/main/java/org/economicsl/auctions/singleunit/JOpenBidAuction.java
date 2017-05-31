@@ -39,23 +39,39 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
         this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
+    /** Create a new instance of `JOpenBidAuction` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of `JOpenBidOrder` whose order book contains all previously submitted `BidOrder` instances.
+     */
     public JOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.insert(order));
     }
 
-    public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+    public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
+    /** Create a new instance of `JOpenBidAuction` whose order book contains all previously submitted `BidOrder`
+     * instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JOpenBidAuction` whose order book contains all previously submitted `BidOrder` instances
+     * except the `order`.
+     */
     public JOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JOpenBidAuction<T>> clear() {
-        OpenAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
         return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));
@@ -67,7 +83,7 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
         this.auction = a;
     }
 
-    private OpenAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
+    private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
       return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
     }
     

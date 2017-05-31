@@ -37,18 +37,34 @@ public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuct
         this.auction = SealedBidAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
+    /** Create a new instance of `JSealedBidAuction` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of `JSealedBidOrder` whose order book contains all previously submitted `BidOrder` instances.
+     */
     public JSealedBidAuction<T> insert(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSealedBidAuction<>(ops.insert(order));
     }
 
+    /** Create a new instance of `JSealedBidAuction` whose order book contains all previously submitted `BidOrder`
+     * instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JSealedBidAuction` whose order book contains all previously submitted `BidOrder`
+     * instances except the `order`.
+     */
     public JSealedBidAuction<T> remove(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSealedBidAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JSealedBidAuction<T>> clear() {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
         return new JClearResult<>(fills, new JSealedBidAuction<>(results.residual()));
@@ -60,8 +76,8 @@ public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuct
       this.auction = a;
     }
 
-    private AuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {
-        return SealedBidAuction$.MODULE$.auctionLikeOps(a);
+    private SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {
+        return SealedBidAuction$.MODULE$.mkAuctionOps(a);
     }
 
 }

@@ -29,14 +29,42 @@ import java.util.stream.StreamSupport;
 
 abstract class AbstractSealedBidDoubleAuction<T extends Tradable, A> {
 
+    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+     *
+     * @param order the `AskOrder` that should be added to the `orderBook`.
+     * @return an instance of type  `A` whose order book contains all previously submitted `AskOrder` instances.
+     */
     public abstract A insert(AskOrder<T> order);
 
+    /** Create a new instance of type `A` whose order book contains all previously submitted `AskOrder` instances
+     * except the `order`.
+     *
+     * @param order the `AskOrder` that should be added to the order Book.
+     * @return an instance of type `A` whose order book contains all previously submitted `AskOrder` instances except
+     * the `order`.
+     */
     public abstract A remove(AskOrder<T> order);
 
+    /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of type `A` whose order book contains all previously submitted `BidOrder` instances.
+     */
     public abstract A insert(BidOrder<T> order);
 
+    /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
+     * except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of type `A` whose order book contains all previously submitted `BidOrder` instances except
+     * the `order`.
+     */
     public abstract A remove(BidOrder<T> order);
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public abstract JClearResult<T, A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */

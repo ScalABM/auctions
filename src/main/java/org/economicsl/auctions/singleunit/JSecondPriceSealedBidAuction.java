@@ -20,7 +20,6 @@ import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
-import org.economicsl.auctions.singleunit.reverse.JSecondPriceSealedBidReverseAuction;
 import scala.Option;
 
 import java.util.stream.Stream;
@@ -36,21 +35,38 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
         extends AbstractSealedBidAuction<T, JSecondPriceSealedBidAuction<T>> {
 
     public JSecondPriceSealedBidAuction(AskOrder<T> reservation) {
-        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
+        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
     }
 
+    /** Create a new instance of `JSecondPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of `JSecondPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
+     * instances.
+     */
     public JSecondPriceSealedBidAuction<T> insert(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSecondPriceSealedBidAuction<>(ops.insert(order));
     }
 
+    /** Create a new instance of `JSecondPriceSealedBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JSecondPriceSealedBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
+     */
     public JSecondPriceSealedBidAuction<T> remove(BidOrder<T> order) {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSecondPriceSealedBidAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JSecondPriceSealedBidAuction<T>> clear() {
-        AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceSealedBidAuction<>(results.residual()));
@@ -62,8 +78,8 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
         this.auction = a;
     }
 
-    private AuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {
-        return SealedBidAuction$.MODULE$.auctionLikeOps(a);
+    private SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {
+        return SealedBidAuction$.MODULE$.mkAuctionOps(a);
     }
 
 }

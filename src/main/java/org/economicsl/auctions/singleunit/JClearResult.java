@@ -22,7 +22,7 @@ import scala.Option;
 import java.util.stream.Stream;
 
 
-/**
+/** Class encapsulating the results of clearing a single-unit auction mechanism.
  *
  * @param <T>
  * @param <A>
@@ -34,15 +34,28 @@ public class JClearResult<T extends Tradable, A> {
     final private Option<Stream<Fill<T>>> fills;
     final private A residual;
 
+    /** Create an instance of `JClearResult`.
+     *
+     * @param fills
+     * @param residual
+     */
     public JClearResult(Option<Stream<Fill<T>>> fills, A residual) {
         this.fills = fills;
         this.residual = residual;
     }
 
+    /** Return the optional collection of `Fill` instances.
+     *
+     * @return `Some(fills)` if ???; `None` otherwise.
+     */
     public Option<Stream<Fill<T>>> getFills() {
         return this.fills;
     }
 
+    /** An instance of type `A` representing the residual auction mechanism.
+     *
+     * @return
+     */
     public A getResidual() {
         return this.residual;
     }

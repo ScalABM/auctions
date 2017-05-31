@@ -41,26 +41,43 @@ import java.util.stream.StreamSupport;
 public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
 
     public JSecondPriceOpenBidReverseAuction(BidOrder<T> reservation) {
-        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy());
+        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
+    /** Create a new instance of `JSecondPriceOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
+     *
+     * @param order the `AskOrder` that should be added to the `orderBook`.
+     * @return an instance of `JSecondPriceOpenBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances.
+     */
     public JSecondPriceOpenBidReverseAuction<T> insert(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JSecondPriceOpenBidReverseAuction<>(ops.insert(order));
     }
 
-    public Option<BidPriceQuote> receive(BidPriceQuoteRequest request) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+    public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
+    /** Create a new instance of `JSecondPriceOpenBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances except the `order`.
+     *
+     * @param order the `AskOrder` that should be added to the order Book.
+     * @return an instance of type `JSecondPriceOpenBidReverseAuction` whose order book contains all previously
+     * submitted `AskOrder` instances except the `order`.
+     */
     public JSecondPriceOpenBidReverseAuction<T> remove(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JSecondPriceOpenBidReverseAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JSecondPriceOpenBidReverseAuction<T>> clear() {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JSecondPriceOpenBidReverseAuction<>(results.residual()));
@@ -70,7 +87,7 @@ public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
 
     private JSecondPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
 
-    private OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
+    private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
         return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);
     }
 

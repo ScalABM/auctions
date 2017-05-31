@@ -20,39 +20,76 @@ import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
-import org.economicsl.auctions.singleunit.twosided.OpenDoubleAuctionLike.Ops
+import org.economicsl.auctions.singleunit.twosided.OpenBidDoubleAuctionLike.Ops
 
-/**
+
+/** Base trait for representing an "open-bid" double auction mechanism.
   *
+  * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+  *           type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
 trait OpenBidDoubleAuction[T <: Tradable] extends SealedBidDoubleAuction[T]
 
 
+/** Companion object for the `OpenBidDoubleAuction` trait.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenBidDoubleAuction {
 
+  /** Create an "open-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @return an `OpenBidDoubleAuction.DiscriminatoryPricingImpl` instance.
+    */
   def withDiscriminatoryPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): DiscriminatoryPricingImpl[T] = {
     new DiscriminatoryPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
 
+  /** Create an "open-bid" double auction mechanism with uniform pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @return an `OpenBidDoubleAuction.UniformPricingImpl` instance.
+    */
   def withUniformPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): UniformPricingImpl[T] = {
     new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
 
+  /** Type class representing an "open-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   case class DiscriminatoryPricingImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], pricingPolicy: PricingPolicy[T])
     extends OpenBidDoubleAuction[T]
 
 
+  /** Companion object for the `DiscriminatoryPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   object DiscriminatoryPricingImpl {
 
     implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): Ops[T, DiscriminatoryPricingImpl[T]] = {
       new Ops[T, DiscriminatoryPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: OpenDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
+    implicit def doubleAuctionLike[T <: Tradable]: OpenBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
 
-      new OpenDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
+      new OpenBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
 
         def insert(a: DiscriminatoryPricingImpl[T], order: AskOrder[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy)
@@ -82,10 +119,6 @@ object OpenBidDoubleAuction {
           new DiscriminatoryPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy)
         }
 
-        def orderBook(a: DiscriminatoryPricingImpl[T]): FourHeapOrderBook[T] = a.orderBook
-
-        def pricingPolicy(a: DiscriminatoryPricingImpl[T]): PricingPolicy[T] = a.pricingPolicy
-
         protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](orderBook, a.pricingPolicy)
         }
@@ -97,19 +130,34 @@ object OpenBidDoubleAuction {
   }
 
 
+  /** Type class representing an "open-bid" double auction mechanism with uniform pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   case class UniformPricingImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], pricingPolicy: PricingPolicy[T])
     extends OpenBidDoubleAuction[T]
 
 
+  /** Companion object for the `UniformPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   object UniformPricingImpl {
 
     implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): Ops[T, UniformPricingImpl[T]] = {
       new Ops[T, UniformPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: OpenDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
+    implicit def doubleAuctionLike[T <: Tradable]: OpenBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
 
-      new OpenDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
+      new OpenBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
 
         def insert(a: UniformPricingImpl[T], order: AskOrder[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy)
@@ -138,10 +186,6 @@ object OpenBidDoubleAuction {
         def remove(a: UniformPricingImpl[T], order: BidOrder[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy)
         }
-
-        def orderBook(a: UniformPricingImpl[T]): FourHeapOrderBook[T] = a.orderBook
-
-        def pricingPolicy(a: UniformPricingImpl[T]): PricingPolicy[T] = a.pricingPolicy
 
         protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](orderBook, a.pricingPolicy)
