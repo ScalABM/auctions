@@ -35,6 +35,11 @@ import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuo
 class OpenBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
 
 
+/** Companion object for the `OpenBidAuction` type class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenBidAuction {
 
   implicit def openAuctionLikeOps[T <: Tradable](a: OpenBidAuction[T]): OpenBidAuctionLike.Ops[T, OpenBidAuction[T]] = {
@@ -65,16 +70,38 @@ object OpenBidAuction {
 
   }
 
+  /** Create an instance of an "open-bid" auction mechanism.
+    *
+    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    *           be for the same type of `Tradable`.
+    * @return an `OpenBidAuction` instance.
+    */
   def apply[T <: Tradable](reservation: AskOrder[T], pricingPolicy: PricingPolicy[T]): OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidAuction[T](orderBook.insert(reservation), pricingPolicy)
   }
 
+  /** Create an instance of a first-price, open-bid auction (FPOBA) mechanism.
+    *
+    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    *           be for the same type of `Tradable`.
+    * @return an `OpenBidAuction` instance.
+    */
   def withAskQuotePricingPolicy[T <: Tradable](reservation: AskOrder[T]): OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T])
   }
 
+  /** Create an instance of a second-price, open-bid auction (SPOBA) mechanism.
+    *
+    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    *           be for the same type of `Tradable`.
+    * @return an `OpenBidAuction` instance.
+    */
   def withBidQuotePricingPolicy[T <: Tradable](reservation: AskOrder[T]): OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T])

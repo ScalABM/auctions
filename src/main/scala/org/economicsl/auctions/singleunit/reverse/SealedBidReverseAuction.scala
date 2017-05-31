@@ -67,40 +67,42 @@ object SealedBidReverseAuction {
 
   /** Create an instance of a "sealed-bid" reverse auction mechanism.
     *
-    * @param reservation
+    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
-    * @tparam T
-    * @return
+    * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
+    *           must be for the same type of `Tradable`.
+    * @return a `SealedBidReverseAuction` instance.
     */
   def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new SealedBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)
   }
 
+  /** Create a second-price, sealed-bid reverse auction (SPSBRA).
+    *
+    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
+    * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
+    *           must be for the same type of `Tradable`.
+    * @return a `SealedBidReverseAuction` instance.
+    * @note The winner of a SPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
+    *       amount equal to the minimum of the second lowest submitted ask price and the buyer's `reservation` price.
+    */
+  def withAskQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T])
+  }
+
   /** Create a first-price, sealed-bid reverse auction (FPSBRA).
     *
-    * @param reservation
-    * @tparam T
-    * @return
+    * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
+    *           must be for the same type of `Tradable`.
+    * @return a `SealedBidReverseAuction` instance.
     * @note The winner of a FPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to its own ask price.
     */
   def withBidQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy)
-  }
-
-  /** Create a second-price, sealed-bid reverse auction (SPSBRA).
-    *
-    * @param reservation
-    * @tparam T
-    * @return
-    * @note The winner of a SPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
-    *       amount equal to the minimum of the second lowest submitted ask price and the buyer's `reservation` price.
-    */
-  def withSecondLowestPricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy)
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T])
   }
   
 }

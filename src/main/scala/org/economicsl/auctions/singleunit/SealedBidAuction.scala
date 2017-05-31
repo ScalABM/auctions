@@ -80,10 +80,11 @@ object SealedBidAuction {
 
   /** Create a "Sealed-bid" auction mechanism.
     *
-    * @param reservation
+    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
-    * @tparam T
-    * @return
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    *           be for the same type of `Tradable`.
+    * @return a `SealedBidAuction` instance.
     */
   def apply[T <: Tradable](reservation: AskOrder[T], pricingPolicy: PricingPolicy[T]): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
@@ -92,9 +93,10 @@ object SealedBidAuction {
 
   /** Create a "First-Price, Sealed-Bid Auction."
     *
-    * @param reservation
-    * @tparam T
-    * @return
+    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    *           be for the same type of `Tradable`.
+    * @return a `SealedBidAuction` instance.
     */
   def withAskPriceQuotingPolicy[T <: Tradable](reservation: AskOrder[T]): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
@@ -103,9 +105,10 @@ object SealedBidAuction {
 
   /** Create a "Second-Price, Sealed-Bid Auction."
     *
-    * @param reservation
-    * @tparam T
-    * @return
+    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    *           be for the same type of `Tradable`.
+    * @return a `SealedBidAuction` instance.
     * @note Second-Price, Sealed-Bid Auctions are also known as "Vickery Auctions."
     */
   def withBidPriceQuotingPolicy[T <: Tradable](reservation: AskOrder[T]): SealedBidAuction[T] = {

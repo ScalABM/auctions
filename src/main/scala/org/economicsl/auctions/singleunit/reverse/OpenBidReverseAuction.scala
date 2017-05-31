@@ -19,7 +19,7 @@ import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
-import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing}
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
 /** Type class representing an "open-bid" reverse auction mechanism.
@@ -35,7 +35,7 @@ import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing
 class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
 
 
-/**
+/** Companion object fo the `OpenBidReverseAuction` type class.
   *
   * @author davidrpugh
   * @since 0.1.0
@@ -72,14 +72,41 @@ object OpenBidReverseAuction {
 
   /** Create an instance of an "open-bid" reverse auction mechanism.
     *
-    * @param reservation
+    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
     * @tparam T
-    * @return
+    * @return an `OpenBidReverseAuction` instance.
     */
   def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): OpenBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)
   }
+
+  /** Create a second-price, open-bid reverse auction (SPOBRA).
+    *
+    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
+    * @tparam T
+    * @return
+    * @note the winner of a SPOBRA is the seller who submitted the lowest priced ask order; however the winner receives
+    *       an amount equal to the second lowest priced ask order.
+    */
+  def withAskQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): OpenBidReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new OpenBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T])
+  }
+
+  /** Create a first-price, open-bid reverse auction (FPOBRA).
+    *
+    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
+    * @tparam T
+    * @return
+    * @note The winner of a FPOBRA is the seller who submitted the lowest priced ask order; the winner receives an
+    *       amount equal to its own ask price.
+    */
+  def withBidQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): OpenBidReverseAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new OpenBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T])
+  }
+
 
 }

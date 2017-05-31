@@ -72,10 +72,30 @@ object OpenBidDoubleAuctionLike {
 
     def receive(request: SpreadQuoteRequest[T]): Option[SpreadQuote] = ev.receive(a, request)
 
+    /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
+      * `BidOrder` instances except the `order`.
+      *
+      * @param order the `AskOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
+      *         `BidOrder` instances except the `order`.
+      */
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
+    /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
+      * `BidOrder` instances except the `order`.
+      *
+      * @param order the `BidOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
+      *         `BidOrder` instances except the `order`.
+      */
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+      *
+      * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
+      *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
+      *         `AskOrder` and `BidOrder` instances.
+      */
     def clear: ClearResult[T, A] = ev.clear(a)
 
   }

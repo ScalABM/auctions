@@ -38,6 +38,7 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
     */
   def insert(a: A, order: AskOrder[T]): A
 
+
   def remove(a: A, order: AskOrder[T]): A
 
   def clear(a: A): ClearResult[T, A]
