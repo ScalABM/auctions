@@ -39,6 +39,11 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
         this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
+    /** Create a new instance of `JOpenBidAuction` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of `JOpenBidOrder` whose order book contains all previously submitted `BidOrder` instances.
+     */
     public JOpenBidAuction<T> insert(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.insert(order));

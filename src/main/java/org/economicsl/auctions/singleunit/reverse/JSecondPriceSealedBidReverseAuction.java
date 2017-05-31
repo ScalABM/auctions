@@ -46,6 +46,13 @@ public class JSecondPriceSealedBidReverseAuction<T extends Tradable>
         return new JSecondPriceSealedBidReverseAuction<>(ops.insert(order));
     }
 
+    /** Create a new instance of `JSecondPriceOpenBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances except the `order`.
+     *
+     * @param order the `AskOrder` that should be added to the order Book.
+     * @return an instance of type `JSecondPriceOpenBidReverseAuction` whose order book contains all previously
+     * submitted `AskOrder` instances except the `order`.
+     */
     public JSecondPriceSealedBidReverseAuction<T> remove(AskOrder<T> order) {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JSecondPriceSealedBidReverseAuction<>(ops.remove(order));

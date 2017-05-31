@@ -37,6 +37,11 @@ public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuct
         this.auction = SealedBidAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
+    /** Create a new instance of `JSealedBidAuction` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of `JSealedBidOrder` whose order book contains all previously submitted `BidOrder` instances.
+     */
     public JSealedBidAuction<T> insert(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSealedBidAuction<>(ops.insert(order));

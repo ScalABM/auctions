@@ -46,6 +46,13 @@ public class JFirstPriceSealedBidReverseAuction<T extends Tradable>
         return new JFirstPriceSealedBidReverseAuction<>(ops.insert(order));
     }
 
+    /** Create a new instance of `JFirstPriceSealedBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances except the `order`.
+     *
+     * @param order the `AskOrder` that should be added to the order Book.
+     * @return an instance of type `JFirstPriceSealedBidReverseAuction` whose order book contains all previously
+     * submitted `AskOrder` instances except the `order`.
+     */
     public JFirstPriceSealedBidReverseAuction<T> remove(AskOrder<T> order) {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JFirstPriceSealedBidReverseAuction<>(ops.remove(order));

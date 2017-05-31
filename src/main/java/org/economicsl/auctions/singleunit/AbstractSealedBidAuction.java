@@ -31,6 +31,11 @@ import java.util.stream.StreamSupport;
  */
 abstract class AbstractSealedBidAuction<T extends Tradable, A> {
 
+    /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of type `A` whose order book contains all previously submitted `BidOrder` instances.
+     */
     public abstract A insert(BidOrder<T> order);
 
     public abstract A remove(BidOrder<T> order);

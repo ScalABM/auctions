@@ -40,6 +40,12 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
         this.auction = OpenBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
+    /** Create a new instance of `JFirstPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
+     *
+     * @param order the `BidOrder` that should be added to the `orderBook`.
+     * @return an instance of `JFirstPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
+     * instances.
+     */
     public JFirstPriceOpenBidAuction<T> insert(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidAuction<>(ops.insert(order));

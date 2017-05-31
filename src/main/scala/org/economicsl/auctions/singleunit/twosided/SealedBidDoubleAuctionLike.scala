@@ -50,10 +50,15 @@ object SealedBidDoubleAuctionLike {
       */
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
+    /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
+      *
+      * @param order the `BidOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
+      */
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
 
-    /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
-      * except the `order`.
+    /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
+      * `BidOrder` instances except the `order`.
       *
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and

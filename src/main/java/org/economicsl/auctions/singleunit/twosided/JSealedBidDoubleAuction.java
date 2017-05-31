@@ -62,11 +62,25 @@ public class JSealedBidDoubleAuction {
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
         }
 
+        /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
+         * `AskOrder` instances except the `order`.
+         *
+         * @param order the `AskOrder` that should be added to the order book.
+         * @return an instance of type `DiscriminatoryPricingImpl` whose order book contains all previously submitted
+         * `AskOrder` instances except the `order`.
+         */
         public DiscriminatoryPricingImpl<T> remove(AskOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.remove(order));
         }
 
+        /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
+         * `BidOrder` instances except the `order`.
+         *
+         * @param order the `BidOrder` that should be added to the order book.
+         * @return an instance of type `DiscriminatoryPricingImpl` whose order book contains all previously submitted
+         * `BidOrder` instances except the `order`.
+         */
         public DiscriminatoryPricingImpl<T> remove(BidOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.remove(order));
@@ -119,11 +133,25 @@ public class JSealedBidDoubleAuction {
             return new UniformPricingImpl<>(ops.insert(order));
         }
 
+        /** Create a new instance of `UniformPricingImpl` whose order book contains all previously submitted `AskOrder`
+         * instances except the `order`.
+         *
+         * @param order the `AskOrder` that should be added to the order book.
+         * @return an instance of type `UniformPricingImpl` whose order book contains all previously submitted
+         * `AskOrder` instances except the `order`.
+         */
         public UniformPricingImpl<T> remove(AskOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.remove(order));
         }
 
+        /** Create a new instance of `UniformPricingImpl` whose order book contains all previously submitted `BidOrder`
+         * instances except the `order`.
+         *
+         * @param order the `BidOrder` that should be added to the order book.
+         * @return an instance of type `UniformPricingImpl` whose order book contains all previously submitted
+         * `BidOrder` instances except the `order`.
+         */
         public UniformPricingImpl<T> remove(BidOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.remove(order));
