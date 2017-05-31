@@ -51,7 +51,7 @@ public class JFirstPriceSealedBidAuction<T extends Tradable>
     public JClearResult<T, JFirstPriceSealedBidAuction<T>> clear() {
         AuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JFirstPriceSealedBidAuction<>(results.residual()));
     }
 

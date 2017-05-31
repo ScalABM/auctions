@@ -40,8 +40,6 @@ import java.util.stream.StreamSupport;
  */
 public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
 
-    private OpenBidReverseAuction<T> auction;
-
     public JSecondPriceOpenBidReverseAuction(BidOrder<T> reservation) {
         this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy());
     }
@@ -68,6 +66,12 @@ public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
         return new JClearResult<>(fills, new JSecondPriceOpenBidReverseAuction<>(results.residual()));
     }
 
+    private OpenBidReverseAuction<T> auction;
+
     private JSecondPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
+
+    private OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
+        return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);
+    }
 
 }

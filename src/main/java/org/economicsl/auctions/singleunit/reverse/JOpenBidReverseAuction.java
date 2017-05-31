@@ -26,10 +26,8 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import scala.Option;
-import scala.collection.JavaConverters;
 
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 
 /** Class implementing an open-bid, reverse auction.
@@ -38,38 +36,43 @@ import java.util.stream.StreamSupport;
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JOpenBidReverseAuction<T extends Tradable> {
-
-    private OpenBidReverseAuction<T> auction;
+public class JOpenBidReverseAuction<T extends Tradable>
+        extends AbstractOpenBidReverseAuction<T, JOpenBidReverseAuction<T>> {
 
     public JOpenBidReverseAuction(BidOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
         this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
     public JOpenBidReverseAuction<T> insert(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JOpenBidReverseAuction<>(ops.insert(order));
     }
 
     public Option<BidPriceQuote> receive(BidPriceQuoteRequest request) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
     public JOpenBidReverseAuction<T> remove(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JOpenBidReverseAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JOpenBidReverseAuction<T>> clear() {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JOpenBidReverseAuction<>(results.residual()));
     }
 
+    private OpenBidReverseAuction<T> auction;
+
     private JOpenBidReverseAuction(OpenBidReverseAuction<T> a) {
         this.auction = a;
+    }
+
+    private OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
+        return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);
     }
 
 }
