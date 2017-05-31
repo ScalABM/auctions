@@ -21,54 +21,55 @@ import org.economicsl.auctions.quotes.AskPriceQuote;
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import scala.Option;
 
 import java.util.stream.Stream;
 
 
-/** Class implementing an open-bid, auction.
+/** Class implementing a second-price, open-bid auction.
  *
  * @param <T>
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<T, JOpenBidAuction<T>> {
+public class JSecondPriceOpenBidAuction<T extends Tradable>
+        extends AbstractOpenBidAuction<T, JSecondPriceOpenBidAuction<T>> {
 
-    public JOpenBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy);
+    public JSecondPriceOpenBidAuction(AskOrder<T> reservation) {
+        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
     }
 
-    public JOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JOpenBidAuction<>(ops.insert(order));
+    public JSecondPriceOpenBidAuction<T> insert(BidOrder<T> order) {
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        return new JSecondPriceOpenBidAuction<>(ops.insert(order));
     }
 
     public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
-    public JOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JOpenBidAuction<>(ops.remove(order));
+    public JSecondPriceOpenBidAuction<T> remove(BidOrder<T> order) {
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        return new JSecondPriceOpenBidAuction<>(ops.remove(order));
     }
 
-    public JClearResult<T, JOpenBidAuction<T>> clear() {
+    public JClearResult<T, JSecondPriceOpenBidAuction<T>> clear() {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
-        return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        return new JClearResult<>(fills, new JSecondPriceOpenBidAuction<>(results.residual()));
     }
 
     private OpenBidAuction<T> auction;
 
-    private JOpenBidAuction(OpenBidAuction<T> a) {
+    private JSecondPriceOpenBidAuction(OpenBidAuction<T> a) {
         this.auction = a;
     }
 
     private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
-      return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
+        return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
     }
-    
+
 }
