@@ -21,15 +21,20 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
-/**
+/** Type class representing a "sealed-bid" reverse auction mechanism.
   *
+  * @param orderBook a `FourHeapOrderBook` instance containing the reservation `BidOrder` and any previously submitted
+  *                  `AskOrder` instances.
+  * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+  * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
+  *           must be for the same type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
 class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
 
 
-/**
+/** Companion object for the `SealedBidReverseAuction` type class.
   *
   * @author davidrpugh
   * @since 0.1.0
@@ -59,8 +64,14 @@ object SealedBidReverseAuction {
     }
 
   }
-  
-  
+
+  /** Create an instance of a "sealed-bid" reverse auction mechanism.
+    *
+    * @param reservation
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T
+    * @return
+    */
   def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new SealedBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)

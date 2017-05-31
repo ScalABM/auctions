@@ -21,7 +21,7 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
 
 
-/**
+/** Base trait for all "sealed-bid" double auction mechanisms.
   *
   * @author davidrpugh
   * @since 0.1.0
@@ -35,7 +35,7 @@ trait SealedBidDoubleAuction[T <: Tradable] {
 }
 
 
-/**
+/** Companion object for the `SealedBidDoubleAuction` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
@@ -50,9 +50,25 @@ object SealedBidDoubleAuction {
     new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
 
+  /** Type class representing an "sealed-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   case class DiscriminatoryPricingImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], pricingPolicy: PricingPolicy[T])
     extends SealedBidDoubleAuction[T]
 
+
+  /** Companion object for the `DiscriminatoryPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   object DiscriminatoryPricingImpl {
 
     implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): SealedBidDoubleAuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
@@ -90,10 +106,25 @@ object SealedBidDoubleAuction {
   }
 
 
+  /** Type class representing a "sealed-bid" double auction mechanism with uniform pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   case class UniformPricingImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], pricingPolicy: PricingPolicy[T])
     extends SealedBidDoubleAuction[T]
 
 
+  /** Companion object for the `UniformPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   object UniformPricingImpl {
 
     implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): SealedBidDoubleAuctionLike.Ops[T, UniformPricingImpl[T]] = {

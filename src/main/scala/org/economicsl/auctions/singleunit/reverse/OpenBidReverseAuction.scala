@@ -22,8 +22,13 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{PricingPolicy, UniformPricing}
 
 
-/**
+/** Type class representing an "open-bid" reverse auction mechanism.
   *
+  * @param orderBook a `FourHeapOrderBook` instance containing the reservation `BidOrder` and any previously submitted
+  *                  `AskOrder` instances.
+  * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+  * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `OpenBidReverseAuction`
+  *           must be for the same type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
@@ -65,6 +70,13 @@ object OpenBidReverseAuction {
 
   }
 
+  /** Create an instance of an "open-bid" reverse auction mechanism.
+    *
+    * @param reservation
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T
+    * @return
+    */
   def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): OpenBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new OpenBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)

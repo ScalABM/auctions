@@ -22,11 +22,13 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
-/** Type class for implementing open-bid auctions.
+/** Type class representing an "open-bid" auction mechanism.
   *
-  * @param orderBook
-  * @param pricingPolicy
-  * @tparam T
+  * @param orderBook a `FourHeapOrderBook` instance containing the reservation `AskOrder` and any previously submitted
+  *                  `BidOrder` instances.
+  * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+  * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+  *           be for the same type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */

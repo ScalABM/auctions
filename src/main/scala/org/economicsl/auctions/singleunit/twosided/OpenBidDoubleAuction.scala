@@ -41,6 +41,16 @@ object OpenBidDoubleAuction {
     new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
 
+  /** Type class representing an "open-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   case class DiscriminatoryPricingImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], pricingPolicy: PricingPolicy[T])
     extends OpenBidDoubleAuction[T]
 
@@ -94,6 +104,16 @@ object OpenBidDoubleAuction {
   }
 
 
+  /** Type class representing an "open-bid" double auction mechanism with uniform pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   case class UniformPricingImpl[T <: Tradable](orderBook: FourHeapOrderBook[T], pricingPolicy: PricingPolicy[T])
     extends OpenBidDoubleAuction[T]
 

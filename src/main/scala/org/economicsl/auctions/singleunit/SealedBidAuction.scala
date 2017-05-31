@@ -21,11 +21,13 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 
 
-/** Type class representing "sealed-bid" auction mechanisms.
+/** Type class representing a "sealed-bid" auction mechanism.
   *
-  * @param orderBook
-  * @param pricingPolicy
-  * @tparam T
+  * @param orderBook a `FourHeapOrderBook` instance containing the reservation `AskOrder` and any previously submitted
+  *                  `BidOrder` instances.
+  * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+  * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `SealedBidAuction` must
+  *           be for the same type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
@@ -76,10 +78,10 @@ object SealedBidAuction {
 
   }
 
-  /** Create a "Sealed-bid" auction.
+  /** Create a "Sealed-bid" auction mechanism.
     *
     * @param reservation
-    * @param pricingPolicy
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
     * @tparam T
     * @return
     */

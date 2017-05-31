@@ -30,10 +30,11 @@ import org.economicsl.auctions.singleunit.reverse.SealedBidReverseAuctionLike
   * @since 0.1.0
   */
 trait SealedBidDoubleAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
-  extends SealedBidAuctionLike[T, A] with SealedBidReverseAuctionLike[T, A]
+  extends SealedBidAuctionLike[T, A]
+  with SealedBidReverseAuctionLike[T, A]
 
 
-/** Companion object for the `DoubleAuctionLike` trait.
+/** Companion object for the `SealedBidDoubleAuctionLike` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
@@ -42,6 +43,11 @@ object SealedBidDoubleAuctionLike {
 
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidDoubleAuctionLike[T, A]) {
 
+    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+      *
+      * @param order the `AskOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+      */
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
     def insert(order: BidOrder[T]): A = ev.insert(a, order)

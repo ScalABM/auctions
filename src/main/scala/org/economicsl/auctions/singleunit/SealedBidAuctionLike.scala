@@ -20,7 +20,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 
 
-/** Base trait defining "sealed-bid auction-like" behavior.
+/** Base trait defining "sealed-bid" auction-like behavior.
   *
   * @tparam T all `BidOrder` instances must be for the same type of `Tradable`.
   * @tparam A type `A` for which sealed-bid, auction-like operations should be defined.
@@ -31,18 +31,28 @@ trait SealedBidAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBoo
 
   /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
     *
-    * @param a
-    * @param order
-    * @return
+    * @param a an instance of type class `A`.
+    * @param order the `BidOrder` that should be added to the `orderBook`.
+    * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
     */
   def insert(a: A, order: BidOrder[T]): A
 
+  /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
+    * except the `order`.
+    *
+    * @param a an instance of type class `A`.
+    * @param order the `BidOrder` that should be added to the `orderBook`.
+    * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
+    *         except the `order`.
+    */
   def remove(a: A, order: BidOrder[T]): A
 
   /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
     *
     * @param a an instance of type `A`.
-    * @return
+    * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
+    *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
+    *         `AskOrder` and `BidOrder` instances.
     */
   def clear(a: A): ClearResult[T, A]
 
@@ -56,10 +66,10 @@ trait SealedBidAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBoo
   */
 object SealedBidAuctionLike {
 
-  /** Class defining auction-like operations for type class `A`.
+  /** Class defining "sealed-bid" auction-like operations for type class `A`.
     *
-    * @param a an instance of type `A` for which auction-like operations should be defined.
-    * @param ev an instance of a class that implements the `AuctionLike` trait.
+    * @param a an instance of type `A` for which "sealed-bid" auction-like operations should be defined.
+    * @param ev an instance of a class that implements the `SealedBidAuctionLike` trait.
     * @tparam T all `BidOrder` instances must be for the same type of `Tradable`.
     * @tparam A the type class for which auction-like operations should be defined.
     * @note The `Ops` class instance takes as a parameter an instance of type `A` and implements the auction-like
@@ -67,21 +77,28 @@ object SealedBidAuctionLike {
     */
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidAuctionLike[T, A]) {
 
-    /** Create a new instance of type class `A` with an order book that contains an additional `BidOrder`.
+    /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
       *
-      * @param order the `BidOrder` that should be added to the order book.
-      * @return a new instance of type class `A` that contains all orders in the current order book and that also
-      *         contains `order`.
+      * @param order the `BidOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
 
-    /** Create a new instance of type class `A` with an order book that does not contain the `BidOrder`.
+    /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
+      * except the `order`.
       *
-      * @param order the `BidOrder` that should be removed from the order book.
-      * @return a new instance of type class `A` that contains all orders in the current order book except the `order`.
+      * @param order the `BidOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
+      *         except the `order`.
       */
     def remove(order: BidOrder[T]): A = ev.remove(a, order)
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+      *
+      * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
+      *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
+      *         `AskOrder` and `BidOrder` instances.
+      */
     def clear: ClearResult[T, A] = ev.clear(a)
 
   }

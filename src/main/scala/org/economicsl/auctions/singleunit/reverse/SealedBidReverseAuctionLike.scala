@@ -32,9 +32,9 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
 
   /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
     *
-    * @param a
-    * @param order
-    * @return
+    * @param a an instance of type class `A`.
+    * @param order the `AskOrder` that should be added to the `orderBook`.
+    * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
     */
   def insert(a: A, order: AskOrder[T]): A
 
@@ -49,6 +49,11 @@ object SealedBidReverseAuctionLike {
 
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidReverseAuctionLike[T, A]) {
 
+    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+      *
+      * @param order the `AskOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+      */
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
     def remove(order: AskOrder[T]): A = ev.remove(a, order)

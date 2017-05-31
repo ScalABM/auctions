@@ -49,6 +49,11 @@ object OpenBidReverseAuctionLike {
 
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidReverseAuctionLike[T, A]) {
 
+    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+      *
+      * @param order the `AskOrder` that should be added to the `orderBook`.
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+      */
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
     def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
