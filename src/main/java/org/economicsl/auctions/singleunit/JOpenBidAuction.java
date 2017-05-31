@@ -54,6 +54,10 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
         return new JOpenBidAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JOpenBidAuction<T>> clear() {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidAuction<T>> results = ops.clear();

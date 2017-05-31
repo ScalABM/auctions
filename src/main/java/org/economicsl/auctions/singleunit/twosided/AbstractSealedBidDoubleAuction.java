@@ -37,6 +37,10 @@ abstract class AbstractSealedBidDoubleAuction<T extends Tradable, A> {
 
     public abstract A remove(BidOrder<T> order);
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public abstract JClearResult<T, A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */

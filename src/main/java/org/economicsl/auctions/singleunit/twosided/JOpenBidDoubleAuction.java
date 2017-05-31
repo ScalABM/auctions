@@ -89,6 +89,10 @@ public class JOpenBidDoubleAuction {
             return new DiscriminatoryPricingImpl<>(ops.remove(order));
         }
 
+        /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+         *
+         * @return an instance of `JClearResult` class.
+         */
         public JClearResult<T, DiscriminatoryPricingImpl<T>> clear() {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             ClearResult<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();

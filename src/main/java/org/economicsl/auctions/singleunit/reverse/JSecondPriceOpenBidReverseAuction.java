@@ -59,6 +59,10 @@ public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
         return new JSecondPriceOpenBidReverseAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JSecondPriceOpenBidReverseAuction<T>> clear() {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();

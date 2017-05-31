@@ -49,6 +49,10 @@ public class JSealedBidReverseAuction<T extends Tradable>
         return new JSealedBidReverseAuction<>(ops.remove(order));
     }
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+     *
+     * @return an instance of `JClearResult` class.
+     */
     public JClearResult<T, JSealedBidReverseAuction<T>> clear() {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();

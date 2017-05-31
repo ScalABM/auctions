@@ -38,9 +38,23 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
     */
   def insert(a: A, order: AskOrder[T]): A
 
-
+  /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
+    * except the `order`.
+    *
+    * @param a an instance of type class `A`.
+    * @param order the `AskOrder` that should be added to the `orderBook`.
+    * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
+    *         except the `order`.
+    */
   def remove(a: A, order: AskOrder[T]): A
 
+  /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+    *
+    * @param a an instance of type class `A`.
+    * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
+    *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
+    *         `AskOrder` and `BidOrder` instances.
+    */
   def clear(a: A): ClearResult[T, A]
 
 }
@@ -59,6 +73,12 @@ object SealedBidReverseAuctionLike {
 
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
+    /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
+      *
+      * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
+      *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
+      *         `AskOrder` and `BidOrder` instances.
+      */
     def clear: ClearResult[T, A] = ev.clear(a)
 
   }
