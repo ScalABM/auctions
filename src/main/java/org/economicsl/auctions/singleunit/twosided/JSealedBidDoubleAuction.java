@@ -29,17 +29,31 @@ import scala.Option;
 import java.util.stream.Stream;
 
 
-/** Class for creating sealed-bid double auctions.
+/** Class for creating "sealed-bid" double auction mechanisms.
  *
  * @author davidrpugh
  * @since 0.1.0
  */
 public class JSealedBidDoubleAuction {
 
+    /** Create a "sealed-bid" double auction mechanism with discriminatory pricing.
+     *
+     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+     * @param <T> all `AskOrder` and `BidOrder` instances submitted to the `JSealedBidDoubleAuction` must be for the
+     *           same type of `Tradable`.
+     * @return a `JSealedBidDoubleAuction.DiscriminatoryPricingImpl` instance.
+     */
     public <T extends Tradable> DiscriminatoryPricingImpl<T> withDiscriminatoryPricing(PricingPolicy<T> pricingPolicy) {
         return new DiscriminatoryPricingImpl<>(pricingPolicy);
     }
 
+    /** Create a "sealed-bid" double auction mechanism with uniform pricing.
+     *
+     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+     * @param <T> all `AskOrder` and `BidOrder` instances submitted to the `JSealedBidDoubleAuction` must be for the
+     *           same type of `Tradable`.
+     * @return a `JSealedBidDoubleAuction.UniformPricingImpl` instance.
+     */
     public <T extends Tradable> UniformPricingImpl<T> withUniformPricing(PricingPolicy<T> pricingPolicy) {
         return new UniformPricingImpl<>(pricingPolicy);
     }

@@ -27,7 +27,8 @@ import java.util.stream.StreamSupport;
 
 /** Abstract base class for all sealed-bid auction mechanisms.
  *
- * @param <T> all `BidOrder` instances
+ * @param <T>
+ * @param <A>
  */
 abstract class AbstractSealedBidAuction<T extends Tradable, A> {
 
@@ -38,6 +39,13 @@ abstract class AbstractSealedBidAuction<T extends Tradable, A> {
      */
     public abstract A insert(BidOrder<T> order);
 
+    /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
+     * except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of type `A` whose order book contains all previously submitted `BidOrder` instances except
+     * the `order`.
+     */
     public abstract A remove(BidOrder<T> order);
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.

@@ -49,6 +49,13 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
         return new JSecondPriceSealedBidAuction<>(ops.insert(order));
     }
 
+    /** Create a new instance of `JSecondPriceSealedBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JSecondPriceSealedBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
+     */
     public JSecondPriceSealedBidAuction<T> remove(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JSecondPriceSealedBidAuction<>(ops.remove(order));

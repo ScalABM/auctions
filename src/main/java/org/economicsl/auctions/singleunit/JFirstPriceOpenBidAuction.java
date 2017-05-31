@@ -56,6 +56,13 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
         return ops.receive(request);
     }
 
+    /** Create a new instance of `JFirstPriceOpenBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JFirstPriceOpenBidAuction` whose order book contains all previously submitted `BidOrder`
+     * instances except the `order`.
+     */
     public JFirstPriceOpenBidAuction<T> remove(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidAuction<>(ops.remove(order));

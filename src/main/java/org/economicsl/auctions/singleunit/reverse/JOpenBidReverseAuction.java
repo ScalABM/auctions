@@ -43,6 +43,12 @@ public class JOpenBidReverseAuction<T extends Tradable>
         this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
 
+    /** Create a new instance of `JOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
+     *
+     * @param order the `AskOrder` that should be added to the `orderBook`.
+     * @return an instance of `JOpenBidReverseAuction` whose order book contains all previously submitted `AskOrder`
+     * instances.
+     */
     public JOpenBidReverseAuction<T> insert(AskOrder<T> order) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JOpenBidReverseAuction<>(ops.insert(order));

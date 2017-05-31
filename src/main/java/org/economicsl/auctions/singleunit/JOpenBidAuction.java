@@ -54,6 +54,13 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
         return ops.receive(request);
     }
 
+    /** Create a new instance of `JOpenBidAuction` whose order book contains all previously submitted `BidOrder`
+     * instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JOpenBidAuction` whose order book contains all previously submitted `BidOrder` instances
+     * except the `order`.
+     */
     public JOpenBidAuction<T> remove(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return new JOpenBidAuction<>(ops.remove(order));

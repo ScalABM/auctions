@@ -54,11 +54,23 @@ public class JOpenBidDoubleAuction {
     public static class DiscriminatoryPricingImpl<T extends Tradable>
             extends AbstractOpenBidDoubleAuction<T, DiscriminatoryPricingImpl<T>> {
 
+        /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains an additional `AskOrder`.
+         *
+         * @param order the `AskOrder` that should be added to the `orderBook`.
+         * @return an instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
+         * `AskOrder` instances.
+         */
         public DiscriminatoryPricingImpl<T> insert(AskOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
         }
 
+        /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains an additional `BidOrder`.
+         *
+         * @param order the `BidOrder` that should be added to the `orderBook`.
+         * @return an instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
+         * `BidOrder` instances.
+         */
         public DiscriminatoryPricingImpl<T> insert(BidOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
@@ -140,11 +152,23 @@ public class JOpenBidDoubleAuction {
     public static class UniformPricingImpl<T extends Tradable>
             extends AbstractOpenBidDoubleAuction<T, UniformPricingImpl<T>> {
 
+        /** Create a new instance of `UniformPricingImpl` whose order book contains an additional `AskOrder`.
+         *
+         * @param order the `AskOrder` that should be added to the `orderBook`.
+         * @return an instance of `UniformPricingImpl` whose order book contains all previously submitted `AskOrder`
+         * instances.
+         */
         public UniformPricingImpl<T> insert(AskOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.insert(order));
         }
 
+        /** Create a new instance of `UniformPricingImpl` whose order book contains an additional `BidOrder`.
+         *
+         * @param order the `BidOrder` that should be added to the `orderBook`.
+         * @return an instance of `UniformPricingImpl` whose order book contains all previously submitted `BidOrder`
+         * instances.
+         */
         public UniformPricingImpl<T> insert(BidOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.insert(order));

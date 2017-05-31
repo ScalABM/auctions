@@ -56,6 +56,13 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
         return ops.receive(request);
     }
 
+    /** Create a new instance of `JSecondPriceOpenBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
+     *
+     * @param order the `BidOrder` that should be added to the order Book.
+     * @return an instance of `JSecondPriceOpenBidAuction` whose order book contains all previously submitted `BidOrder`
+     * instances except the `order`.
+     */
     public JSecondPriceOpenBidAuction<T> remove(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
         return new JSecondPriceOpenBidAuction<>(ops.remove(order));
