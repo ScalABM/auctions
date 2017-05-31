@@ -74,7 +74,8 @@ object OpenBidReverseAuction {
     *
     * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
-    * @tparam T
+    * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `OpenBidReverseAuction`
+    *           must be for the same type of `Tradable`.
     * @return an `OpenBidReverseAuction` instance.
     */
   def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): OpenBidReverseAuction[T] = {
@@ -85,8 +86,9 @@ object OpenBidReverseAuction {
   /** Create a second-price, open-bid reverse auction (SPOBRA).
     *
     * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
-    * @tparam T
-    * @return
+    * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `OpenBidReverseAuction`
+    *           must be for the same type of `Tradable`.
+    * @return an `OpenBidReverseAuction` instance.
     * @note the winner of a SPOBRA is the seller who submitted the lowest priced ask order; however the winner receives
     *       an amount equal to the second lowest priced ask order.
     */
@@ -98,8 +100,9 @@ object OpenBidReverseAuction {
   /** Create a first-price, open-bid reverse auction (FPOBRA).
     *
     * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
-    * @tparam T
-    * @return
+    * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `OpenBidReverseAuction`
+    *           must be for the same type of `Tradable`.
+    * @return an `OpenBidReverseAuction` instance.
     * @note The winner of a FPOBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to its own ask price.
     */

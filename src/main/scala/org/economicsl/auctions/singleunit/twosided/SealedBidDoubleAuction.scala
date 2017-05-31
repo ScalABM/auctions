@@ -21,15 +21,19 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
 
 
-/** Base trait for all "sealed-bid" double auction mechanisms.
+/** Base trait for representing a "sealed-bid" double auction mechanism.
   *
+  * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidDoubleAuction` must be for the same
+  *           type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
 trait SealedBidDoubleAuction[T <: Tradable] {
 
+  /** A `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder` instances.*/
   def orderBook: FourHeapOrderBook[T]
 
+  /** A `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`. */
   def pricingPolicy: PricingPolicy[T]
 
 }
@@ -42,10 +46,24 @@ trait SealedBidDoubleAuction[T <: Tradable] {
   */
 object SealedBidDoubleAuction {
 
+  /** Create a "sealed-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @return a `SealedBidDoubleAuction.DiscriminatoryPricingImpl` instance.
+    */
   def withDiscriminatoryPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): DiscriminatoryPricingImpl[T] = {
     new DiscriminatoryPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
 
+  /** Create a "sealed-bid" double auction mechanism with uniform pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @return a `SealedBidDoubleAuction.UniformPricingImpl` instance.
+    */
   def withUniformPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): UniformPricingImpl[T] = {
     new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }

@@ -23,20 +23,41 @@ import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, Pricin
 import org.economicsl.auctions.singleunit.twosided.OpenBidDoubleAuctionLike.Ops
 
 
-/**
+/** Base trait for representing an "open-bid" double auction mechanism.
   *
+  * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+  *           type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
 trait OpenBidDoubleAuction[T <: Tradable] extends SealedBidDoubleAuction[T]
 
 
+/** Companion object for the `OpenBidDoubleAuction` trait.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object OpenBidDoubleAuction {
 
+  /** Create an "open-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @return an `OpenBidDoubleAuction.DiscriminatoryPricingImpl` instance.
+    */
   def withDiscriminatoryPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): DiscriminatoryPricingImpl[T] = {
     new DiscriminatoryPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
 
+  /** Create an "open-bid" double auction mechanism with uniform pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidDoubleAuction` must be for the same
+    *           type of `Tradable`.
+    * @return an `OpenBidDoubleAuction.UniformPricingImpl` instance.
+    */
   def withUniformPricing[T <: Tradable](pricingPolicy: PricingPolicy[T]): UniformPricingImpl[T] = {
     new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy)
   }
@@ -55,6 +76,11 @@ object OpenBidDoubleAuction {
     extends OpenBidDoubleAuction[T]
 
 
+  /** Companion object for the `DiscriminatoryPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   object DiscriminatoryPricingImpl {
 
     implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): Ops[T, DiscriminatoryPricingImpl[T]] = {
@@ -118,6 +144,11 @@ object OpenBidDoubleAuction {
     extends OpenBidDoubleAuction[T]
 
 
+  /** Companion object for the `UniformPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
   object UniformPricingImpl {
 
     implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): Ops[T, UniformPricingImpl[T]] = {
