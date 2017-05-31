@@ -13,6 +13,9 @@ lazy val commonSettings = Seq(
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     "Sonatype OSS Releases" at "https://oss.sonatype.org/content/repositories/releases"
   ),
+  javacOptions ++= Seq(
+    "-Xlint:unchecked"
+  ),
   scalacOptions ++= Seq(
     "-deprecation",  // issue warning if we use any deprecated API features
     "-feature",  // tells the compiler to provide information about misused language features
