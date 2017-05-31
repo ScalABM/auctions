@@ -43,26 +43,26 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
     private OpenBidReverseAuction<T> auction;
 
     public JFirstPriceOpenBidReverseAuction(BidOrder<T> reservation) {
-        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy());
+        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
     }
 
     public JFirstPriceOpenBidReverseAuction<T> insert(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidReverseAuction<>(ops.insert(order));
     }
 
-    public Option<BidPriceQuote> receive(BidPriceQuoteRequest request) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+    public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
     public JFirstPriceOpenBidReverseAuction<T> remove(AskOrder<T> order) {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidReverseAuction<>(ops.remove(order));
     }
 
     public JClearResult<T, JFirstPriceOpenBidReverseAuction<T>> clear() {
-        OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JFirstPriceOpenBidReverseAuction<>(results.residual()));
@@ -70,7 +70,7 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
 
     private JFirstPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
 
-    private OpenReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
+    private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
         return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);
     }
 

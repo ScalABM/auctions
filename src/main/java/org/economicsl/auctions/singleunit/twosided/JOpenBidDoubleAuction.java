@@ -64,17 +64,17 @@ public class JOpenBidDoubleAuction {
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
         }
 
-        public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
+        public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
 
-        public Option<BidPriceQuote> receive(BidPriceQuoteRequest request) {
+        public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
 
-        public Option<SpreadQuote> receive(SpreadQuoteRequest request) {
+        public Option<SpreadQuote> receive(SpreadQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
@@ -132,17 +132,17 @@ public class JOpenBidDoubleAuction {
             return new UniformPricingImpl<>(ops.insert(order));
         }
 
-        public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
+        public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
 
-        public Option<BidPriceQuote> receive(BidPriceQuoteRequest request) {
+        public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
 
-        public Option<SpreadQuote> receive(SpreadQuoteRequest request) {
+        public Option<SpreadQuote> receive(SpreadQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }

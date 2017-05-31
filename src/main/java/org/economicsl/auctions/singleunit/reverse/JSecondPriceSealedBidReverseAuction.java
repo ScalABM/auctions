@@ -38,7 +38,7 @@ public class JSecondPriceSealedBidReverseAuction<T extends Tradable>
         extends AbstractSealedBidReverseAuction<T, JSecondPriceSealedBidReverseAuction<T>>{
 
     public JSecondPriceSealedBidReverseAuction(BidOrder<T> reservation) {
-        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy());
+        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
     public JSecondPriceSealedBidReverseAuction<T> insert(AskOrder<T> order) {

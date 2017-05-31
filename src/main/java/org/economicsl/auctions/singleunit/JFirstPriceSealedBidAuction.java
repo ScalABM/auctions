@@ -35,7 +35,7 @@ public class JFirstPriceSealedBidAuction<T extends Tradable>
         extends AbstractSealedBidAuction<T, JFirstPriceSealedBidAuction<T>> {
 
     public JFirstPriceSealedBidAuction(AskOrder<T> reservation) {
-        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy());
+        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
     public JFirstPriceSealedBidAuction<T> insert(BidOrder<T> order) {

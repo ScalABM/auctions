@@ -23,10 +23,10 @@ import scala.Option;
 
 abstract class AbstractOpenBidDoubleAuction<T extends Tradable, A> extends AbstractSealedBidDoubleAuction<T, A> {
 
-    public abstract Option<AskPriceQuote> receive(AskPriceQuoteRequest request);
+    public abstract Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request);
 
-    public abstract Option<BidPriceQuote> receive(BidPriceQuoteRequest request);
+    public abstract Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request);
 
-    public abstract Option<SpreadQuote> receive(SpreadQuoteRequest request);
+    public abstract Option<SpreadQuote> receive(SpreadQuoteRequest<T> request);
 
 }

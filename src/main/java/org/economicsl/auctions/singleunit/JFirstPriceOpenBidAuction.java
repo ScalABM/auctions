@@ -37,7 +37,7 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
         extends AbstractOpenBidAuction<T, JFirstPriceOpenBidAuction<T>> {
 
     public JFirstPriceOpenBidAuction(AskOrder<T> reservation) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy());
+        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
     public JFirstPriceOpenBidAuction<T> insert(BidOrder<T> order) {
@@ -45,7 +45,7 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
         return new JFirstPriceOpenBidAuction<>(ops.insert(order));
     }
 
-    public Option<AskPriceQuote> receive(AskPriceQuoteRequest request) {
+    public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
