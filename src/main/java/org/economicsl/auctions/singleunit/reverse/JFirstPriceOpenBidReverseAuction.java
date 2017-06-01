@@ -38,7 +38,8 @@ import java.util.stream.StreamSupport;
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
+public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
+        extends AbstractOpenBidReverseAuction<T, JFirstPriceOpenBidReverseAuction<T>> {
 
     /* underlying Scala auction contains all of the interesting logic.*/
     private OpenBidReverseAuction<T> auction;
@@ -54,12 +55,12 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
      * `AskOrder` instances.
      */
     public JFirstPriceOpenBidReverseAuction<T> insert(AskOrder<T> order) {
-        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidReverseAuction<>(ops.insert(order));
     }
 
     public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
-        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
 
@@ -71,7 +72,7 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
      * `AskOrder` instances except the `order`.
      */
     public JFirstPriceOpenBidReverseAuction<T> remove(AskOrder<T> order) {
-        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return new JFirstPriceOpenBidReverseAuction<>(ops.remove(order));
     }
 
@@ -80,9 +81,9 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
      * @return an instance of `JClearResult` class.
      */
     public JClearResult<T, JFirstPriceOpenBidReverseAuction<T>> clear() {
-        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(this.auction);
+        OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JFirstPriceOpenBidReverseAuction<>(results.residual()));
     }
 
