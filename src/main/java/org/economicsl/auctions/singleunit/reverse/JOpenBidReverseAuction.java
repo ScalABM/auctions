@@ -39,6 +39,9 @@ import java.util.stream.Stream;
 public class JOpenBidReverseAuction<T extends Tradable>
         extends AbstractOpenBidReverseAuction<T, JOpenBidReverseAuction<T>> {
 
+    /* underlying Scala auction contains all of the interesting logic. */
+    private OpenBidReverseAuction<T> auction;
+
     public JOpenBidReverseAuction(BidOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
         this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, pricingPolicy);
     }
@@ -81,8 +84,6 @@ public class JOpenBidReverseAuction<T extends Tradable>
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JOpenBidReverseAuction<>(results.residual()));
     }
-
-    private OpenBidReverseAuction<T> auction;
 
     private JOpenBidReverseAuction(OpenBidReverseAuction<T> a) {
         this.auction = a;

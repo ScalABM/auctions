@@ -66,6 +66,9 @@ public class JSealedBidDoubleAuction {
     public static class DiscriminatoryPricingImpl<T extends Tradable>
             extends AbstractSealedBidDoubleAuction<T, DiscriminatoryPricingImpl<T>> {
 
+        /* underlying Scala auction contains all of the interesting logic. */
+        private SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> auction;
+
         public DiscriminatoryPricingImpl<T> insert(AskOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.insert(order));
@@ -116,8 +119,6 @@ public class JSealedBidDoubleAuction {
             this.auction = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.apply(orderBook, pricingPolicy);
         }
 
-        private SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> auction;
-
         private DiscriminatoryPricingImpl(SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> a) {
             this.auction = a;
         }
@@ -136,6 +137,9 @@ public class JSealedBidDoubleAuction {
      */
     public static class UniformPricingImpl<T extends Tradable>
             extends AbstractSealedBidDoubleAuction<T, UniformPricingImpl<T>> {
+
+        /* underlying Scala auction contains all of the interesting logic. */
+        private SealedBidDoubleAuction.UniformPricingImpl<T> auction;
 
         public UniformPricingImpl<T> insert(AskOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
@@ -182,8 +186,6 @@ public class JSealedBidDoubleAuction {
             FourHeapOrderBook<T> orderBook = FourHeapOrderBook.empty();
             this.auction = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.apply(orderBook, pricingPolicy);
         }
-
-        private SealedBidDoubleAuction.UniformPricingImpl<T> auction;
 
         private UniformPricingImpl(SealedBidDoubleAuction.UniformPricingImpl<T> a) {
             this.auction = a;

@@ -54,6 +54,9 @@ public class JOpenBidDoubleAuction {
     public static class DiscriminatoryPricingImpl<T extends Tradable>
             extends AbstractOpenBidDoubleAuction<T, DiscriminatoryPricingImpl<T>> {
 
+        /* underlying Scala auction contains all of the interesting logic. */
+        private OpenBidDoubleAuction.DiscriminatoryPricingImpl<T> auction;
+
         /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains an additional `AskOrder`.
          *
          * @param order the `AskOrder` that should be added to the `orderBook`.
@@ -131,8 +134,6 @@ public class JOpenBidDoubleAuction {
             this.auction = OpenBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.apply(orderBook, pricingPolicy);
         }
 
-        private OpenBidDoubleAuction.DiscriminatoryPricingImpl<T> auction;
-
         private DiscriminatoryPricingImpl(OpenBidDoubleAuction.DiscriminatoryPricingImpl<T> a) {
             this.auction = a;
         }
@@ -151,6 +152,9 @@ public class JOpenBidDoubleAuction {
      */
     public static class UniformPricingImpl<T extends Tradable>
             extends AbstractOpenBidDoubleAuction<T, UniformPricingImpl<T>> {
+
+        /* underlying Scala auction contains all of the interesting logic. */
+        private OpenBidDoubleAuction.UniformPricingImpl<T> auction;
 
         /** Create a new instance of `UniformPricingImpl` whose order book contains an additional `AskOrder`.
          *
@@ -224,8 +228,6 @@ public class JOpenBidDoubleAuction {
             FourHeapOrderBook<T> orderBook = FourHeapOrderBook.empty();
             this.auction = OpenBidDoubleAuction.UniformPricingImpl$.MODULE$.apply(orderBook, pricingPolicy);
         }
-
-        private OpenBidDoubleAuction.UniformPricingImpl<T> auction;
 
         private UniformPricingImpl(OpenBidDoubleAuction.UniformPricingImpl<T> a) {
             this.auction = a;

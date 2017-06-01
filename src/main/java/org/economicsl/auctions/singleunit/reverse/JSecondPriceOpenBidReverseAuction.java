@@ -40,6 +40,9 @@ import java.util.stream.StreamSupport;
  */
 public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
 
+    /* underlying Scala auction contains all of the interesting logic. */
+    private OpenBidReverseAuction<T> auction;
+
     public JSecondPriceOpenBidReverseAuction(BidOrder<T> reservation) {
         this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
@@ -82,8 +85,6 @@ public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
         return new JClearResult<>(fills, new JSecondPriceOpenBidReverseAuction<>(results.residual()));
     }
-
-    private OpenBidReverseAuction<T> auction;
 
     private JSecondPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
 

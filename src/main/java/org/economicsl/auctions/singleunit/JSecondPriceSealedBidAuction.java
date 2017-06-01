@@ -34,6 +34,9 @@ import java.util.stream.Stream;
 public class JSecondPriceSealedBidAuction<T extends Tradable>
         extends AbstractSealedBidAuction<T, JSecondPriceSealedBidAuction<T>> {
 
+    /* underlying Scala auction contains all of the interesting logic. */
+    private SealedBidAuction<T> auction;
+
     public JSecondPriceSealedBidAuction(AskOrder<T> reservation) {
         this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
     }
@@ -71,8 +74,6 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceSealedBidAuction<>(results.residual()));
     }
-
-    private SealedBidAuction<T> auction;
 
     private JSecondPriceSealedBidAuction(SealedBidAuction<T> a) {
         this.auction = a;

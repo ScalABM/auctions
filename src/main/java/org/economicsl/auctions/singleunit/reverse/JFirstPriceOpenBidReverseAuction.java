@@ -40,6 +40,7 @@ import java.util.stream.StreamSupport;
  */
 public class JFirstPriceOpenBidReverseAuction<T extends Tradable> {
 
+    /* underlying Scala auction contains all of the interesting logic.*/
     private OpenBidReverseAuction<T> auction;
 
     public JFirstPriceOpenBidReverseAuction(BidOrder<T> reservation) {

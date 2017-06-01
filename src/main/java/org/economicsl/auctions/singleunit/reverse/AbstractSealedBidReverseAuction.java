@@ -52,7 +52,7 @@ abstract class AbstractSealedBidReverseAuction<T extends Tradable, A> {
     public abstract JClearResult<T, A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */
-    Stream<Fill<T>> toJavaStream(Iterable<Fill<T>> input, boolean parallel) {
+    protected Stream<Fill<T>> toJavaStream(Iterable<Fill<T>> input, boolean parallel) {
         return StreamSupport.stream(JavaConverters.asJavaIterable(input).spliterator(), parallel);
     }
 
