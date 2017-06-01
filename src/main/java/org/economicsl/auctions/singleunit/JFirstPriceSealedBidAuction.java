@@ -19,62 +19,64 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import scala.Option;
 
 import java.util.stream.Stream;
 
 
-/** Class implementing a sealed-bid auction.
+/** Class implementing a first-price, sealed-bid auction.
  *
  * @param <T>
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuction<T, JSealedBidAuction<T>> {
+public class JFirstPriceSealedBidAuction<T extends Tradable>
+        extends AbstractSealedBidAuction<T, JFirstPriceSealedBidAuction<T>> {
 
     /* underlying Scala auction contains all of the interesting logic. */
     private SealedBidAuction<T> auction;
 
-    public JSealedBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
-        this.auction = SealedBidAuction$.MODULE$.apply(reservation, pricingPolicy);
+    public JFirstPriceSealedBidAuction(AskOrder<T> reservation) {
+        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
-    /** Create a new instance of `JSealedBidAuction` whose order book contains an additional `BidOrder`.
+    /** Create a new instance of `JFirstPriceSealedBidAuction` whose order book contains an additional `BidOrder`.
      *
      * @param order the `BidOrder` that should be added to the `orderBook`.
-     * @return an instance of `JSealedBidOrder` whose order book contains all previously submitted `BidOrder` instances.
+     * @return an instance of `JFirstPriceSealedBidOrder` whose order book contains all previously submitted `BidOrder`
+     * instances.
      */
-    public JSealedBidAuction<T> insert(BidOrder<T> order) {
+    public JFirstPriceSealedBidAuction<T> insert(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JSealedBidAuction<>(ops.insert(order));
+        return new JFirstPriceSealedBidAuction<>(ops.insert(order));
     }
 
-    /** Create a new instance of `JSealedBidAuction` whose order book contains all previously submitted `BidOrder`
-     * instances except the `order`.
+    /** Create a new instance of `JFirstPriceSealedBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
      *
      * @param order the `BidOrder` that should be added to the order Book.
-     * @return an instance of `JSealedBidAuction` whose order book contains all previously submitted `BidOrder`
-     * instances except the `order`.
+     * @return an instance of `JFirstPriceSealedBidAuction` whose order book contains all previously submitted
+     * `BidOrder` instances except the `order`.
      */
-    public JSealedBidAuction<T> remove(BidOrder<T> order) {
+    public JFirstPriceSealedBidAuction<T> remove(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JSealedBidAuction<>(ops.remove(order));
+        return new JFirstPriceSealedBidAuction<>(ops.remove(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSealedBidAuction<T>> clear() {
+    public JClearResult<T, JFirstPriceSealedBidAuction<T>> clear() {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
-        return new JClearResult<>(fills, new JSealedBidAuction<>(results.residual()));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        return new JClearResult<>(fills, new JFirstPriceSealedBidAuction<>(results.residual()));
     }
 
-    private JSealedBidAuction(SealedBidAuction<T> a) {
-      this.auction = a;
+    private JFirstPriceSealedBidAuction(SealedBidAuction<T> a) {
+        this.auction = a;
     }
 
     private SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {

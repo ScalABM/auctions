@@ -95,8 +95,8 @@ public class Sandbox {
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da3 = da2.insert(order4);
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da4 = da3.insert(order8);
 
-        System.out.println(da4.receive(new AskPriceQuoteRequest()));
-        System.out.println(da4.receive(new BidPriceQuoteRequest()));
+        System.out.println(da4.receive(new AskPriceQuoteRequest<>()));
+        System.out.println(da4.receive(new BidPriceQuoteRequest<>()));
 
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9);
         JClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
@@ -107,8 +107,8 @@ public class Sandbox {
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da8 = da7.insert(order4);
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da9 = da8.insert(order8);
 
-        System.out.println(da9.receive(new AskPriceQuoteRequest()));
-        System.out.println(da9.receive(new BidPriceQuoteRequest()));
+        System.out.println(da9.receive(new AskPriceQuoteRequest<>()));
+        System.out.println(da9.receive(new BidPriceQuoteRequest<>()));
 
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9);
         JClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();

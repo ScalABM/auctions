@@ -17,67 +17,69 @@ package org.economicsl.auctions.singleunit.reverse;
 
 
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.*;
+import org.economicsl.auctions.singleunit.ClearResult;
+import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import scala.Option;
 
 import java.util.stream.Stream;
 
 
-/** Class implementing a sealed-bid, reverse auction.
+/** Class implementing a first-price, sealed-bid reverse auction.
  *
  * @param <T>
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JSealedBidReverseAuction<T extends Tradable>
-        extends AbstractSealedBidReverseAuction<T, JSealedBidReverseAuction<T>> {
+public class JFirstPriceSealedBidReverseAuction<T extends Tradable>
+        extends AbstractSealedBidReverseAuction<T, JFirstPriceSealedBidReverseAuction<T>> {
 
-    /* underlying Scala auction contains all of the interesting logic. */
+    /* underlying Scala auction contains all of the interesting logic.*/
     private SealedBidReverseAuction<T> auction;
 
-    public JSealedBidReverseAuction(BidOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
-        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, pricingPolicy);
+    public JFirstPriceSealedBidReverseAuction(BidOrder<T> reservation) {
+        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
     }
 
-    /** Create a new instance of `JSealedBidReverseAuction` whose order book contains an additional `AskOrder`.
+    /** Create a new instance of `JFirstPriceSealedBidReverseAuction` whose order book contains an additional `AskOrder`.
      *
      * @param order the `AskOrder` that should be added to the `orderBook`.
-     * @return an instance of `JSealedBidReverseAuction` whose order book contains all previously submitted `AskOrder`
-     * instances.
+     * @return an instance of `JFirstPriceSealedBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances.
      */
-    public JSealedBidReverseAuction<T> insert(AskOrder<T> order) {
+    public JFirstPriceSealedBidReverseAuction<T> insert(AskOrder<T> order) {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JSealedBidReverseAuction<>(ops.insert(order));
+        return new JFirstPriceSealedBidReverseAuction<>(ops.insert(order));
     }
 
-    /** Create a new instance of `JSealedBidReverseAuction` whose order book contains all previously submitted
+    /** Create a new instance of `JFirstPriceSealedBidReverseAuction` whose order book contains all previously submitted
      * `AskOrder` instances except the `order`.
      *
      * @param order the `AskOrder` that should be added to the order Book.
-     * @return an instance of type `JSealedBidReverseAuction` whose order book contains all previously submitted
-     * `AskOrder` instances except the `order`.
+     * @return an instance of type `JFirstPriceSealedBidReverseAuction` whose order book contains all previously
+     * submitted `AskOrder` instances except the `order`.
      */
-    public JSealedBidReverseAuction<T> remove(AskOrder<T> order) {
+    public JFirstPriceSealedBidReverseAuction<T> remove(AskOrder<T> order) {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JSealedBidReverseAuction<>(ops.remove(order));
+        return new JFirstPriceSealedBidReverseAuction<>(ops.remove(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSealedBidReverseAuction<T>> clear() {
+    public JClearResult<T, JFirstPriceSealedBidReverseAuction<T>> clear() {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();
         Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
-        return new JClearResult<>(fills, new JSealedBidReverseAuction<>(results.residual()));
+        return new JClearResult<>(fills, new JFirstPriceSealedBidReverseAuction<>(results.residual()));
     }
 
-    private JSealedBidReverseAuction(SealedBidReverseAuction<T> a) {
-      this.auction = a;
+    private JFirstPriceSealedBidReverseAuction(SealedBidReverseAuction<T> a) {
+        this.auction = a;
     }
 
     private SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> mkReverseAuctionLikeOps(SealedBidReverseAuction<T> a) {

@@ -24,37 +24,38 @@ import org.economicsl.auctions.singleunit.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import scala.Option;
+import scala.collection.JavaConverters;
 
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 
-/** Class implementing an open-bid, reverse auction.
+/** Class implementing a second-price, open-bid reverse auction.
  *
  * @param <T>
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JOpenBidReverseAuction<T extends Tradable>
-        extends AbstractOpenBidReverseAuction<T, JOpenBidReverseAuction<T>> {
+public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
 
     /* underlying Scala auction contains all of the interesting logic. */
     private OpenBidReverseAuction<T> auction;
 
-    public JOpenBidReverseAuction(BidOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
-        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, pricingPolicy);
+    public JSecondPriceOpenBidReverseAuction(BidOrder<T> reservation) {
+        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
     }
 
-    /** Create a new instance of `JOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
+    /** Create a new instance of `JSecondPriceOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
      *
      * @param order the `AskOrder` that should be added to the `orderBook`.
-     * @return an instance of `JOpenBidReverseAuction` whose order book contains all previously submitted `AskOrder`
-     * instances.
+     * @return an instance of `JSecondPriceOpenBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances.
      */
-    public JOpenBidReverseAuction<T> insert(AskOrder<T> order) {
+    public JSecondPriceOpenBidReverseAuction<T> insert(AskOrder<T> order) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JOpenBidReverseAuction<>(ops.insert(order));
+        return new JSecondPriceOpenBidReverseAuction<>(ops.insert(order));
     }
 
     public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
@@ -62,32 +63,30 @@ public class JOpenBidReverseAuction<T extends Tradable>
         return ops.receive(request);
     }
 
-    /** Create a new instance of `JOpenBidReverseAuction` whose order book contains all previously submitted `AskOrder`
-     * instances except the `order`.
+    /** Create a new instance of `JSecondPriceOpenBidReverseAuction` whose order book contains all previously submitted
+     * `AskOrder` instances except the `order`.
      *
      * @param order the `AskOrder` that should be added to the order Book.
-     * @return an instance of type `JOpenBidReverseAuction` whose order book contains all previously submitted
-     * `AskOrder` instances except the `order`.
+     * @return an instance of type `JSecondPriceOpenBidReverseAuction` whose order book contains all previously
+     * submitted `AskOrder` instances except the `order`.
      */
-    public JOpenBidReverseAuction<T> remove(AskOrder<T> order) {
+    public JSecondPriceOpenBidReverseAuction<T> remove(AskOrder<T> order) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JOpenBidReverseAuction<>(ops.remove(order));
+        return new JSecondPriceOpenBidReverseAuction<>(ops.remove(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JOpenBidReverseAuction<T>> clear() {
+    public JClearResult<T, JSecondPriceOpenBidReverseAuction<T>> clear() {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
-        return new JClearResult<>(fills, new JOpenBidReverseAuction<>(results.residual()));
+        Option<Stream<Fill<T>>> fills = results.fills().map(f -> StreamSupport.stream(JavaConverters.asJavaIterable(f).spliterator(), false));
+        return new JClearResult<>(fills, new JSecondPriceOpenBidReverseAuction<>(results.residual()));
     }
 
-    private JOpenBidReverseAuction(OpenBidReverseAuction<T> a) {
-        this.auction = a;
-    }
+    private JSecondPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
 
     private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
         return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);

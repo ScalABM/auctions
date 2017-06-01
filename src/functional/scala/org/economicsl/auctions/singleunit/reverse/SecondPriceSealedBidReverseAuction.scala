@@ -37,7 +37,7 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
   val service = Service(tick=1)
 
   val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
-  val spsbra: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withSecondLowestPricingPolicy(reservationPrice)
+  val spsbra: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withAskQuotePricingPolicy(reservationPrice)
 
   // suppose that there are lots of sellers
   val prng = new Random(42)
