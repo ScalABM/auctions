@@ -1,3 +1,8 @@
+// the locations of the decrypted files on Travis CI
+pgpPublicRing := file("local.pubring.gpg")
+pgpSecretRing := file("local.secring.gpg")
+
+// targets for publishing of snapshots and releases...
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value) {
