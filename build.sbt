@@ -2,7 +2,7 @@
 lazy val commonSettings = Seq(
   scalaVersion := "2.12.1" ,
   name := "esl-auctions",
-  version := "0.1.1",
+  version := "0.1.2",
   organization := "org.economicsl",
   organizationName := "EconomicSL",
   organizationHomepage := Some(url("https://economicsl.github.io/")),
