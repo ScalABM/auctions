@@ -17,7 +17,7 @@ package org.economicsl.auctions.multiunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
 /** An order to sell multiple units of a tradable at a per-unit price greater than or equal to the limit price.
@@ -30,8 +30,14 @@ import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class LimitAskOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quantity: Quantity, val tradable: T)
-  extends AskOrder[T] with SinglePricePoint[T]
+case class LimitAskOrder[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
+  extends AskOrder[T] {
+
+  def withQuantity(quantity: Quantity): LimitAskOrder[T] = {
+    copy(quantity = quantity)
+  }
+
+}
 
 
 /** Companion object for `LimitAskOrder`.
@@ -45,10 +51,6 @@ object LimitAskOrder {
 
   implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[(UUID, O)] = {
     Ordering.by{case (uuid, order) => (order.limit, uuid) }
-  }
-
-  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitAskOrder[T] = {
-    new LimitAskOrder[T](issuer, limit, quantity, tradable)
   }
 
 }

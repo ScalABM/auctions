@@ -17,8 +17,8 @@ package org.economicsl.auctions.multiunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Quantity, Tradable}
-import org.economicsl.auctions.multiunit.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.multiunit.{AskOrder, BidOrder}
 
 
 class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
@@ -48,14 +48,14 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  /** Add a new `LimitAskOrder` to the `OrderBook`.
+  /** Add a new `AskOrder` to the `OrderBook`.
     *
     * @param uuid
     * @param order
     * @return
-    * @note adding a new `LimitAskOrder` is non-trivial and there are several cases to consider.
+    * @note adding a new `AskOrder` is non-trivial and there are several cases to consider.
     */
-  def + (uuid: UUID, order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
+  def + (uuid: UUID, order: AskOrder[T]): FourHeapOrderBook[T] = {
     (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
       case (Some((out, bidOrder)), Some((in, askOrder))) =>
         if (order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit) {
@@ -96,13 +96,13 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  /** Add a new `LimitBidOrder` to the `OrderBook`.
+  /** Add a new `BidOrder` to the `OrderBook`.
     *
     * @param uuid
     * @param order
     * @return
     */
-  def + (uuid: UUID, order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
+  def + (uuid: UUID, order: BidOrder[T]): FourHeapOrderBook[T] = {
     (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
       case (Some((in, bidOrder)), Some((out, askOrder))) =>
         if (order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit) {
@@ -145,16 +145,16 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
   def contains(uuid: UUID): Boolean = matchedOrders.contains(uuid) || unMatchedOrders.contains(uuid)
 
-  def takeWhileMatched: (Stream[(LimitAskOrder[T], LimitBidOrder[T])], FourHeapOrderBook[T]) = {
+  def takeWhileMatched: (Stream[(AskOrder[T], BidOrder[T])], FourHeapOrderBook[T]) = {
     (matchedOrders.zipped, withEmptyMatchedOrders)
   }
 
-  /** Update an existing `LimitAskOrder`.
+  /** Update an existing `AskOrder`.
     *
     * @note Because multi-unit orders are divisible, an order with the `uuid` might have been split in which case it
     *       will exist in both the matched and unmatched order sets. Thus if
     */
-  def update(uuid: UUID, order: LimitAskOrder[T]): FourHeapOrderBook[T] = {
+  def update(uuid: UUID, order: AskOrder[T]): FourHeapOrderBook[T] = {
     if (contains(uuid)) {
       val residualOrderBook = this - uuid
       residualOrderBook + (uuid, order)
@@ -163,12 +163,12 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
     }
   }
 
-  /** Update an existing `LimitBidOrder`.
+  /** Update an existing `BidOrder`.
     *
     * @note Because multi-unit orders are divisible, an order with the `uuid` might have been split in which case it
     *       will exist in both the matched and unmatched order sets. Thus if
     */
-  def update(uuid: UUID, order: LimitBidOrder[T]): FourHeapOrderBook[T] = {
+  def update(uuid: UUID, order: BidOrder[T]): FourHeapOrderBook[T] = {
     if (contains(uuid)) {
       val residualOrderBook = this - uuid
       residualOrderBook + (uuid, order)
@@ -187,7 +187,7 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
 
 object FourHeapOrderBook {
 
-  def empty[T <: Tradable](implicit askOrdering: Ordering[(UUID, LimitAskOrder[T])], bidOrdering: Ordering[(UUID, LimitBidOrder[T])]): FourHeapOrderBook[T] = {
+  def empty[T <: Tradable](implicit askOrdering: Ordering[(UUID, AskOrder[T])], bidOrdering: Ordering[(UUID, BidOrder[T])]): FourHeapOrderBook[T] = {
     val matchedOrders = MatchedOrders.empty(askOrdering.reverse, bidOrdering.reverse)
     val unMatchedOrders = UnMatchedOrders.empty(askOrdering, bidOrdering)
     new FourHeapOrderBook(matchedOrders, unMatchedOrders)

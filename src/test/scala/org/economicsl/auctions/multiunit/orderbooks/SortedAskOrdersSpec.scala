@@ -27,7 +27,7 @@ class SortedAskOrdersSpec extends FlatSpec with Matchers {
     // Check that update is successful!
     updated.head should be ((issuer, revised))
     updated.size should be (1)
-    updated.quantity should be (revised.quantity)
+    updated.numberUnits should be (revised.quantity)
 
   }
 
@@ -53,10 +53,10 @@ class SortedAskOrdersSpec extends FlatSpec with Matchers {
     val (matched, residual) = nonEmpty.splitAt(Quantity(57))
 
     // Check that splitAt was successful
-    matched.quantity should be (Quantity(57))
+    matched.numberUnits should be (Quantity(57))
     matched.size should be(3)
 
-    residual.quantity should be (Quantity(125 - 57))
+    residual.numberUnits should be (Quantity(125 - 57))
     residual.size should be(1)
 
   }

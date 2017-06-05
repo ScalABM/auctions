@@ -17,7 +17,7 @@ package org.economicsl.auctions.multiunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
 /** An order to buy multiple units of a tradable at any positive price.
@@ -29,23 +29,12 @@ import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class MarketBidOrder[+T <: Tradable](val issuer: UUID, val quantity: Quantity, val tradable: T)
-  extends BidOrder[T] with SinglePricePoint[T] {
+case class MarketBidOrder[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T) extends BidOrder[T] {
 
   val limit: Price = Price.MaxValue
 
-}
-
-
-/** Companion object for `MarketBidOrder`.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object MarketBidOrder {
-
-  def apply[T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T): MarketBidOrder[T] = {
-    new MarketBidOrder[T](issuer, quantity, tradable)
+  def withQuantity(quantity: Quantity): MarketBidOrder[T] = {
+    copy(quantity = quantity)
   }
 
 }

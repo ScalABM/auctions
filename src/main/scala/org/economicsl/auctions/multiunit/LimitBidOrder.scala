@@ -30,8 +30,14 @@ import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quantity: Quantity, val tradable: T)
-  extends BidOrder[T] with SinglePricePoint[T]
+case class LimitBidOrder[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
+  extends BidOrder[T] {
+
+  def withQuantity(quantity: Quantity): LimitBidOrder[T] = {
+    copy(quantity = quantity)
+  }
+
+}
 
 
 /** Companion object for `LimitBidOrder`.
@@ -44,10 +50,6 @@ class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quan
 object LimitBidOrder {
 
   implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
-
-  def apply[T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T): LimitBidOrder[T] = {
-    new LimitBidOrder[T](issuer, limit, quantity, tradable)
-  }
 
 }
 

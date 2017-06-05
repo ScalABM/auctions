@@ -15,15 +15,15 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.{Order, Quantity, Tradable}
+import org.economicsl.auctions.{Quantity, Tradable}
 
-import scala.collection.{GenIterable, immutable}
+import scala.collection.GenIterable
 
 
 /** Documentation for multi-unit orderbooks goes here! */
 package object orderbooks {
 
-  def totalQuantity[T <: Tradable](orders: GenIterable[Order[T] with SinglePricePoint[T]]): Quantity = {
+  def totalQuantity[T <: Tradable](orders: GenIterable[Order[T]]): Quantity = {
     orders.aggregate[Quantity](Quantity(0))((total, order) => Quantity(total.value + order.quantity.value), (q1, q2) => Quantity(q1.value + q2.value))
   }
 
