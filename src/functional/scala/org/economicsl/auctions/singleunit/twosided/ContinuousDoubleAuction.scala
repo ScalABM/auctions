@@ -22,7 +22,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 
-import scala.util.Random
+import scala.util.{Random, Success}
 
 
 /**
@@ -32,11 +32,11 @@ import scala.util.Random
   */
 object ContinuousDoubleAuction extends App with OrderGenerator {
 
-  val google: GoogleStock = GoogleStock(tick=1)
+  val google: GoogleStock = GoogleStock()
   val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
   val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[GoogleStock] = {
-    OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule)
+    OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule, tickSize = 1)
   }
 
   // generate a very large stream of random orders...
@@ -52,11 +52,21 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
       case Stream.Empty => out
       case head #:: tail => head match {
         case Left(askOrder) =>
-          val results = da.insert(askOrder).clear
-          loop(results.residual, tail, results #:: out)
+          da.insert(askOrder) match {
+            case Success(withAsk) =>
+              val results = withAsk.clear
+              loop(results.residual, tail, results #:: out)
+            case _ =>
+              loop(da, tail, out)
+          }
         case Right(bidOrder) =>
-          val results = da.insert(bidOrder).clear
-          loop(results.residual, tail, results #:: out)
+          da.insert(bidOrder) match {
+            case Success(withBid) =>
+              val results = withBid.clear
+              loop(results.residual, tail, results #:: out)
+            case _ =>
+              loop(da, tail, out)
+          }
       }
     }
     loop(auction, incoming, Stream.empty[ClearResult[T, DoubleAuction[T]]])
