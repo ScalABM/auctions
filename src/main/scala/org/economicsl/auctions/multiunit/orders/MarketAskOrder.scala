@@ -13,43 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit
+package org.economicsl.auctions.multiunit.orders
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
+import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
-/** An order to buy multiple units of a tradable at a per-unit price less than or equal to the limit price.
+/** An order to sell a multiple units of a tradable at any positive price.
   *
   * @param issuer
-  * @param limit
   * @param quantity
   * @param tradable
   * @tparam T the type of `Tradable` for which the `Order` is being issued.
   * @author davidrpugh
   * @since 0.1.0
   */
-case class LimitBidOrder[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
-  extends BidOrder[T] {
+case class MarketAskOrder[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T) extends AskOrder[T] {
 
-  def withQuantity(quantity: Quantity): LimitBidOrder[T] = {
+  val limit: Price = Price.MinValue
+
+  def withQuantity(quantity: Quantity): MarketAskOrder[T] = {
     copy(quantity = quantity)
   }
-
-}
-
-
-/** Companion object for `LimitBidOrder`.
-  *
-  * Provides default ordering as well as constructor for default implementation of `LimitBidOrder` trait.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object LimitBidOrder {
-
-  implicit def ordering[O <: LimitBidOrder[_ <: Tradable]]: Ordering[O] = SinglePricePoint.ordering[O]
 
 }
 

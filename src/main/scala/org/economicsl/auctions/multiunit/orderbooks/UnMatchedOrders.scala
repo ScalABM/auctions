@@ -18,7 +18,8 @@ package org.economicsl.auctions.multiunit.orderbooks
 import java.util.UUID
 
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.multiunit.{AskOrder, BidOrder}
+import org.economicsl.auctions.multiunit.BidOrder
+import org.economicsl.auctions.multiunit.orders.{AskOrder, BidOrder}
 
 
 private[orderbooks] case class UnMatchedOrders[T <: Tradable](askOrders: SortedAskOrders[T],

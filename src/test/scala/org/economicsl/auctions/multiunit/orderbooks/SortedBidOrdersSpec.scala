@@ -2,6 +2,8 @@ package org.economicsl.auctions.multiunit.orderbooks
 
 import java.util.UUID
 
+import org.economicsl.auctions.multiunit.orders
+import org.economicsl.auctions.multiunit.orders.LimitBidOrder
 import org.economicsl.auctions.{GoogleStock, Price, Quantity, multiunit}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -13,7 +15,7 @@ class SortedBidOrdersSpec extends FlatSpec with Matchers {
     // Create a multi-unit limit ask order
     val issuer = UUID.randomUUID()
     val google = new GoogleStock
-    val order = multiunit.LimitBidOrder(issuer, Price(10), Quantity(100), google)
+    val order = LimitBidOrder(issuer, Price(10), Quantity(100), google)
 
     // Create an empty order book and add the order
     val empty = SortedBidOrders.empty[GoogleStock]
@@ -37,13 +39,13 @@ class SortedBidOrdersSpec extends FlatSpec with Matchers {
 
     // Create some multi-unit limit bid orders
     val issuer1 = UUID.randomUUID()
-    val order1 = multiunit.LimitBidOrder(issuer1, Price(10), Quantity(10), google)
+    val order1 = orders.LimitBidOrder(issuer1, Price(10), Quantity(10), google)
 
     val issuer2 = UUID.randomUUID()
-    val order2 = multiunit.LimitBidOrder(issuer2, Price(5), Quantity(15), google)
+    val order2 = orders.LimitBidOrder(issuer2, Price(5), Quantity(15), google)
 
     val issuer3 = UUID.randomUUID()
-    val order3 = multiunit.LimitBidOrder(issuer3, Price(15), Quantity(100), google)
+    val order3 = orders.LimitBidOrder(issuer3, Price(15), Quantity(100), google)
 
     // Create an empty order book and add the orders
     val empty = SortedBidOrders.empty[GoogleStock]

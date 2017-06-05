@@ -13,28 +13,44 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.multiunit
+package org.economicsl.auctions.multiunit.orders
 
 import java.util.UUID
 
 import org.economicsl.auctions.{Price, Quantity, Tradable}
 
 
-/** An order to sell a multiple units of a tradable at any positive price.
+/** An order to sell multiple units of a tradable at a per-unit price greater than or equal to the limit price.
   *
   * @param issuer
+  * @param limit
   * @param quantity
   * @param tradable
   * @tparam T the type of `Tradable` for which the `Order` is being issued.
   * @author davidrpugh
   * @since 0.1.0
   */
-case class MarketAskOrder[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T) extends AskOrder[T] {
+case class LimitAskOrder[+T <: Tradable](issuer: UUID, limit: Price, quantity: Quantity, tradable: T)
+  extends AskOrder[T] {
 
-  val limit: Price = Price.MinValue
-
-  def withQuantity(quantity: Quantity): MarketAskOrder[T] = {
+  def withQuantity(quantity: Quantity): LimitAskOrder[T] = {
     copy(quantity = quantity)
+  }
+
+}
+
+
+/** Companion object for `LimitAskOrder`.
+  *
+  * Provides default ordering for the multi-unit `LimitAskOrder` type.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+object LimitAskOrder {
+
+  implicit def ordering[O <: LimitAskOrder[_ <: Tradable]]: Ordering[(UUID, O)] = {
+    Ordering.by{case (uuid, order) => (order.limit, uuid) }
   }
 
 }

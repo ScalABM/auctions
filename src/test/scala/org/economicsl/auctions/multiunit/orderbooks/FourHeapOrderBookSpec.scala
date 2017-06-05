@@ -2,6 +2,7 @@ package org.economicsl.auctions.multiunit.orderbooks
 
 import java.util.UUID
 
+import org.economicsl.auctions.multiunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{GoogleStock, Price, Quantity, multiunit}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -14,10 +15,10 @@ class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
     // Create some multi-unit limit ask orders
     val issuer1 = UUID.randomUUID()
-    val order1 = multiunit.LimitAskOrder(issuer1, Price(10), Quantity(10), google)
+    val order1 = LimitAskOrder(issuer1, Price(10), Quantity(10), google)
 
     val issuer2 = UUID.randomUUID()
-    val order2 = multiunit.LimitBidOrder(issuer2, Price(15), Quantity(10), google)
+    val order2 = LimitBidOrder(issuer2, Price(15), Quantity(10), google)
 
     // Create an empty orderBook
     val empty = FourHeapOrderBook.empty[GoogleStock]

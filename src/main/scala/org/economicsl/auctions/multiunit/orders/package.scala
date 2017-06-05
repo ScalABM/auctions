@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,17 +15,5 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.multiunit.orders.Order
-import org.economicsl.auctions.{Quantity, Tradable}
 
-import scala.collection.GenIterable
-
-
-/** Documentation for multi-unit orderbooks goes here! */
-package object orderbooks {
-
-  def totalQuantity[T <: Tradable](orders: GenIterable[Order[T]]): Quantity = {
-    orders.aggregate[Quantity](Quantity(0))((total, order) => Quantity(total.value + order.quantity.value), (q1, q2) => Quantity(q1.value + q2.value))
-  }
-
-}
+package object orders
