@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-/** Value class representing quantities. */
+/** Value class representing quantities.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 case class Quantity(value: Long) extends AnyVal {
 
   def + (that: Quantity): Quantity = {
@@ -32,7 +36,11 @@ case class Quantity(value: Long) extends AnyVal {
 }
 
 
-/** Companion object for the `Quantity` value class. */
+/** Companion object for the `Quantity` value class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object Quantity {
 
   implicit val ordering: Ordering[Quantity] = QuantityOrdering
@@ -42,7 +50,11 @@ object Quantity {
 }
 
 
-/** Object containing the numeric operators for the `Quantity` value class. */
+/** Object containing the numeric operators for the `Quantity` value class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object QuantityOrdering extends Ordering[Quantity] {
 
   def compare(x: Quantity, y: Quantity): Int = x.value compare y.value

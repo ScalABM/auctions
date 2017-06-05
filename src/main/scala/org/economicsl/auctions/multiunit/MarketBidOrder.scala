@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,13 +17,21 @@ package org.economicsl.auctions.multiunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Quantity, Tradable}
+import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
 
 
-/** Base trait for a market order to buy a particular `Tradable`. */
-trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {
+/** An order to buy multiple units of a tradable at any positive price.
+  *
+  * @param issuer
+  * @param quantity
+  * @param tradable
+  * @tparam T the type of `Tradable` for which the `Order` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+class MarketBidOrder[+T <: Tradable](val issuer: UUID, val quantity: Quantity, val tradable: T)
+  extends BidOrder[T] with SinglePricePoint[T] {
 
-  /** An issuer of a `MarketBidOrder` is willing to pay any finite price. */
   val limit: Price = Price.MaxValue
 
 }
@@ -31,22 +39,13 @@ trait MarketBidOrder[+T <: Tradable] extends LimitBidOrder[T] {
 
 /** Companion object for `MarketBidOrder`.
   *
-  * Provides constructor for default implementation of `MarketBidOrder` trait.
+  * @author davidrpugh
+  * @since 0.1.0
   */
 object MarketBidOrder {
 
   def apply[T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T): MarketBidOrder[T] = {
-    SinglePricePointImpl(issuer, quantity, tradable)
-  }
-
-  private[this] case class SinglePricePointImpl[+T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T)
-    extends MarketBidOrder[T] {
-
-    def withQuantity(residual: Quantity): MarketBidOrder[T] = {
-      require(residual.value < quantity.value)
-      copy(quantity = residual)
-    }
-
+    new MarketBidOrder[T](issuer, quantity, tradable)
   }
 
 }

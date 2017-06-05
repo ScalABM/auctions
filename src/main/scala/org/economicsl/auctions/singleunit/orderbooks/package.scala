@@ -1,6 +1,5 @@
 /*
-Copyright 2017 EconomicSL
-<<<<<<< HEAD
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,5 +16,9 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 
-/** Documentation for the single unit order books pacakge should go here! */
+/** Classes implementing various algorithms for storing collections of single unit orders.
+  *
+  * Initial focus has been on implementing the four-heap algorithm discussed in
+  * [[http://wewalsh.com/papers/dss98.pdf, ``Wurman et al (1998)``]].
+  */
 package object orderbooks
