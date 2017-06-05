@@ -23,6 +23,7 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -39,8 +40,8 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic. */
     private OpenBidAuction<T> auction;
 
-    public JSecondPriceOpenBidAuction(AskOrder<T> reservation) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
+    public JSecondPriceOpenBidAuction(AskOrder<T> reservation, Long tickSize) {
+        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JSecondPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
@@ -49,13 +50,13 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
      * @return an instance of `JSecondPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
      * instances.
      */
-    public JSecondPriceOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
-        return new JSecondPriceOpenBidAuction<>(ops.insert(order));
+    public Try<JSecondPriceOpenBidAuction<T>> insert(BidOrder<T> order) {
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
+        return ops.insert(order).map(a -> new JSecondPriceOpenBidAuction<>(a));
     }
 
     public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
         return ops.receive(request);
     }
 
@@ -67,7 +68,7 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
      * instances except the `order`.
      */
     public JSecondPriceOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
         return new JSecondPriceOpenBidAuction<>(ops.remove(order));
     }
 
@@ -87,7 +88,7 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
     }
 
     private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
-        return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
+        return OpenBidAuction$.MODULE$.mkAuctionOps(a);
     }
 
 }
