@@ -22,6 +22,8 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 
+import scala.util.Try
+
 
 /** Trait extends sealed-bid reverse auction-like behavior to include the ability to process bid price quote requests.
   *
@@ -54,7 +56,7 @@ object OpenBidReverseAuctionLike {
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
     def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
 

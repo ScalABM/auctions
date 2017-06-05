@@ -21,9 +21,4 @@ package org.economicsl.auctions
   * @author davidrpugh
   * @since 0.1.0
   */
-trait Tradable extends Serializable {
-
-  /** Minimum tick size. */
-  def tick: Currency
-
-}
+trait Tradable extends Serializable

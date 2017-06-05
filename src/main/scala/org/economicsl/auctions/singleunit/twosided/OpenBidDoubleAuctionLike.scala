@@ -23,6 +23,8 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting, SpreadQuotingPolicy}
 import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuctionLike
 
+import scala.util.Try
+
 
 /** Base trait defining "open-bid" reverse auction-like behavior.
   *
@@ -57,14 +59,14 @@ object OpenBidDoubleAuctionLike {
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
       *
       * @param order the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
 
     def receive(request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = ev.receive(a, request)
 
