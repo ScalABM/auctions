@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orders
 
 import org.economicsl.auctions.{Contract, OrderLike, SingleUnit, Tradable}
+import play.api.libs.json.{JsValue, Json, Writes}
 
 
 /** Base trait for all single-unit orders.
@@ -35,6 +36,15 @@ sealed trait Order[+T <: Tradable] extends Contract with OrderLike[T] with Singl
   * @since 0.1.0
   */
 object Order {
+
+  implicit def writes[O <: Order[_ <: Tradable]]: Writes[O] = new Writes[O] {
+    def writes(o: O): JsValue = Json.obj(
+      "issuer" -> o.issuer,
+      "limit" -> o.limit,
+      "quantity" -> o.quantity,
+      "tradable" -> o.tradable
+    )
+  }
 
   /** All `Order` instances are ordered by `limit` from lowest to highest.
     *
@@ -57,6 +67,13 @@ object Order {
 trait AskOrder[+T <: Tradable] extends Order[T]
 
 
+object AskOrder {
+
+  implicit def writes[T <: Tradable]: Writes[AskOrder[T]] = Order.writes[AskOrder[T]]
+
+}
+
+
 /** Base trait for all single-unit orders to buy a particular `Tradable`.
   *
   * @tparam T the type of `Tradable` for which the `BidOrder` is being issued.
@@ -64,3 +81,10 @@ trait AskOrder[+T <: Tradable] extends Order[T]
   * @since 0.1.0
   */
 trait BidOrder[+T <: Tradable] extends Order[T]
+
+
+object BidOrder {
+
+  implicit def writes[T <: Tradable]: Writes[BidOrder[T]] = Order.writes[BidOrder[T]]
+
+}
