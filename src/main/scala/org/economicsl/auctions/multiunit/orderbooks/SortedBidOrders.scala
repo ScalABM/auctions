@@ -15,79 +15,112 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
-import java.util.UUID
-
 import org.economicsl.auctions.multiunit.orders.BidOrder
 import org.economicsl.auctions.{Quantity, Tradable}
 
-import scala.collection.immutable.TreeSet
+import scala.collection.immutable
 
 
-private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[UUID, BidOrder[T]],
-                                                                 val sorted: TreeSet[(UUID, BidOrder[T])],
-                                                                 val numberUnits: Quantity) {
+class SortedBidOrders[K, T <: Tradable] private(existing: immutable.TreeMap[K, immutable.Queue[BidOrder[T]]], val numberUnits: Quantity) {
 
-  assert(existing.size == sorted.size)
+  val ordering: Ordering[K] = existing.ordering
 
-  def apply(uuid: UUID): BidOrder[T] = existing(uuid)
-
-  def + (kv: (UUID, BidOrder[T])): SortedBidOrders[T] = {
-    new SortedBidOrders(existing + kv, sorted + kv, numberUnits + kv._2.quantity)
+  /** Return a new `SortedBidOrders` instance containing an additional `BidOrder` instance.
+    *
+    * @param key
+    * @param order
+    * @return
+    * @note if this `SortedBidOrders` instance contains an existing collection of `BidOrder` instances sharing the same
+    *       key as the new `BidOrder` instance, the new `BidOrder` instance is added to the existing collection.
+    */
+  def + (key: K, order: BidOrder[T]): SortedBidOrders[K, T] = {
+    val current = existing.getOrElse(key, immutable.Queue.empty[BidOrder[T]])
+    new SortedBidOrders(existing + (key -> current.enqueue(order)), numberUnits + order.quantity)
   }
 
-  def - (uuid: UUID): SortedBidOrders[T] = existing.get(uuid) match {
-    case Some(order) =>
-      val remaining = Quantity(numberUnits.value - order.quantity.value)
-      new SortedBidOrders(existing - uuid, sorted - ((uuid, order)), remaining)
-    case None => this
+  /** Return a new `SortedBidOrders` instance containing an collection of `BidOrder` instances.
+    *
+    * @param key
+    * @param orders
+    * @return
+    * @note if this `SortedBidOrders` instance contains an existing collection of `BidOrder` instances sharing the same
+    *       key, then the new collection replaces the existing collection.
+    */
+  def + (key: K, orders: immutable.Queue[BidOrder[T]]): SortedBidOrders[K, T] = {
+    val currentOrders = existing.getOrElse(key, immutable.Queue.empty[BidOrder[T]])
+    val currentUnits = currentOrders.foldLeft(Quantity(0)){ case (total, order) => total + order.quantity }
+    val incomingUnits = orders.foldLeft(Quantity(0)){ case (total, order) => total + order.quantity }
+    val netChange: Quantity = currentUnits - incomingUnits
+    new SortedBidOrders(existing + (key -> orders), numberUnits + netChange)
   }
 
-  def contains(uuid: UUID): Boolean = existing.contains(uuid)
-
-  def head: (UUID, BidOrder[T]) = sorted.head
-
-  val headOption: Option[(UUID, BidOrder[T])] = sorted.headOption
-
-  val isEmpty: Boolean = existing.isEmpty && sorted.isEmpty
-
-  val nonEmpty: Boolean = existing.nonEmpty && sorted.nonEmpty
-
-  val ordering: Ordering[(UUID, BidOrder[T])] = sorted.ordering
-
-  val size: Int = existing.size
-
-  def mergeWith(other: SortedBidOrders[T]): SortedBidOrders[T] = {
-    ???
-  }
-
-  def splitAt(quantity: Quantity): (SortedBidOrders[T], SortedBidOrders[T]) = {
-
-    def split(order: BidOrder[T], quantity: Quantity): (BidOrder[T], BidOrder[T]) = {
-      val residual = order.quantity - quantity
-      (order.withQuantity(quantity), order.withQuantity(residual))
+  def - (key: K): SortedBidOrders[K, T] = {
+    existing.get(key) match {
+      case Some(orders) =>
+        val removedUnits = orders.foldLeft(Quantity(0))((total, order) => total + order.quantity)
+        new SortedBidOrders(existing - key, numberUnits - removedUnits)
+      case None => this
     }
+  }
+
+  def - (key: K, order: BidOrder[T]): SortedBidOrders[K, T] = {
+    existing.get(key) match {
+      case Some(orders) =>
+        val residualOrders = orders.diff(immutable.Queue(order))  // multi-set diff available on SeqLike collections!
+        if (residualOrders.isEmpty) {
+          new SortedBidOrders(existing - key, numberUnits - order.quantity)
+        } else {
+          new SortedBidOrders(existing + (key -> residualOrders), numberUnits - order.quantity)
+        }
+      case None => this
+    }
+  }
+
+  def contains(key: K): Boolean = existing.contains(key)
+
+  def foldLeft[B](z: B)(op: (B, (K, immutable.Queue[BidOrder[T]])) => B): B = {
+    existing.foldLeft(z)(op)
+  }
+
+  def getOrElse(key: K, default: => immutable.Queue[BidOrder[T]]): immutable.Queue[BidOrder[T]] = {
+    existing.getOrElse(key, default)
+  }
+
+  def headOption: Option[(K, BidOrder[T])] = {
+    existing.headOption.flatMap{ case (key, orders) => orders.headOption.map(order => (key, order)) }
+  }
+
+  def isEmpty: Boolean = existing.isEmpty
+
+  def mergeWith(other: SortedBidOrders[K, T]): SortedBidOrders[K, T] = {
+    other.foldLeft(this) { case (ob, (key, orders)) =>
+      val currentOrders = ob.getOrElse(key, immutable.Queue.empty[BidOrder[T]])
+      ob + (key, currentOrders.enqueue(orders))
+    }
+  }
+
+  def nonEmpty: Boolean = existing.nonEmpty
+
+  def splitAt(quantity: Quantity): (SortedBidOrders[K, T], SortedBidOrders[K, T]) = {
 
     @annotation.tailrec
-    def loop(in: SortedBidOrders[T], out: SortedBidOrders[T]): (SortedBidOrders[T], SortedBidOrders[T]) = {
-      val unMatched = quantity - in.numberUnits
-      val (uuid, bidOrder) = out.head
-      if (unMatched > bidOrder.quantity) {
-        loop(in + (uuid -> bidOrder), out - uuid)
-      } else if (unMatched < bidOrder.quantity) {
-        val (matched, residual) = split(bidOrder, unMatched)
-        (in + (uuid -> matched), out.updated(uuid, residual))
-      } else {
-        (in + (uuid -> bidOrder), out - uuid)
+    def loop(prefix: SortedBidOrders[K, T], suffix: SortedBidOrders[K, T]): (SortedBidOrders[K, T], SortedBidOrders[K, T]) = {
+      suffix.headOption match {
+        case Some((key, bidOrder)) =>
+          val remainingQuantity = quantity - prefix.numberUnits
+          if (remainingQuantity > bidOrder.quantity) {
+            loop(prefix + (key, bidOrder), suffix - (key, bidOrder))
+          } else if (remainingQuantity < bidOrder.quantity) {
+            (prefix + (key, bidOrder.withQuantity(remainingQuantity)), suffix - (key, bidOrder) + (key, bidOrder.withQuantity(bidOrder.quantity - remainingQuantity)))
+          } else {
+            (prefix + (key, bidOrder), suffix - (key, bidOrder))
+          }
+        case None =>
+          (prefix, SortedBidOrders.empty[K, T](ordering))
       }
     }
-    loop(SortedBidOrders.empty[T](sorted.ordering), this)
+    loop(SortedBidOrders.empty[K, T](ordering), this)
 
-  }
-
-  def updated(uuid: UUID, order: BidOrder[T]): SortedBidOrders[T] = {
-    val bidOrder = this(uuid)
-    val change = order.quantity - bidOrder.quantity
-    new SortedBidOrders(existing.updated(uuid, order), sorted - ((uuid, bidOrder)) + ((uuid, order)), numberUnits + change)
   }
 
 }
@@ -95,8 +128,8 @@ private[orderbooks] class SortedBidOrders[T <: Tradable] private(existing: Map[U
 
 object SortedBidOrders {
 
-  def empty[T <: Tradable](implicit ordering: Ordering[(UUID, BidOrder[T])]): SortedBidOrders[T] = {
-    new SortedBidOrders(Map.empty[UUID, BidOrder[T]], TreeSet.empty[(UUID, BidOrder[T])](ordering), Quantity(0))
+  def empty[K, T <: Tradable](implicit ordering: Ordering[K]): SortedBidOrders[K, T] = {
+    new SortedBidOrders(immutable.TreeMap.empty[K, immutable.Queue[BidOrder[T]]](ordering), Quantity(0))
   }
 
 }

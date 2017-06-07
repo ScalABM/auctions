@@ -2,65 +2,46 @@ package org.economicsl.auctions.multiunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.multiunit.orders
 import org.economicsl.auctions.multiunit.orders.LimitAskOrder
-import org.economicsl.auctions.{GoogleStock, Price, Quantity, multiunit}
+import org.economicsl.auctions.{GoogleStock, Price, Quantity}
 import org.scalatest.{FlatSpec, Matchers}
 
 
 class SortedAskOrdersSpec extends FlatSpec with Matchers {
 
-  "A SortedAskOrderBook" should "update an existing order" in {
+  "A SortedAskOrderBook" should "be able to add a new ask order" in {
 
     // Create a multi-unit limit ask order
     val issuer = UUID.randomUUID()
-    val google = new GoogleStock
+    val google = GoogleStock(tick = 1)
     val order = LimitAskOrder(issuer, Price(10), Quantity(100), google)
 
     // Create an empty order book and add the order
-    val empty = SortedAskOrders.empty[GoogleStock]
-    val nonEmpty = empty + (issuer -> order)
-    nonEmpty.head should be ((issuer, order))
+    val empty = SortedAskOrders.empty[(Price, UUID), GoogleStock]
+    empty.numberUnits should be(Quantity(0))
+    empty.contains((order.limit, order.issuer)) should be(false)
 
-    // Create a revised order and update the order book
-    val revised = order.withQuantity(Quantity(1))
-    val updated = nonEmpty.update(issuer, revised)
-
-    // Check that update is successful!
-    updated.head should be ((issuer, revised))
-    updated.size should be (1)
-    updated.numberUnits should be (revised.quantity)
+    val nonEmpty = empty + ((order.limit, order.issuer),  order)
+    nonEmpty.headOption should be (Some(((order.limit, order.issuer), order)))
+    nonEmpty.numberUnits should be(Quantity(100))
+    nonEmpty.contains((order.limit, order.issuer)) should be(true)
 
   }
 
-  "A SortedAskOrderBook" should "split itself into two pieces" in {
+  "A SortedAskOrderBook" should "be able to remove an existing ask order" in {
 
-    val google = new GoogleStock
+    // Create a multi-unit limit ask order
+    val issuer = UUID.randomUUID()
+    val google = GoogleStock(tick = 1)
+    val order = LimitAskOrder(issuer, Price(10), Quantity(100), google)
 
-    // Create some multi-unit limit ask orders
-    val issuer1 = UUID.randomUUID()
-    val order1 = orders.LimitAskOrder(issuer1, Price(10), Quantity(10), google)
-
-    val issuer2 = UUID.randomUUID()
-    val order2 = orders.LimitAskOrder(issuer2, Price(5), Quantity(15), google)
-
-    val issuer3 = UUID.randomUUID()
-    val order3 = orders.LimitAskOrder(issuer3, Price(15), Quantity(100), google)
-
-    // Create an empty order book and add the orders
-    val empty = SortedAskOrders.empty[GoogleStock]
-    val nonEmpty = empty + (issuer1 -> order1) + (issuer2 -> order2) + (issuer3 -> order3)
-
-    // Create a revised order and update the order book
-    val (matched, residual) = nonEmpty.splitAt(Quantity(57))
-
-    // Check that splitAt was successful
-    matched.numberUnits should be (Quantity(57))
-    matched.size should be(3)
-
-    residual.numberUnits should be (Quantity(125 - 57))
-    residual.size should be(1)
+    // Create an empty order book, add the order, and then remove it
+    val empty = SortedAskOrders.empty[(Price, UUID), GoogleStock]
+    val nonEmpty = empty + ((order.limit, order.issuer), order)
+    val withoutOrders = nonEmpty - ((order.limit, order.issuer), order)
+    withoutOrders.isEmpty should be(true)
 
   }
+
 
 }

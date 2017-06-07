@@ -15,87 +15,133 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
-import java.util.UUID
-
 import org.economicsl.auctions.multiunit.orders.AskOrder
 import org.economicsl.auctions.{Quantity, Tradable}
 
-import scala.collection.immutable.TreeSet
+import scala.collection.immutable
 
 
-private[orderbooks] class SortedAskOrders[T <: Tradable] private(existing: Map[UUID, AskOrder[T]],
-                                                                 sorted: TreeSet[(UUID, AskOrder[T])],
-                                                                 val numberUnits: Quantity) {
-  assert(existing.size == sorted.size)
+/**
+  *
+  * @param existing sorted mapping from keys to collections of orders sharing a particular key.
+  * @param numberUnits
+  * @tparam K
+  * @tparam T
+  */
+class SortedAskOrders[K, T <: Tradable] private(existing: immutable.TreeMap[K, immutable.Queue[AskOrder[T]]], val numberUnits: Quantity) {
 
-  def apply(uuid: UUID): AskOrder[T] = existing(uuid)
+  val ordering: Ordering[K] = existing.ordering
 
-  def + (kv: (UUID, AskOrder[T])): SortedAskOrders[T] = {
-    new SortedAskOrders(existing + kv, sorted + kv, numberUnits + kv._2.quantity)
+  /** Return a new `SortedAskOrders` instance containing an additional `AskOrder` instance.
+    *
+    * @param key
+    * @param order
+    * @return
+    * @note if this `SortedAskOrders` instance contains an existing collection of `AskOrder` instances sharing the same
+    *       key as the new `AskOrder` instance, the new `AskOrder` instance is added to the existing collection.
+    */
+  def + (key: K, order: AskOrder[T]): SortedAskOrders[K, T] = {
+    val current = existing.getOrElse(key, empty)
+    new SortedAskOrders(existing + (key -> current.enqueue(order)), numberUnits + order.quantity)
   }
 
-  def - (uuid: UUID): SortedAskOrders[T] = existing.get(uuid) match {
-    case Some(order) =>
-      val remaining = Quantity(numberUnits.value - order.quantity.value)
-      new SortedAskOrders(existing - uuid, sorted - ((uuid, order)), remaining)
-    case None => this
+  /** Return a new `SortedAskOrders` instance containing an collection of `AskOrder` instances.
+    *
+    * @param key
+    * @param orders
+    * @return
+    * @note if this `SortedAskOrders` instance contains an existing collection of `AskOrder` instances sharing the same
+    *       key, then the new collection replaces the existing collection.
+    */
+  def + (key: K, orders: immutable.Queue[AskOrder[T]]): SortedAskOrders[K, T] = {
+    val currentUnits = aggregate(existing.getOrElse(key, empty))
+    val incomingUnits = aggregate(orders)
+    val change = currentUnits - incomingUnits
+    new SortedAskOrders(existing + (key -> orders), numberUnits + change)
   }
 
-  def contains(uuid: UUID): Boolean = existing.contains(uuid)
-
-  def head: (UUID, AskOrder[T]) = sorted.head
-
-  val headOption: Option[(UUID, AskOrder[T])] = sorted.headOption
-
-  val isEmpty: Boolean = existing.isEmpty && sorted.isEmpty
-
-  val nonEmpty: Boolean = existing.nonEmpty && sorted.nonEmpty
-
-  val ordering: Ordering[(UUID, AskOrder[T])] = sorted.ordering
-
-  val size: Int = existing.size
-
-  def mergeWith(other: SortedAskOrders[T]): SortedAskOrders[T] = {
-    ???
-  }
-
-  def splitAt(quantity: Quantity): (SortedAskOrders[T], SortedAskOrders[T]) = {
-
-    def split(order: AskOrder[T], quantity: Quantity): (AskOrder[T], AskOrder[T]) = {
-      val residual = order.quantity - quantity
-      (order.withQuantity(quantity), order.withQuantity(residual))
+  def - (key: K): SortedAskOrders[K, T] = {
+    existing.get(key) match {
+      case Some(orders) =>
+        val removedUnits = orders.foldLeft(Quantity(0))((total, order) => total + order.quantity)
+        new SortedAskOrders(existing - key, numberUnits - removedUnits)
+      case None => this
     }
+  }
+
+  def - (key: K, order: AskOrder[T]): SortedAskOrders[K, T] = {
+    existing.get(key) match {
+      case Some(orders) =>
+        val residualOrders = orders.diff(immutable.Queue(order))  // multi-set diff!
+        if (residualOrders.isEmpty) {
+          new SortedAskOrders(existing - key, numberUnits - order.quantity)
+        } else {
+          new SortedAskOrders(existing + (key -> residualOrders), numberUnits - order.quantity)
+        }
+      case None => this
+    }
+  }
+
+  def contains(key: K): Boolean = existing.contains(key)
+
+  def foldLeft[B](z: B)(op: (B, (K, immutable.Queue[AskOrder[T]])) => B): B = {
+    existing.foldLeft(z)(op)
+  }
+
+  def getOrElse(key: K, default: => immutable.Queue[AskOrder[T]]): immutable.Queue[AskOrder[T]] = {
+    existing.getOrElse(key, default)
+  }
+
+  def headOption: Option[(K, AskOrder[T])] = {
+    existing.headOption.flatMap{ case (key, orders) => orders.headOption.map(order => (key, order)) }
+  }
+
+  def isEmpty: Boolean = existing.isEmpty
+
+  def mergeWith(other: SortedAskOrders[K, T]): SortedAskOrders[K, T] = {
+    other.foldLeft(this) { case (ob, (key, orders)) =>
+      val currentOrders = ob.getOrElse(key, empty)
+      ob + (key, currentOrders.enqueue(orders))
+    }
+  }
+
+  def nonEmpty: Boolean = existing.nonEmpty
+
+  def splitAt(quantity: Quantity): (SortedAskOrders[K, T], SortedAskOrders[K, T]) = {
 
     @annotation.tailrec
-    def loop(in: SortedAskOrders[T], out: SortedAskOrders[T]): (SortedAskOrders[T], SortedAskOrders[T]) = {
-      val unMatched = quantity - in.numberUnits
-      val (uuid, askOrder) = out.head
-      if (unMatched > askOrder.quantity) {
-        loop(in + (uuid -> askOrder), out - uuid)
-      } else if (unMatched < askOrder.quantity) {
-        val (matched, residual) = split(askOrder, unMatched)
-        (in + (uuid -> matched), out.update(uuid, residual))
-      } else {
-        (in + (uuid -> askOrder), out - uuid)
+    def loop(prefix: SortedAskOrders[K, T], suffix: SortedAskOrders[K, T]): (SortedAskOrders[K, T], SortedAskOrders[K, T]) = {
+      suffix.headOption match {
+        case Some((key, askOrder)) =>
+          val remainingQuantity = quantity - prefix.numberUnits
+          if (remainingQuantity > askOrder.quantity) {
+            loop(prefix + (key, askOrder), suffix - (key, askOrder))
+          } else if (remainingQuantity < askOrder.quantity) {
+            (prefix + (key, askOrder.withQuantity(remainingQuantity)), suffix - (key, askOrder) + (key, askOrder.withQuantity(askOrder.quantity - remainingQuantity)))
+          } else {
+            (prefix + (key, askOrder), suffix - (key, askOrder))
+          }
+        case None =>
+          (prefix, SortedAskOrders.empty(ordering))
       }
     }
-    loop(SortedAskOrders.empty[T](sorted.ordering), this)
+    loop(SortedAskOrders.empty[K, T](ordering), this)
 
   }
 
-  def update(uuid: UUID, order: AskOrder[T]): SortedAskOrders[T] = {
-    val askOrder = this(uuid)
-    val change = order.quantity - askOrder.quantity
-    new SortedAskOrders(existing.updated(uuid, order), sorted - ((uuid, askOrder)) + ((uuid, order)), numberUnits + change)
+  private[this] def aggregate(orders: immutable.Queue[AskOrder[T]]): Quantity = {
+    orders.aggregate(Quantity(0))((total, order) => total + order.quantity, _ + _ )
   }
+
+  private[this] def empty: immutable.Queue[AskOrder[T]] = immutable.Queue.empty[AskOrder[T]]
 
 }
 
 
 object SortedAskOrders {
 
-  def empty[T <: Tradable](implicit ordering: Ordering[(UUID, AskOrder[T])]): SortedAskOrders[T] = {
-    new SortedAskOrders(Map.empty[UUID, AskOrder[T]], TreeSet.empty[(UUID, AskOrder[T])](ordering), Quantity(0))
+  def empty[K, T <: Tradable](implicit ordering: Ordering[K]): SortedAskOrders[K, T] = {
+    new SortedAskOrders(immutable.TreeMap.empty[K, immutable.Queue[AskOrder[T]]](ordering), Quantity(0))
   }
 
 }

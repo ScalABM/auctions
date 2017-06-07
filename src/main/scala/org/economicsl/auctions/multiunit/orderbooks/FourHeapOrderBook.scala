@@ -15,100 +15,76 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
-import java.util.UUID
-
 import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.multiunit.BidOrder
 import org.economicsl.auctions.multiunit.orders.{AskOrder, BidOrder}
 
 
-class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], unMatchedOrders: UnMatchedOrders[T]) {
+class FourHeapOrderBook[K, T <: Tradable] private(matched: MatchedOrders[K, T], unMatched: UnMatchedOrders[K, T]) {
 
-  val isEmpty: Boolean = matchedOrders.isEmpty && unMatchedOrders.isEmpty
+  require(matched.bidOrders.headOption.forall{ case (_, b1) => unMatched.bidOrders.headOption.forall{ case (_, b2) => b1.limit >= b2.limit } })
 
-  val nonEmpty: Boolean = matchedOrders.nonEmpty || unMatchedOrders.nonEmpty
+  require(unMatched.askOrders.headOption.forall{ case (_, a1) => matched.askOrders.headOption.forall{ case (_, a2) => a1.limit >= a2.limit } })
 
-  /** Remove an order from the `OrderBook`.
-    *
-    * @param uuid the universal unique identifier corresponding to the order that should be removed.
-    * @return A new `OrderBook` with the order corresponding to the `uuid` removed.
-    * @note Because multi-unit orders are divisible, the order with the `uuid` might have been split in which case it
-    *       will exist in both the matched and unmatched order sets.
-    */
-  def - (uuid: UUID): FourHeapOrderBook[T] = {
-    if (matchedOrders.contains(uuid) && unMatchedOrders.contains(uuid)) {
-      val (residualMatched, additionalUnMatched) = matchedOrders - uuid
-      val residualUnMatched = unMatchedOrders - uuid
-      new FourHeapOrderBook(residualMatched, residualUnMatched.mergeWith(additionalUnMatched))
-    } else if (matchedOrders.contains(uuid)) {
-      val (residualMatched, additionalUnMatched) = matchedOrders - uuid
-      new FourHeapOrderBook(residualMatched, unMatchedOrders.mergeWith(additionalUnMatched))
-    } else {
-      val residualUnMatched = unMatchedOrders - uuid
-      new FourHeapOrderBook(matchedOrders, unMatchedOrders.mergeWith(residualUnMatched))
-    }
-  }
-
+  /*
   /** Add a new `AskOrder` to the `OrderBook`.
     *
-    * @param uuid
+    * @param key
     * @param order
     * @return
     * @note adding a new `AskOrder` is non-trivial and there are several cases to consider.
     */
-  def + (uuid: UUID, order: AskOrder[T]): FourHeapOrderBook[T] = {
-    (unMatchedOrders.bidOrders.headOption, matchedOrders.askOrders.headOption) match {
+  def + (key: K, order: AskOrder[T]): FourHeapOrderBook[K, T] = {
+    (unMatched.bidOrders.headOption, matched.askOrders.headOption) match {
       case (Some((out, bidOrder)), Some((in, askOrder))) =>
         if (order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit) {
-          val residualUnMatched = unMatchedOrders - out
-          val (updatedMatched, optionalUnMatched) = matchedOrders + (uuid -> order, out -> bidOrder)
-          optionalUnMatched match {
-            case Some(additionalUnMatched) =>
-              new FourHeapOrderBook(updatedMatched, residualUnMatched.mergeWith(additionalUnMatched))
-            case None =>
-              new FourHeapOrderBook(updatedMatched, residualUnMatched)
-          }
+          val remainingUnMatched = unMatched - (out, bidOrder)
+          val (updatedMatched, additionalUnMatched) = matched + (key -> order, out -> bidOrder)
+          val default = new FourHeapOrderBook(updatedMatched, remainingUnMatched)
+          additionalUnMatched.fold(default)(orders => new FourHeapOrderBook(updatedMatched, remainingUnMatched.mergeWith(orders)))
         } else if (order.limit <= askOrder.limit) {
-          val (updatedMatched, additionalUnMatched) = matchedOrders.swap(uuid, order, in)
-          new FourHeapOrderBook(updatedMatched, unMatchedOrders.mergeWith(additionalUnMatched))
+          val (updatedMatched, additionalUnMatched) = matched - (in, askOrder)  // what happens if queue is empty?
+          updatedMatched + (key -> order, ???) additionalUnMatched.bidOrders
+          new FourHeapOrderBook(updatedMatched, unMatched.mergeWith(additionalUnMatched))
+          ???
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+          new FourHeapOrderBook(matched, unMatched + (key, order))
         }
       case (Some((out, bidOrder)), None) =>
         if (order.limit <= bidOrder.limit) {
-          val (updatedMatched, optionalUnMatched) = matchedOrders + (uuid -> order, out -> bidOrder)
+          val (updatedMatched, optionalUnMatched) = matched + (key -> order, out -> bidOrder)
           optionalUnMatched match {
             case Some(additionalUnMatched) =>
-              new FourHeapOrderBook(updatedMatched, unMatchedOrders.mergeWith(additionalUnMatched))
+              new FourHeapOrderBook(updatedMatched, unMatched.mergeWith(additionalUnMatched))
             case None =>
-              new FourHeapOrderBook(updatedMatched, unMatchedOrders)
+              new FourHeapOrderBook(updatedMatched, unMatched)
           }
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+          new FourHeapOrderBook(matched, unMatched + (key, order))
         }
       case (None, Some((in ,askOrder))) =>
         if (order.limit <= askOrder.limit) {
-          val (updatedMatched, additionalUnMatched) = matchedOrders.swap(uuid, order, in)
-          new FourHeapOrderBook(updatedMatched, unMatchedOrders.mergeWith(additionalUnMatched))
+          //val (updatedMatched, additionalUnMatched) = matched.swap(key -> order, in)
+          //new FourHeapOrderBook(updatedMatched, unMatched.mergeWith(additionalUnMatched))
+          ???
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+          new FourHeapOrderBook(matched, unMatched + (key, order))
         }
-      case (None, None) => new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+      case (None, None) => new FourHeapOrderBook(matched, unMatched + (key, order))
     }
   }
 
   /** Add a new `BidOrder` to the `OrderBook`.
     *
-    * @param uuid
+    * @param key
     * @param order
     * @return
     */
-  def + (uuid: UUID, order: BidOrder[T]): FourHeapOrderBook[T] = {
-    (matchedOrders.bidOrders.headOption, unMatchedOrders.askOrders.headOption) match {
+  def + (key: K, order: BidOrder[T]): FourHeapOrderBook[K, T] = {
+    (matched.bidOrders.headOption, unMatched.askOrders.headOption) match {
       case (Some((in, bidOrder)), Some((out, askOrder))) =>
         if (order.limit >= askOrder.limit && bidOrder.limit >= askOrder.limit) {
-          val residualUnMatched = unMatchedOrders - out
-          val (updatedMatched, optionalUnMatched) = matchedOrders + (out -> askOrder, uuid -> order)
+          val residualUnMatched = unMatched - out
+          val (updatedMatched, optionalUnMatched) = matched + (out -> askOrder, key -> order)
           optionalUnMatched match {
             case Some(additionalUnMatched) =>
               new FourHeapOrderBook(updatedMatched, residualUnMatched.mergeWith(additionalUnMatched))
@@ -116,83 +92,88 @@ class FourHeapOrderBook[T <: Tradable] private(matchedOrders: MatchedOrders[T], 
               new FourHeapOrderBook(updatedMatched, residualUnMatched)
           }
         } else if (order.limit >= bidOrder.limit) {
-          val (updatedMatched, additionalUnMatched) = matchedOrders.swap(uuid, order, in)
-          new FourHeapOrderBook(updatedMatched, unMatchedOrders.mergeWith(additionalUnMatched))
+          //val (updatedMatched, additionalUnMatched) = matched.swap(key -> order, in)
+          //new FourHeapOrderBook(updatedMatched, unMatched.mergeWith(additionalUnMatched))
+          ???
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+          new FourHeapOrderBook(matched, unMatched + (key, order))
         }
       case (Some((in ,bidOrder)), None) =>
         if (order.limit >= bidOrder.limit) {
-          val (updatedMatched, additionalUnMatched) = matchedOrders.swap(uuid, order, in)
-          new FourHeapOrderBook(updatedMatched, unMatchedOrders.mergeWith(additionalUnMatched))
+          //val (updatedMatched, additionalUnMatched) = matched.swap(key -> order, in)
+          //new FourHeapOrderBook(updatedMatched, unMatched.mergeWith(additionalUnMatched))
+          ???
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+          new FourHeapOrderBook(matched, unMatched + (key, order))
         }
       case (None, Some((out, askOrder))) =>
         if (order.limit >= askOrder.limit) {
-          val (updatedMatched, optionalUnMatched) = matchedOrders + (out -> askOrder, uuid -> order)
+          val (updatedMatched, optionalUnMatched) = matched + (out -> askOrder, key -> order)
           optionalUnMatched match {
             case Some(additionalUnMatched) =>
-              new FourHeapOrderBook(updatedMatched, unMatchedOrders.mergeWith(additionalUnMatched))
+              new FourHeapOrderBook(updatedMatched, unMatched.mergeWith(additionalUnMatched))
             case None =>
-              new FourHeapOrderBook(updatedMatched, unMatchedOrders)
+              new FourHeapOrderBook(updatedMatched, unMatched)
           }
         } else {
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+          new FourHeapOrderBook(matched, unMatched + (key, order))
         }
-      case (None, None) => new FourHeapOrderBook(matchedOrders, unMatchedOrders + (uuid, order))
+      case (None, None) => new FourHeapOrderBook(matched, unMatched + (key, order))
     }
   }
 
-  def contains(uuid: UUID): Boolean = matchedOrders.contains(uuid) || unMatchedOrders.contains(uuid)
+  def contains(key: K): Boolean = matched.contains(key) || unMatched.contains(key)
 
-  def takeWhileMatched: (Stream[(AskOrder[T], BidOrder[T])], FourHeapOrderBook[T]) = {
-    (matchedOrders.zipped, withEmptyMatchedOrders)
+  def isEmpty: Boolean = matched.isEmpty && unMatched.isEmpty
+
+  def nonEmpty: Boolean = matched.nonEmpty || unMatched.nonEmpty
+
+  /*def - (key: K): FourHeapOrderBook[K, T] = {
+    if (matched.contains(key) && unMatched.contains(key)) {
+      val (residualMatched, additionalUnMatched) = matched - key
+      val residualUnMatched = unMatched - key
+      new FourHeapOrderBook(residualMatched, residualUnMatched.mergeWith(additionalUnMatched))
+    } else if (matched.contains(key)) {
+      val (residualMatched, additionalUnMatched) = matched - key
+      new FourHeapOrderBook(residualMatched, unMatched.mergeWith(additionalUnMatched))
+    } else {
+      val residualUnMatched = unMatched - key
+      new FourHeapOrderBook(matched, unMatched.mergeWith(residualUnMatched))
+    }
   }
 
   /** Update an existing `AskOrder`.
     *
-    * @note Because multi-unit orders are divisible, an order with the `uuid` might have been split in which case it
-    *       will exist in both the matched and unmatched order sets. Thus if
+    * @note If an `AskOrder[T]` associated with the `key` already exists in the `OrderBook`, then the existing order
+    *       (or orders in the case that the previously submitted order was split) are removed from this `OrderBook`
+    *       before the `order` is added to this `OrderBook`.
     */
-  def update(uuid: UUID, order: AskOrder[T]): FourHeapOrderBook[T] = {
-    if (contains(uuid)) {
-      val residualOrderBook = this - uuid
-      residualOrderBook + (uuid, order)
-    } else {
-      this + (uuid, order)
-    }
+  def updated(key: K, order: AskOrder[T]): FourHeapOrderBook[K, T] = {
+    if (contains(key)) this - key + (key -> order) else this + (key -> order)
   }
 
   /** Update an existing `BidOrder`.
     *
-    * @note Because multi-unit orders are divisible, an order with the `uuid` might have been split in which case it
-    *       will exist in both the matched and unmatched order sets. Thus if
+    * @note If an `AskOrder[T]` associated with the `key` already exists in the `OrderBook`, then the existing order
+    *       (or orders in the case that the previously submitted order was split) are removed from this `OrderBook`
+    *       before the `order` is added to this `OrderBook`.
     */
-  def update(uuid: UUID, order: BidOrder[T]): FourHeapOrderBook[T] = {
-    if (contains(uuid)) {
-      val residualOrderBook = this - uuid
-      residualOrderBook + (uuid, order)
-    } else {
-      this + (uuid, order)
-    }
-  }
+  def updated(key: K, order: BidOrder[T]): FourHeapOrderBook[K, T] = {
+    if (contains(key)) this - key + (key -> order) else this + (key -> order)
+  }*/
 
-  private[this] def withEmptyMatchedOrders: FourHeapOrderBook[T] = {
-    val (askOrdering, bidOrdering) = (matchedOrders.askOrdering, matchedOrders.bidOrdering)
-    new FourHeapOrderBook[T](MatchedOrders.empty(askOrdering, bidOrdering), unMatchedOrders)
-  }
-
+  */
 }
 
 
 object FourHeapOrderBook {
 
-  def empty[T <: Tradable](implicit askOrdering: Ordering[(UUID, AskOrder[T])], bidOrdering: Ordering[(UUID, BidOrder[T])]): FourHeapOrderBook[T] = {
-    val matchedOrders = MatchedOrders.empty(askOrdering.reverse, bidOrdering.reverse)
-    val unMatchedOrders = UnMatchedOrders.empty(askOrdering, bidOrdering)
+  def empty[K, T <: Tradable](implicit askOrdering: Ordering[K], bidOrdering: Ordering[K]): FourHeapOrderBook[K, T] = {
+    val matchedOrders = MatchedOrders.empty[K, T](askOrdering.reverse, bidOrdering)
+    val unMatchedOrders = UnMatchedOrders.empty[K, T](askOrdering, bidOrdering.reverse)
     new FourHeapOrderBook(matchedOrders, unMatchedOrders)
   }
+
 
 }
 
