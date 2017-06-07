@@ -15,9 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orderbooks
 
-import org.economicsl.auctions.multiunit.orders.{AskOrder, Order}
+import org.economicsl.auctions.multiunit.orders.Order
 import org.economicsl.auctions.{Quantity, Tradable}
 
+import scala.collection.generic.CanBuildFrom
 import scala.collection.{GenIterable, immutable}
 
 
@@ -28,7 +29,9 @@ import scala.collection.{GenIterable, immutable}
   * @tparam K
   * @tparam O
   */
-class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap[K, immutable.Queue[O]], val numberUnits: Quantity) {
+class OrderBook[K, O <: Order[_ <:Tradable], CC <: GenIterable[O]] private(existing: immutable.TreeMap[K, CC],
+                                                                           val numberUnits: Quantity)
+                                                                          (implicit cbf: CanBuildFrom[CC, O, CC]) {
 
   val ordering: Ordering[K] = existing.ordering
 
@@ -40,9 +43,11 @@ class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap
     * @note if this `OrderBook` instance contains an existing collection of `AskOrder` instances sharing the same
     *       key as the new `AskOrder` instance, the new `AskOrder` instance is added to the existing collection.
     */
-  def + (key: K, order: O): OrderBook[K, O] = {
+  def + (key: K, order: O): OrderBook[K, O, CC] = {
     val current = existing.getOrElse(key, empty)
-    new OrderBook(existing + (key -> current.enqueue(order)), numberUnits + order.quantity)
+    val builder = cbf(current)
+    builder += order
+    new OrderBook(existing + (key -> builder.result()), numberUnits + order.quantity)
   }
 
   /** Return a new `OrderBook` instance containing an collection of `AskOrder` instances.
@@ -53,14 +58,14 @@ class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap
     * @note if this `OrderBook` instance contains an existing collection of `AskOrder` instances sharing the same
     *       key, then the new collection replaces the existing collection.
     */
-  def + (key: K, orders: immutable.Queue[O]): OrderBook[K, O] = {
+  def + (key: K, orders: CC): OrderBook[K, O, CC] = {
     val currentUnits = aggregate(existing.getOrElse(key, empty))
     val incomingUnits = aggregate(orders)
     val change = currentUnits - incomingUnits
     new OrderBook(existing + (key -> orders), numberUnits + change)
   }
 
-  def - (key: K): OrderBook[K, O] = {
+  def - (key: K): OrderBook[K, O, CC] = {
     existing.get(key) match {
       case Some(orders) =>
         val removedUnits = orders.foldLeft(Quantity(0))((total, order) => total + order.quantity)
@@ -69,10 +74,12 @@ class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap
     }
   }
 
-  def - (key: K, order: O): OrderBook[K, O] = {
+  def - (key: K, order: O): OrderBook[K, O, CC] = {
     existing.get(key) match {
       case Some(orders) =>
-        val residualOrders = orders.diff(immutable.Queue(order))  // multi-set diff!
+        val builder = cbf()
+        orders.foreach(o => if (o != order) builder += o)
+        val residualOrders = builder.result()
         if (residualOrders.isEmpty) {
           new OrderBook(existing - key, numberUnits - order.quantity)
         } else {
@@ -84,11 +91,11 @@ class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap
 
   def contains(key: K): Boolean = existing.contains(key)
 
-  def foldLeft[B](z: B)(op: (B, (K, immutable.Queue[O])) => B): B = {
+  def foldLeft[B](z: B)(op: (B, (K, CC)) => B): B = {
     existing.foldLeft(z)(op)
   }
 
-  def getOrElse(key: K, default: => immutable.Queue[O]): immutable.Queue[O] = {
+  def getOrElse(key: K, default: => CC): CC = {
     existing.getOrElse(key, default)
   }
 
@@ -98,10 +105,12 @@ class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap
 
   def isEmpty: Boolean = existing.isEmpty
 
-  def mergeWith(other: OrderBook[K, O]): OrderBook[K, O] = {
+  def mergeWith(other: OrderBook[K, O, CC]): OrderBook[K, O, CC] = {
     other.foldLeft(this) { case (ob, (key, orders)) =>
-      val currentOrders = ob.getOrElse(key, empty)
-      ob + (key, currentOrders.enqueue(orders))
+      val current = ob.getOrElse(key, empty)
+      val builder = cbf(current)
+      orders.foreach(order => builder += order)
+      ob + (key, builder.result())
     }
   }
 
@@ -112,16 +121,18 @@ class OrderBook[K, O <: Order[_ <:Tradable]] private(existing: immutable.TreeMap
     orders.aggregate(Quantity(0))((total, order) => total + order.quantity, _ + _ )
   }
 
-  private[this] def empty: immutable.Queue[O] = immutable.Queue.empty[O]
+  private[this] def empty: CC = {
+    cbf().result()
+  }
 
 }
 
 
 object OrderBook {
 
-  def empty[K, O <: Order[_ <: Tradable]](implicit ordering: Ordering[K]): OrderBook[K, O] = {
-    new OrderBook(immutable.TreeMap.empty[K, immutable.Queue[O]](ordering), Quantity(0))
+  def empty[K, O <: Order[_ <: Tradable], CC <: GenIterable[O]](implicit ordering: Ordering[K], cbf: CanBuildFrom[CC, O, CC]): OrderBook[K, O, CC] = {
+    val initial = immutable.TreeMap.empty(ordering)
+    new OrderBook[K, O, CC](initial, Quantity(0))(cbf)
   }
 
 }
-
