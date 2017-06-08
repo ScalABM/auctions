@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import play.api.libs.json.{Json, Writes}
+
 
 /** Value class representing prices.
   *
@@ -39,6 +41,8 @@ object Price {
 
   /** Default ordering for `Price` instances is low to high based on the underlying value. */
   implicit val ordering: Ordering[Price] = PriceOrdering
+
+  implicit val writes: Writes[Price] = Json.writes[Price]
 
   implicit def mkOrderingOps(lhs: Price): PriceOrdering.Ops = PriceOrdering.mkOrderingOps(lhs)
 

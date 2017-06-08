@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import play.api.libs.json.{Json, Writes}
+
 
 /** Value class representing quantities.
   *
@@ -40,6 +42,8 @@ case class Quantity(value: Long) extends AnyVal {
   * @since 0.1.0
   */
 object Quantity {
+
+  implicit val writes: Writes[Quantity] = Json.writes[Quantity]
 
   implicit val ordering: Ordering[Quantity] = QuantityOrdering
 

@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import play.api.libs.json.{JsValue, Json, Writes}
+
 
 /** Trait used to indicate that an object can be traded via an auction.
   *
@@ -25,5 +27,16 @@ trait Tradable extends Serializable {
 
   /** Minimum tick size. */
   def tick: Currency
+
+}
+
+
+object Tradable {
+
+  implicit val writes: Writes[Tradable] = new Writes[Tradable] {
+    def writes(o: Tradable): JsValue = Json.obj(
+      "tick" -> o.tick
+    )
+  }
 
 }

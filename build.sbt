@@ -7,7 +7,8 @@ lazy val commonSettings = Seq(
   organizationName := "EconomicSL",
   organizationHomepage := Some(url("https://economicsl.github.io/")),
   libraryDependencies ++= Seq(
-    "org.scalactic" %% "scalactic" % "3.0.1"
+    "org.scalactic" %% "scalactic" % "3.0.1",
+    "com.typesafe.play" %% "play-json" % "2.6.0-RC2"
   ),
   resolvers ++= Seq(
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",

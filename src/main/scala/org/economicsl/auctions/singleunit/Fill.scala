@@ -19,6 +19,7 @@ import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.{Contract, Price, Tradable}
+import play.api.libs.json.{Json, Writes}
 
 
 /** Class representing a `Fill`.
@@ -37,5 +38,12 @@ case class Fill[T <: Tradable](askOrder: AskOrder[T], bidOrder: BidOrder[T], pri
 
   require(askOrder.limit <= price, s"Fill price of $price, is not greater than seller's limit price of ${askOrder.limit}.")
   require(price <= bidOrder.limit,  s"Fill price of $price, is not less than buyer's limit price of ${bidOrder.limit}.")
+
+}
+
+
+object Fill {
+
+  implicit def writes[T <: Tradable]: Writes[Fill[T]] = Json.writes[Fill[T]]
 
 }
