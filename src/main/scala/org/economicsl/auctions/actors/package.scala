@@ -21,4 +21,9 @@ package org.economicsl.auctions
   * @author davidrpugh
   * @since 0.2.0
   */
-package object actors
+package object actors {
+
+  /** Message sent from an auction actor to itself in order to initialize a clear. */
+  case object ClearRequest
+
+}
