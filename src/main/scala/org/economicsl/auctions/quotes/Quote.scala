@@ -1,0 +1,67 @@
+/*
+Copyright (c) 2017 KAPSARC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package org.economicsl.auctions.quotes
+
+import org.economicsl.auctions.Price
+
+
+/** Base trait for all quote implementations.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+sealed trait Quote
+
+
+/** Base trait for all price quote implementations.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+trait PriceQuote extends Quote {
+
+  def quote: Price
+
+}
+
+
+/** Class implementing an ask price quote.
+  *
+  * @param quote
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+case class AskPriceQuote(quote: Price) extends PriceQuote
+
+
+/** Class implementing a bid price quote.
+  *
+  * @param quote
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+case class BidPriceQuote(quote: Price) extends PriceQuote
+
+
+/** Class implementing a spread quote.
+  *
+  * @param quote
+  * @author davidrpugh
+  * @since 0.1.0
+  * @todo a spread is the difference between two prices and as such the unit is not really `Price` but rather should
+  *       be `Currency`.
+  */
+case class SpreadQuote(quote: Price) extends PriceQuote

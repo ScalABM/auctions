@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,13 @@ package org.economicsl.auctions
 import scala.collection.immutable
 
 
-/** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price. */
+/** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
-  this: Order[T] =>
+  this: Contract with OrderLike[T] =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
     *
@@ -33,22 +37,27 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
 
+  require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
+
 }
 
 
 /** Companion object for the `SinglePricePoint` trait.
   *
   * Defines a basic ordering for anything that mixes in the `SinglePricePoint` trait.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
   */
 object SinglePricePoint {
 
-  /** All `Order` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
+  /** All `Contract with OrderLike` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
     *
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return and `Ordering` defined over `Order with SinglePricePoint` instances.
+    * @return `Ordering` defined over `Order[T] with SinglePricePoint[T]` instances.
     */
-  def ordering[O <: Order[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer))
+  def ordering[O <: Contract with OrderLike[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
+    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
   }
 
 }

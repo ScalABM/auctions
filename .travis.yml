@@ -1,0 +1,46 @@
+dist: trusty
+
+sudo: false  # builds will run on Docker infrastructure!
+
+language: scala
+
+scala:
+  - 2.12.1
+  
+jdk:
+  - oraclejdk8
+  - openjdk8
+  
+branches:
+  only:
+    - develop
+    - master
+    - /(release)-.*$/
+    
+before_install:
+  - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in secring.gpg.enc -out local.secring.gpg -d
+  - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in pubring.gpg.enc -out local.pubring.gpg -d
+  - openssl aes-256-cbc -pass pass:$ENCRYPTION_PASSWORD -in credentials.sbt.enc -out local.credentials.sbt -d
+    
+script:
+  - sbt ++$TRAVIS_SCALA_VERSION clean compile
+  - sbt ++$TRAVIS_SCALA_VERSION coverage test functional:test
+
+after_success:
+  - sbt ++$TRAVIS_SCALA_VERSION coverageReport codacyCoverage  # uses decrypted CODACY_PROJECT_TOKEN
+  - scripts/publish.sh
+  
+env:
+  global:
+    - secure: "V7vhWyyrZMQOf1ANHKHgbjUK6XlztR/fG5o6MxW/MUmdEuR05HaswS10IXs+GEXkduqRXTl4JNPMG2rnc5RAjZmLOxMsvPvhzvSFM9lr9SAHHNRQpthWtsqTc2XGGzEk61ARGHpaEbPH+N+XYB0mdu1x39ZE9TWUj5+F5wxoBH2ZGfFRDzppeIvFT2EmhfS51b9X5on2fM0Dw1uB1PzK1OR9XL42wFXeOtf125s7Sw6dAIDWQ4dyB7XYpflZxK8H3hvsripNQ4X6z503Od7NlkWF1wkfpdk/B6unJFiu3YlpI7XArYigL89OXNRA4gtiUQeayYmEHzVPfN3bLkRv2gm7+kwPiMlHXRvQ/Cz5wCzS0CF88WlSrQCGabcsRtC4YLXEfh+MORji/3aa7o1IYLjHgfe7N8uxjBCv0wtUVcnbk69HgPNqm6RSPnil9eH92FVONJfAowo8AvLwLU2A+iGYyl8fmRrQGz/OLCrvpJpsJzQzwE67K1VI+pTovpL2yjL+imuQmmCje3Wq9drxwcYHisTln57mpImtw8rgBg/bHxczuvH8XEwzqOGIJi3jP4mtX1PEqtpek5T0khcm8O2GPlZtT1RNGV+NMptFFTctier5I5ww20FazoI1P9PjFtike3MiiBCFMBJYlIUoweuTLMi5agohYOsU9Ju/Z3Q="
+    - secure: "pGgwZk1yM8WnV6b0p5kK0PFz2uVcOr/KfBkfeJQGtV+Xfs0ZGEoliPTec/m9hVcuxzUeKYCaunPVFgYr8+Si0HosowE+kPdcbpvaWZlZIDZIJa08CPLtYlbdDhHQrToc82louQ/E/WWxqCYhYFsyaL7MPtqytj7s9xsXrx+PR8fTKuhYakCB7QkkkZvx+Vr8di0LCHJP98Mp2nMewtZ2D5tw8310Es8gmTMEnnxCnS0lG5gsbjroUkNnRi5LDacYtnkWHOL+Hk1WCTPOlYauMueF4ECk2Abl8EkiR8n1qYylFhnMcEYm3D0DMxNHh0LACsBmOg9zzmwTz+QSlY7kRnOc9Wf1gLMiF+h+BeAQwdhZdK9xFOLoJRGxH10jSiGPjZ8ynDTUA/3PbwPQZ27YOuBXvWJ+HpyZs4a/oaUENCJ6V5zJxQgB5efW+T4ysZcnD5oCheLiPCeM5cl8aQb0+IG54sCiMvZoR+2BK/dvuI2NhED1tRMlEbTFjgU7rCKak1LeQaiTt1zCeL8ezf3pkbO7GUXTsYBuugaFRbUS4P6N9RWl+5WdOO4fnYu1yRNTbR64b8NCFjF4wGH+/6/ZsHlo285SqmPBka9Miu/Zg3BlSQasmENChxSgfbiz9v/ZjJoY7szFjRlnUvy/np1bwsLD4qtu3U0Zewmgnwg3MLk="
+
+before_cache:
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.ivy2 -name "ivydata-*.properties" -delete
+  - find $HOME/.sbt -name "*.lock" -delete
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot/

@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,9 +18,13 @@ package org.economicsl.auctions
 import scala.collection.GenIterable
 
 
-/** Mixin trait providing a schedule of price-quantity pairs for an order. */
+/** Mixin trait providing a schedule of price-quantity pairs for an order.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait PriceQuantitySchedule[+T <: Tradable] {
-  this: Order[T] =>
+  this: Contract with OrderLike[T] =>
 
   type PricePoint = (Price, Quantity)
 
