@@ -51,7 +51,7 @@ class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGener
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {
 
     val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(Some(AskPriceQuote(bids.max.limit)))
+    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
 
   }
 

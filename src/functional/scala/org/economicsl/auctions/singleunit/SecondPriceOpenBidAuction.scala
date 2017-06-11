@@ -53,7 +53,7 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
   "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process ask price quote requests" in {
 
     val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(Some(AskPriceQuote(bids.max.limit)))
+    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
 
   }
 
