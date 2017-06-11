@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.Price
+import org.economicsl.auctions.{Currency, Price}
+import play.api.libs.json.{Json, Writes}
 
 
 /** Base trait for all quote implementations.
@@ -23,7 +24,11 @@ import org.economicsl.auctions.Price
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Quote
+sealed trait Quote[T] {
+
+  def quote: Option[T]
+
+}
 
 
 /** Base trait for all price quote implementations.
@@ -31,7 +36,7 @@ sealed trait Quote
   * @author davidrpugh
   * @since 0.1.0
   */
-trait PriceQuote extends Quote {
+trait PriceQuote extends Quote[Price] {
 
   def quote: Option[Price]
 
@@ -47,6 +52,12 @@ trait PriceQuote extends Quote {
 case class AskPriceQuote(quote: Option[Price]) extends PriceQuote
 
 
+object AskPriceQuote {
+
+  implicit val writes: Writes[AskPriceQuote] = Json.writes[AskPriceQuote]
+
+}
+
 /** Class implementing a bid price quote.
   *
   * @param quote
@@ -54,6 +65,13 @@ case class AskPriceQuote(quote: Option[Price]) extends PriceQuote
   * @since 0.1.0
   */
 case class BidPriceQuote(quote: Option[Price]) extends PriceQuote
+
+
+object BidPriceQuote {
+
+  implicit val writes: Writes[BidPriceQuote] = Json.writes[BidPriceQuote]
+
+}
 
 
 /** Class implementing a spread quote.
@@ -64,4 +82,11 @@ case class BidPriceQuote(quote: Option[Price]) extends PriceQuote
   * @todo a spread is the difference between two prices and as such the unit is not really `Price` but rather should
   *       be `Currency`.
   */
-case class SpreadQuote(quote: Option[Price]) extends PriceQuote
+case class SpreadQuote(quote: Option[Currency]) extends Quote[Currency]
+
+
+object SpreadQuote {
+
+  implicit val writes: Writes[SpreadQuote] = Json.writes[SpreadQuote]
+
+}
