@@ -17,12 +17,17 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.singleunit.orders.LimitAskOrder
 import org.economicsl.auctions.{Price, Tradable}
 
 import scala.util.Random
 
 
-
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait AskOrderGenerator {
 
   def randomAskOrder[T <: Tradable](tradable: T, prng: Random): LimitAskOrder[T] = {

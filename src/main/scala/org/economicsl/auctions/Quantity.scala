@@ -15,8 +15,14 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import play.api.libs.json.{Json, Writes}
 
-/** Value class representing quantities. */
+
+/** Value class representing quantities.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 case class Quantity(value: Long) extends AnyVal {
 
   def + (that: Quantity): Quantity = {
@@ -30,8 +36,14 @@ case class Quantity(value: Long) extends AnyVal {
 }
 
 
-/** Companion object for the `Quantity` value class. */
+/** Companion object for the `Quantity` value class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object Quantity {
+
+  implicit val writes: Writes[Quantity] = Json.writes[Quantity]
 
   implicit val ordering: Ordering[Quantity] = QuantityOrdering
 
@@ -40,7 +52,11 @@ object Quantity {
 }
 
 
-/** Object containing the numeric operators for the `Quantity` value class. */
+/** Object containing the numeric operators for the `Quantity` value class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object QuantityOrdering extends Ordering[Quantity] {
 
   def compare(x: Quantity, y: Quantity): Int = x.value compare y.value

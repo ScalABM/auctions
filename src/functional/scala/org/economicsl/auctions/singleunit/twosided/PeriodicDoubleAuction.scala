@@ -17,28 +17,41 @@ package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
-import org.economicsl.auctions.singleunit.{Order, OrderGenerator}
+import org.economicsl.auctions.singleunit.OrderGenerator
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
   // generate a stream of random orders...
   val google: GoogleStock = GoogleStock(tick=1)
   val prng = new Random(42)
-  val orders: Stream[Order[GoogleStock]] = {
+  val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = {
     randomOrders(100, google, prng)
   }
 
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
     val pricingRule = new MidPointPricingPolicy[GoogleStock]
-    val withUniformPricing: DoubleAuction[GoogleStock] = DoubleAuction.withUniformPricing(pricingRule)
+    val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
+      SealedBidDoubleAuction.withUniformPricing(pricingRule)
+    }
 
-    val withOrders: DoubleAuction[GoogleStock] = {
-      orders.foldLeft(withUniformPricing){ case (auction, order) => auction.insert(order) }
+    val withOrders: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
+      orders.foldLeft(withUniformPricing){
+        case (auction, order) => order match {
+          case Left(askOrder) => auction.insert(askOrder)
+          case Right(bidOrder) => auction.insert(bidOrder)
+        }
+      }
     }
 
     val results = withOrders.clear

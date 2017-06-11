@@ -20,7 +20,16 @@ import java.util.UUID
 import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
 
 
-/** An order to buy multiple units of a tradable at a per-unit price less than or equal to the limit price. */
+/** An order to buy multiple units of a tradable at a per-unit price less than or equal to the limit price.
+  *
+  * @param issuer
+  * @param limit
+  * @param quantity
+  * @param tradable
+  * @tparam T the type of `Tradable` for which the `Order` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quantity: Quantity, val tradable: T)
   extends BidOrder[T] with SinglePricePoint[T]
 
@@ -28,6 +37,9 @@ class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val quan
 /** Companion object for `LimitBidOrder`.
   *
   * Provides default ordering as well as constructor for default implementation of `LimitBidOrder` trait.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
   */
 object LimitBidOrder {
 

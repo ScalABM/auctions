@@ -18,4 +18,10 @@ package org.economicsl.auctions.singleunit.pricing
 import org.economicsl.auctions.Tradable
 
 
+/** Class implementing a mid-point pricing policy.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class MidPointPricingPolicy[T <: Tradable] extends WeightedAveragePricingPolicy[T](0.5)

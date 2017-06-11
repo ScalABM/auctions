@@ -19,5 +19,10 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.{Price, Tradable}
 
 
-/** Base trait for all pricing rules. */
+/** Base trait for all pricing policies.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait PricingPolicy[T <: Tradable] extends ((FourHeapOrderBook[T]) => Option[Price])

@@ -16,32 +16,48 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.{Order, OrderGenerator}
+import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
+import org.economicsl.auctions.singleunit.{ClearResult, OrderGenerator}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object ContinuousDoubleAuction extends App with OrderGenerator {
 
   val google: GoogleStock = GoogleStock(tick=1)
   val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
-  val withDiscriminatoryPricing: DoubleAuction[GoogleStock] = DoubleAuction.withDiscriminatoryPricing(pricingRule)
+  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[GoogleStock] = {
+    OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule)
+  }
 
   // generate a very large stream of random orders...
+  type DoubleAuction[T <: Tradable] = OpenBidDoubleAuction.DiscriminatoryPricingImpl[T]
+  type OrderFlow[T <: Tradable] = Stream[Either[AskOrder[T], BidOrder[T]]]
   val prng = new Random(42)
-  val orders: Stream[Order[GoogleStock]] = randomOrders(1000000, google, prng)
+  val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = randomOrders(1000000, google, prng)
 
   // A lazy, tail-recursive implementation of a continuous double auction!
-  def continuous[T <: Tradable](auction: DoubleAuction[T])(incoming: Stream[Order[T]]): Stream[ClearResult[T, DoubleAuction[T]]] = {
+  def continuous[T <: Tradable](auction: DoubleAuction[T])(incoming: OrderFlow[T]): Stream[ClearResult[T, DoubleAuction[T]]] = {
     @annotation.tailrec
-    def loop(da: DoubleAuction[T], in: Stream[Order[T]], out: Stream[ClearResult[T, DoubleAuction[T]]]): Stream[ClearResult[T, DoubleAuction[T]]] = in match {
+    def loop(da: DoubleAuction[T], in: OrderFlow[T], out: Stream[ClearResult[T, DoubleAuction[T]]]): Stream[ClearResult[T, DoubleAuction[T]]] = in match {
       case Stream.Empty => out
-      case head #:: tail =>
-        val results = da.insert(head).clear
-        loop(results.residual, tail, results #:: out)
+      case head #:: tail => head match {
+        case Left(askOrder) =>
+          val results = da.insert(askOrder).clear
+          loop(results.residual, tail, results #:: out)
+        case Right(bidOrder) =>
+          val results = da.insert(bidOrder).clear
+          loop(results.residual, tail, results #:: out)
+      }
     }
     loop(auction, incoming, Stream.empty[ClearResult[T, DoubleAuction[T]]])
   }
@@ -50,13 +66,22 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
     * containing the unmatched orders following each clear.  Basically the entire auction history is stored in the
     * stream of clear results.
     */
-  val results = continuous(withDiscriminatoryPricing)(orders)
+  val results = continuous[GoogleStock](withDiscriminatoryPricing)(orders)
 
-  val prices: Stream[Price] = results.flatMap(result => result.fills)
-                                     .flatMap(fills => fills.headOption)
-                                     .map(fill => fill.price)
+  val prices: Stream[Price] = {
+    results.flatMap(result => result.fills)
+      .flatMap(fills => fills.headOption)
+      .map(fill => fill.price)
+  }
+
+  val spreadQuotes: Stream[SpreadQuote] = {
+    results.map(result => result.residual.receive(SpreadQuoteRequest[GoogleStock]()))
+  }
 
   // print off the first 10 prices...
   println(prices.take(10).toList)
+
+  // print off the first 10 spread quotes...
+  println(spreadQuotes.take(100).toList)
 
 }
