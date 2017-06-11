@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,19 +15,78 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.Price
+import org.economicsl.auctions.{Currency, Price}
+import play.api.libs.json.{Json, Writes}
 
 
-sealed trait Quote
+/** Base trait for all quote implementations.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+sealed trait Quote[T] {
 
-trait PriceQuote extends Quote {
-
-  def quote: Price
+  def quote: Option[T]
 
 }
 
-case class AskPriceQuote(quote: Price) extends PriceQuote
 
-case class BidPriceQuote(quote: Price) extends PriceQuote
+/** Base trait for all price quote implementations.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+trait PriceQuote extends Quote[Price] {
 
-case class SpreadQuote(quote: Price) extends PriceQuote
+  def quote: Option[Price]
+
+}
+
+
+/** Class implementing an ask price quote.
+  *
+  * @param quote
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+case class AskPriceQuote(quote: Option[Price]) extends PriceQuote
+
+
+object AskPriceQuote {
+
+  implicit val writes: Writes[AskPriceQuote] = Json.writes[AskPriceQuote]
+
+}
+
+/** Class implementing a bid price quote.
+  *
+  * @param quote
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+case class BidPriceQuote(quote: Option[Price]) extends PriceQuote
+
+
+object BidPriceQuote {
+
+  implicit val writes: Writes[BidPriceQuote] = Json.writes[BidPriceQuote]
+
+}
+
+
+/** Class implementing a spread quote.
+  *
+  * @param quote
+  * @author davidrpugh
+  * @since 0.1.0
+  * @todo a spread is the difference between two prices and as such the unit is not really `Price` but rather should
+  *       be `Currency`.
+  */
+case class SpreadQuote(quote: Option[Currency]) extends Quote[Currency]
+
+
+object SpreadQuote {
+
+  implicit val writes: Writes[SpreadQuote] = Json.writes[SpreadQuote]
+
+}

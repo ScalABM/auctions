@@ -1,5 +1,5 @@
 /*
-Copyright 2017 EconomicSL
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,10 +17,18 @@ package org.economicsl.auctions.multiunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{BidOrder, Price, Quantity, Tradable}
+import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
 
 
-/** An order to buy multiple units of a tradable at any positive price. */
+/** An order to buy multiple units of a tradable at any positive price.
+  *
+  * @param issuer
+  * @param quantity
+  * @param tradable
+  * @tparam T the type of `Tradable` for which the `Order` is being issued.
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 class MarketBidOrder[+T <: Tradable](val issuer: UUID, val quantity: Quantity, val tradable: T)
   extends BidOrder[T] with SinglePricePoint[T] {
 
@@ -29,6 +37,11 @@ class MarketBidOrder[+T <: Tradable](val issuer: UUID, val quantity: Quantity, v
 }
 
 
+/** Companion object for `MarketBidOrder`.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 object MarketBidOrder {
 
   def apply[T <: Tradable](issuer: UUID, quantity: Quantity, tradable: T): MarketBidOrder[T] = {

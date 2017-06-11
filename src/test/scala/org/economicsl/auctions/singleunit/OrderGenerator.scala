@@ -1,15 +1,36 @@
+/*
+Copyright (c) 2017 KAPSARC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
 import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.auctions.singleunit.orders._
 
 import scala.util.Random
 
 
+/**
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
 trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
 
-  def randomOrder[T <: Tradable](tradable: T, prng: Random): Either[LimitAskOrder[T], LimitBidOrder[T]] = {
+  def randomOrder[T <: Tradable](tradable: T, prng: Random): Either[AskOrder[T], BidOrder[T]] = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val limit = Price(prng.nextInt(Int.MaxValue))
     if (prng.nextDouble() <= 0.5) {
@@ -20,9 +41,9 @@ trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
   }
 
 
-  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]] = {
+  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[Either[AskOrder[T], BidOrder[T]]] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]], remaining: Int): Stream[Either[LimitAskOrder[T], LimitBidOrder[T]]] = {
+    def loop(accumulated: Stream[Either[AskOrder[T], BidOrder[T]]], remaining: Int): Stream[Either[AskOrder[T], BidOrder[T]]] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -30,7 +51,7 @@ trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
         loop(order #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[Either[LimitAskOrder[T], LimitBidOrder[T]]], n)
+    loop(Stream.empty[Either[AskOrder[T], BidOrder[T]]], n)
   }
 
 }

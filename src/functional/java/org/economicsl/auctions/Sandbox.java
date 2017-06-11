@@ -15,16 +15,17 @@
 
 package org.economicsl.auctions;
 
-import org.economicsl.auctions.Price;
-import org.economicsl.auctions.singleunit.*;
+import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
+import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
+import org.economicsl.auctions.singleunit.JClearResult;
+import org.economicsl.auctions.singleunit.JSealedBidAuction;
+import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
+import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
-import org.economicsl.auctions.singleunit.pricing.AskQuotePricingRule;
-import org.economicsl.auctions.singleunit.pricing.BidQuotePricingRule;
-import org.economicsl.auctions.singleunit.pricing.MidPointPricingRule;
-import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingRule;
+import org.economicsl.auctions.singleunit.pricing.*;
+import org.economicsl.auctions.singleunit.twosided.*;
 import scala.Option;
 
-import java.util.Optional;
 import java.util.UUID;
 
 public class Sandbox {
@@ -34,20 +35,9 @@ public class Sandbox {
         UUID issuer = UUID.randomUUID();
         GoogleStock google = new GoogleStock(1);
 
-        org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order1 = new org.economicsl.auctions.multiunit.LimitBidOrder<>(issuer, 10, 100, google);
-
-        // Create a multi-unit market ask order
-        org.economicsl.auctions.multiunit.MarketAskOrder<GoogleStock> order2 = new org.economicsl.auctions.multiunit.MarketAskOrder<>(issuer, 100, google);
-
         // Create some single-unit limit ask orders...
         LimitAskOrder<GoogleStock> order3 = new LimitAskOrder<>(issuer, 5, google);
         LimitAskOrder<GoogleStock> order4 = new LimitAskOrder<>(issuer, 6, google);
-
-        // Create a multi-unit limit bid order...
-        org.economicsl.auctions.multiunit.LimitBidOrder<GoogleStock> order5 = new org.economicsl.auctions.multiunit.LimitBidOrder<>(issuer, 10, 100, google);
-
-        // Create a multi-unit market bid order...
-        org.economicsl.auctions.multiunit.MarketBidOrder<GoogleStock> order7 = new org.economicsl.auctions.multiunit.MarketBidOrder<>(issuer, 100, google);
 
         // Create some single-unit limit bid orders...
         LimitBidOrder<GoogleStock> order8 = new LimitBidOrder<>(issuer, 10, google);
@@ -58,9 +48,7 @@ public class Sandbox {
         LimitBidOrder<AppleStock> order10 = new LimitBidOrder<>(issuer, 10, apple);
 
         // Create a four-heap order book and add some orders...
-        FourHeapOrderBook<GoogleStock> orderBook1 = FourHeapOrderBook.empty(
-                LimitAskOrder$.MODULE$.ordering(),
-                LimitBidOrder$.MODULE$.ordering());
+        FourHeapOrderBook<GoogleStock> orderBook1 = FourHeapOrderBook.empty();
 
         FourHeapOrderBook<GoogleStock> orderBook2 = orderBook1.insert(order3);
         FourHeapOrderBook<GoogleStock> orderBook3 = orderBook2.insert(order4);
@@ -68,58 +56,64 @@ public class Sandbox {
         FourHeapOrderBook<GoogleStock> orderBook5 = orderBook4.insert(order8);
 
         // example of a uniform price auction that would be incentive compatible for the sellers...
-        AskQuotePricingRule<GoogleStock> askQuotePricing = new AskQuotePricingRule<>();
+        AskQuotePricingPolicy<GoogleStock> askQuotePricing = new AskQuotePricingPolicy<>();
         Option<Price> price1 = askQuotePricing.apply(orderBook5);
         if(price1.isDefined()) {
             System.out.println(price1.get().value());
         }
 
         // example of a uniform price auction that would be incentive compatible for the buyers...
-        BidQuotePricingRule<GoogleStock> bidQuotePricing = new BidQuotePricingRule<GoogleStock>();
+        BidQuotePricingPolicy<GoogleStock> bidQuotePricing = new BidQuotePricingPolicy<GoogleStock>();
         Option<Price> price2 = bidQuotePricing.apply(orderBook5);
         if(price2.isDefined()) {
             System.out.println(price2.get().value());
         }
 
         // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-        MidPointPricingRule<GoogleStock> midPointPricing = new MidPointPricingRule<GoogleStock>();
+        MidPointPricingPolicy<GoogleStock> midPointPricing = new MidPointPricingPolicy<GoogleStock>();
         Option<Price> midPrice = midPointPricing.apply(orderBook5);
         if(midPrice.isDefined()) {
             System.out.println(midPrice.get().value());
         }
 
         // example of a uniform price auction that puts more weight on the bidPriceQuote and yield higher surplus for sellers
-        WeightedAveragePricingRule<GoogleStock> averagePricing = new WeightedAveragePricingRule<GoogleStock>(0.75);
+        WeightedAveragePricingPolicy<GoogleStock> averagePricing = new WeightedAveragePricingPolicy<GoogleStock>(0.75);
         Option<Price> averagePrice = averagePricing.apply(orderBook5);
         if(averagePrice.isDefined()) {
             System.out.println(averagePrice.get().value());
         };
 
-        // TODO: take a look at paired orders
+        // try using the new Java API?
+        JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<>(order3, askQuotePricing);
+        JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8);
+        JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9);
+        JClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
+        System.out.println(results.getFills().get());  // TODO: is Stream the best collection to use here?
 
-        // example usage of a double auction where we don't want to define the pricing rule until later...
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook = DoubleAuction$.MODULE$.withClosedOrderBook(orderBook1);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook2 = withOrderBook.insert(order3);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook3 = withOrderBook2.insert(order4);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook4 = withOrderBook3.insert(order9);
-        DoubleAuction.WithClosedOrderBook<GoogleStock> withOrderBook5 = withOrderBook4.insert(order8);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da2 = da.insert(order3);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da3 = da2.insert(order4);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da4 = da3.insert(order8);
 
-        Clearing<GoogleStock> clearing = new Clearing<GoogleStock>();
+        System.out.println(da4.receive(new AskPriceQuoteRequest<>()));
+        System.out.println(da4.receive(new BidPriceQuoteRequest<>()));
 
-        // after inserting orders, now we can define the pricing rule...
-        DoubleAuction<GoogleStock> auction = withOrderBook5.withUniformPricing(midPointPricing);
-        Optional<Clearing<GoogleStock>.ClearResult<GoogleStock>> result = clearing.clear(auction);
-        result.ifPresent(res -> {
-            res.getFills().forEach(fill -> System.out.println(fill));
-        });
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9);
+        JClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
+        System.out.println(results3.getFills().get());
 
-        // ...trivial to re-run the same auction with a different pricing rule!
-        DoubleAuction<GoogleStock> auction2 = withOrderBook5.withUniformPricing(askQuotePricing);
-        Optional<Clearing<GoogleStock>.ClearResult<GoogleStock>> result2 = clearing.clear(auction2);
-        result2.ifPresent(res -> {
-            res.getFills().forEach(fill -> System.out.println(fill));
-        });
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da7 = da6.insert(order3);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da8 = da7.insert(order4);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da9 = da8.insert(order8);
 
-        // TODO: extend with quotes
+        System.out.println(da9.receive(new AskPriceQuoteRequest<>()));
+        System.out.println(da9.receive(new BidPriceQuoteRequest<>()));
+
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9);
+        JClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
+        System.out.println(results4.getFills().get());
+
     }
+    
 }
