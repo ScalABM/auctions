@@ -54,7 +54,7 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
         return new JFirstPriceOpenBidAuction<>(ops.insert(order));
     }
 
-    public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
+    public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }

@@ -54,7 +54,7 @@ object OpenBidAuction {
         new OpenBidAuction[T](a.orderBook.insert(order), a.pricingPolicy)
       }
 
-      def receive(a: OpenBidAuction[T], request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = {
+      def receive(a: OpenBidAuction[T], request: AskPriceQuoteRequest[T]): AskPriceQuote = {
         askPriceQuotingPolicy(a.orderBook, request)
       }
 

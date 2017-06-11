@@ -19,11 +19,10 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.AskPriceQuote;
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
-import scala.Option;
 
 
 abstract class AbstractOpenBidAuction<T extends Tradable, A> extends AbstractSealedBidAuction<T, A> {
 
-    public abstract Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request);
+    public abstract AskPriceQuote receive(AskPriceQuoteRequest<T> request);
 
 }

@@ -33,7 +33,7 @@ sealed trait Quote
   */
 trait PriceQuote extends Quote {
 
-  def quote: Price
+  def quote: Option[Price]
 
 }
 
@@ -44,7 +44,7 @@ trait PriceQuote extends Quote {
   * @author davidrpugh
   * @since 0.1.0
   */
-case class AskPriceQuote(quote: Price) extends PriceQuote
+case class AskPriceQuote(quote: Option[Price]) extends PriceQuote
 
 
 /** Class implementing a bid price quote.
@@ -53,7 +53,7 @@ case class AskPriceQuote(quote: Price) extends PriceQuote
   * @author davidrpugh
   * @since 0.1.0
   */
-case class BidPriceQuote(quote: Price) extends PriceQuote
+case class BidPriceQuote(quote: Option[Price]) extends PriceQuote
 
 
 /** Class implementing a spread quote.
@@ -64,4 +64,4 @@ case class BidPriceQuote(quote: Price) extends PriceQuote
   * @todo a spread is the difference between two prices and as such the unit is not really `Price` but rather should
   *       be `Currency`.
   */
-case class SpreadQuote(quote: Price) extends PriceQuote
+case class SpreadQuote(quote: Option[Price]) extends PriceQuote

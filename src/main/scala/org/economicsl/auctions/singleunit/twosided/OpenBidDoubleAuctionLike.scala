@@ -66,11 +66,11 @@ object OpenBidDoubleAuctionLike {
       */
     def insert(order: BidOrder[T]): A = ev.insert(a, order)
 
-    def receive(request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = ev.receive(a, request)
+    def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = ev.receive(a, request)
 
-    def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
+    def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
 
-    def receive(request: SpreadQuoteRequest[T]): Option[SpreadQuote] = ev.receive(a, request)
+    def receive(request: SpreadQuoteRequest[T]): SpreadQuote = ev.receive(a, request)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       * `BidOrder` instances except the `order`.

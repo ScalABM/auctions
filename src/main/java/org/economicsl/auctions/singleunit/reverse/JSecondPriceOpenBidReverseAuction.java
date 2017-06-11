@@ -58,7 +58,7 @@ public class JSecondPriceOpenBidReverseAuction<T extends Tradable> {
         return new JSecondPriceOpenBidReverseAuction<>(ops.insert(order));
     }
 
-    public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+    public BidPriceQuote receive(BidPriceQuoteRequest<T> request) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
