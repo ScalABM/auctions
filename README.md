@@ -2,18 +2,25 @@
 [![Build Status](https://travis-ci.org/EconomicSL/auctions.svg?branch=develop)](https://travis-ci.org/EconomicSL/auctions)
 
 # auctions
-An embedded domain specific language for auction simulation written in Scala and Java 8. 
+A set of functional APIs for auction simulation written in Scala and Java 8. 
 
-## API Design
+## Installation and usage
+
+### SBT
+
+### Maven
+TODO
+
+## API design
 Our current API design is based loosely on ideas gleaned from the following.
 
 * Wurman et al (1998) [_Flexible double auctions for electronic commerce: theory and implementation_](http://wewalsh.com/papers/dss98.pdf)
-* Wellman and Walsh (2001) [_A Parametrization of the Auction Design Space_](https://pdfs.semanticscholar.org/88eb/648f4c74c9e8ee50fd818a266b6f1b3b2ca3.pdf)
+* Wurman et al (2001) [_A Parametrization of the Auction Design Space_](https://pdfs.semanticscholar.org/88eb/648f4c74c9e8ee50fd818a266b6f1b3b2ca3.pdf)
 * Nisan et al (2007) [_Algorithmic Game Theory_](http://www.cs.cmu.edu/~sandholm/cs15-892F13/algorithmic-game-theory.pdf)
 
-Primary focus for version 0.1.0 is on developing a minimal API based around the key ingredients discussed in the Wurman et al (1998) paper. Rough road map that should take us through the end of 2017:
+Primary focus for version 0.1.X was on developing a minimal API based around the key ingredients discussed in the Wurman et al (1998) paper. Rough road map that should take us through the end of 2017:
 
-* Version 0.2.0: extend the API to allow for multi-unit auctions. Incentive structures in multi-unit auctions often differ in important ways from the incentive structures in single unit auctions. Multi-unit auctions are critical for modeling electricity auctions which are a key use case. 
+* Version 0.2.0: will extend the API to allow for multi-unit auctions. Incentive structures in multi-unit auctions often differ in important ways from the incentive structures in single unit auctions. Multi-unit auctions are critical for modeling electricity auctions which are a key use case. 
 * Version 0.3.0 will extend the API to incorporate single unit combinatorial auctions. 
 
 In the longer term, we would like to generalize the auctions API so that auctions can be thought of as special types of social choice mechanisms that use "money" (see chapter 10 from Nisan et al (2007) for discussion and details). 
@@ -59,4 +66,4 @@ Currently auctions for electricity are independent of auctions for ancillary ene
 
 ## "Economy of Things"
 
-We have started implementing a [proof-of-concept trading platform](https://github.com/EconomicSL/auctions-remote-example) that would allow Internet-of-Things (IoT) enabled devices to trade with one another using our auctions mechanisms.
+We have started implementing a [proof-of-concept trading platform](https://github.com/EconomicSL/auctions-remote-example) that would allow Internet-of-Things (IoT) enabled devices to trade with one another using our auction mechanisms.  Motivating use case: explore the impact of auction micro-structure on market outcomes by simulating agents representing "smart houses" trading electricity as well as supporting ancillary services, with one another.
