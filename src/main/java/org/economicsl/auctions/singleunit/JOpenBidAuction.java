@@ -52,7 +52,7 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
         return new JOpenBidAuction<>(ops.insert(order));
     }
 
-    public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
+    public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }

@@ -56,7 +56,7 @@ object OpenBidReverseAuctionLike {
       */
     def insert(order: AskOrder[T]): A = ev.insert(a, order)
 
-    def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
+    def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
       * except the `order`.
