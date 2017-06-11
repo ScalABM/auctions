@@ -25,7 +25,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait QuotingPolicy[T <: Tradable, -R <: QuoteRequest[T], +Q <: Quote] extends ((FourHeapOrderBook[T], R) => Q)
+sealed trait QuotingPolicy[T <: Tradable, -R <: QuoteRequest[T], +Q <: Quote[_]] extends ((FourHeapOrderBook[T], R) => Q)
 
 
 /**
