@@ -16,9 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.{ClearResult, OrderGenerator}
-import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 
@@ -33,14 +31,11 @@ import scala.util.Random
 object ContinuousDoubleAuction extends App with OrderGenerator {
 
   val google: GoogleStock = GoogleStock(tick=1)
-  val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
-  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[GoogleStock] = {
-    OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule)
-  }
+  val withDiscriminatoryPricing = SealedBidDoubleAuction.withDiscriminatoryPricing(pricingRule)
 
   // generate a very large stream of random orders...
-  type DoubleAuction[T <: Tradable] = OpenBidDoubleAuction.DiscriminatoryPricingImpl[T]
+  type DoubleAuction[T <: Tradable] = SealedBidDoubleAuction.DiscriminatoryPricingImpl[T]
   type OrderFlow[T <: Tradable] = Stream[Either[AskOrder[T], BidOrder[T]]]
   val prng = new Random(42)
   val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = randomOrders(1000000, google, prng)
@@ -68,20 +63,7 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
     */
   val results = continuous[GoogleStock](withDiscriminatoryPricing)(orders)
 
-  val prices: Stream[Price] = {
-    results.flatMap(result => result.fills)
-      .flatMap(fills => fills.headOption)
-      .map(fill => fill.price)
-  }
-
-  val spreadQuotes: Stream[SpreadQuote] = {
-    results.map(result => result.residual.receive(SpreadQuoteRequest[GoogleStock]()))
-  }
-
-  // print off the first 10 prices...
-  println(prices.take(10).toList)
-
-  // print off the first 10 spread quotes...
-  println(spreadQuotes.take(100).toList)
+  // Write Fills to disk for further processing
+  results.flatMap(result => result.fills).foreach(???)
 
 }
