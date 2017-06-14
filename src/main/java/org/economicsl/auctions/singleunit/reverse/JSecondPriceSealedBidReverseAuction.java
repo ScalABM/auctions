@@ -17,8 +17,8 @@ package org.economicsl.auctions.singleunit.reverse;
 
 
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
@@ -71,10 +71,10 @@ public class JSecondPriceSealedBidReverseAuction<T extends Tradable>
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSecondPriceSealedBidReverseAuction<T>> clear() {
+    public JClearResult<JSecondPriceSealedBidReverseAuction<T>> clear() {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        ClearResult<SealedBidReverseAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceSealedBidReverseAuction<>(results.residual()));
     }
 

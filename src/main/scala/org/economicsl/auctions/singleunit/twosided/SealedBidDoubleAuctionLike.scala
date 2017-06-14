@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.{ClearResult, SealedBidAuctionLike}
+import org.economicsl.auctions.singleunit.SealedBidAuctionLike
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.reverse.SealedBidReverseAuctionLike
 
@@ -81,7 +81,7 @@ object SealedBidDoubleAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 
