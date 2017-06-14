@@ -18,8 +18,8 @@ package org.economicsl.auctions.singleunit.reverse
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.singleunit.{AskOrderGenerator, ClearResult}
-import org.economicsl.auctions.{Price, Service}
+import org.economicsl.auctions.singleunit.AskOrderGenerator
+import org.economicsl.auctions.{ClearResult, Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -44,11 +44,11 @@ class FirstPriceSealedBidReverseAuction extends FlatSpec with Matchers with AskO
   val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
 
   val withAsks: SealedBidReverseAuction[Service] = offers.foldLeft(fpsara)((auction, askOrder) => auction.insert(askOrder))
-  val results: ClearResult[Service, SealedBidReverseAuction[Service]] = withAsks.clear
+  val results: ClearResult[SealedBidReverseAuction[Service]] = withAsks.clear
 
   "A First-Price, Sealed-Bid Reverse Auction (FPSBRA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
-    results.fills.map(_.map(_.askOrder.issuer)) should be (Some(Stream(offers.min.issuer)))
+    results.fills.map(_.map(_.counterparty)) should be (Some(Stream(offers.min.issuer)))
 
   }
 

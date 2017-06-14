@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -45,11 +45,11 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGen
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
   val withBids: SealedBidAuction[ParkingSpace] = bids.foldLeft(fpsba)((auction, bidOrder) => auction.insert(bidOrder))
-  val results: ClearResult[ParkingSpace, SealedBidAuction[ParkingSpace]] = withBids.clear
+  val results: ClearResult[SealedBidAuction[ParkingSpace]] = withBids.clear
 
   "A First-Price, Sealed-Bid Auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
-    results.fills.map(_.map(_.bidOrder.issuer)) should be(Some(Stream(bids.max.issuer)))
+    results.fills.map(_.map(_.issuer)) should be(Some(Stream(bids.max.issuer)))
 
   }
 
