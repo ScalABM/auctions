@@ -16,6 +16,8 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
@@ -67,10 +69,10 @@ public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuct
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSealedBidAuction<T>> clear() {
+    public JClearResult<JSealedBidAuction<T>> clear() {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        ClearResult<T, SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
+        ClearResult<SealedBidAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
         return new JClearResult<>(fills, new JSealedBidAuction<>(results.residual()));
     }
 

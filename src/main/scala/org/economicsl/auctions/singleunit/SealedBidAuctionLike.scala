@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 
@@ -56,7 +56,7 @@ trait SealedBidAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBoo
     *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
     *         `AskOrder` and `BidOrder` instances.
     */
-  def clear(a: A): ClearResult[T, A]
+  def clear(a: A): ClearResult[A]
 
 }
 
@@ -101,7 +101,7 @@ object SealedBidAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 

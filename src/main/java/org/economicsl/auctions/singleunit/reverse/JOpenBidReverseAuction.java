@@ -19,8 +19,8 @@ package org.economicsl.auctions.singleunit.reverse;
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.BidPriceQuote;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
@@ -58,7 +58,7 @@ public class JOpenBidReverseAuction<T extends Tradable>
         return ops.insert(order).map(a -> new JOpenBidReverseAuction<>(a));
     }
 
-    public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+    public BidPriceQuote receive(BidPriceQuoteRequest<T> request) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
@@ -79,10 +79,10 @@ public class JOpenBidReverseAuction<T extends Tradable>
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JOpenBidReverseAuction<T>> clear() {
+    public JClearResult<JOpenBidReverseAuction<T>> clear() {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
+        ClearResult<OpenBidReverseAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JOpenBidReverseAuction<>(results.residual()));
     }
 

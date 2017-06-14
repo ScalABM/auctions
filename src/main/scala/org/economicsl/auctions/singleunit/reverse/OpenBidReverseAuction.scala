@@ -58,7 +58,7 @@ object OpenBidReverseAuction {
         new OpenBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
       }
 
-      def receive(a: OpenBidReverseAuction[T], request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = {
+      def receive(a: OpenBidReverseAuction[T], request: BidPriceQuoteRequest[T]): BidPriceQuote = {
         bidPriceQuotingPolicy(a.orderBook, request)
       }
       

@@ -18,15 +18,14 @@ package org.economicsl.auctions.singleunit.twosided;
 
 import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.*;
-import scala.Option;
 
 
 abstract class AbstractOpenBidDoubleAuction<T extends Tradable, A> extends AbstractSealedBidDoubleAuction<T, A> {
 
-    public abstract Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request);
+    public abstract AskPriceQuote receive(AskPriceQuoteRequest<T> request);
 
-    public abstract Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request);
+    public abstract BidPriceQuote receive(BidPriceQuoteRequest<T> request);
 
-    public abstract Option<SpreadQuote> receive(SpreadQuoteRequest<T> request);
+    public abstract SpreadQuote receive(SpreadQuoteRequest<T> request);
 
 }

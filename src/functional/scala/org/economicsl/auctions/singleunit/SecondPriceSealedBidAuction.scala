@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -51,11 +51,11 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
       case _ => auction
     }
   }
-  val results: ClearResult[ParkingSpace, SealedBidAuction[ParkingSpace]] = withBids.clear
+  val results: ClearResult[SealedBidAuction[ParkingSpace]] = withBids.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val winner = results.fills.map(_.map(_.bidOrder.issuer))
+    val winner = results.fills.map(_.map(_.issuer))
     winner should be(Some(Stream(bids.max.issuer)))
 
   }
@@ -63,12 +63,11 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
   "The winning price of a Second-Price, Sealed-Bid Auction (SPSBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.fills.map(_.map(_.price))
+    val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
-    val auction2 = withBids.remove(bids.max)
-    val results2 = auction2.clear
-    results2.fills.map(_.map(_.bidOrder.limit)) should be (winningPrice)
+    val withHighestBidRemoved = withBids.remove(bids.max)
+    withHighestBidRemoved.orderBook.askPriceQuote should be (winningPrice)
 
   }
 

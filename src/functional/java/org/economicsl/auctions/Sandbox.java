@@ -87,7 +87,7 @@ public class Sandbox {
         JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<GoogleStock>(order3, askQuotePricing, 1L);
         JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8).get();
         JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9).get();
-        JClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
+        JClearResult<JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
         System.out.println(results.getFills().get());  // TODO: is Stream the best collection to use here?
 
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing, 1L);
@@ -99,7 +99,7 @@ public class Sandbox {
         System.out.println(da4.receive(new BidPriceQuoteRequest<>()));
 
         JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9).get();
-        JClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
+        JClearResult<JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
         System.out.println(results3.getFills().get());
 
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing, 1L);
@@ -111,7 +111,7 @@ public class Sandbox {
         System.out.println(da9.receive(new BidPriceQuoteRequest<>()));
 
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9).get();
-        JClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
+        JClearResult<JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
         System.out.println(results4.getFills().get());
 
     }

@@ -19,7 +19,7 @@ import java.util.UUID
 
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -52,19 +52,19 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
       case _ => auction
     }
   }
-  val results: ClearResult[ParkingSpace, OpenBidAuction[ParkingSpace]] = withBids.clear
+  val results: ClearResult[OpenBidAuction[ParkingSpace]] = withBids.clear
 
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process ask price quote requests" in {
 
     val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(Some(AskPriceQuote(bids.max.limit)))
+    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
 
   }
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val winner = results.fills.map(_.map(_.bidOrder.issuer))
+    val winner = results.fills.map(_.map(_.issuer))
     winner should be(Some(Stream(bids.max.issuer)))
 
   }
@@ -72,12 +72,12 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
   "The winning price of a Second-Price, Open-Bid Auction (SPOBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.fills.map(_.map(_.price))
+    val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
+
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
     val withHighestBidRemoved = withBids.remove(bids.max)
-    val results2 = withHighestBidRemoved.clear
-    results2.fills.map(_.map(_.bidOrder.limit)) should be (winningPrice)
+    withHighestBidRemoved.orderBook.askPriceQuote should be (winningPrice)
 
   }
 

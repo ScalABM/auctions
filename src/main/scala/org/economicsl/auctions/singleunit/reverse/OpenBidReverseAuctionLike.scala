@@ -15,9 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
-import org.economicsl.auctions.singleunit.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
@@ -58,7 +57,7 @@ object OpenBidReverseAuctionLike {
       */
     def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
-    def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
+    def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
       * except the `order`.
@@ -75,7 +74,7 @@ object OpenBidReverseAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 

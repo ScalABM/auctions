@@ -19,7 +19,7 @@ import java.util.UUID
 
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -53,18 +53,18 @@ class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGener
     }
   }
 
-  val results: ClearResult[ParkingSpace, OpenBidAuction[ParkingSpace]] = withBids.clear
+  val results: ClearResult[OpenBidAuction[ParkingSpace]] = withBids.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {
 
     val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(Some(AskPriceQuote(bids.max.limit)))
+    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
 
   }
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
-    results.fills.map(_.map(_.bidOrder.issuer)) should be(Some(Stream(bids.max.issuer)))
+    results.fills.map(_.map(_.issuer)) should be(Some(Stream(bids.max.issuer)))
 
   }
 
