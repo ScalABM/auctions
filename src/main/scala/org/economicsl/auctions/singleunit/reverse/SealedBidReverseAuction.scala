@@ -15,10 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{Currency, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
+
+import scala.util.Try
 
 
 /** Type class representing a "sealed-bid" reverse auction mechanism.
@@ -26,12 +28,13 @@ import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuo
   * @param orderBook a `FourHeapOrderBook` instance containing the reservation `BidOrder` and any previously submitted
   *                  `AskOrder` instances.
   * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+  * @param tickSize the minimum price movement of a tradable.
   * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
   *           must be for the same type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
-class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T])
+class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T], val tickSize: Currency)
 
 
 /** Companion object for the `SealedBidReverseAuction` type class.
@@ -49,16 +52,17 @@ object SealedBidReverseAuction {
 
     new SealedBidReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] {
 
-      def insert(a: SealedBidReverseAuction[T], order: AskOrder[T]): SealedBidReverseAuction[T] = {
-        new SealedBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy)
+      def insert(a: SealedBidReverseAuction[T], order: AskOrder[T]): Try[SealedBidReverseAuction[T]] = Try {
+        require(order.limit.value % a.tickSize == 0)
+        new SealedBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
       }
 
       def remove(a: SealedBidReverseAuction[T], order: AskOrder[T]): SealedBidReverseAuction[T] = {
-        new SealedBidReverseAuction[T](a.orderBook.remove(order), a.pricingPolicy)
+        new SealedBidReverseAuction[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
       }
 
       protected def withOrderBook(a: SealedBidReverseAuction[T], orderBook: FourHeapOrderBook[T]): SealedBidReverseAuction[T] = {
-        new SealedBidReverseAuction[T](orderBook, a.pricingPolicy)
+        new SealedBidReverseAuction[T](orderBook, a.pricingPolicy, a.tickSize)
       }
 
     }
@@ -69,40 +73,44 @@ object SealedBidReverseAuction {
     *
     * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @param tickSize the minimum price movement of a tradable.
     * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
     *           must be for the same type of `Tradable`.
     * @return a `SealedBidReverseAuction` instance.
     */
-  def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T]): SealedBidReverseAuction[T] = {
+  def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T], tickSize: Currency): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy)
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy, tickSize)
   }
 
   /** Create a second-price, sealed-bid reverse auction (SPSBRA).
     *
     * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
+    * @param tickSize the minimum price movement of a tradable.
     * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
     *           must be for the same type of `Tradable`.
     * @return a `SealedBidReverseAuction` instance.
     * @note The winner of a SPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to the minimum of the second lowest submitted ask price and the buyer's `reservation` price.
     */
-  def withAskQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
+  def withAskQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T], tickSize: Currency): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T])
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T], tickSize)
   }
 
   /** Create a first-price, sealed-bid reverse auction (FPSBRA).
     *
+    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
+    * @param tickSize the minimum price movement of a tradable.
     * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `SealedBidReverseAuction`
     *           must be for the same type of `Tradable`.
     * @return a `SealedBidReverseAuction` instance.
     * @note The winner of a FPSBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to its own ask price.
     */
-  def withBidQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T]): SealedBidReverseAuction[T] = {
+  def withBidQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T], tickSize: Currency): SealedBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T])
+    new SealedBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T], tickSize)
   }
   
 }

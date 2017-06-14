@@ -23,6 +23,7 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -39,8 +40,8 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic. */
     private SealedBidAuction<T> auction;
 
-    public JSecondPriceSealedBidAuction(AskOrder<T> reservation) {
-        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
+    public JSecondPriceSealedBidAuction(AskOrder<T> reservation, Long tickSize) {
+        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JSecondPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
@@ -49,9 +50,9 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
      * @return an instance of `JSecondPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
      * instances.
      */
-    public JSecondPriceSealedBidAuction<T> insert(BidOrder<T> order) {
+    public Try<JSecondPriceSealedBidAuction<T>> insert(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JSecondPriceSealedBidAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JSecondPriceSealedBidAuction<>(a));
     }
 
     /** Create a new instance of `JSecondPriceSealedBidAuction` whose order book contains all previously submitted

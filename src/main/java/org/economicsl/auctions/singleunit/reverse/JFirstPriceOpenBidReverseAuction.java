@@ -26,6 +26,7 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -42,8 +43,8 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic.*/
     private OpenBidReverseAuction<T> auction;
 
-    public JFirstPriceOpenBidReverseAuction(BidOrder<T> reservation) {
-        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
+    public JFirstPriceOpenBidReverseAuction(BidOrder<T> reservation, Long tickSize) {
+        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JFirstPriceOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
@@ -52,9 +53,9 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
      * @return an instance of `JFirstPriceOpenBidReverseAuction` whose order book contains all previously submitted
      * `AskOrder` instances.
      */
-    public JFirstPriceOpenBidReverseAuction<T> insert(AskOrder<T> order) {
+    public Try<JFirstPriceOpenBidReverseAuction<T>> insert(AskOrder<T> order) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JFirstPriceOpenBidReverseAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JFirstPriceOpenBidReverseAuction<>(a));
     }
 
     public BidPriceQuote receive(BidPriceQuoteRequest<T> request) {

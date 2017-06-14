@@ -19,6 +19,8 @@ import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 
+import scala.util.Try
+
 
 /** Base trait defining "reverse auction-like" behavior.
   *
@@ -35,7 +37,7 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
     * @param order the `AskOrder` that should be added to the `orderBook`.
     * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
     */
-  def insert(a: A, order: AskOrder[T]): A
+  def insert(a: A, order: AskOrder[T]): Try[A]
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
     * except the `order`.
@@ -68,7 +70,7 @@ object SealedBidReverseAuctionLike {
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 

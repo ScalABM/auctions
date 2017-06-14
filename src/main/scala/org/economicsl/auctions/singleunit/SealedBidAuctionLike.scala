@@ -19,6 +19,8 @@ import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 
+import scala.util.Try
+
 
 /** Base trait defining "sealed-bid" auction-like behavior.
   *
@@ -35,7 +37,7 @@ trait SealedBidAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBoo
     * @param order the `BidOrder` that should be added to the `orderBook`.
     * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
     */
-  def insert(a: A, order: BidOrder[T]): A
+  def insert(a: A, order: BidOrder[T]): Try[A]
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
@@ -82,7 +84,7 @@ object SealedBidAuctionLike {
       * @param order the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
       * except the `order`.

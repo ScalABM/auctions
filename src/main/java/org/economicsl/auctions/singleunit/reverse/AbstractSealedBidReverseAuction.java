@@ -22,6 +22,7 @@ import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import scala.collection.Iterable;
 import scala.collection.JavaConverters;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -34,7 +35,7 @@ abstract class AbstractSealedBidReverseAuction<T extends Tradable, A> {
      * @param order the `AskOrder` that should be added to the `orderBook`.
      * @return an instance of type `A` whose order book contains all previously submitted `AskOrder` instances.
      */
-    public abstract A insert(AskOrder<T> order);
+    public abstract Try<A> insert(AskOrder<T> order);
 
     /** Create a new instance of type `A` whose order book contains all previously submitted `AskOrder` instances
      * except the `order`.

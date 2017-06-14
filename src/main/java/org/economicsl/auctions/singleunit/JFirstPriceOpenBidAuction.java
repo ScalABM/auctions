@@ -25,6 +25,7 @@ import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -41,8 +42,8 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic. */
     private OpenBidAuction<T> auction;
 
-    public JFirstPriceOpenBidAuction(AskOrder<T> reservation) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
+    public JFirstPriceOpenBidAuction(AskOrder<T> reservation, Long tickSize) {
+        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JFirstPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
@@ -51,9 +52,9 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
      * @return an instance of `JFirstPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
      * instances.
      */
-    public JFirstPriceOpenBidAuction<T> insert(BidOrder<T> order) {
+    public Try<JFirstPriceOpenBidAuction<T>> insert(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JFirstPriceOpenBidAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JFirstPriceOpenBidAuction<>(a));
     }
 
     public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
@@ -89,7 +90,7 @@ public class JFirstPriceOpenBidAuction<T extends Tradable>
     }
 
     private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
-        return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
+        return OpenBidAuction$.MODULE$.mkAuctionOps(a);
     }
 
 }

@@ -21,6 +21,8 @@ import org.economicsl.auctions.singleunit.SealedBidAuctionLike
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.reverse.SealedBidReverseAuctionLike
 
+import scala.util.Try
+
 
 /** Base trait defining "sealed-bid double auction-like" behavior.
   *
@@ -48,14 +50,14 @@ object SealedBidDoubleAuctionLike {
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
       *
       * @param order the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       * `BidOrder` instances except the `order`.

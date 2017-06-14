@@ -21,7 +21,7 @@ import org.economicsl.auctions.singleunit.OrderGenerator
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Random
+import scala.util.{Random, Success}
 
 
 /**
@@ -32,7 +32,7 @@ import scala.util.Random
 class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
   // generate a stream of random orders...
-  val google: GoogleStock = GoogleStock(tick=1)
+  val google: GoogleStock = GoogleStock()
   val prng = new Random(42)
   val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = {
     randomOrders(100, google, prng)
@@ -42,14 +42,21 @@ class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
     val pricingRule = new MidPointPricingPolicy[GoogleStock]
     val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
-      SealedBidDoubleAuction.withUniformPricing(pricingRule)
+      SealedBidDoubleAuction.withUniformPricing(pricingRule, tickSize = 1)
     }
 
+    // this whole process is data parallel...
     val withOrders: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
       orders.foldLeft(withUniformPricing){
         case (auction, order) => order match {
-          case Left(askOrder) => auction.insert(askOrder)
-          case Right(bidOrder) => auction.insert(bidOrder)
+          case Left(askOrder) => auction.insert(askOrder) match {
+            case Success(withAsk) => withAsk
+            case _ => auction
+          }
+          case Right(bidOrder) => auction.insert(bidOrder) match {
+            case Success(withBid) => withBid
+            case _ => auction
+          }
         }
       }
     }

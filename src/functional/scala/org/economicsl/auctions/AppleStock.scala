@@ -21,4 +21,5 @@ package org.economicsl.auctions
   * @author davidrpugh
   * @since 0.1.0
   */
-case class ParkingSpace() extends Tradable
+case class AppleStock() extends Security
+

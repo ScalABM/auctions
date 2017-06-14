@@ -22,7 +22,7 @@ import org.economicsl.auctions.singleunit.AskOrderGenerator
 import org.economicsl.auctions.{ClearResult, Price, Service}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Random
+import scala.util.{Random, Success}
 
 
 /**
@@ -34,18 +34,23 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
 
   // suppose that buyer must procure some service...
   val buyer: UUID = UUID.randomUUID()
-  val service = Service(tick=1)
+  val service = Service()
 
   val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
-  val spsbra: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withAskQuotePricingPolicy(reservationPrice)
+  val spsbra: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withAskQuotePricingPolicy(reservationPrice, tickSize = 1)
 
   // suppose that there are lots of sellers
   val prng = new Random(42)
   val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
 
-
-  val withOffers: SealedBidReverseAuction[Service] = offers.foldLeft(spsbra)((auction, askOrder) => auction.insert(askOrder))
+  val withOffers: SealedBidReverseAuction[Service] = offers.foldLeft(spsbra){ case (auction, askOrder) =>
+    auction.insert(askOrder) match {
+      case Success(withAsk) => withAsk
+      case _ => auction
+    }
+  }
   val results: ClearResult[SealedBidReverseAuction[Service]] = withOffers.clear
+
 
   "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "purchase the Service from the seller who offers it at the lowest price." in {
 
@@ -59,7 +64,6 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
     // winning price from the original auction...
     val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
 
-    // remove the winning offer and then find the ask price of the winner of this new auction...
     val withLowestOfferRemoved = withOffers.remove(offers.max)
     withLowestOfferRemoved.orderBook.askPriceQuote should be (winningPrice)
 

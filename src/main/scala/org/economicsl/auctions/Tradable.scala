@@ -23,20 +23,13 @@ import play.api.libs.json.{JsValue, Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-trait Tradable extends Serializable {
-
-  /** Minimum tick size. */
-  def tick: Currency
-
-}
+trait Tradable extends Serializable
 
 
 object Tradable {
 
   implicit val writes: Writes[Tradable] = new Writes[Tradable] {
-    def writes(o: Tradable): JsValue = Json.obj(
-      "tick" -> o.tick
-    )
+    def writes(o: Tradable): JsValue = Json.obj()
   }
 
 }

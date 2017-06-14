@@ -21,7 +21,7 @@ import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Random
+import scala.util.{Random, Success}
 
 
 /**
@@ -33,11 +33,11 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace(tick = 1)
+  val parkingSpace = ParkingSpace()
 
   // seller is willing to sell at any positive price
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withBidPriceQuotingPolicy(reservationPrice)
+  val spsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withBidPriceQuotingPolicy(reservationPrice, tickSize = 1)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
@@ -45,7 +45,12 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
   // winner should be the bidder that submitted the highest bid
-  val withBids: SealedBidAuction[ParkingSpace] = bids.foldLeft(spsba)((auction, bidOrder) => auction.insert(bidOrder))
+  val withBids: SealedBidAuction[ParkingSpace] = bids.foldLeft(spsba) { case (auction, bidOrder) =>
+    auction.insert(bidOrder) match {
+      case Success(withBid) => withBid
+      case _ => auction
+    }
+  }
   val results: ClearResult[SealedBidAuction[ParkingSpace]] = withBids.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {

@@ -21,6 +21,8 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 
+import scala.util.Try
+
 
 /** Trait that extends "auction-like" behavior to include the ability to process ask price quote requests.
   *
@@ -51,7 +53,7 @@ object OpenBidAuctionLike {
       * @param order the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
 
     def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = ev.receive(a, request)
 
