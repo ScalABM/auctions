@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.{ClearResult, OpenBidAuctionLike}
+import org.economicsl.auctions.singleunit.OpenBidAuctionLike
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting, SpreadQuotingPolicy}
 import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuctionLike
@@ -96,7 +96,7 @@ object OpenBidDoubleAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 

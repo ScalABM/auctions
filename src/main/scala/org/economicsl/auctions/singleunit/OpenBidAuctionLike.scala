@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.{ClearResult, Tradable}
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
@@ -70,7 +70,7 @@ object OpenBidAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 

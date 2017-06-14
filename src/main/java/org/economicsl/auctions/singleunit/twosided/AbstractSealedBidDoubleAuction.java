@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided;
 
 import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
@@ -65,10 +65,10 @@ abstract class AbstractSealedBidDoubleAuction<T extends Tradable, A> {
      *
      * @return an instance of `JClearResult` class.
      */
-    public abstract JClearResult<T, A> clear();
+    public abstract JClearResult<A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */
-    protected Stream<Fill<T>> toJavaStream(Iterable<Fill<T>> input, boolean parallel) {
+    protected Stream<Fill> toJavaStream(Iterable<Fill> input, boolean parallel) {
         return StreamSupport.stream(JavaConverters.asJavaIterable(input).spliterator(), parallel);
     }
 
