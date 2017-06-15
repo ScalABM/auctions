@@ -19,7 +19,8 @@ import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.AskOrderGenerator
-import org.economicsl.auctions.{ClearResult, Price, Service}
+import org.economicsl.auctions.{ClearResult, Service}
+import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}

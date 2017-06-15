@@ -18,7 +18,8 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace}
+import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -37,7 +38,8 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGen
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
 
   // seller uses a first-priced, sealed bid auction...
-  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withAskPriceQuotingPolicy(reservationPrice, tickSize = 1)
+  val tickSize: Currency = 1
+  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withAskPriceQuotingPolicy(reservationPrice, tickSize)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
