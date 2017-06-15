@@ -16,8 +16,8 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided;
 
 
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.*;
+import org.economicsl.core.Tradable;
 
 
 abstract class AbstractOpenBidDoubleAuction<T extends Tradable, A> extends AbstractSealedBidDoubleAuction<T, A> {

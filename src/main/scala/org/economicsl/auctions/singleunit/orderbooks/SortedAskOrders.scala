@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.singleunit.orders.AskOrder
-import org.economicsl.auctions.{Quantity, Tradable}
+import org.economicsl.core.{Quantity, Tradable}
 
 import scala.collection.immutable
 

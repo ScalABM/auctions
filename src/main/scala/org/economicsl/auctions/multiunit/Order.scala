@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.{Contract, OrderLike, Tradable}
+import org.economicsl.auctions.{Contract, OrderLike}
+import org.economicsl.core.Tradable
 
 
 /** Base trait for all multi-unit orders.

@@ -15,10 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit;
 
-
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.AskPriceQuote;
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
+import org.economicsl.core.Tradable;
 
 
 abstract class AbstractOpenBidAuction<T extends Tradable, A> extends AbstractSealedBidAuction<T, A> {

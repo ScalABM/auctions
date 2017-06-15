@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.core.Tradable
 
 
 /** Base trait for all quote requests.

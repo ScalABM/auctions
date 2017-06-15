@@ -16,9 +16,9 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse;
 
 
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.BidPriceQuote;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
+import org.economicsl.core.Tradable;
 
 
 abstract class AbstractOpenBidReverseAuction<T extends Tradable, A> extends AbstractSealedBidReverseAuction<T, A> {

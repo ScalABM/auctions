@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orders
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.core.{Price, Tradable}
 
 
 /** An order to sell a single-unit of a tradable at a price greater than or equal to the limit price.

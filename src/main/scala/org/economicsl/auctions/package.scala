@@ -21,9 +21,6 @@ import java.util.UUID
 /** General documentation for the auctions package should go here! */
 package object auctions {
 
-  /** Type used to representing currencies. */
-  type Currency = Long
-
   type Buyer = UUID
 
   type Seller = UUID

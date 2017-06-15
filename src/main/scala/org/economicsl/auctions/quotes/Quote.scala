@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
-import org.economicsl.auctions.{Currency, Price}
+import org.economicsl.core.{Currency, Price}
 import play.api.libs.json.{Json, Writes}
 
 

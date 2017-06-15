@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.{Quantity, Tradable}
+
 
 /** Mixin trait that restricts the quantity of an `Order` to a single unit of a `Tradable`.
   *
@@ -24,7 +26,7 @@ package org.economicsl.auctions
 trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
   this: Contract with OrderLike[T] =>
 
-  val quantity = Quantity(1)
+  val quantity: Quantity = Quantity.single
 
 }
 

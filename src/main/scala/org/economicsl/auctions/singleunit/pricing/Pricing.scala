@@ -1,7 +1,8 @@
 package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.{ClearResult, Fill, Price, Tradable}
+import org.economicsl.auctions.{ClearResult, Fill}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.core.{Price, Tradable}
 
 
 /**
