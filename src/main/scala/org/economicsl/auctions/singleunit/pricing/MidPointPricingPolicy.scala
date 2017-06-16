@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.core.Tradable
 
 
 /** Class implementing a mid-point pricing policy.

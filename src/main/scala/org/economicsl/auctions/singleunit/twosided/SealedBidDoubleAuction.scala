@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.{Currency, Tradable}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
+import org.economicsl.core.{Currency, Tradable}
 
 import scala.util.Try
 

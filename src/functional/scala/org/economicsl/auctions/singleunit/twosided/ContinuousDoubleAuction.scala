@@ -21,6 +21,7 @@ import org.economicsl.auctions.singleunit.OrderGenerator
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
+import org.economicsl.core.{Price, Tradable}
 
 import scala.util.{Random, Success}
 

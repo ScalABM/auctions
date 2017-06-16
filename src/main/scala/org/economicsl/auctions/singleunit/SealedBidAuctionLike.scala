@@ -15,9 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{ClearResult, Tradable}
+import org.economicsl.auctions.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
+import org.economicsl.core.Tradable
 
 import scala.util.Try
 

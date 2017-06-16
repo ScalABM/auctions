@@ -15,11 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.{Currency, Tradable}
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
+import org.economicsl.core.{Currency, Tradable}
 
 import scala.util.Try
 

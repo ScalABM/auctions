@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orders
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.core.{Price, Tradable}
 
 
 /** An order to buy a single-unit of a `Tradable` at any positive price.

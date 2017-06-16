@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.Tradable
+
 
 /** Mixin trait indicating that a `Contract` is `OrderLke`.
   *

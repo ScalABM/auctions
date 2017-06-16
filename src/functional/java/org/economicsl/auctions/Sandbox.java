@@ -24,6 +24,7 @@ import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.*;
 import org.economicsl.auctions.singleunit.twosided.*;
+import org.economicsl.core.Price;
 import scala.Option;
 
 import java.util.UUID;

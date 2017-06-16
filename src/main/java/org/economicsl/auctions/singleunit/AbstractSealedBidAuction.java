@@ -17,8 +17,9 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.Fill;
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
+import org.economicsl.core.Tradable;
+
 import scala.collection.Iterable;
 import scala.collection.JavaConverters;
 import scala.util.Try;

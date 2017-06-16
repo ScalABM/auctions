@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.{Price, Quantity, Tradable}
+
 import scala.collection.GenIterable
 
 

@@ -15,11 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.{ClearResult, Tradable}
+import org.economicsl.auctions.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.SealedBidAuctionLike
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.reverse.SealedBidReverseAuctionLike
+import org.economicsl.core.Tradable
 
 import scala.util.Try
 

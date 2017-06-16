@@ -16,13 +16,14 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse;
 
 
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.ClearResult;
 import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
+import org.economicsl.core.Tradable;
+
 import scala.Option;
 import scala.util.Try;
 

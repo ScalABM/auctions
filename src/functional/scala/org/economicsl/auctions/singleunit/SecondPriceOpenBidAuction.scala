@@ -19,7 +19,8 @@ import java.util.UUID
 
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace}
+import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -37,8 +38,9 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
   val parkingSpace = ParkingSpace()
 
   // seller is willing to sell at any positive price
+  val tickSize: Currency = 1
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withBidQuotePricingPolicy(reservationPrice, tickSize = 1)
+  val spoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withBidQuotePricingPolicy(reservationPrice, tickSize)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)

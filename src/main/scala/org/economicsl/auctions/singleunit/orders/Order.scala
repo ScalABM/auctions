@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orders
 
-import org.economicsl.auctions.{Contract, OrderLike, SingleUnit, Tradable}
+import org.economicsl.auctions.{Contract, OrderLike, SingleUnit}
+import org.economicsl.core.Tradable
 import play.api.libs.json.{JsValue, Json, Writes}
 
 

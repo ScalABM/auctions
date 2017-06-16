@@ -15,8 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.quoting
 
-import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.core.Tradable
 
 
 /**

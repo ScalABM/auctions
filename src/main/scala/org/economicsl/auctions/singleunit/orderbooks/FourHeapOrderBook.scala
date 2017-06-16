@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
-import org.economicsl.auctions.{Currency, Price, Tradable}
+import org.economicsl.core.{Currency, Price, Tradable}
 
 
 /** Class implementing the four-heap order book algorithm.

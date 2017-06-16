@@ -17,8 +17,8 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Tradable}
 import org.economicsl.auctions.singleunit.orders._
+import org.economicsl.core.{Price, Tradable}
 
 import scala.util.Random
 
