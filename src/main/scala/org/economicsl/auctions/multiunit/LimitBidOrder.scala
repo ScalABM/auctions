@@ -17,7 +17,8 @@ package org.economicsl.auctions.multiunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Quantity, SinglePricePoint, Tradable}
+import org.economicsl.auctions.SinglePricePoint
+import org.economicsl.core.{Price, Quantity, Tradable}
 
 
 /** An order to buy multiple units of a tradable at a per-unit price less than or equal to the limit price.

@@ -16,13 +16,17 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Tradable;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.quotes.AskPriceQuote;
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.core.Tradable;
+
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -38,8 +42,8 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
     /* underlying Scala auction contains all of the interesting logic. */
     private OpenBidAuction<T> auction;
 
-    public JOpenBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy);
+    public JOpenBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy, Long tickSize) {
+        this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy, tickSize);
     }
 
     /** Create a new instance of `JOpenBidAuction` whose order book contains an additional `BidOrder`.
@@ -47,12 +51,12 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
      * @param order the `BidOrder` that should be added to the `orderBook`.
      * @return an instance of `JOpenBidOrder` whose order book contains all previously submitted `BidOrder` instances.
      */
-    public JOpenBidAuction<T> insert(BidOrder<T> order) {
+    public Try<JOpenBidAuction<T>> insert(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JOpenBidAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JOpenBidAuction<>(a));
     }
 
-    public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
+    public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
@@ -73,10 +77,10 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JOpenBidAuction<T>> clear() {
+    public JClearResult<JOpenBidAuction<T>> clear() {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
+        ClearResult<OpenBidAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
         return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));
     }
 
@@ -85,7 +89,7 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
     }
 
     private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
-      return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
+      return OpenBidAuction$.MODULE$.mkAuctionOps(a);
     }
     
 }

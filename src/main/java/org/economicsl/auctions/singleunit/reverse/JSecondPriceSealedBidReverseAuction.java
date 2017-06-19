@@ -16,14 +16,16 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse;
 
 
-import org.economicsl.auctions.Tradable;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy;
+import org.economicsl.core.Tradable;
+
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -40,8 +42,8 @@ public class JSecondPriceSealedBidReverseAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic. */
     private SealedBidReverseAuction<T> auction;
 
-    public JSecondPriceSealedBidReverseAuction(BidOrder<T> reservation) {
-        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>());
+    public JSecondPriceSealedBidReverseAuction(BidOrder<T> reservation, Long tickSize) {
+        this.auction = SealedBidReverseAuction$.MODULE$.apply(reservation, new AskQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JSecondPriceSealedBidReverseAuction` whose order book contains an additional `AskOrder`.
@@ -50,9 +52,9 @@ public class JSecondPriceSealedBidReverseAuction<T extends Tradable>
      * @return an instance of `JSecondPriceSealedBidReverseAuction` whose order book contains all previously submitted
      * `AskOrder` instances.
      */
-    public JSecondPriceSealedBidReverseAuction<T> insert(AskOrder<T> order) {
+    public Try<JSecondPriceSealedBidReverseAuction<T>> insert(AskOrder<T> order) {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JSecondPriceSealedBidReverseAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JSecondPriceSealedBidReverseAuction<>(a));
     }
 
     /** Create a new instance of `JSecondPriceOpenBidReverseAuction` whose order book contains all previously submitted
@@ -71,10 +73,10 @@ public class JSecondPriceSealedBidReverseAuction<T extends Tradable>
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSecondPriceSealedBidReverseAuction<T>> clear() {
+    public JClearResult<JSecondPriceSealedBidReverseAuction<T>> clear() {
         SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        ClearResult<T, SealedBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        ClearResult<SealedBidReverseAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceSealedBidReverseAuction<>(results.residual()));
     }
 

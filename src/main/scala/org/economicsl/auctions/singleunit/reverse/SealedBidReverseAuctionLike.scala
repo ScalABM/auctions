@@ -15,10 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.Tradable
-import org.economicsl.auctions.singleunit.ClearResult
+import org.economicsl.auctions.ClearResult
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
+import org.economicsl.core.Tradable
+
+import scala.util.Try
 
 
 /** Base trait defining "reverse auction-like" behavior.
@@ -36,7 +38,7 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
     * @param order the `AskOrder` that should be added to the `orderBook`.
     * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
     */
-  def insert(a: A, order: AskOrder[T]): A
+  def insert(a: A, order: AskOrder[T]): Try[A]
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
     * except the `order`.
@@ -55,7 +57,7 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
     *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
     *         `AskOrder` and `BidOrder` instances.
     */
-  def clear(a: A): ClearResult[T, A]
+  def clear(a: A): ClearResult[A]
 
 }
 
@@ -69,7 +71,7 @@ object SealedBidReverseAuctionLike {
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
     def remove(order: AskOrder[T]): A = ev.remove(a, order)
 
@@ -79,7 +81,7 @@ object SealedBidReverseAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 

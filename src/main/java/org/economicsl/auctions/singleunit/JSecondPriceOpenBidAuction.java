@@ -16,13 +16,17 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Tradable;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.quotes.AskPriceQuote;
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
+import org.economicsl.core.Tradable;
+
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -39,8 +43,8 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic. */
     private OpenBidAuction<T> auction;
 
-    public JSecondPriceOpenBidAuction(AskOrder<T> reservation) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
+    public JSecondPriceOpenBidAuction(AskOrder<T> reservation, Long tickSize) {
+        this.auction = OpenBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JSecondPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
@@ -49,13 +53,13 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
      * @return an instance of `JSecondPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
      * instances.
      */
-    public JSecondPriceOpenBidAuction<T> insert(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
-        return new JSecondPriceOpenBidAuction<>(ops.insert(order));
+    public Try<JSecondPriceOpenBidAuction<T>> insert(BidOrder<T> order) {
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
+        return ops.insert(order).map(a -> new JSecondPriceOpenBidAuction<>(a));
     }
 
-    public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+    public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
         return ops.receive(request);
     }
 
@@ -67,7 +71,7 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
      * instances except the `order`.
      */
     public JSecondPriceOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.openAuctionLikeOps(this.auction);
+        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
         return new JSecondPriceOpenBidAuction<>(ops.remove(order));
     }
 
@@ -75,10 +79,10 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSecondPriceOpenBidAuction<T>> clear() {
+    public JClearResult<JSecondPriceOpenBidAuction<T>> clear() {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        ClearResult<T, OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        ClearResult<OpenBidAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceOpenBidAuction<>(results.residual()));
     }
 
@@ -87,7 +91,7 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
     }
 
     private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
-        return OpenBidAuction$.MODULE$.openAuctionLikeOps(a);
+        return OpenBidAuction$.MODULE$.mkAuctionOps(a);
     }
 
 }

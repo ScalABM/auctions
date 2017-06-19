@@ -16,17 +16,18 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided;
 
 
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.*;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.core.Tradable;
 
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -38,12 +39,12 @@ import java.util.stream.Stream;
  */
 public class JOpenBidDoubleAuction {
 
-    public <T extends Tradable> DiscriminatoryPricingImpl<T> withDiscriminatoryPricing(PricingPolicy<T> pricingPolicy) {
-        return new DiscriminatoryPricingImpl<>(pricingPolicy);
+    public <T extends Tradable> DiscriminatoryPricingImpl<T> withDiscriminatoryPricing(PricingPolicy<T> pricingPolicy, Long tickSize) {
+        return new DiscriminatoryPricingImpl<>(pricingPolicy, tickSize);
     }
 
-    public <T extends Tradable> UniformPricingImpl<T> withUniformPricing(PricingPolicy<T> pricingPolicy) {
-        return new UniformPricingImpl<>(pricingPolicy);
+    public <T extends Tradable> UniformPricingImpl<T> withUniformPricing(PricingPolicy<T> pricingPolicy, Long tickSize) {
+        return new UniformPricingImpl<>(pricingPolicy, tickSize);
     }
 
     /** Class implementing an open-bid, discriminatory price double auction.
@@ -63,9 +64,9 @@ public class JOpenBidDoubleAuction {
          * @return an instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
          * `AskOrder` instances.
          */
-        public DiscriminatoryPricingImpl<T> insert(AskOrder<T> order) {
+        public Try<DiscriminatoryPricingImpl<T>> insert(AskOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new DiscriminatoryPricingImpl<>(ops.insert(order));
+            return ops.insert(order).map(a -> new DiscriminatoryPricingImpl<>(a));
         }
 
         /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains an additional `BidOrder`.
@@ -74,22 +75,22 @@ public class JOpenBidDoubleAuction {
          * @return an instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
          * `BidOrder` instances.
          */
-        public DiscriminatoryPricingImpl<T> insert(BidOrder<T> order) {
+        public Try<DiscriminatoryPricingImpl<T>> insert(BidOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new DiscriminatoryPricingImpl<>(ops.insert(order));
+            return ops.insert(order).map(a -> new DiscriminatoryPricingImpl<>(a));
         }
 
-        public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
-            OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return ops.receive(request);
-        }
-
-        public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+        public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
 
-        public Option<SpreadQuote> receive(SpreadQuoteRequest<T> request) {
+        public BidPriceQuote receive(BidPriceQuoteRequest<T> request) {
+            OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
+            return ops.receive(request);
+        }
+
+        public SpreadQuote receive(SpreadQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
@@ -122,16 +123,16 @@ public class JOpenBidDoubleAuction {
          *
          * @return an instance of `JClearResult` class.
          */
-        public JClearResult<T, DiscriminatoryPricingImpl<T>> clear() {
+        public JClearResult<DiscriminatoryPricingImpl<T>> clear() {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            ClearResult<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
-            Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
+            ClearResult<OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
+            Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
             return new JClearResult<>(fills, new DiscriminatoryPricingImpl<>(results.residual()));
         }
 
-        DiscriminatoryPricingImpl(PricingPolicy<T> pricingPolicy) {
+        DiscriminatoryPricingImpl(PricingPolicy<T> pricingPolicy, Long tickSize) {
             FourHeapOrderBook<T> orderBook = FourHeapOrderBook.empty();
-            this.auction = OpenBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.apply(orderBook, pricingPolicy);
+            this.auction = OpenBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.apply(orderBook, pricingPolicy, tickSize);
         }
 
         private DiscriminatoryPricingImpl(OpenBidDoubleAuction.DiscriminatoryPricingImpl<T> a) {
@@ -162,9 +163,9 @@ public class JOpenBidDoubleAuction {
          * @return an instance of `UniformPricingImpl` whose order book contains all previously submitted `AskOrder`
          * instances.
          */
-        public UniformPricingImpl<T> insert(AskOrder<T> order) {
+        public Try<UniformPricingImpl<T>> insert(AskOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new UniformPricingImpl<>(ops.insert(order));
+            return ops.insert(order).map(a -> new UniformPricingImpl<>(a));
         }
 
         /** Create a new instance of `UniformPricingImpl` whose order book contains an additional `BidOrder`.
@@ -173,22 +174,22 @@ public class JOpenBidDoubleAuction {
          * @return an instance of `UniformPricingImpl` whose order book contains all previously submitted `BidOrder`
          * instances.
          */
-        public UniformPricingImpl<T> insert(BidOrder<T> order) {
+        public Try<UniformPricingImpl<T>> insert(BidOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new UniformPricingImpl<>(ops.insert(order));
+            return ops.insert(order).map(a -> new UniformPricingImpl<>(a));
         }
 
-        public Option<AskPriceQuote> receive(AskPriceQuoteRequest<T> request) {
-            OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return ops.receive(request);
-        }
-
-        public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+        public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
 
-        public Option<SpreadQuote> receive(SpreadQuoteRequest<T> request) {
+        public BidPriceQuote receive(BidPriceQuoteRequest<T> request) {
+            OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
+            return ops.receive(request);
+        }
+
+        public SpreadQuote receive(SpreadQuoteRequest<T> request) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             return ops.receive(request);
         }
@@ -217,16 +218,16 @@ public class JOpenBidDoubleAuction {
             return new UniformPricingImpl<>(ops.remove(order));
         }
 
-        public JClearResult<T, UniformPricingImpl<T>> clear() {
+        public JClearResult<UniformPricingImpl<T>> clear() {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            ClearResult<T, OpenBidDoubleAuction.UniformPricingImpl<T>> results = ops.clear();
-            Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
+            ClearResult<OpenBidDoubleAuction.UniformPricingImpl<T>> results = ops.clear();
+            Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
             return new JClearResult<>(fills, new UniformPricingImpl<>(results.residual()));
         }
 
-        UniformPricingImpl(PricingPolicy<T> pricingPolicy) {
+        UniformPricingImpl(PricingPolicy<T> pricingPolicy, Long tickSize) {
             FourHeapOrderBook<T> orderBook = FourHeapOrderBook.empty();
-            this.auction = OpenBidDoubleAuction.UniformPricingImpl$.MODULE$.apply(orderBook, pricingPolicy);
+            this.auction = OpenBidDoubleAuction.UniformPricingImpl$.MODULE$.apply(orderBook, pricingPolicy, tickSize);
         }
 
         private UniformPricingImpl(OpenBidDoubleAuction.UniformPricingImpl<T> a) {

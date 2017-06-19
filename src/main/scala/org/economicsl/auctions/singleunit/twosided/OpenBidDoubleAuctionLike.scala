@@ -15,13 +15,16 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.Tradable
+import org.economicsl.auctions.ClearResult
 import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.{ClearResult, OpenBidAuctionLike}
+import org.economicsl.auctions.singleunit.OpenBidAuctionLike
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting, SpreadQuotingPolicy}
 import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuctionLike
+import org.economicsl.core.Tradable
+
+import scala.util.Try
 
 
 /** Base trait defining "open-bid" reverse auction-like behavior.
@@ -57,20 +60,20 @@ object OpenBidDoubleAuctionLike {
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): A = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
       *
       * @param order the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): A = ev.insert(a, order)
+    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
 
-    def receive(request: AskPriceQuoteRequest[T]): Option[AskPriceQuote] = ev.receive(a, request)
+    def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = ev.receive(a, request)
 
-    def receive(request: BidPriceQuoteRequest[T]): Option[BidPriceQuote] = ev.receive(a, request)
+    def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
 
-    def receive(request: SpreadQuoteRequest[T]): Option[SpreadQuote] = ev.receive(a, request)
+    def receive(request: SpreadQuoteRequest[T]): SpreadQuote = ev.receive(a, request)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       * `BidOrder` instances except the `order`.
@@ -96,7 +99,7 @@ object OpenBidDoubleAuctionLike {
       *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
       *         `AskOrder` and `BidOrder` instances.
       */
-    def clear: ClearResult[T, A] = ev.clear(a)
+    def clear: ClearResult[A] = ev.clear(a)
 
   }
 

@@ -15,10 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.Tradable
+
 
 /**
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-case class Service(tick: Currency) extends Tradable
+case class Service() extends Tradable

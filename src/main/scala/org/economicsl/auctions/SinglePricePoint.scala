@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.{Price, Quantity, Tradable}
+
 import scala.collection.immutable
 
 
@@ -36,8 +38,6 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   def quantity: Quantity
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
-
-  require(limit.value % tradable.tick == 0, "Limit price must be a multiple of the tick size!")
 
 }
 

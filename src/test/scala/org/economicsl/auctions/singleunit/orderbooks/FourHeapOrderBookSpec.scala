@@ -17,8 +17,9 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Price, Quantity, TestTradable}
+import org.economicsl.auctions.TestTradable
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.core.{Price, Quantity}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -32,7 +33,7 @@ import scala.util.Random
 class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
   // suppose that seller must sell the parking space at any positive price...
-  val tradable = TestTradable(tick = 1)
+  val tradable = TestTradable()
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
@@ -56,21 +57,21 @@ class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
   "A FourHeapOrderBook" should "be able to insert bid orders" in {
 
-    withBids.matched.askOrders.numberUnits should be(Quantity(0))
-    withBids.matched.bidOrders.numberUnits should be(Quantity(0))
+    withBids.matched.askOrders.numberUnits should be(Quantity.zero)
+    withBids.matched.bidOrders.numberUnits should be(Quantity.zero)
 
-    withBids.unMatched.askOrders.numberUnits should be(Quantity(0))
+    withBids.unMatched.askOrders.numberUnits should be(Quantity.zero)
     withBids.unMatched.bidOrders.numberUnits should be(Quantity(100))
 
   }
 
   "A FourHeapOrderBook" should "be able to insert ask orders" in {
 
-    withOffers.matched.askOrders.numberUnits should be(Quantity(0))
-    withOffers.matched.bidOrders.numberUnits should be(Quantity(0))
+    withOffers.matched.askOrders.numberUnits should be(Quantity.zero)
+    withOffers.matched.bidOrders.numberUnits should be(Quantity.zero)
 
     withOffers.unMatched.askOrders.numberUnits should be(Quantity(100))
-    withOffers.unMatched.bidOrders.numberUnits should be(Quantity(0))
+    withOffers.unMatched.bidOrders.numberUnits should be(Quantity.zero)
 
   }
 

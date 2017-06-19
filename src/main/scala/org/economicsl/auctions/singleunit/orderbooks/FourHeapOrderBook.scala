@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
-import org.economicsl.auctions.{Price, Tradable}
+import org.economicsl.core.{Currency, Price, Tradable}
 
 
 /** Class implementing the four-heap order book algorithm.
@@ -65,8 +65,8 @@ final class FourHeapOrderBook[T <: Tradable] private(val matched: MatchedOrders[
     case (None, None) => None
   }
 
-  def spread: Option[Price] = {
-    bidPriceQuote.flatMap(bidPrice => askPriceQuote.map(askPrice => Price(bidPrice.value - askPrice.value)))
+  def spread: Option[Currency] = {
+    bidPriceQuote.flatMap(bidPrice => askPriceQuote.map(askPrice => bidPrice.value - askPrice.value))
   }
 
   /** Create a new `FourHeapOrderBook` with an additional `AskOrder` (unless the ask order already exists in the order book).

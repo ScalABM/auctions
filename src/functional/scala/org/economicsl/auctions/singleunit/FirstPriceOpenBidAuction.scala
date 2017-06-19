@@ -19,10 +19,11 @@ import java.util.UUID
 
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.auctions.{ClearResult, ParkingSpace}
+import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Random
+import scala.util.{Random, Success}
 
 
 /**
@@ -34,30 +35,38 @@ class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGener
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace(tick = 1)
+  val parkingSpace = ParkingSpace()
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
 
   // seller uses a first-priced, sealed bid auction...
-  val fpoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withAskQuotePricingPolicy(reservationPrice)
+  val tickSize: Currency = 1
+  val fpoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withAskQuotePricingPolicy(reservationPrice, tickSize)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
   val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
 
-  val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(fpoba)((auction, bidOrder) => auction.insert(bidOrder))
-  val results: ClearResult[ParkingSpace, OpenBidAuction[ParkingSpace]] = withBids.clear
+  // want withBids to include all successful bids
+  val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(fpoba) { case (auction, bidOrder) =>
+    auction.insert(bidOrder) match {
+      case Success(withBid) => withBid
+      case _ => auction
+    }
+  }
+
+  val results: ClearResult[OpenBidAuction[ParkingSpace]] = withBids.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {
 
     val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(Some(AskPriceQuote(bids.max.limit)))
+    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
 
   }
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
-    results.fills.map(_.map(_.bidOrder.issuer)) should be(Some(Stream(bids.max.issuer)))
+    results.fills.map(_.map(_.issuer)) should be(Some(Stream(bids.max.issuer)))
 
   }
 

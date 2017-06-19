@@ -9,7 +9,8 @@ lazy val commonSettings = Seq(
   libraryDependencies ++= Seq(
     "org.scalactic" %% "scalactic" % "3.0.1",
     "com.typesafe.akka" %% "akka-actor" % "2.5.2",
-    "com.typesafe.play" %% "play-json" % "2.6.0-RC2"
+    "com.typesafe.play" %% "play-json" % "2.6.0-RC2",
+    "org.economicsl" %% "esl-core" % "0.1.0-SNAPSHOT"
   ),
   resolvers ++= Seq(
     "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",

@@ -17,12 +17,13 @@ package org.economicsl.auctions.singleunit.twosided
 
 import java.util.UUID
 
+import org.economicsl.auctions.ParkingSpace
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ParkingSpace, Price}
+import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.Random
+import scala.util.{Random, Success}
 
 
 /**
@@ -34,17 +35,17 @@ class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
   val withDiscriminatoryPricing: SealedBidDoubleAuction.DiscriminatoryPricingImpl[ParkingSpace] = {
-    SealedBidDoubleAuction.withDiscriminatoryPricing(pricingRule)
+    SealedBidDoubleAuction.withDiscriminatoryPricing(pricingRule, tickSize = 1)
   }
   val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[ParkingSpace] = {
-    SealedBidDoubleAuction.withUniformPricing(pricingRule)
+    SealedBidDoubleAuction.withUniformPricing(pricingRule, tickSize = 1)
   }
 
   val prng = new Random(42)
 
   "A Sealed-Bid, DoubleAuction (SBDA)" should "generate the same number of fills as orders." in {
 
-    val parkingSpace = ParkingSpace(tick = 1)
+    val parkingSpace = ParkingSpace()
 
     // how many ask and bid orders should be generated...
     val numberOrders = 100
@@ -66,8 +67,18 @@ class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
     }
 
     // insert all of the orders...
-    val withBids = bids.foldLeft(withDiscriminatoryPricing)((auction, bidOrder) => auction.insert(bidOrder))
-    val withOrders = offers.foldLeft(withBids)((auction, askOrder) => auction.insert(askOrder))
+    val withBids = bids.foldLeft(withDiscriminatoryPricing){ case (auction, bidOrder) =>
+      auction.insert(bidOrder) match {
+        case Success(withBid) => withBid
+        case _ => auction
+      }
+    }
+    val withOrders = offers.foldLeft(withBids){ case (auction, askOrder) =>
+      auction.insert(askOrder) match {
+        case Success(withAsk) => withAsk
+        case _ => auction
+      }
+    }
 
     // without rationing, the number of fills should match the number of orders
     val results = withOrders.clear

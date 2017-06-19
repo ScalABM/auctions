@@ -16,11 +16,15 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Tradable;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
+import org.economicsl.core.Tradable;
+
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -37,8 +41,8 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic. */
     private SealedBidAuction<T> auction;
 
-    public JSecondPriceSealedBidAuction(AskOrder<T> reservation) {
-        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
+    public JSecondPriceSealedBidAuction(AskOrder<T> reservation, Long tickSize) {
+        this.auction = SealedBidAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JSecondPriceOpenBidAuction` whose order book contains an additional `BidOrder`.
@@ -47,9 +51,9 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
      * @return an instance of `JSecondPriceOpenBidOrder` whose order book contains all previously submitted `BidOrder`
      * instances.
      */
-    public JSecondPriceSealedBidAuction<T> insert(BidOrder<T> order) {
+    public Try<JSecondPriceSealedBidAuction<T>> insert(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JSecondPriceSealedBidAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JSecondPriceSealedBidAuction<>(a));
     }
 
     /** Create a new instance of `JSecondPriceSealedBidAuction` whose order book contains all previously submitted
@@ -68,10 +72,10 @@ public class JSecondPriceSealedBidAuction<T extends Tradable>
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JSecondPriceSealedBidAuction<T>> clear() {
+    public JClearResult<JSecondPriceSealedBidAuction<T>> clear() {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        ClearResult<T, SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        ClearResult<SealedBidAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceSealedBidAuction<>(results.residual()));
     }
 

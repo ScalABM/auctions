@@ -24,6 +24,7 @@ import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.pricing.*;
 import org.economicsl.auctions.singleunit.twosided.*;
+import org.economicsl.core.Price;
 import scala.Option;
 
 import java.util.UUID;
@@ -33,7 +34,7 @@ public class Sandbox {
     public static void main(String[] args) {
 
         UUID issuer = UUID.randomUUID();
-        GoogleStock google = new GoogleStock(1);
+        GoogleStock google = new GoogleStock();
 
         // Create some single-unit limit ask orders...
         LimitAskOrder<GoogleStock> order3 = new LimitAskOrder<>(issuer, 5, google);
@@ -44,7 +45,7 @@ public class Sandbox {
         LimitBidOrder<GoogleStock> order9 = new LimitBidOrder<>(issuer, 6, google);
 
         // Create an order for some other tradable
-        AppleStock apple = new AppleStock(2);
+        AppleStock apple = new AppleStock();
         LimitBidOrder<AppleStock> order10 = new LimitBidOrder<>(issuer, 10, apple);
 
         // Create a four-heap order book and add some orders...
@@ -84,34 +85,34 @@ public class Sandbox {
         };
 
         // try using the new Java API?
-        JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<>(order3, askQuotePricing);
-        JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8);
-        JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9);
-        JClearResult<GoogleStock, JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
+        JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<GoogleStock>(order3, askQuotePricing, 1L);
+        JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8).get();
+        JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9).get();
+        JClearResult<JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
         System.out.println(results.getFills().get());  // TODO: is Stream the best collection to use here?
 
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing);
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da2 = da.insert(order3);
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da3 = da2.insert(order4);
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da4 = da3.insert(order8);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing, 1L);
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da2 = da.insert(order3).get();
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da3 = da2.insert(order4).get();
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da4 = da3.insert(order8).get();
 
         System.out.println(da4.receive(new AskPriceQuoteRequest<>()));
         System.out.println(da4.receive(new BidPriceQuoteRequest<>()));
 
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9);
-        JClearResult<GoogleStock, JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
+        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9).get();
+        JClearResult<JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
         System.out.println(results3.getFills().get());
 
-        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing);
-        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da7 = da6.insert(order3);
-        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da8 = da7.insert(order4);
-        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da9 = da8.insert(order8);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing, 1L);
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da7 = da6.insert(order3).get();
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da8 = da7.insert(order4).get();
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da9 = da8.insert(order8).get();
 
         System.out.println(da9.receive(new AskPriceQuoteRequest<>()));
         System.out.println(da9.receive(new BidPriceQuoteRequest<>()));
 
-        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9);
-        JClearResult<GoogleStock, JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
+        JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da10 = da9.insert(order9).get();
+        JClearResult<JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock>> results4 = da10.clear();
         System.out.println(results4.getFills().get());
 
     }

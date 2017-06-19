@@ -16,10 +16,13 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Tradable;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
+import org.economicsl.core.Tradable;
+
 import scala.collection.Iterable;
 import scala.collection.JavaConverters;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -37,7 +40,7 @@ abstract class AbstractSealedBidAuction<T extends Tradable, A> {
      * @param order the `BidOrder` that should be added to the `orderBook`.
      * @return an instance of type `A` whose order book contains all previously submitted `BidOrder` instances.
      */
-    public abstract A insert(BidOrder<T> order);
+    public abstract Try<A> insert(BidOrder<T> order);
 
     /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
      * except the `order`.
@@ -52,10 +55,10 @@ abstract class AbstractSealedBidAuction<T extends Tradable, A> {
      *
      * @return an instance of `JClearResult` class.
      */
-    public abstract JClearResult<T, A> clear();
+    public abstract JClearResult<A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */
-    protected Stream<Fill<T>> toJavaStream(Iterable<Fill<T>> input, boolean parallel) {
+    protected Stream<Fill> toJavaStream(Iterable<Fill> input, boolean parallel) {
         return StreamSupport.stream(JavaConverters.asJavaIterable(input).spliterator(), parallel);
     }
 

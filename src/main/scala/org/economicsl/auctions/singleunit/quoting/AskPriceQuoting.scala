@@ -15,8 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.quoting
 
-import org.economicsl.auctions.Tradable
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.core.Tradable
 
 
 /**
@@ -26,6 +26,6 @@ import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
   */
 trait AskPriceQuoting[T <: Tradable, -A] {
 
-  def receive(a: A, request: AskPriceQuoteRequest[T]): Option[AskPriceQuote]
+  def receive(a: A, request: AskPriceQuoteRequest[T]): AskPriceQuote
 
 }

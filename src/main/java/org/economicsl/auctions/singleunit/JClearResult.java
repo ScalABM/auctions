@@ -16,7 +16,8 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Tradable;
+import org.economicsl.auctions.Fill;
+import org.economicsl.core.Tradable;
 import scala.Option;
 
 import java.util.stream.Stream;
@@ -24,14 +25,13 @@ import java.util.stream.Stream;
 
 /** Class encapsulating the results of clearing a single-unit auction mechanism.
  *
- * @param <T>
  * @param <A>
  * @author davidrpugh
  * @since 0.1.0
  */
-public class JClearResult<T extends Tradable, A> {
+public class JClearResult<A> {
 
-    final private Option<Stream<Fill<T>>> fills;
+    final private Option<Stream<Fill>> fills;
     final private A residual;
 
     /** Create an instance of `JClearResult`.
@@ -39,7 +39,7 @@ public class JClearResult<T extends Tradable, A> {
      * @param fills
      * @param residual
      */
-    public JClearResult(Option<Stream<Fill<T>>> fills, A residual) {
+    public JClearResult(Option<Stream<Fill>> fills, A residual) {
         this.fills = fills;
         this.residual = residual;
     }
@@ -48,7 +48,7 @@ public class JClearResult<T extends Tradable, A> {
      *
      * @return `Some(fills)` if ???; `None` otherwise.
      */
-    public Option<Stream<Fill<T>>> getFills() {
+    public Option<Stream<Fill>> getFills() {
         return this.fills;
     }
 

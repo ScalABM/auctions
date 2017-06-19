@@ -16,16 +16,18 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse;
 
 
-import org.economicsl.auctions.Tradable;
 import org.economicsl.auctions.quotes.BidPriceQuote;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
-import org.economicsl.auctions.singleunit.ClearResult;
-import org.economicsl.auctions.singleunit.Fill;
+import org.economicsl.auctions.ClearResult;
+import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy;
+import org.economicsl.core.Tradable;
+
 import scala.Option;
+import scala.util.Try;
 
 import java.util.stream.Stream;
 
@@ -42,8 +44,8 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
     /* underlying Scala auction contains all of the interesting logic.*/
     private OpenBidReverseAuction<T> auction;
 
-    public JFirstPriceOpenBidReverseAuction(BidOrder<T> reservation) {
-        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>());
+    public JFirstPriceOpenBidReverseAuction(BidOrder<T> reservation, Long tickSize) {
+        this.auction = OpenBidReverseAuction$.MODULE$.apply(reservation, new BidQuotePricingPolicy<T>(), tickSize);
     }
 
     /** Create a new instance of `JFirstPriceOpenBidReverseAuction` whose order book contains an additional `AskOrder`.
@@ -52,12 +54,12 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
      * @return an instance of `JFirstPriceOpenBidReverseAuction` whose order book contains all previously submitted
      * `AskOrder` instances.
      */
-    public JFirstPriceOpenBidReverseAuction<T> insert(AskOrder<T> order) {
+    public Try<JFirstPriceOpenBidReverseAuction<T>> insert(AskOrder<T> order) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JFirstPriceOpenBidReverseAuction<>(ops.insert(order));
+        return ops.insert(order).map(a -> new JFirstPriceOpenBidReverseAuction<>(a));
     }
 
-    public Option<BidPriceQuote> receive(BidPriceQuoteRequest<T> request) {
+    public BidPriceQuote receive(BidPriceQuoteRequest<T> request) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         return ops.receive(request);
     }
@@ -78,10 +80,10 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
      *
      * @return an instance of `JClearResult` class.
      */
-    public JClearResult<T, JFirstPriceOpenBidReverseAuction<T>> clear() {
+    public JClearResult<JFirstPriceOpenBidReverseAuction<T>> clear() {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        ClearResult<T, OpenBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill<T>>> fills = results.fills().map(f -> toJavaStream(f, false));
+        ClearResult<OpenBidReverseAuction<T>> results = ops.clear();
+        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JFirstPriceOpenBidReverseAuction<>(results.residual()));
     }
 

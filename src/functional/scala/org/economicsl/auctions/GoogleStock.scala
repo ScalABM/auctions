@@ -21,5 +21,5 @@ package org.economicsl.auctions
   * @author davidrpugh
   * @since 0.1.0
   */
-case class GoogleStock(tick: Currency) extends Security
+case class GoogleStock() extends Security
 
