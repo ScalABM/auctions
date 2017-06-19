@@ -1,10 +1,8 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.Actor
 
-
+// todo consider moving to esl-core?
 trait Timestamper {
-  this: Actor =>
 
   protected def currentTimeMillis(): Long = {
     System.currentTimeMillis()

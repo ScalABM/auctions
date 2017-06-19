@@ -1,6 +1,6 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.reverse.SealedBidReverseAuction
@@ -9,10 +9,10 @@ import org.economicsl.core.Tradable
 import scala.util.{Failure, Success}
 
 
-final class SealedBidReverseAuctionActor[T <: Tradable](reservation: BidOrder[T],
-                                                        pricingPolicy: PricingPolicy[T],
-                                                        tickSize: Long,
-                                                        settlementService: ActorRef)
+final class SealedBidReverseAuctionActor[T <: Tradable] private(reservation: BidOrder[T],
+                                                                pricingPolicy: PricingPolicy[T],
+                                                                tickSize: Long,
+                                                                settlementService: ActorRef)
     extends Actor
     with ActorLogging
     with Timestamper {
@@ -45,5 +45,17 @@ final class SealedBidReverseAuctionActor[T <: Tradable](reservation: BidOrder[T]
   }
 
   private[this] var auction: SealedBidReverseAuction[T] = SealedBidReverseAuction(reservation, pricingPolicy, tickSize)
+
+}
+
+
+object SealedBidReverseAuctionActor {
+
+  def props[T <: Tradable](reservation: BidOrder[T],
+                           pricingPolicy: PricingPolicy[T],
+                           tickSize: Long,
+                           settlementService: ActorRef): Props = {
+    Props(new SealedBidReverseAuctionActor[T](reservation, pricingPolicy, tickSize, settlementService))
+  }
 
 }

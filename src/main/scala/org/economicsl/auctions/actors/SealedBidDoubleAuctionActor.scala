@@ -1,6 +1,6 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.twosided.SealedBidDoubleAuction
@@ -59,6 +59,17 @@ final class SealedBidDoubleAuctionActor[T <: Tradable](pricingPolicy: PricingPol
 
   private[this] var auction: SealedBidDoubleAuction.DiscriminatoryPricingImpl[T] = {
     SealedBidDoubleAuction.withDiscriminatoryPricing(pricingPolicy, tickSize)
+  }
+
+}
+
+
+object SealedBidDoubleAuctionActor {
+
+  def props[T <: Tradable](pricingPolicy: PricingPolicy[T],
+                           tickSize: Long,
+                           settlementService: ActorRef): Props = {
+    Props(new SealedBidDoubleAuctionActor[T](pricingPolicy, tickSize, settlementService))
   }
 
 }

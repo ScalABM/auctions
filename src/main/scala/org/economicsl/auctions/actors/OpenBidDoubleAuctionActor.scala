@@ -1,6 +1,6 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.economicsl.auctions.quotes.{AskPriceQuoteRequest, BidPriceQuoteRequest, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -10,9 +10,9 @@ import org.economicsl.core.Tradable
 import scala.util.{Failure, Success}
 
 
-final class OpenBidDoubleAuctionActor[T <: Tradable](pricingPolicy: PricingPolicy[T],
-                                                     tickSize: Long,
-                                                     settlementService: ActorRef)
+final class OpenBidDoubleAuctionActor[T <: Tradable] private(pricingPolicy: PricingPolicy[T],
+                                                             tickSize: Long,
+                                                             settlementService: ActorRef)
     extends Actor
     with ActorLogging
     with Timestamper {
@@ -79,6 +79,17 @@ final class OpenBidDoubleAuctionActor[T <: Tradable](pricingPolicy: PricingPolic
 
   private[this] var auction: OpenBidDoubleAuction.DiscriminatoryPricingImpl[T] = {
     OpenBidDoubleAuction.withDiscriminatoryPricing(pricingPolicy, tickSize)
+  }
+
+}
+
+
+object OpenBidDoubleAuctionActor {
+
+  def props[T <: Tradable](pricingPolicy: PricingPolicy[T],
+                           tickSize: Long,
+                           settlementService: ActorRef): Props = {
+    Props(new OpenBidDoubleAuctionActor[T](pricingPolicy, tickSize, settlementService))
   }
 
 }

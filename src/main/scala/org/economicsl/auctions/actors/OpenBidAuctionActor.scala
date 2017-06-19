@@ -1,6 +1,6 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorLogging, ActorRef}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest
 import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
@@ -38,7 +38,7 @@ final class OpenBidAuctionActor[T <: Tradable](reservation: AskOrder[T],
       sender() ! auction.receive(quote)
   }
 
-  def clearingBehavior: Receive = {
+  def handleClearRequest: Receive = {
     case ClearRequest =>
       val results = auction.clear
       results.fills.foreach(fills => settlementService ! fills)
@@ -47,9 +47,21 @@ final class OpenBidAuctionActor[T <: Tradable](reservation: AskOrder[T],
 
 
   def receive: Receive = {
-    handleBidOrder orElse handleAskPriceQuoteRequest orElse clearingBehavior
+    handleBidOrder orElse handleAskPriceQuoteRequest orElse handleClearRequest
   }
 
   private[this] var auction: OpenBidAuction[T] = OpenBidAuction(reservation, pricingPolicy, tickSize)
+
+}
+
+
+object OpenBidAuctionActor {
+
+  def props[T <: Tradable](reservation: AskOrder[T],
+                           pricingPolicy: PricingPolicy[T],
+                           tickSize: Long,
+                           settlementService: ActorRef): Props = {
+    Props(new OpenBidAuctionActor[T](reservation, pricingPolicy, tickSize, settlementService))
+  }
 
 }
