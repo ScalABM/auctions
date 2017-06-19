@@ -1,29 +1,55 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorRef}
-import org.economicsl.auctions.Tradable
+import akka.actor.{Actor, ActorLogging, ActorRef}
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest
-import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuction
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuction
+import org.economicsl.core.Tradable
+
+import scala.util.{Failure, Success}
 
 
-class OpenBidReverseAuctionActor[T <: Tradable](reservation: BidOrder[T],
-                                                pricingPolicy: PricingPolicy[T],
-                                                settlementService: ActorRef)
-  extends Actor {
+final class OpenBidReverseAuctionActor[T <: Tradable](reservation: BidOrder[T],
+                                                      pricingPolicy: PricingPolicy[T],
+                                                      tickSize: Long,
+                                                      settlementService: ActorRef)
+    extends Actor
+    with ActorLogging
+    with Timestamper {
 
-  def receive: Receive = {
-    case request: BidPriceQuoteRequest[T] =>
-      sender() ! auction.receive(request)
+  def timestamp(): Long = {
+    currentTimeMillis()
+  }
+
+  def handleAskOrder: Receive = {
     case order: AskOrder[T] =>
-      auction = auction.insert(order)
+      auction.insert(order) match {
+        case Success(updated) =>
+          sender() ! Accepted(timestamp(), order)
+          auction = updated
+        case Failure(ex) =>
+          sender() ! Rejected(timestamp(), order, ex)
+      }
+  }
+
+  def handleBidPriceQuoteRequest: Receive = {
+    case quote: BidPriceQuoteRequest[T] =>
+      sender() ! auction.receive(quote)
+  }
+
+  def clearingBehavior: Receive = {
     case ClearRequest =>
       val results = auction.clear
-      settlementService ! results
+      results.fills.foreach(fills => settlementService ! fills)
       auction = results.residual
   }
 
-  var auction: OpenBidReverseAuction[T] = OpenBidReverseAuction(reservation, pricingPolicy)
-  
+
+  def receive: Receive = {
+    handleAskOrder orElse handleBidPriceQuoteRequest orElse clearingBehavior
+  }
+
+  private[this] var auction: OpenBidReverseAuction[T] = OpenBidReverseAuction(reservation, pricingPolicy, tickSize)
+
 }
