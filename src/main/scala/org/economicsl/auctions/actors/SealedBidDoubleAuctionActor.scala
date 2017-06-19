@@ -9,9 +9,9 @@ import org.economicsl.core.Tradable
 import scala.util.{Failure, Success}
 
 
-final class SealedBidDoubleAuctionActor[T <: Tradable](pricingPolicy: PricingPolicy[T],
-                                                       tickSize: Long,
-                                                       settlementService: ActorRef)
+final class SealedBidDoubleAuctionActor[T <: Tradable] private(pricingPolicy: PricingPolicy[T],
+                                                               tickSize: Long,
+                                                               settlementService: ActorRef)
     extends Actor
     with ActorLogging
     with Timestamper {

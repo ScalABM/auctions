@@ -10,10 +10,10 @@ import org.economicsl.core.Tradable
 import scala.util.{Failure, Success}
 
 
-final class OpenBidAuctionActor[T <: Tradable](reservation: AskOrder[T],
-                                               pricingPolicy: PricingPolicy[T],
-                                               tickSize: Long,
-                                               settlementService: ActorRef)
+final class OpenBidAuctionActor[T <: Tradable] private(reservation: AskOrder[T],
+                                                       pricingPolicy: PricingPolicy[T],
+                                                       tickSize: Long,
+                                                       settlementService: ActorRef)
     extends Actor
     with ActorLogging
     with Timestamper {
