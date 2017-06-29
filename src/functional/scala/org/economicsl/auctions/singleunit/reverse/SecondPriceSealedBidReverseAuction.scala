@@ -35,7 +35,7 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
 
   // suppose that buyer must procure some service...
   val buyer: UUID = UUID.randomUUID()
-  val service = Service()
+  val service = Service(UUID.randomUUID())
 
   val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
   val spsbra: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withAskQuotePricingPolicy(reservationPrice, tickSize = 1)
@@ -55,7 +55,7 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
 
   "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "purchase the Service from the seller who offers it at the lowest price." in {
 
-    val winner = results.fills.map(_.map(_.counterparty))
+    val winner = results.contracts.map(_.map(_.counterparty))
     winner should be(Some(Stream(offers.min.issuer)))
 
   }
@@ -63,7 +63,7 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
   "The price paid (received) by the buyer (seller) when using a SPSBRA" should "be the second-lowest offered price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
+    val winningPrice = results.contracts.flatMap(_.headOption.map(_.price))
 
     val withLowestOfferRemoved = withOffers.remove(offers.max)
     withLowestOfferRemoved.orderBook.askPriceQuote should be (winningPrice)

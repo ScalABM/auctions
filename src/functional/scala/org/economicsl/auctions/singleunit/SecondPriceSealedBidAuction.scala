@@ -34,7 +34,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
+  val parkingSpace = ParkingSpace(UUID.randomUUID())
 
   // seller is willing to sell at any positive price
   val tickSize: Currency = 1
@@ -57,7 +57,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val winner = results.fills.map(_.map(_.issuer))
+    val winner = results.contracts.map(_.map(_.issuer))
     winner should be(Some(Stream(bids.max.issuer)))
 
   }
@@ -65,7 +65,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
   "The winning price of a Second-Price, Sealed-Bid Auction (SPSBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
+    val winningPrice = results.contracts.flatMap(_.headOption.map(_.price))
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
     val withHighestBidRemoved = withBids.remove(bids.max)

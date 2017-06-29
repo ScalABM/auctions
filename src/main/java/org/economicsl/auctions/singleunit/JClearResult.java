@@ -16,8 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Fill;
-import org.economicsl.core.Tradable;
+import org.economicsl.auctions.SpotContract;
 import scala.Option;
 
 import java.util.stream.Stream;
@@ -31,7 +30,7 @@ import java.util.stream.Stream;
  */
 public class JClearResult<A> {
 
-    final private Option<Stream<Fill>> fills;
+    final private Option<Stream<SpotContract>> fills;
     final private A residual;
 
     /** Create an instance of `JClearResult`.
@@ -39,7 +38,7 @@ public class JClearResult<A> {
      * @param fills
      * @param residual
      */
-    public JClearResult(Option<Stream<Fill>> fills, A residual) {
+    public JClearResult(Option<Stream<SpotContract>> fills, A residual) {
         this.fills = fills;
         this.residual = residual;
     }
@@ -48,7 +47,7 @@ public class JClearResult<A> {
      *
      * @return `Some(fills)` if ???; `None` otherwise.
      */
-    public Option<Stream<Fill>> getFills() {
+    public Option<Stream<SpotContract>> getFills() {
         return this.fills;
     }
 

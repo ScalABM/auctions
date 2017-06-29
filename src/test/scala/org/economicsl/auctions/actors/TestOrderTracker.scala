@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 KAPSARC
+Copyright 2016 David R. Pugh
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,38 +17,23 @@ package org.economicsl.auctions.actors
 
 import java.util.UUID
 
+import akka.actor.Props
 
-/** Base trait providing UUID generation.
-  *
-  * @author davidrpugh
-  * @since 0.2.0
-  *
-  */
-sealed trait UUIDProvider {
 
-  protected def randomUUID(): UUID = {
-    UUID.randomUUID()
-  }
+class TestOrderTracker private(val issuer: UUID)
+    extends StackableActor
+    with OrderTracking
+    with TokenProvider {
+
+  wrappedBecome(trackingOrders)
 
 }
 
 
-/** Mixin trait providing Reference generation. */
-trait ReferenceProvider
-    extends UUIDProvider {
+object TestOrderTracker {
 
-  final def randomReference(): Reference = {
-    randomUUID()
-  }
-
-}
-
-
-trait TokenProvider
-    extends UUIDProvider {
-
-  final def randomToken(): Token = {
-    randomUUID()
+  def props(issuer: UUID): Props = {
+    Props(new TestOrderTracker(issuer))
   }
 
 }

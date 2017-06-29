@@ -35,7 +35,7 @@ class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGener
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
+  val parkingSpace = ParkingSpace(UUID.randomUUID())
   val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
 
   // seller uses a first-priced, sealed bid auction...
@@ -66,13 +66,13 @@ class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGener
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
-    results.fills.map(_.map(_.issuer)) should be(Some(Stream(bids.max.issuer)))
+    results.contracts.map(_.map(_.issuer)) should be(Some(Stream(bids.max.issuer)))
 
   }
 
   "The winning price of a First-Price, Open-Bid Auction (FPOBA)" should "be the highest submitted bid price." in {
 
-    results.fills.map(_.map(_.price)) should be(Some(Stream(bids.max.limit)))
+    results.contracts.map(_.map(_.price)) should be(Some(Stream(bids.max.limit)))
 
   }
 

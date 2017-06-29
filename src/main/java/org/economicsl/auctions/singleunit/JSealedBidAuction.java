@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.ClearResult;
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
@@ -73,7 +73,7 @@ public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuct
     public JClearResult<JSealedBidAuction<T>> clear() {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
+        Option<Stream<SpotContract>> fills = results.contracts().map(f -> toJavaStream(f, false)); // todo consider parallel=true
         return new JClearResult<>(fills, new JSealedBidAuction<>(results.residual()));
     }
 

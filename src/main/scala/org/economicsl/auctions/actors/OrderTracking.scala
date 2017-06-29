@@ -15,41 +15,35 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import java.util.UUID
-
 import akka.actor.DiagnosticActorLogging
 import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.core.Tradable
 
 
-/** Mixin trait for providing `OrderTracker` behavior.
+/** Mixin trait providing `OrderTracking` behavior.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait OrderTracking
-    extends DiagnosticActorLogging {
-  this: StackableActor =>
+trait OrderTracking {
+  this: StackableActor with DiagnosticActorLogging =>
 
   import OrderTracking._
 
-  /** An `OrderTracker` should add any `Accepted` orders to its collection of outstanding orders; orders that have been
-    * `Canceled` should be removed from the collection of outstanding orders; orders that have been `Rejected` should
-    * be logged for reference.
+  /** Add any `Accepted` orders to the collection of outstanding orders; orders that have been `Canceled` are removed
+    * from the collection of outstanding orders; orders that have been `Rejected` are logged for debugging.
     */
   def trackingOrders: Receive = {
     case Accepted(_, token, order, reference) =>
-      log.info(order.toString)
-      outstandingOrders = outstandingOrders + (token -> (reference, order))
+      outstandingOrders = outstandingOrders + (token -> (reference -> order))
     case message: Rejected =>
       log.debug(message.toString)
-    case message @ Canceled(_, token, _) =>
-      log.info(message.toString)
+    case Canceled(_, token, _) =>
       outstandingOrders = outstandingOrders - token
   }
 
-  /* An `OrderTracker` needs to keep track of outstanding orders. */
-  protected var outstandingOrders: Map[Token, (Reference, Order[Tradable])] = Map.empty
+  /* Any actor mixing in `OrderTracking` needs to keep track of outstanding orders. */
+  var outstandingOrders: Map[Token, (Reference, Order[Tradable])]
 
 }
 
@@ -65,7 +59,7 @@ object OrderTracking {
     * @author davidrpugh
     * @since 0.2.0
     */
-  final case class Accepted(timestamp: Long, token: Token, order: Order[Tradable], reference: UUID)
+  final case class Accepted(timestamp: Timestamp, token: Token, order: Order[Tradable], reference: Reference)
 
 
   /** Message used to indicate that a previously submitted order has been rejected.
@@ -76,10 +70,10 @@ object OrderTracking {
     * @author davidrpugh
     * @since 0.2.0
     */
-  final case class Rejected(timestamp: Long, token: Token, reason: Throwable)
+  final case class Rejected(timestamp: Timestamp, token: Token, reason: Throwable)
 
 
-  /** Message used to indicate that a previously accepted order has been canceled or reduced.
+  /** Message used to indicate that a previously accepted order has been canceled.
     *
     * @param timestamp
     * @param token the unique (to the auction participant) identifier of the previously accepted order.
@@ -87,6 +81,6 @@ object OrderTracking {
     * @author davidrpugh
     * @since 0.2.0
     */
-  final case class Canceled(timestamp: Long, token: Token, reason: String)
+  final case class Canceled(timestamp: Timestamp, token: Token, reason: String)
 
 }

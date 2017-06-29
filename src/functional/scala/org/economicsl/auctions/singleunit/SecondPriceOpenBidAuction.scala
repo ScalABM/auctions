@@ -35,7 +35,7 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
+  val parkingSpace = ParkingSpace(UUID.randomUUID())
 
   // seller is willing to sell at any positive price
   val tickSize: Currency = 1
@@ -66,7 +66,7 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val winner = results.fills.map(_.map(_.issuer))
+    val winner = results.contracts.map(_.map(_.issuer))
     winner should be(Some(Stream(bids.max.issuer)))
 
   }
@@ -74,7 +74,7 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
   "The winning price of a Second-Price, Open-Bid Auction (SPOBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
-    val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
+    val winningPrice = results.contracts.flatMap(_.headOption.map(_.price))
 
 
     // remove the winning bid and then find the bid price of the winner of this new auction...

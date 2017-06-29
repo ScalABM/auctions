@@ -19,7 +19,7 @@ package org.economicsl.auctions.singleunit.reverse;
 import org.economicsl.auctions.quotes.BidPriceQuote;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
 import org.economicsl.auctions.ClearResult;
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
@@ -83,7 +83,7 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
     public JClearResult<JFirstPriceOpenBidReverseAuction<T>> clear() {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
         ClearResult<OpenBidReverseAuction<T>> results = ops.clear();
-        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
+        Option<Stream<SpotContract>> fills = results.contracts().map(f -> toJavaStream(f, false));
         return new JClearResult<>(fills, new JFirstPriceOpenBidReverseAuction<>(results.residual()));
     }
 

@@ -33,10 +33,10 @@ import scala.util.{Random, Success}
   */
 object ContinuousDoubleAuction extends App with OrderGenerator {
 
-  val google: GoogleStock = GoogleStock()
-  val orderBook = FourHeapOrderBook.empty[GoogleStock]
-  val pricingRule = new MidPointPricingPolicy[GoogleStock]
-  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[GoogleStock] = {
+  val google: TestStock = TestStock()
+  val orderBook = FourHeapOrderBook.empty[TestStock]
+  val pricingRule = new MidPointPricingPolicy[TestStock]
+  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[TestStock] = {
     OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule, tickSize = 1)
   }
 
@@ -44,7 +44,7 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
   type DoubleAuction[T <: Tradable] = OpenBidDoubleAuction.DiscriminatoryPricingImpl[T]
   type OrderFlow[T <: Tradable] = Stream[Either[AskOrder[T], BidOrder[T]]]
   val prng = new Random(42)
-  val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = randomOrders(1000000, google, prng)
+  val orders: Stream[Either[AskOrder[TestStock], BidOrder[TestStock]]] = randomOrders(1000000, google, prng)
 
   // A lazy, tail-recursive implementation of a continuous double auction!
   def continuous[T <: Tradable](auction: DoubleAuction[T])(incoming: OrderFlow[T]): Stream[ClearResult[DoubleAuction[T]]] = {
@@ -77,16 +77,16 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
     * containing the unmatched orders following each clear.  Basically the entire auction history is stored in the
     * stream of clear results.
     */
-  val results = continuous[GoogleStock](withDiscriminatoryPricing)(orders)
+  val results = continuous[TestStock](withDiscriminatoryPricing)(orders)
 
   val prices: Stream[Price] = {
-    results.flatMap(result => result.fills)
+    results.flatMap(result => result.contracts)
       .flatMap(fills => fills.headOption)
       .map(fill => fill.price)
   }
 
   val spreadQuotes: Stream[SpreadQuote] = {
-    results.map(result => result.residual.receive(SpreadQuoteRequest[GoogleStock]()))
+    results.map(result => result.residual.receive(SpreadQuoteRequest[TestStock]()))
   }
 
   // print off the first 10 prices...

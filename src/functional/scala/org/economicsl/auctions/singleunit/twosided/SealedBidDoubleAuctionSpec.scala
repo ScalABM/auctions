@@ -45,7 +45,7 @@ class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   "A Sealed-Bid, DoubleAuction (SBDA)" should "generate the same number of fills as orders." in {
 
-    val parkingSpace = ParkingSpace()
+    val parkingSpace = ParkingSpace(UUID.randomUUID())
 
     // how many ask and bid orders should be generated...
     val numberOrders = 100
@@ -82,7 +82,7 @@ class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
     // without rationing, the number of fills should match the number of orders
     val results = withOrders.clear
-    results.fills.map(_.length) should be(Some(numberOrders))
+    results.contracts.map(_.length) should be(Some(numberOrders))
 
   }
 

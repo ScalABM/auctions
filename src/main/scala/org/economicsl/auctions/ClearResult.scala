@@ -18,10 +18,10 @@ package org.economicsl.auctions
 
 /** Class used to represent the results from clearing an auction.
   *
-  * @param fills
+  * @param contracts
   * @param residual
   * @tparam A
   * @author davidrpugh
   * @since 0.1.0
   */
-case class ClearResult[A](fills: Option[Stream[Fill]], residual: A)
+case class ClearResult[A](contracts: Option[Stream[SpotContract]], residual: A)

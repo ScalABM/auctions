@@ -32,21 +32,21 @@ import scala.util.{Random, Success}
 class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
 
   // generate a stream of random orders...
-  val google: GoogleStock = GoogleStock()
+  val google: TestStock = TestStock()
   val prng = new Random(42)
-  val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = {
+  val orders: Stream[Either[AskOrder[TestStock], BidOrder[TestStock]]] = {
     randomOrders(100, google, prng)
   }
 
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
-    val pricingRule = new MidPointPricingPolicy[GoogleStock]
-    val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
+    val pricingRule = new MidPointPricingPolicy[TestStock]
+    val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[TestStock] = {
       SealedBidDoubleAuction.withUniformPricing(pricingRule, tickSize = 1)
     }
 
     // this whole process is data parallel...
-    val withOrders: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
+    val withOrders: SealedBidDoubleAuction.UniformPricingImpl[TestStock] = {
       orders.foldLeft(withUniformPricing){
         case (auction, order) => order match {
           case Left(askOrder) => auction.insert(askOrder) match {
@@ -62,7 +62,7 @@ class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
     }
 
     val results = withOrders.clear
-    results.fills.map(_.map(_.price).toSet).size should be(1)
+    results.contracts.map(_.map(_.price).toSet).size should be(1)
 
   }
 

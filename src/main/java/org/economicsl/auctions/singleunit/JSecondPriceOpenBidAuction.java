@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.ClearResult;
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.quotes.AskPriceQuote;
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
@@ -82,7 +82,7 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
     public JClearResult<JSecondPriceOpenBidAuction<T>> clear() {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
         ClearResult<OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));  // todo consider parallel=true
+        Option<Stream<SpotContract>> fills = results.contracts().map(f -> toJavaStream(f, false));  // todo consider parallel=true
         return new JClearResult<>(fills, new JSecondPriceOpenBidAuction<>(results.residual()));
     }
 

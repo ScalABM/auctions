@@ -33,7 +33,7 @@ import scala.util.Random
 class FourHeapOrderBookSpec extends FlatSpec with Matchers {
 
   // suppose that seller must sell the parking space at any positive price...
-  val tradable = TestTradable()
+  val tradable = TestTradable(UUID.randomUUID())
 
   // suppose that there are lots of bidders
   val prng = new Random(42)

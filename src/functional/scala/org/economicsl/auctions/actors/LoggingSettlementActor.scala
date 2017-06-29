@@ -15,40 +15,16 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import java.util.UUID
+import akka.actor.{Actor, DiagnosticActorLogging}
+import org.economicsl.auctions.SpotContract
 
 
-/** Base trait providing UUID generation.
-  *
-  * @author davidrpugh
-  * @since 0.2.0
-  *
-  */
-sealed trait UUIDProvider {
+class LoggingSettlementActor
+    extends Actor
+    with DiagnosticActorLogging {
 
-  protected def randomUUID(): UUID = {
-    UUID.randomUUID()
-  }
-
-}
-
-
-/** Mixin trait providing Reference generation. */
-trait ReferenceProvider
-    extends UUIDProvider {
-
-  final def randomReference(): Reference = {
-    randomUUID()
-  }
-
-}
-
-
-trait TokenProvider
-    extends UUIDProvider {
-
-  final def randomToken(): Token = {
-    randomUUID()
+  def receive: Receive = {
+    case contract: SpotContract => log.info(contract.toString)
   }
 
 }

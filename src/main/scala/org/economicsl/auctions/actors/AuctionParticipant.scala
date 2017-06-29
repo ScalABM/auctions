@@ -16,37 +16,41 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 
-import akka.actor.ActorIdentity
+import akka.actor.DiagnosticActorLogging
+import org.economicsl.core.{Currency, Tradable}
 
 
 /** Base trait for all `AuctionParticipant` actors.
   *
   * @author davidrpugh
   * @since 0.2.0
-  * @note if auction registry fails for some reason it will need to be re-identified; during re-identification auction
-  *       participant should continue to process messages received by any auctions to which it has previously registered.
+  * @todo if auction registry fails for some reason while the auction participant is "active", the auction registry will
+  *       need to be re-identified; during re-identification auction participant should continue to process messages
+  *       received by any auctions to which it has previously registered.
   */
 trait AuctionParticipant
     extends StackableActor
-    with AuctionRegistryIdentifier
+    with DiagnosticActorLogging
     with OrderTracking {
 
-  wrappedBecome(identifyingAuctionRegistry)
+  import AuctionParticipant._
 
-  @scala.throws[Exception](classOf[Exception])
-  override def preStart(): Unit = {
-    super.preStart()
-    identify(auctionRegistryPath, "auctionRegistry")
-  }
-
-  override def identifyingAuctionRegistry: Receive = {
-    case message @ ActorIdentity("auctionRegistry", Some(_)) =>
+  override def receive: Receive = {
+    case protocol : AuctionProtocol =>
+      auctions = auctions + (sender() -> protocol)
+    case message =>
       super.receive(message)
-      context.become(active)
   }
 
-  def active: Receive = {
-    registeringAuctions orElse trackingOrders
-  }
+  /* An `AuctionParticipant` needs to keep track of multiple auction protocols. */
+  protected var auctions: Map[AuctionRef, AuctionProtocol] = Map.empty
+
+}
+
+
+object AuctionParticipant {
+
+  /** Need some data structure to convey the information about an auction to participants. */
+  final case class AuctionProtocol(tickSize: Currency, tradable: Tradable)
 
 }

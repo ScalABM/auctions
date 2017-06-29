@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit.twosided;
 
 import org.economicsl.auctions.quotes.*;
 import org.economicsl.auctions.ClearResult;
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
@@ -126,7 +126,7 @@ public class JOpenBidDoubleAuction {
         public JClearResult<DiscriminatoryPricingImpl<T>> clear() {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             ClearResult<OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
-            Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
+            Option<Stream<SpotContract>> fills = results.contracts().map(f -> toJavaStream(f, false));
             return new JClearResult<>(fills, new DiscriminatoryPricingImpl<>(results.residual()));
         }
 
@@ -221,7 +221,7 @@ public class JOpenBidDoubleAuction {
         public JClearResult<UniformPricingImpl<T>> clear() {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
             ClearResult<OpenBidDoubleAuction.UniformPricingImpl<T>> results = ops.clear();
-            Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
+            Option<Stream<SpotContract>> fills = results.contracts().map(f -> toJavaStream(f, false));
             return new JClearResult<>(fills, new UniformPricingImpl<>(results.residual()));
         }
 

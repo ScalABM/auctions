@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse;
 
 
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.singleunit.JClearResult;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.core.Tradable;
@@ -54,7 +54,7 @@ abstract class AbstractSealedBidReverseAuction<T extends Tradable, A> {
     public abstract JClearResult<A> clear();
 
     /* Converts a Scala `Iterable` to a Java `Stream`. */
-    protected Stream<Fill> toJavaStream(Iterable<Fill> input, boolean parallel) {
+    protected Stream<SpotContract> toJavaStream(Iterable<SpotContract> input, boolean parallel) {
         return StreamSupport.stream(JavaConverters.asJavaIterable(input).spliterator(), parallel);
     }
 
