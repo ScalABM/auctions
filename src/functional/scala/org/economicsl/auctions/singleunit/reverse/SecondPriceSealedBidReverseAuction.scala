@@ -65,7 +65,7 @@ class SecondPriceSealedBidReverseAuction extends FlatSpec with Matchers with Ask
     // winning price from the original auction...
     val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
 
-    val withLowestOfferRemoved = withOffers.remove(offers.max)
+    val withLowestOfferRemoved = withOffers.cancel(offers.max)
     withLowestOfferRemoved.orderBook.askPriceQuote should be (winningPrice)
 
   }

@@ -70,7 +70,7 @@ public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<
      */
     public JOpenBidAuction<T> remove(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JOpenBidAuction<>(ops.remove(order));
+        return new JOpenBidAuction<>(ops.cancel(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.

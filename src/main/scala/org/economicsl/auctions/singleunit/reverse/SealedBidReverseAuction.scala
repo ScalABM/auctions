@@ -16,11 +16,9 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 import org.economicsl.core.{Currency, Tradable}
-
-import scala.util.Try
 
 
 /** Type class representing a "sealed-bid" reverse auction mechanism.
@@ -34,7 +32,9 @@ import scala.util.Try
   * @author davidrpugh
   * @since 0.1.0
   */
-class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T], val tickSize: Currency)
+class SealedBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T],
+                                                     val pricingPolicy: PricingPolicy[T],
+                                                     val tickSize: Currency)
 
 
 /** Companion object for the `SealedBidReverseAuction` type class.
@@ -51,15 +51,6 @@ object SealedBidReverseAuction {
   implicit def reverseAuctionLike[T <: Tradable]: SealedBidReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] = {
 
     new SealedBidReverseAuctionLike[T, SealedBidReverseAuction[T]] with UniformPricing[T, SealedBidReverseAuction[T]] {
-
-      def insert(a: SealedBidReverseAuction[T], order: AskOrder[T]): Try[SealedBidReverseAuction[T]] = Try {
-        require(order.limit.value % a.tickSize == 0)
-        new SealedBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-      }
-
-      def remove(a: SealedBidReverseAuction[T], order: AskOrder[T]): SealedBidReverseAuction[T] = {
-        new SealedBidReverseAuction[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-      }
 
       protected def withOrderBook(a: SealedBidReverseAuction[T], orderBook: FourHeapOrderBook[T]): SealedBidReverseAuction[T] = {
         new SealedBidReverseAuction[T](orderBook, a.pricingPolicy, a.tickSize)

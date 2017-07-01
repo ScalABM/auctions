@@ -15,14 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.ClearResult
+import org.economicsl.auctions.{ClearResult, Reference, Token}
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 import org.economicsl.core.Tradable
-
-import scala.util.Try
 
 
 /** Trait extends sealed-bid reverse auction-like behavior to include the ability to process bid price quote requests.
@@ -51,23 +49,17 @@ object OpenBidReverseAuctionLike {
 
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidReverseAuctionLike[T, A]) {
 
-    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
-      *
-      * @param order the `AskOrder` that should be added to the `orderBook`.
-      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
-      */
-    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
+    import org.economicsl.auctions.AuctionParticipant._
 
-    def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
-
-    /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
-      * except the `order`.
+    /** Remove a previously accepted `AskOrder` instance from the `orderBook`.
       *
-      * @param order the `AskOrder` that should be added to the `orderBook`.
-      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
-      *         except the `order`.
+      * @param reference the unique identifier for the `AskOrder` that should be removed from the `orderBook`.
+      * @return a `Tuple` whose first element is a `Canceled` instance encapsulating information about `AskOrder` that
+      *         has been removed from the `orderBook` and whose second element is an instance of type class `A` whose
+      *         `orderBook` contains all previously submitted `AskOrder` instances except the `AskOrder` corresponding
+      *         to the `reference` identifier.
       */
-    def remove(order: AskOrder[T]): A = ev.remove(a, order)
+    def cancel(reference: Reference): (A, Option[Canceled]) = ev.cancel(a, reference)
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
       *
@@ -76,6 +68,15 @@ object OpenBidReverseAuctionLike {
       *         `AskOrder` and `BidOrder` instances.
       */
     def clear: ClearResult[A] = ev.clear(a)
+
+    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+      *
+      * @param kv
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+      */
+    def insert(kv: (Token, AskOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
+
+    def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
 
   }
 

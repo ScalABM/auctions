@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.ClearResult
+import org.economicsl.auctions.{ClearResult, Reference}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.SealedBidAuctionLike
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
@@ -33,8 +33,8 @@ import scala.util.Try
   * @since 0.1.0
   */
 trait SealedBidDoubleAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
-  extends SealedBidAuctionLike[T, A]
-  with SealedBidReverseAuctionLike[T, A]
+    extends SealedBidAuctionLike[T, A]
+    with SealedBidReverseAuctionLike[T, A]
 
 
 /** Companion object for the `SealedBidDoubleAuctionLike` trait.
@@ -44,21 +44,21 @@ trait SealedBidDoubleAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOr
   */
 object SealedBidDoubleAuctionLike {
 
-  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidDoubleAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def tickSize: Long; def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidDoubleAuctionLike[T, A]) {
 
     /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
       *
       * @param order the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
+    def insert(order: AskOrder[T]): Try[(Reference, A)] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
       *
       * @param order the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
+    def insert(order: BidOrder[T]): Try[(Reference, A)] = ev.insert(a, order)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       * `BidOrder` instances except the `order`.
@@ -67,7 +67,7 @@ object SealedBidDoubleAuctionLike {
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       *         `BidOrder` instances except the `order`.
       */
-    def remove(order: AskOrder[T]): A = ev.remove(a, order)
+    def remove(reference: Reference): (AskOrder[T], A) = ev.cancel(a, reference)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
       * except the `order`.
@@ -76,7 +76,7 @@ object SealedBidDoubleAuctionLike {
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       *         `BidOrder` instances except the `order`.
       */
-    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+    def remove(reference: Reference): (BidOrder[T], A) = ev.cancel(a, reference)
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
       *

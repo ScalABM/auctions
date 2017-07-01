@@ -15,14 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.ClearResult
+import org.economicsl.auctions.{ClearResult, Reference, Token}
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
 import org.economicsl.core.Tradable
-
-import scala.util.Try
 
 
 /** Trait that extends "auction-like" behavior to include the ability to process ask price quote requests.
@@ -49,23 +47,16 @@ object OpenBidAuctionLike {
 
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidAuctionLike[T, A]) {
 
-    /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
-      *
-      * @param order the `BidOrder` that should be added to the `orderBook`.
-      * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
-      */
-    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
-
-    def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = ev.receive(a, request)
+    import org.economicsl.auctions.AuctionParticipant._
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
       * except the `order`.
       *
-      * @param order the `BidOrder` that should be added to the `orderBook`.
+      * @param reference the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
       *         except the `order`.
       */
-    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+    def cancel(reference: Reference): (A, Option[Canceled]) = ev.cancel(a, reference)
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
       *
@@ -74,6 +65,16 @@ object OpenBidAuctionLike {
       *         `AskOrder` and `BidOrder` instances.
       */
     def clear: ClearResult[A] = ev.clear(a)
+
+    /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
+      *
+      * @param kv
+      * @return a `Tuple` containing a unique identifier for the inserted `order` as well as an instance of type class `A`
+      *         whose order book contains all previously submitted `BidOrder` instances.
+      */
+    def insert(kv: (Token, BidOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
+
+    def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = ev.receive(a, request)
 
   }
 

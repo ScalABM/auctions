@@ -15,13 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.{Reference, ReferenceGenerator, Token}
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 import org.economicsl.core.{Currency, Tradable}
-
-import scala.util.Try
 
 
 /** Type class representing an "open-bid" auction mechanism.
@@ -35,7 +34,9 @@ import scala.util.Try
   * @author davidrpugh
   * @since 0.1.0
   */
-class OpenBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T], val tickSize: Currency)
+class OpenBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T],
+                                            val pricingPolicy: PricingPolicy[T],
+                                            val tickSize: Currency)
 
 
 /** Companion object for the `OpenBidAuction` type class.
@@ -53,17 +54,8 @@ object OpenBidAuction {
 
     new OpenBidAuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] {
 
-      def insert(a: OpenBidAuction[T], order: BidOrder[T]): Try[OpenBidAuction[T]] = Try {
-        require(order.limit.value % a.tickSize == 0)
-        new OpenBidAuction[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-      }
-
       def receive(a: OpenBidAuction[T], request: AskPriceQuoteRequest[T]): AskPriceQuote = {
         askPriceQuotingPolicy(a.orderBook, request)
-      }
-
-      def remove(a: OpenBidAuction[T], order: BidOrder[T]): OpenBidAuction[T] = {
-        new OpenBidAuction[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
       }
 
       protected def withOrderBook(a: OpenBidAuction[T], orderBook: FourHeapOrderBook[T]): OpenBidAuction[T] = {

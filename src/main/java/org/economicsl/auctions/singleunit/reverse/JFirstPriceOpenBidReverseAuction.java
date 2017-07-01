@@ -73,7 +73,7 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
      */
     public JFirstPriceOpenBidReverseAuction<T> remove(AskOrder<T> order) {
         OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> ops = mkReverseAuctionLikeOps(this.auction);
-        return new JFirstPriceOpenBidReverseAuction<>(ops.remove(order));
+        return new JFirstPriceOpenBidReverseAuction<>(ops.cancel(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
@@ -90,7 +90,7 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
     private JFirstPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
 
     private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
-        return OpenBidReverseAuction$.MODULE$.openReverseAuctionLikeOps(a);
+        return OpenBidReverseAuction$.MODULE$.reverseAuctionLikeOps(a);
     }
 
 }

@@ -82,7 +82,7 @@ object OpenBidDoubleAuctionLike {
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       *         `BidOrder` instances except the `order`.
       */
-    def remove(order: AskOrder[T]): A = ev.remove(a, order)
+    def remove(order: AskOrder[T]): A = ev.cancel(a, order)
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       * `BidOrder` instances except the `order`.
@@ -91,7 +91,7 @@ object OpenBidDoubleAuctionLike {
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       *         `BidOrder` instances except the `order`.
       */
-    def remove(order: BidOrder[T]): A = ev.remove(a, order)
+    def remove(order: BidOrder[T]): A = ev.cancel(a, order)
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
       *

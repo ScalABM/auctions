@@ -25,4 +25,13 @@ package object auctions {
 
   type Seller = UUID
 
+  /* Type alias used to denote a unique identifier for each auction participant. */
+  type Issuer = UUID
+
+  /* Type alias used to denote a unique (to the auction!) identifier for an accepted order. */
+  type Reference = UUID
+
+  /* Type alias used to denote a unique (to the auction participant!) identifier for an accepted order. */
+  type Token = UUID
+
 }

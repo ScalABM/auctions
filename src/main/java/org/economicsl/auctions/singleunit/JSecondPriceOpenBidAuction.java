@@ -72,7 +72,7 @@ public class JSecondPriceOpenBidAuction<T extends Tradable>
      */
     public JSecondPriceOpenBidAuction<T> remove(BidOrder<T> order) {
         OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = OpenBidAuction$.MODULE$.mkAuctionOps(this.auction);
-        return new JSecondPriceOpenBidAuction<>(ops.remove(order));
+        return new JSecondPriceOpenBidAuction<>(ops.cancel(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.

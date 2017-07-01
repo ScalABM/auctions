@@ -63,7 +63,7 @@ public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuct
      */
     public JSealedBidAuction<T> remove(BidOrder<T> order) {
         SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JSealedBidAuction<>(ops.remove(order));
+        return new JSealedBidAuction<>(ops.cancel(order));
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.

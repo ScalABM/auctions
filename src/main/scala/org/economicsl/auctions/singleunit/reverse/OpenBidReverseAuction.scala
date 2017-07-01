@@ -17,11 +17,9 @@ package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 import org.economicsl.core.{Currency, Tradable}
-
-import scala.util.Try
 
 
 /** Type class representing an "open-bid" reverse auction mechanism.
@@ -45,25 +43,16 @@ class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderB
   */
 object OpenBidReverseAuction {
 
-  implicit def openReverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenBidReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
+  implicit def reverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenBidReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
     new OpenBidReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]](a)
   }
 
-  implicit def openReverseAuctionLike[T <: Tradable]: OpenBidReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
+  implicit def reverseAuctionLike[T <: Tradable]: OpenBidReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
 
     new OpenBidReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] {
 
-      def insert(a: OpenBidReverseAuction[T], order: AskOrder[T]): Try[OpenBidReverseAuction[T]] = Try {
-        require(order.limit.value % a.tickSize == 0)
-        new OpenBidReverseAuction[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-      }
-
       def receive(a: OpenBidReverseAuction[T], request: BidPriceQuoteRequest[T]): BidPriceQuote = {
         bidPriceQuotingPolicy(a.orderBook, request)
-      }
-      
-      def remove(a: OpenBidReverseAuction[T], order: AskOrder[T]): OpenBidReverseAuction[T] = {
-        new OpenBidReverseAuction[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
       }
 
       protected def withOrderBook(a: OpenBidReverseAuction[T], orderBook: FourHeapOrderBook[T]): OpenBidReverseAuction[T] = {

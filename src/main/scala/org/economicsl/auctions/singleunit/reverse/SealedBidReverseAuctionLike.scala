@@ -15,12 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
-import org.economicsl.auctions.ClearResult
+import org.economicsl.auctions.{ClearResult, Reference, Token}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.core.Tradable
-
-import scala.util.Try
 
 
 /** Base trait defining "reverse auction-like" behavior.
@@ -30,25 +28,29 @@ import scala.util.Try
   * @author davidrpugh
   * @since 0.1.0
   */
-trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }] {
+trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def tickSize: Long; def orderBook: FourHeapOrderBook[T] }] {
 
-  /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+  import org.economicsl.auctions.AuctionParticipant._
+
+  /** Remove a previously accepted `AskOrder` instance from the `orderBook`.
     *
     * @param a an instance of type class `A`.
-    * @param order the `AskOrder` that should be added to the `orderBook`.
-    * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+    * @param reference the unique identifier for the `AskOrder` that should be removed from the `orderBook`.
+    * @return a `Tuple` whose first element is a `Canceled` instance encapsulating information about `AskOrder` that
+    *         has been removed from the `orderBook` and whose second element is an instance of type class `A` whose
+    *         `orderBook` contains all previously submitted `AskOrder` instances except the `AskOrder` corresponding
+    *         to the `reference` identifier.
     */
-  def insert(a: A, order: AskOrder[T]): Try[A]
-
-  /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
-    * except the `order`.
-    *
-    * @param a an instance of type class `A`.
-    * @param order the `AskOrder` that should be added to the `orderBook`.
-    * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances
-    *         except the `order`.
-    */
-  def remove(a: A, order: AskOrder[T]): A
+  def cancel(a: A, reference: Reference): (A, Option[Canceled]) = {
+    val (kv, residualOrderBook) = a.orderBook.remove(reference)
+    kv match {
+      case Some((token, removedOrder)) =>
+        val canceled = Canceled(removedOrder.issuer, token)
+        (withOrderBook(a, residualOrderBook), Some(canceled))
+      case None =>
+        (a, None)
+    }
+  }
 
   /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
     *
@@ -59,21 +61,46 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapO
     */
   def clear(a: A): ClearResult[A]
 
+  /** Attempt to insert an new `AskOrder` into the `orderBook`.
+    *
+    * @param a an instance of type class `A`.
+    * @param kv
+    * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+    */
+  def insert(a: A, kv: (Token, AskOrder[T])): (A, Either[Rejected, Accepted]) = {
+    val (_, order) = kv
+    if (order.limit.value % a.tickSize > 0) {
+      val reason = s"Limit price of ${order.limit} is not a multiple of the tick size ${a.tickSize}"
+      val rejected = Rejected(order.issuer, reason)
+      (a, Left(rejected))
+    } else {
+      val reference: Reference = ???
+      val accepted = Accepted(order.issuer, reference)
+      val updatedOrderBook = a.orderBook.insert(reference -> kv)
+      (withOrderBook(a, updatedOrderBook), Right(accepted))
+    }
+  }
+
+  protected def withOrderBook(a: A, orderBook: FourHeapOrderBook[T]): A
+
 }
 
 
 object SealedBidReverseAuctionLike {
 
-  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidReverseAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: { def tickSize: Long; def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidReverseAuctionLike[T, A]) {
 
-    /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
+    import org.economicsl.auctions.AuctionParticipant._
+
+    /** Remove a previously accepted `AskOrder` instance from the `orderBook`.
       *
-      * @param order the `AskOrder` that should be added to the `orderBook`.
-      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+      * @param reference the unique identifier for the `AskOrder` that should be removed from the `orderBook`.
+      * @return a `Tuple` whose first element is a `Canceled` instance encapsulating information about `AskOrder` that
+      *         has been removed from the `orderBook` and whose second element is an instance of type class `A` whose
+      *         `orderBook` contains all previously submitted `AskOrder` instances except the `AskOrder` corresponding
+      *         to the `reference` identifier.
       */
-    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
-
-    def remove(order: AskOrder[T]): A = ev.remove(a, order)
+    def cancel(reference: Reference): (A, Option[Canceled]) = ev.cancel(a, reference)
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
       *
@@ -82,6 +109,13 @@ object SealedBidReverseAuctionLike {
       *         `AskOrder` and `BidOrder` instances.
       */
     def clear: ClearResult[A] = ev.clear(a)
+
+    /** Attempt to insert an new `AskOrder` into the `orderBook`.
+      *
+      * @param kv
+      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
+      */
+    def insert(kv: (Token, AskOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
 
   }
 

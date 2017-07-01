@@ -68,7 +68,7 @@ class SecondPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGe
     val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
-    val withHighestBidRemoved = withBids.remove(bids.max)
+    val withHighestBidRemoved = withBids.cancel(bids.max)
     withHighestBidRemoved.orderBook.askPriceQuote should be (winningPrice)
 
   }

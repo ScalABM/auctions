@@ -15,12 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.{Reference, ReferenceGenerator, Token}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 import org.economicsl.core.{Currency, Tradable}
-
-import scala.util.Try
 
 
 /** Type class representing a "sealed-bid" auction mechanism.
@@ -34,7 +33,9 @@ import scala.util.Try
   * @author davidrpugh
   * @since 0.1.0
   */
-class SealedBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T], val tickSize: Currency)
+class SealedBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T],
+                                              val pricingPolicy: PricingPolicy[T],
+                                              val tickSize: Currency)
 
 
 /** Companion object for the `SealedBidAuction` type class.
@@ -65,17 +66,8 @@ object SealedBidAuction {
 
     new SealedBidAuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] {
 
-      def insert(a: SealedBidAuction[T], order: BidOrder[T]): Try[SealedBidAuction[T]] = Try {
-        require(order.limit.value % a.tickSize == 0)
-        new SealedBidAuction[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-      }
-
-      def remove(a: SealedBidAuction[T], order: BidOrder[T]): SealedBidAuction[T] = {
-        new SealedBidAuction[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-      }
-
       protected def withOrderBook(a: SealedBidAuction[T], orderBook: FourHeapOrderBook[T]): SealedBidAuction[T] = {
-        new SealedBidAuction[T](orderBook, a.pricingPolicy, a.tickSize)
+        new SealedBidAuction(orderBook, a.pricingPolicy, a.tickSize)
       }
 
     }
