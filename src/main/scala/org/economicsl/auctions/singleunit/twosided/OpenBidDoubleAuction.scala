@@ -17,12 +17,9 @@ package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
 import org.economicsl.auctions.singleunit.twosided.OpenBidDoubleAuctionLike.Ops
 import org.economicsl.core.{Currency, Tradable}
-
-import scala.util.Try
 
 
 /** Base trait for representing an "open-bid" double auction mechanism.
@@ -96,16 +93,6 @@ object OpenBidDoubleAuction {
 
       new OpenBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
 
-        def insert(a: DiscriminatoryPricingImpl[T], order: AskOrder[T]): Try[DiscriminatoryPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def insert(a: DiscriminatoryPricingImpl[T], order: BidOrder[T]): Try[DiscriminatoryPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
         def receive(a: DiscriminatoryPricingImpl[T], request: AskPriceQuoteRequest[T]): AskPriceQuote = {
           askPriceQuotingPolicy(a.orderBook, request)
         }
@@ -116,14 +103,6 @@ object OpenBidDoubleAuction {
 
         def receive(a: DiscriminatoryPricingImpl[T], request: SpreadQuoteRequest[T]): SpreadQuote = {
           spreadQuotingPolicy(a.orderBook, request)
-        }
-
-        def remove(a: DiscriminatoryPricingImpl[T], order: AskOrder[T]): DiscriminatoryPricingImpl[T] = {
-          new DiscriminatoryPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def remove(a: DiscriminatoryPricingImpl[T], order: BidOrder[T]): DiscriminatoryPricingImpl[T] = {
-          new DiscriminatoryPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
         }
 
         protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
@@ -167,16 +146,6 @@ object OpenBidDoubleAuction {
 
       new OpenBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
 
-        def insert(a: UniformPricingImpl[T], order: AskOrder[T]): Try[UniformPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def insert(a: UniformPricingImpl[T], order: BidOrder[T]): Try[UniformPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
         def receive(a: UniformPricingImpl[T], request: AskPriceQuoteRequest[T]): AskPriceQuote = {
           askPriceQuotingPolicy(a.orderBook, request)
         }
@@ -187,14 +156,6 @@ object OpenBidDoubleAuction {
 
         def receive(a: UniformPricingImpl[T], request: SpreadQuoteRequest[T]): SpreadQuote = {
           spreadQuotingPolicy(a.orderBook, request)
-        }
-
-        def remove(a: UniformPricingImpl[T], order: AskOrder[T]): UniformPricingImpl[T] = {
-          new UniformPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def remove(a: UniformPricingImpl[T], order: BidOrder[T]): UniformPricingImpl[T] = {
-          new UniformPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
         }
 
         protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {

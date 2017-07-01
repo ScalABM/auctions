@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.Reference
+import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
 import org.economicsl.core.Tradable
 
@@ -34,10 +34,10 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
   require(notCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `UnMatchedOrders` instance. */
-  val askOrdering: Ordering[(Reference, AskOrder[T])] = askOrders.ordering
+  val askOrdering: Ordering[(Reference, (Token, AskOrder[T]))] = askOrders.ordering
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
-  val bidOrdering: Ordering[(Reference, BidOrder[T])] = bidOrders.ordering
+  val bidOrdering: Ordering[(Reference, (Token, BidOrder[T]))] = bidOrders.ordering
 
   /** Create a new `UnMatchedOrders` instance containing the additional `AskOrder`.
     *
@@ -45,10 +45,10 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
     * @return a new `UnMatchedOrders` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (Reference, Order[T])): UnMatchedOrders[T] = kv match {
-    case askOrder@(_, _: AskOrder[T]) =>
+  def + (kv: (Reference, (Token, Order[T]))): UnMatchedOrders[T] = kv match {
+    case askOrder@(_, (_, _: AskOrder[T])) =>
       new UnMatchedOrders(askOrders + askOrder, bidOrders)
-    case bidOrder@(_, _: BidOrder[T]) =>
+    case bidOrder@(_, (_, _: BidOrder[T])) =>
       new UnMatchedOrders(askOrders, bidOrders + bidOrder)
   }
 
@@ -75,10 +75,14 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
     */
   def contains(reference: Reference): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
 
+  def get(reference: Reference): Option[(Token, Order[T])] = {
+    ???
+  }
+
   /* Used to check the invariant that must hold for all `UnMatchedOrders` instances. */
   private[this] def notCrossed: Boolean = {
-    bidOrders.headOption.forall{ case (_, bidOrder) =>
-      askOrders.headOption.forall{ case (_, askOrder) =>
+    bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
+      askOrders.headOption.forall{ case (_, (_, askOrder)) =>
         bidOrder.limit <= askOrder.limit
       }
     }
@@ -105,8 +109,7 @@ object UnMatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from high to low based on `limit` price.
     */
-  def empty[T <: Tradable](askOrdering: Ordering[(Reference, AskOrder[T])],
-                           bidOrdering: Ordering[(Reference, BidOrder[T])]): UnMatchedOrders[T] = {
+  def empty[T <: Tradable](askOrdering: Ordering[AskOrder[T]], bidOrdering: Ordering[BidOrder[T]]): UnMatchedOrders[T] = {
     new UnMatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 

@@ -39,7 +39,7 @@ final class SortedAskOrders[T <: Tradable] private(existing: Map[Reference, (Tok
                                                    val numberUnits: Quantity) {
 
   /** The ordering used to sort the `AskOrder` instances contained in this `SortedAskOrders` instance. */
-  val ordering: Ordering[AskOrder[T]] = sorted.ordering
+  val ordering: Ordering[(Reference, (Token, AskOrder[T]))] = sorted.ordering
 
   /** Create a new `SortedAskOrders` instance containing the additional `AskOrder`.
     *
@@ -48,7 +48,7 @@ final class SortedAskOrders[T <: Tradable] private(existing: Map[Reference, (Tok
     *         also contains the `order`.
     */
   def + (kv: (Reference, (Token, AskOrder[T]))): SortedAskOrders[T] = {
-    new SortedAskOrders(existing + kv, sorted + kv._2, numberUnits + kv._2.quantity)
+    new SortedAskOrders(existing + kv, sorted + kv, numberUnits + kv._2._2.quantity)
   }
 
   /** Create a new `SortedAskOrders` instance with the given `AskOrder` removed from this `SortedAskOrders` instance.
@@ -58,8 +58,8 @@ final class SortedAskOrders[T <: Tradable] private(existing: Map[Reference, (Tok
     */
   def - (reference: Reference): SortedAskOrders[T] = {
     existing.get(reference) match {
-      case Some(askOrder) =>
-        new SortedAskOrders(existing - reference, sorted - askOrder, numberUnits - askOrder.quantity)
+      case Some((token, order)) =>
+        new SortedAskOrders(existing - reference, sorted - (reference -> (token -> order)), numberUnits - order.quantity)
       case None =>  // attempt to remove ask order that had already been processed!
         this
     }
@@ -108,8 +108,8 @@ object SortedAskOrders {
     * @return an instance of `SortedAskOrders`.
     */
   def empty[T <: Tradable](ordering: Ordering[AskOrder[T]]): SortedAskOrders[T] = {
-    val existing = immutable.HashMap.empty[Reference, AskOrder[T]]
-    val sorted = immutable.TreeSet.empty[AskOrder[T]](ordering)
+    val existing = immutable.HashMap.empty[Reference, (Token, AskOrder[T])]
+    val sorted = immutable.TreeSet.empty[(Reference, (Token, AskOrder[T]))](???)  // todo need to convert ordering!
     new SortedAskOrders(existing, sorted, Quantity.zero)
   }
 

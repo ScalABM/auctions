@@ -16,11 +16,8 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
 import org.economicsl.core.{Currency, Tradable}
-
-import scala.util.Try
 
 
 /** Base trait for representing a "sealed-bid" double auction mechanism.
@@ -105,24 +102,6 @@ object SealedBidDoubleAuction {
 
       new SealedBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
 
-        def insert(a: DiscriminatoryPricingImpl[T], order: AskOrder[T]): Try[DiscriminatoryPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def insert(a: DiscriminatoryPricingImpl[T], order: BidOrder[T]): Try[DiscriminatoryPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new DiscriminatoryPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def remove(a: DiscriminatoryPricingImpl[T], order: AskOrder[T]): DiscriminatoryPricingImpl[T] = {
-          new DiscriminatoryPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def remove(a: DiscriminatoryPricingImpl[T], order: BidOrder[T]): DiscriminatoryPricingImpl[T] = {
-          new DiscriminatoryPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-        }
-
         protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
         }
@@ -163,24 +142,6 @@ object SealedBidDoubleAuction {
     implicit def doubleAuctionLike[T <: Tradable]: SealedBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
 
       new SealedBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
-
-        def insert(a: UniformPricingImpl[T], order: AskOrder[T]): Try[UniformPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def insert(a: UniformPricingImpl[T], order: BidOrder[T]): Try[UniformPricingImpl[T]] = Try {
-          require(order.limit.value % a.tickSize == 0)
-          new UniformPricingImpl[T](a.orderBook.insert(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def remove(a: UniformPricingImpl[T], order: AskOrder[T]): UniformPricingImpl[T] = {
-          new UniformPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-        }
-
-        def remove(a: UniformPricingImpl[T], order: BidOrder[T]): UniformPricingImpl[T] = {
-          new UniformPricingImpl[T](a.orderBook.remove(order), a.pricingPolicy, a.tickSize)
-        }
 
         protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)

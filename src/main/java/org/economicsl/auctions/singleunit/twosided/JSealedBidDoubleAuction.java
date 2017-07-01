@@ -90,7 +90,7 @@ public class JSealedBidDoubleAuction {
          */
         public DiscriminatoryPricingImpl<T> remove(AskOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
-            return new DiscriminatoryPricingImpl<>(ops.remove(order));
+            return new DiscriminatoryPricingImpl<>(ops.cancel(order));
         }
 
         /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
@@ -102,7 +102,7 @@ public class JSealedBidDoubleAuction {
          */
         public DiscriminatoryPricingImpl<T> remove(BidOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
-            return new DiscriminatoryPricingImpl<>(ops.remove(order));
+            return new DiscriminatoryPricingImpl<>(ops.cancel(order));
         }
 
         /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
@@ -162,7 +162,7 @@ public class JSealedBidDoubleAuction {
          */
         public UniformPricingImpl<T> remove(AskOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
-            return new UniformPricingImpl<>(ops.remove(order));
+            return new UniformPricingImpl<>(ops.cancel(order));
         }
 
         /** Create a new instance of `UniformPricingImpl` whose order book contains all previously submitted `BidOrder`
@@ -174,7 +174,7 @@ public class JSealedBidDoubleAuction {
          */
         public UniformPricingImpl<T> remove(BidOrder<T> order) {
             SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
-            return new UniformPricingImpl<>(ops.remove(order));
+            return new UniformPricingImpl<>(ops.cancel(order));
         }
 
         public JClearResult<UniformPricingImpl<T>> clear() {

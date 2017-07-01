@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.ClearResult
+import org.economicsl.auctions.{ClearResult, Reference, Token}
 import org.economicsl.auctions.quotes._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.OpenBidAuctionLike
@@ -23,8 +23,6 @@ import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting, SpreadQuotingPolicy}
 import org.economicsl.auctions.singleunit.reverse.OpenBidReverseAuctionLike
 import org.economicsl.core.Tradable
-
-import scala.util.Try
 
 
 /** Base trait defining "open-bid" reverse auction-like behavior.
@@ -55,19 +53,21 @@ object OpenBidDoubleAuctionLike {
 
   class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidDoubleAuctionLike[T, A]) {
 
+    import org.economicsl.auctions.AuctionParticipant._
+
     /** Create a new instance of type class `A` whose order book contains an additional `AskOrder`.
       *
-      * @param order the `AskOrder` that should be added to the `orderBook`.
+      * @param kv the `AskOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(order: AskOrder[T]): Try[A] = ev.insert(a, order)
+    def insert(kv: (Token, AskOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
 
     /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
       *
-      * @param order the `BidOrder` that should be added to the `orderBook`.
+      * @param kv the `BidOrder` that should be added to the `orderBook`.
       * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances.
       */
-    def insert(order: BidOrder[T]): Try[A] = ev.insert(a, order)
+    def insert(kv: (Token, BidOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
 
     def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = ev.receive(a, request)
 
@@ -78,20 +78,11 @@ object OpenBidDoubleAuctionLike {
     /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       * `BidOrder` instances except the `order`.
       *
-      * @param order the `AskOrder` that should be added to the `orderBook`.
+      * @param reference
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
       *         `BidOrder` instances except the `order`.
       */
-    def remove(order: AskOrder[T]): A = ev.cancel(a, order)
-
-    /** Create a new instance of type class `A` whose order book contains all previously submitted `AskOrder` and
-      * `BidOrder` instances except the `order`.
-      *
-      * @param order the `BidOrder` that should be added to the `orderBook`.
-      * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` and
-      *         `BidOrder` instances except the `order`.
-      */
-    def remove(order: BidOrder[T]): A = ev.cancel(a, order)
+    def cancel(reference: Reference): (A, Option[Canceled]) = ev.cancel(a, reference)
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
       *

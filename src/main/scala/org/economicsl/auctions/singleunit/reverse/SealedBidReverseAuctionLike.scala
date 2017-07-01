@@ -42,7 +42,7 @@ trait SealedBidReverseAuctionLike[T <: Tradable, A <: { def tickSize: Long; def 
     *         to the `reference` identifier.
     */
   def cancel(a: A, reference: Reference): (A, Option[Canceled]) = {
-    val (kv, residualOrderBook) = a.orderBook.remove(reference)
+    val (residualOrderBook, kv) = a.orderBook.remove(reference)
     kv match {
       case Some((token, removedOrder)) =>
         val canceled = Canceled(removedOrder.issuer, token)

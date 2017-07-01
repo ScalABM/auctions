@@ -36,10 +36,10 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
   require(crossed, "Limit price of the best `BidOrder` must exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `MatchedOrders` instance. */
-  val askOrdering: Ordering[AskOrder[T]] = askOrders.ordering
+  val askOrdering: Ordering[(Reference, (Token, AskOrder[T]))] = askOrders.ordering
 
   /** The ordering used to sort the `BidOrder` instances contained in this `MatchedOrders` instance. */
-  val bidOrdering: Ordering[(Reference, BidOrder[T])] = bidOrders.ordering
+  val bidOrdering: Ordering[(Reference, (Token, BidOrder[T]))] = bidOrders.ordering
 
   /** Create a new `MatchedOrders` instance containing a matched pair of `(AskOrder, BidOrder)` instances.
     *
@@ -47,7 +47,7 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `BidOrder` instances of this
     *         instance and that also contains the matched pair of  `orders`.
     */
-  def + (kvs: ((Reference, AskOrder[T]), (Reference, BidOrder[T]))): MatchedOrders[T] = {
+  def + (kvs: ((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))): MatchedOrders[T] = {
     new MatchedOrders(askOrders + kvs._1, bidOrders + kvs._2)
   }
 
@@ -67,6 +67,10 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
     * @return `true` if the `order` is contained in this `MatchedOrders` instance; `false` otherwise.
     */
   def contains(reference: Reference): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
+
+  def get(reference: Reference): Option[(Token, Order[T])] = {
+    ???
+  }
 
   /** Replace an existing `AskOrder` instance with another `AskOrder` instance.
     *
@@ -91,17 +95,17 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
     *         `MatchedOrders` instance is non empty (first element is `None` otherwise), and whose second element is
     *         the residual `MatchedOrders` instance.
     */
-  def splitAtBestMatch: (Option[((Reference, AskOrder[T]), (Reference, BidOrder[T]))], MatchedOrders[T]) = {
+  def splitAtBestMatch: (MatchedOrders[T], Option[((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))]) = {
     (askOrders.headOption, bidOrders.headOption) match {
-      case (Some((reference, askOrder)), Some(bidOrder)) =>
-        (Some((askOrder, bidOrder)), new MatchedOrders(askOrders - askOrder, bidOrders - bidOrder))
-      case _ => (None, this)
+      case (Some((k1, v1)), Some((k2, v2))) =>
+        (new MatchedOrders(askOrders - k1, bidOrders - k2), Some((k1 -> v1, k2 -> v2)))
+      case _ => (this, None)
     }
   }
 
   private[this] def crossed: Boolean = {
-    bidOrders.headOption.forall{ case (_, bidOrder) =>
-      askOrders.headOption.forall{ askOrder =>
+    bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
+      askOrders.headOption.forall{ case (_, (_, askOrder)) =>
         bidOrder.limit >= askOrder.limit
       }
     }
@@ -128,7 +132,7 @@ object MatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from low to high based on `limit` price.
     */
-  def empty[T <: Tradable](askOrdering: Ordering[AskOrder[T]], bidOrdering: Ordering[(Reference, BidOrder[T])]): MatchedOrders[T] = {
+  def empty[T <: Tradable](askOrdering: Ordering[AskOrder[T]], bidOrdering: Ordering[BidOrder[T]]): MatchedOrders[T] = {
     new MatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 

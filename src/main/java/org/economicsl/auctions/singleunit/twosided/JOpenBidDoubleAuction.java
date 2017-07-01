@@ -104,7 +104,7 @@ public class JOpenBidDoubleAuction {
          */
         public DiscriminatoryPricingImpl<T> remove(AskOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new DiscriminatoryPricingImpl<>(ops.remove(order));
+            return new DiscriminatoryPricingImpl<>(ops.cancel(order));
         }
 
         /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
@@ -116,7 +116,7 @@ public class JOpenBidDoubleAuction {
          */
         public DiscriminatoryPricingImpl<T> remove(BidOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new DiscriminatoryPricingImpl<>(ops.remove(order));
+            return new DiscriminatoryPricingImpl<>(ops.cancel(order));
         }
 
         /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
@@ -203,7 +203,7 @@ public class JOpenBidDoubleAuction {
          */
         public UniformPricingImpl<T> remove(AskOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new UniformPricingImpl<>(ops.remove(order));
+            return new UniformPricingImpl<>(ops.cancel(order));
         }
 
         /** Create a new instance of `DiscriminatoryPricingImpl` whose order book contains all previously submitted
@@ -215,7 +215,7 @@ public class JOpenBidDoubleAuction {
          */
         public UniformPricingImpl<T> remove(BidOrder<T> order) {
             OpenBidDoubleAuctionLike.Ops<T, OpenBidDoubleAuction.UniformPricingImpl<T>> ops = mkDoubleAuctionLikeOps(this.auction);
-            return new UniformPricingImpl<>(ops.remove(order));
+            return new UniformPricingImpl<>(ops.cancel(order));
         }
 
         public JClearResult<UniformPricingImpl<T>> clear() {

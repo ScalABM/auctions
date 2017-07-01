@@ -39,7 +39,7 @@ final class SortedBidOrders[T <: Tradable] private(existing: Map[Reference, (Tok
                                                    val numberUnits: Quantity) {
 
   /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
-  val ordering: Ordering[(Reference, BidOrder[T])] = sorted.ordering
+  val ordering: Ordering[(Reference, (Token, BidOrder[T]))] = sorted.ordering
 
   /** Create a new `SortedBidOrders` instance containing the additional `BidOrder`.
     *
@@ -59,8 +59,8 @@ final class SortedBidOrders[T <: Tradable] private(existing: Map[Reference, (Tok
     */
   def - (reference: Reference): SortedBidOrders[T] = {
     existing.get(reference) match {
-      case Some(bidOrder) =>
-        new SortedBidOrders(existing - reference, sorted - (reference -> bidOrder), numberUnits - bidOrder.quantity)
+      case Some((token, order)) =>
+        new SortedBidOrders(existing - reference, sorted - (reference -> (token -> order)), numberUnits - order.quantity)
       case None => // attempt to remove bid order that had already been processed!
         this
     }
@@ -107,9 +107,9 @@ object SortedBidOrders {
     * @tparam T all `BidOrder` instances stored in the heap should be for the same type of `Tradable`.
     * @return an instance of `SortedBidOrders`.
     */
-  def empty[T <: Tradable](ordering: Ordering[(Reference, BidOrder[T])]): SortedBidOrders[T] = {
-    val existing = immutable.HashMap.empty[Reference, BidOrder[T]]
-    val sorted = immutable.TreeSet.empty[(Reference, BidOrder[T])](ordering)
+  def empty[T <: Tradable](ordering: Ordering[BidOrder[T]]): SortedBidOrders[T] = {
+    val existing = immutable.HashMap.empty[Reference, (Token, BidOrder[T])]
+    val sorted = immutable.TreeSet.empty[(Reference, (Token, BidOrder[T]))](???) // todo need to convert ordering!
     new SortedBidOrders(existing, sorted, Quantity.zero)
   }
 
