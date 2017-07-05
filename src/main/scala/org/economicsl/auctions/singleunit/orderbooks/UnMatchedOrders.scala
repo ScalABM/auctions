@@ -29,9 +29,10 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
+                                                   val bidOrders: SortedBidOrders[T]) {
 
-  require(notCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
+  require(heapsNotCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `UnMatchedOrders` instance. */
   val askOrdering: Ordering[(Reference, (Token, AskOrder[T]))] = askOrders.ordering
@@ -52,19 +53,19 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
       new UnMatchedOrders(askOrders, bidOrders + bidOrder)
   }
 
-  /** Create a new `UnMatchedOrders` instance with the given `AskOrder` removed from this `UnMatchedOrders` instance.
+  /** Remove an order from the collection of unmatched orders.
     *
     * @param reference
-    * @return a new `UnMatchedOrders` instance that contains all of the `AskOrder` instances of this instance and that
-    *         also contains the `order`.
+    * @return a tuple whose first element is ??? and whose second element is ???
     */
-  def - (reference: Reference): UnMatchedOrders[T] = {
-    if (askOrders.contains(reference)) {
-      new UnMatchedOrders(askOrders - reference, bidOrders)
-    } else if (bidOrders.contains(reference)) {
-      new UnMatchedOrders(askOrders, bidOrders - reference)
-    } else {
-      this
+  def - (reference: Reference): (UnMatchedOrders[T], Option[(Token, Order[T])]) = {
+    val (remainingAskOrders, removedAskOrder) = askOrders - reference
+    removedAskOrder match {
+      case Some(_) =>
+        (new UnMatchedOrders(remainingAskOrders, bidOrders), removedAskOrder)
+      case None =>
+        val (remainingBidOrders, removedBidOrder) = bidOrders - reference
+        (new UnMatchedOrders(askOrders, remainingBidOrders), removedBidOrder)
     }
   }
 
@@ -76,11 +77,11 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
   def contains(reference: Reference): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
 
   def get(reference: Reference): Option[(Token, Order[T])] = {
-    ???
+    askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
-  /* Used to check the invariant that must hold for all `UnMatchedOrders` instances. */
-  private[this] def notCrossed: Boolean = {
+  /* Used to check this invariant that must hold for all `UnMatchedOrders` instances. */
+  private[this] def heapsNotCrossed: Boolean = {
     bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
       askOrders.headOption.forall{ case (_, (_, askOrder)) =>
         bidOrder.limit <= askOrder.limit

@@ -92,7 +92,7 @@ public class JOpenBidReverseAuction<T extends Tradable>
     }
 
     private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
-        return OpenBidReverseAuction$.MODULE$.reverseAuctionLikeOps(a);
+        return OpenBidReverseAuction$.MODULE$.auctionLikeOps(a);
     }
 
 }

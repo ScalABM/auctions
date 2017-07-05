@@ -28,7 +28,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+final class MatchedOrders[T <: Tradable] private(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T]) {
 
   /* Number of units supplied must equal the number of units demanded. */
   require(askOrders.numberUnits == bidOrders.numberUnits)
@@ -53,12 +53,26 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
 
   /** Create a new `MatchedOrders` instance with the given matched pair of `(AskOrder, BidOrder)` removed.
     *
-    * @param references
+    * @param reference
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `BidOrder` instances of this
     *         instance but that does not contain the matched pair of  `orders`.
     */
-  def - (references: (Reference, Reference)): MatchedOrders[T] = {
-    new MatchedOrders(askOrders - references._1, bidOrders - references._2)
+  def - (reference: Reference): (MatchedOrders[T], Option[((Token, AskOrder[T]), (Token, BidOrder[T]))]) = {
+    val (remainingAskOrders, removedAskOrder) = askOrders - reference
+    removedAskOrder match {
+      case Some(askOrder) =>
+        val (remainingBidOrders, Some((_, marginalBidOrder))) = bidOrders.splitOffTopOrder
+        (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((askOrder, marginalBidOrder)))
+      case None =>
+        val (remainingBidOrders, removedBidOrder) = bidOrders - reference
+        removedBidOrder match {
+          case Some(kv) =>
+            val (remainingAskOrders, marginalAskOrder) = askOrders.splitAtHead
+            (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((???, kv)))
+          case None =>
+            (this, None)
+        }
+    }
   }
 
   /** Tests whether this `MatchedOrders` instance contains an `Order` associated with a given reference identifier.
@@ -69,7 +83,11 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
   def contains(reference: Reference): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
 
   def get(reference: Reference): Option[(Token, Order[T])] = {
-    ???
+    askOrders.get(reference).orElse(bidOrders.get(reference))
+  }
+
+  def headOption: Option[((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))] = {
+    askOrders.headOption.flatMap(askOrder => bidOrders.headOption.map(bidOrder => (askOrder, bidOrder)))
   }
 
   /** Replace an existing `AskOrder` instance with another `AskOrder` instance.
@@ -95,11 +113,20 @@ final class MatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[
     *         `MatchedOrders` instance is non empty (first element is `None` otherwise), and whose second element is
     *         the residual `MatchedOrders` instance.
     */
-  def splitAtBestMatch: (MatchedOrders[T], Option[((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))]) = {
-    (askOrders.headOption, bidOrders.headOption) match {
-      case (Some((k1, v1)), Some((k2, v2))) =>
-        (new MatchedOrders(askOrders - k1, bidOrders - k2), Some((k1 -> v1, k2 -> v2)))
-      case _ => (this, None)
+  def splitAtTopMatch: (MatchedOrders[T], Option[((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))]) = {
+    headOption match {
+      case Some((marginalAskOrder @ (k1, v1), marginalBidOrder @ (k2, v2))) =>
+        (this - (k1, k2), Some((marginalAskOrder, marginalBidOrder)))
+      case None =>
+        (this, None)
+    }
+    headOption match {
+      case Some(((r1, (_, askOrder)), (r2, (_, bidOrder)))) =>
+        val (remainingAskOrders, _) = askOrders - r1
+        val remainingUnits = numberUnits - askOrder.quantity
+        (new MatchedOrders(remainingOrders, sortedOrders.tail), headOption)
+      case None =>
+        (this, None)
     }
   }
 

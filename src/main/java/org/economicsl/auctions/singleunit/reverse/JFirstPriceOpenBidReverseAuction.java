@@ -90,7 +90,7 @@ public class JFirstPriceOpenBidReverseAuction<T extends Tradable>
     private JFirstPriceOpenBidReverseAuction(OpenBidReverseAuction<T> a) { this.auction = a; }
 
     private OpenBidReverseAuctionLike.Ops<T, OpenBidReverseAuction<T>> mkReverseAuctionLikeOps(OpenBidReverseAuction<T> a) {
-        return OpenBidReverseAuction$.MODULE$.reverseAuctionLikeOps(a);
+        return OpenBidReverseAuction$.MODULE$.auctionLikeOps(a);
     }
 
 }

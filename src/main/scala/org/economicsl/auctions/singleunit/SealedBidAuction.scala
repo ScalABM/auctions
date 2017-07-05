@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Reference, ReferenceGenerator, Token}
+import org.economicsl.auctions.Token
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
 import org.economicsl.core.{Currency, Tradable}
 
@@ -33,9 +33,11 @@ import org.economicsl.core.{Currency, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class SealedBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T],
-                                              val pricingPolicy: PricingPolicy[T],
-                                              val tickSize: Currency)
+class SealedBidAuction[T <: Tradable] private(
+    protected[singleunit] val orderBook: FourHeapOrderBook[T],
+    protected[singleunit] val pricingPolicy: PricingPolicy[T],
+    val tickSize: Currency)
+  extends Auction[T]
 
 
 /** Companion object for the `SealedBidAuction` type class.
@@ -45,6 +47,8 @@ class SealedBidAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T
   */
 object SealedBidAuction {
 
+  import AuctionParticipant._
+
   /** Create an instance of `SealedBidAuctionLike.Ops`.
     *
     * @param a an instance of the `SealedBidAuction` type class.
@@ -52,8 +56,8 @@ object SealedBidAuction {
     * @return an instance of `SealedBidAuctionLike.Ops` that will be used by the compiler to generate the
     *         `SealedBidAuctionLike` methods for the `SealedBidAuction` type class.
     */
-  implicit def mkAuctionOps[T <: Tradable](a: SealedBidAuction[T]): SealedBidAuctionLike.Ops[T, SealedBidAuction[T]] = {
-    new SealedBidAuctionLike.Ops[T, SealedBidAuction[T]](a)
+  implicit def mkAuctionOps[T <: Tradable](a: SealedBidAuction[T]): AuctionLike.Ops[T, SealedBidAuction[T]] = {
+    new AuctionLike.Ops[T, SealedBidAuction[T]](a)
   }
 
   /** Create an instance of `SealedBidAuctionLike` trait.
@@ -62,16 +66,13 @@ object SealedBidAuction {
     * @return an instance of the `SealedBidAuctionLike` trait that will be used by the compiler to generate the
     *         `SealedBidAuctionLike` methods for the `SealedBidAuction` type class.
     */
-  implicit def mkAuctionLike[T <: Tradable]: SealedBidAuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] = {
-
-    new SealedBidAuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] {
-
+  implicit def mkAuctionLike[T <: Tradable]
+                            : AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] = {
+    new AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] {
       protected def withOrderBook(a: SealedBidAuction[T], orderBook: FourHeapOrderBook[T]): SealedBidAuction[T] = {
         new SealedBidAuction(orderBook, a.pricingPolicy, a.tickSize)
       }
-
     }
-
   }
 
   /** Create a "Sealed-bid" auction mechanism.
@@ -83,36 +84,37 @@ object SealedBidAuction {
     *           be for the same type of `Tradable`.
     * @return a `SealedBidAuction` instance.
     */
-  def apply[T <: Tradable](reservation: AskOrder[T], pricingPolicy: PricingPolicy[T], tickSize: Currency): SealedBidAuction[T] = {
+  def withReservation[T <: Tradable]
+           (reservation: (Token, AskOrder[T]), pricingPolicy: PricingPolicy[T], tickSize: Currency)
+           : (SealedBidAuction[T], Either[Rejected, Accepted]) = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidAuction[T](orderBook.insert(reservation), pricingPolicy, tickSize)
+    val auction = new SealedBidAuction[T](orderBook, pricingPolicy, tickSize)
+    auction.insert(reservation)
   }
 
   /** Create a "First-Price, Sealed-Bid Auction."
     *
-    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
     * @param tickSize the minimum price movement of a tradable.
-    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `SealedBidAuction` must
     *           be for the same type of `Tradable`.
     * @return a `SealedBidAuction` instance.
     */
-  def withAskPriceQuotingPolicy[T <: Tradable](reservation: AskOrder[T], tickSize: Currency): SealedBidAuction[T] = {
+  def withAskPriceQuotingPolicy[T <: Tradable](tickSize: Currency): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T], tickSize)
+    new SealedBidAuction[T](orderBook, new AskQuotePricingPolicy[T], tickSize)
   }
 
   /** Create a "Second-Price, Sealed-Bid Auction."
     *
-    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
     * @param tickSize the minimum price movement of a tradable.
-    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
+    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `SealedBidAuction` must
     *           be for the same type of `Tradable`.
     * @return a `SealedBidAuction` instance.
     * @note Second-Price, Sealed-Bid Auctions are also known as "Vickery Auctions."
     */
-  def withBidPriceQuotingPolicy[T <: Tradable](reservation: AskOrder[T], tickSize: Currency): SealedBidAuction[T] = {
+  def withBidPriceQuotingPolicy[T <: Tradable](tickSize: Currency): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new SealedBidAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T], tickSize)
+    new SealedBidAuction[T](orderBook, new BidQuotePricingPolicy[T], tickSize)
   }
 
 }

@@ -15,10 +15,13 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.reverse
 
+import org.economicsl.auctions.Token
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.{Auction, AuctionLike}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
+import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -33,7 +36,12 @@ import org.economicsl.core.{Currency, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderBook[T], val pricingPolicy: PricingPolicy[T], val tickSize: Currency)
+class OpenBidReverseAuction[T <: Tradable] private(
+    protected[singleunit] val orderBook: FourHeapOrderBook[T],
+    val pricingPolicy: PricingPolicy[T],
+    val tickSize: Currency)
+  extends Auction[T]
+  with BidPriceQuoting[T]
 
 
 /** Companion object fo the `OpenBidReverseAuction` type class.
@@ -43,24 +51,21 @@ class OpenBidReverseAuction[T <: Tradable] private(val orderBook: FourHeapOrderB
   */
 object OpenBidReverseAuction {
 
-  implicit def reverseAuctionLikeOps[T <: Tradable](a: OpenBidReverseAuction[T]): OpenBidReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
-    new OpenBidReverseAuctionLike.Ops[T, OpenBidReverseAuction[T]](a)
+  import org.economicsl.auctions.singleunit.AuctionParticipant._
+
+  implicit def reverseAuctionLikeOps[T <: Tradable]
+                                    (a: OpenBidReverseAuction[T])
+                                    : AuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
+    new AuctionLike.Ops[T, OpenBidReverseAuction[T]](a)
   }
 
-  implicit def reverseAuctionLike[T <: Tradable]: OpenBidReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
-
-    new OpenBidReverseAuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] {
-
-      def receive(a: OpenBidReverseAuction[T], request: BidPriceQuoteRequest[T]): BidPriceQuote = {
-        bidPriceQuotingPolicy(a.orderBook, request)
-      }
-
+  implicit def reverseAuctionLike[T <: Tradable]
+                                 : AuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
+    new AuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] {
       protected def withOrderBook(a: OpenBidReverseAuction[T], orderBook: FourHeapOrderBook[T]): OpenBidReverseAuction[T] = {
         new OpenBidReverseAuction[T](orderBook, a.pricingPolicy, a.tickSize)
       }
-
     }
-
   }
 
   /** Create an instance of an "open-bid" reverse auction mechanism.
@@ -72,14 +77,16 @@ object OpenBidReverseAuction {
     *           must be for the same type of `Tradable`.
     * @return an `OpenBidReverseAuction` instance.
     */
-  def apply[T <: Tradable](reservation: BidOrder[T], pricingPolicy: PricingPolicy[T], tickSize: Currency): OpenBidReverseAuction[T] = {
+  def withReservation[T <: Tradable]
+                     (reservation: (Token, BidOrder[T]), pricingPolicy: PricingPolicy[T], tickSize: Currency)
+                     : (OpenBidReverseAuction[T], Either[Rejected, Accepted]) = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new OpenBidReverseAuction[T](orderBook.insert(reservation), pricingPolicy, tickSize)
+    val auction = new OpenBidReverseAuction[T](orderBook, pricingPolicy, tickSize)
+    auction.insert(reservation)
   }
 
   /** Create a second-price, open-bid reverse auction (SPOBRA).
     *
-    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
     * @param tickSize the minimum price movement of a tradable.
     * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `OpenBidReverseAuction`
     *           must be for the same type of `Tradable`.
@@ -87,14 +94,13 @@ object OpenBidReverseAuction {
     * @note the winner of a SPOBRA is the seller who submitted the lowest priced ask order; however the winner receives
     *       an amount equal to the second lowest priced ask order.
     */
-  def withAskQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T], tickSize: Currency): OpenBidReverseAuction[T] = {
+  def withAskQuotePricingPolicy[T <: Tradable](tickSize: Currency): OpenBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new OpenBidReverseAuction[T](orderBook.insert(reservation), new AskQuotePricingPolicy[T], tickSize)
+    new OpenBidReverseAuction[T](orderBook, new AskQuotePricingPolicy[T], tickSize)
   }
 
   /** Create a first-price, open-bid reverse auction (FPOBRA).
     *
-    * @param reservation a `BidOrder` instance representing the reservation price for the reverse auction.
     * @param tickSize the minimum price movement of a tradable.
     * @tparam T the reservation `BidOrder` as well as all `AskOrder` instances submitted to the `OpenBidReverseAuction`
     *           must be for the same type of `Tradable`.
@@ -102,9 +108,9 @@ object OpenBidReverseAuction {
     * @note The winner of a FPOBRA is the seller who submitted the lowest priced ask order; the winner receives an
     *       amount equal to its own ask price.
     */
-  def withBidQuotePricingPolicy[T <: Tradable](reservation: BidOrder[T], tickSize: Currency): OpenBidReverseAuction[T] = {
+  def withBidQuotePricingPolicy[T <: Tradable](tickSize: Currency): OpenBidReverseAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new OpenBidReverseAuction[T](orderBook.insert(reservation), new BidQuotePricingPolicy[T], tickSize)
+    new OpenBidReverseAuction[T](orderBook, new BidQuotePricingPolicy[T], tickSize)
   }
 
 

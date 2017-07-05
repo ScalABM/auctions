@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.quoting
 
 import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
+import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
 
@@ -24,8 +25,13 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait SpreadQuoting[T <: Tradable, -A] {
+trait SpreadQuoting[T <: Tradable] {
+  this: Auction[T] =>
 
-  def receive(a: A, request: SpreadQuoteRequest[T]): SpreadQuote
+  def receive(request: SpreadQuoteRequest[T]): SpreadQuote = {
+    spreadQuotingPolicy(orderBook, request)
+  }
+
+  protected val spreadQuotingPolicy: SpreadQuotingPolicy[T] = new SpreadQuotingPolicy[T]
 
 }

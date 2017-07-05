@@ -15,10 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.twosided
 
-import org.economicsl.auctions.quotes._
+import org.economicsl.auctions.singleunit.AuctionLike
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.{DiscriminatoryPricing, PricingPolicy, UniformPricing}
-import org.economicsl.auctions.singleunit.twosided.OpenBidDoubleAuctionLike.Ops
+import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting}
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -29,8 +29,11 @@ import org.economicsl.core.{Currency, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-trait OpenBidDoubleAuction[T <: Tradable] extends SealedBidDoubleAuction[T]
-
+trait OpenBidDoubleAuction[T <: Tradable]
+    extends SealedBidDoubleAuction[T]
+    with AskPriceQuoting[T]
+    with BidPriceQuoting[T]
+    with SpreadQuoting[T]
 
 /** Companion object for the `OpenBidDoubleAuction` trait.
   *
@@ -85,25 +88,13 @@ object OpenBidDoubleAuction {
     */
   object DiscriminatoryPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): Ops[T, DiscriminatoryPricingImpl[T]] = {
-      new Ops[T, DiscriminatoryPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T]): AuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
+      new AuctionLike.Ops[T, DiscriminatoryPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: OpenBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
+    implicit def doubleAuctionLike[T <: Tradable]: AuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] = {
 
-      new OpenBidDoubleAuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
-
-        def receive(a: DiscriminatoryPricingImpl[T], request: AskPriceQuoteRequest[T]): AskPriceQuote = {
-          askPriceQuotingPolicy(a.orderBook, request)
-        }
-
-        def receive(a: DiscriminatoryPricingImpl[T], request: BidPriceQuoteRequest[T]): BidPriceQuote = {
-          bidPriceQuotingPolicy(a.orderBook, request)
-        }
-
-        def receive(a: DiscriminatoryPricingImpl[T], request: SpreadQuoteRequest[T]): SpreadQuote = {
-          spreadQuotingPolicy(a.orderBook, request)
-        }
+      new AuctionLike[T, DiscriminatoryPricingImpl[T]] with DiscriminatoryPricing[T, DiscriminatoryPricingImpl[T]] {
 
         protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
           new DiscriminatoryPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
@@ -138,25 +129,14 @@ object OpenBidDoubleAuction {
     */
   object UniformPricingImpl {
 
-    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): Ops[T, UniformPricingImpl[T]] = {
-      new Ops[T, UniformPricingImpl[T]](a)
+    implicit def doubleAuctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): AuctionLike.Ops[T, UniformPricingImpl[T]] = {
+      new AuctionLike.Ops[T, UniformPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: OpenBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
+    implicit def doubleAuctionLike[T <: Tradable]
+                                  : AuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] = {
 
-      new OpenBidDoubleAuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
-
-        def receive(a: UniformPricingImpl[T], request: AskPriceQuoteRequest[T]): AskPriceQuote = {
-          askPriceQuotingPolicy(a.orderBook, request)
-        }
-
-        def receive(a: UniformPricingImpl[T], request: BidPriceQuoteRequest[T]): BidPriceQuote = {
-          bidPriceQuotingPolicy(a.orderBook, request)
-        }
-
-        def receive(a: UniformPricingImpl[T], request: SpreadQuoteRequest[T]): SpreadQuote = {
-          spreadQuotingPolicy(a.orderBook, request)
-        }
+      new AuctionLike[T, UniformPricingImpl[T]] with UniformPricing[T, UniformPricingImpl[T]] {
 
         protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)

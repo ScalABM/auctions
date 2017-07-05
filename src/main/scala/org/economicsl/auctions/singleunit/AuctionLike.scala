@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.{ClearResult, Reference, ReferenceGenerator, Token}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.BidOrder
+import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.core.Tradable
 
 
@@ -28,15 +28,15 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait SealedBidAuctionLike[T <: Tradable, A <: { def tickSize: Long; def orderBook: FourHeapOrderBook[T] }]
+trait AuctionLike[T <: Tradable, A <: Auction[T]]
     extends ReferenceGenerator {
 
-  import org.economicsl.auctions.AuctionParticipant._
+  import AuctionParticipant._
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
     *
-    * @param a         an instance of type class `A`.
+    * @param a an instance of type class `A`.
     * @param reference the unique identifier for the order that should be removed.
     * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     *         except the `order`.
@@ -70,14 +70,14 @@ trait SealedBidAuctionLike[T <: Tradable, A <: { def tickSize: Long; def orderBo
     *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
     *         instances.
     */
-  def insert(a: A, kv: (Token, BidOrder[T])): (A, Either[Rejected, Accepted]) = {
+  def insert(a: A, kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = {
     val (_, order) = kv
     if (order.limit.value % a.tickSize > 0) {
       val reason = s"Limit price of ${order.limit} is not a multiple of the tick size ${a.tickSize}"
       val rejected = Rejected(order.issuer, reason)
       (a, Left(rejected))
     } else {
-      val reference: Reference = ???
+      val reference = randomReference()
       val accepted = Accepted(order.issuer, reference)
       val updatedOrderBook = a.orderBook.insert(reference -> kv)
       (withOrderBook(a, updatedOrderBook), Right(accepted))
@@ -94,9 +94,9 @@ trait SealedBidAuctionLike[T <: Tradable, A <: { def tickSize: Long; def orderBo
   * @author davidrpugh
   * @since 0.1.0
   */
-object SealedBidAuctionLike {
+object AuctionLike {
 
-  /** Class defining "sealed-bid" auction-like operations for type class `A`.
+  /** Class defining auction-like operations for an auction of type `A`.
     *
     * @param a an instance of type `A` for which "sealed-bid" auction-like operations should be defined.
     * @param ev an instance of a class that implements the `SealedBidAuctionLike` trait.
@@ -105,9 +105,9 @@ object SealedBidAuctionLike {
     * @note The `Ops` class instance takes as a parameter an instance of type `A` and implements the auction-like
     *       operations `insert`, `remove`, and `clear` by delegating these method calls to the implicit `ev` instance.
     */
-  class Ops[T <: Tradable, A <: { def tickSize: Long; def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: SealedBidAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: Auction[T]](a: A)(implicit ev: AuctionLike[T, A]) {
 
-    import org.economicsl.auctions.AuctionParticipant._
+    import AuctionParticipant._
 
     /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
       * except the `order`.
@@ -134,7 +134,7 @@ object SealedBidAuctionLike {
       *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
       *         instances.
       */
-    def insert(kv: (Token, BidOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
+    def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
 
   }
 

@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.quoting
 
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
 
@@ -24,8 +25,14 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait BidPriceQuoting[T <: Tradable, -A] {
+trait BidPriceQuoting[T <: Tradable] {
+  this: Auction[T] =>
 
-  def receive(a: A, request: BidPriceQuoteRequest[T]): BidPriceQuote
+  def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = {
+    bidPriceQuotingPolicy(orderBook, request)
+  }
+
+  /* Defines how an `OpenBidReverseAuctionLike` instance will respond to `BidPriceQuoteRequests`. */
+  protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
 
 }

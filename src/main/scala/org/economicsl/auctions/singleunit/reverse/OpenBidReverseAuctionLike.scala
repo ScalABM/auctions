@@ -17,27 +17,14 @@ package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.{ClearResult, Reference, Token}
 import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.{Auction, AuctionLike}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.AskOrder
+import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
 import org.economicsl.core.Tradable
 
 
-/** Trait extends sealed-bid reverse auction-like behavior to include the ability to process bid price quote requests.
-  *
-  * @tparam T all `AskOrder` instances must be for the same type of `Tradable`.
-  * @tparam A type class `A` for which sealed-bid reverse auction-like operations should be defined.
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-trait OpenBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }]
-  extends SealedBidReverseAuctionLike[T, A]
-  with BidPriceQuoting[T, A] {
 
-  /* Defines how an `OpenBidReverseAuctionLike` instance will respond to `BidPriceQuoteRequests`. */
-  protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
-
-}
 
 
 /** Companion object for the `OpenBidReverseAuctionLike` trait.
@@ -47,9 +34,9 @@ trait OpenBidReverseAuctionLike[T <: Tradable, A <: { def orderBook: FourHeapOrd
   */
 object OpenBidReverseAuctionLike {
 
-  class Ops[T <: Tradable, A <: { def orderBook: FourHeapOrderBook[T] }](a: A)(implicit ev: OpenBidReverseAuctionLike[T, A]) {
+  class Ops[T <: Tradable, A <: Auction[T]](a: A)(implicit ev: OpenBidReverseAuctionLike[T, A]) {
 
-    import org.economicsl.auctions.AuctionParticipant._
+    import org.economicsl.auctions.singleunit.AuctionParticipant._
 
     /** Remove a previously accepted `AskOrder` instance from the `orderBook`.
       *
@@ -74,7 +61,7 @@ object OpenBidReverseAuctionLike {
       * @param kv
       * @return an instance of type class `A` whose order book contains all previously submitted `AskOrder` instances.
       */
-    def insert(kv: (Token, AskOrder[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
+    def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = ev.insert(a, kv)
 
     def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = ev.receive(a, request)
 

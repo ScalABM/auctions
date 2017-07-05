@@ -1,5 +1,6 @@
 package org.economicsl.auctions.singleunit.pricing
 
+import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.{ClearResult, Fill}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.core.{Price, Tradable}
@@ -10,7 +11,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Pricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }] {
+sealed trait Pricing[T <: Tradable, A <: Auction[T]] {
 
   def clear(a: A): ClearResult[A]
 
@@ -24,7 +25,7 @@ sealed trait Pricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; 
   * @author davidrpugh
   * @since 0.1.0
   */
-trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }]
+trait DiscriminatoryPricing[T <: Tradable, A <: Auction[T]]
   extends Pricing[T, A] {
 
   def clear(a: A): ClearResult[A] = {
@@ -32,9 +33,9 @@ trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPoli
     @annotation.tailrec
     def loop(pricingPolicy: PricingPolicy[T])(fills: Stream[Fill], ob: FourHeapOrderBook[T]): ClearResult[A] = {
       val currentPrice = pricingPolicy(ob)
-      val (bestMatch, residualOrderBook) = ob.splitAtBestMatch
-      bestMatch match {
-        case Some((askOrder, bidOrder)) =>
+      val (residualOrderBook, topMatch) = ob.splitAtTopMatch
+      topMatch match {
+        case Some(((_, (_, askOrder)), (_, (_, bidOrder)))) =>
           val fill = currentPrice.map(price => Fill.fromOrders(askOrder, bidOrder, price))
           loop(pricingPolicy)(fill.fold(fills)(_ #:: fills), residualOrderBook)
         case None =>
@@ -55,7 +56,7 @@ trait DiscriminatoryPricing[T <: Tradable, A <: { def pricingPolicy: PricingPoli
   * @author davidrpugh
   * @since 0.1.0
   */
-trait UniformPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; def orderBook: FourHeapOrderBook[T] }]
+trait UniformPricing[T <: Tradable, A <: Auction[T]]
   extends Pricing[T, A] {
 
   def clear(a: A): ClearResult[A] = {
@@ -71,9 +72,9 @@ trait UniformPricing[T <: Tradable, A <: { def pricingPolicy: PricingPolicy[T]; 
 
   @annotation.tailrec
   private[this] def accumulate(price: Price)(fills: Stream[Fill], ob: FourHeapOrderBook[T]): (Stream[Fill], FourHeapOrderBook[T]) = {
-    val (bestMatch, residualOrderBook) = ob.splitAtBestMatch
-    bestMatch match {
-      case Some((askOrder, bidOrder)) =>
+    val (residualOrderBook, topMatch) = ob.splitAtTopMatch
+    topMatch match {
+      case Some(((_, (_, askOrder)), (_, (_, bidOrder)))) =>
         val fill = Fill.fromOrders(askOrder, bidOrder, price)
         accumulate(price)(fill #:: fills, residualOrderBook)
       case None =>
