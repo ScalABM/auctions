@@ -19,11 +19,11 @@ import org.economicsl.auctions._
 import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
 import org.economicsl.auctions.singleunit.{OpenBidAuction, OrderGenerator}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.economicsl.core.{Price, Tradable}
 
-import scala.util.{Random, Success}
+import scala.util.Random
 
 
 /**
@@ -36,39 +36,23 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
   val google: GoogleStock = GoogleStock()
   val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
-  val withDiscriminatoryPricing: OpenBidAuction[GoogleStock] = {
-    OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
-  }
+  val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
 
   // generate a very large stream of random orders...
-  type DoubleAuction[T <: Tradable] = OpenBidAuction.DiscriminatoryPricingImpl[T]
-  type OrderFlow[T <: Tradable] = Stream[Either[AskOrder[T], BidOrder[T]]]
+  type DoubleAuction[T <: Tradable] = OpenBidAuction.DiscriminatoryClearingImpl[T]
+  type OrderFlow[T <: Tradable] = Stream[(Token, Order[T])]
   val prng = new Random(42)
-  val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = randomOrders(1000000, google, prng)
+  val orders: Stream[(Token, Order[GoogleStock])] = randomOrders(1000000, google, prng)
 
   // A lazy, tail-recursive implementation of a continuous double auction!
   def continuous[T <: Tradable](auction: DoubleAuction[T])(incoming: OrderFlow[T]): Stream[ClearResult[DoubleAuction[T]]] = {
     @annotation.tailrec
     def loop(da: DoubleAuction[T], in: OrderFlow[T], out: Stream[ClearResult[DoubleAuction[T]]]): Stream[ClearResult[DoubleAuction[T]]] = in match {
       case Stream.Empty => out
-      case head #:: tail => head match {
-        case Left(askOrder) =>
-          da.insert(askOrder) match {
-            case Success(withAsk) =>
-              val results = withAsk.clear
-              loop(results.residual, tail, results #:: out)
-            case _ =>
-              loop(da, tail, out)
-          }
-        case Right(bidOrder) =>
-          da.insert(bidOrder) match {
-            case Success(withBid) =>
-              val results = withBid.clear
-              loop(results.residual, tail, results #:: out)
-            case _ =>
-              loop(da, tail, out)
-          }
-      }
+      case head #:: tail =>
+        val (withAsk, response) = da.insert(head)
+        val results = withAsk.clear
+        loop(results.residual, tail, results #:: out)
     }
     loop(auction, incoming, Stream.empty[ClearResult[DoubleAuction[T]]])
   }

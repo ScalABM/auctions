@@ -45,12 +45,10 @@ class PeriodicDoubleAuction
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
     val pricingRule = new MidPointPricingPolicy[GoogleStock]
-    val withUniformPricing: SealedBidAuction.UniformClearingImpl[GoogleStock] = {
-      SealedBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
-    }
+    val withUniformPricing = SealedBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
 
     // this whole process is data parallel...
-    val results: (Stream[Either[Rejected, Accepted]], SealedBidAuction.UniformClearingImpl[GoogleStock]) = {
+    val results = {
       orders.foldLeft((Stream.empty[Either[Rejected, Accepted]], withUniformPricing)){
         case ((responses, auction), order) =>
           val (withOrder, response) = auction.insert(order)

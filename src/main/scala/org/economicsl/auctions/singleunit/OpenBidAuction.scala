@@ -53,8 +53,8 @@ object OpenBidAuction {
     */
   def withDiscriminatoryClearingPolicy[T <: Tradable]
                                       (pricingPolicy: PricingPolicy[T], tickSize: Currency)
-                                      : OpenBidAuction[T] = {
-    new DiscriminatoryPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy, tickSize)
+                                      : DiscriminatoryClearingImpl[T] = {
+    new DiscriminatoryClearingImpl[T](FourHeapOrderBook.empty, pricingPolicy, tickSize)
   }
 
   /** Create an "open-bid" double auction mechanism with uniform pricing.
@@ -67,8 +67,8 @@ object OpenBidAuction {
     */
   def withUniformClearingPolicy[T <: Tradable]
                                (pricingPolicy: PricingPolicy[T], tickSize: Currency)
-                               : OpenBidAuction[T] = {
-    new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy, tickSize)
+                               : UniformClearingImpl[T] = {
+    new UniformClearingImpl[T](FourHeapOrderBook.empty, pricingPolicy, tickSize)
   }
 
   /** Type class representing an "open-bid" double auction mechanism with discriminatory pricing.
@@ -82,7 +82,7 @@ object OpenBidAuction {
     * @author davidrpugh
     * @since 0.1.0
     */
-  private case class DiscriminatoryPricingImpl[T <: Tradable](
+  case class DiscriminatoryClearingImpl[T <: Tradable](
       orderBook: FourHeapOrderBook[T],
       pricingPolicy: PricingPolicy[T],
       tickSize: Currency)
@@ -94,17 +94,17 @@ object OpenBidAuction {
     * @author davidrpugh
     * @since 0.1.0
     */
-  private object DiscriminatoryPricingImpl {
+  private object DiscriminatoryClearingImpl {
 
-    implicit def auctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T])
-                                              : AuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
-      new AuctionLike.Ops[T, DiscriminatoryPricingImpl[T]](a)
+    implicit def auctionLikeOps[T <: Tradable](a: DiscriminatoryClearingImpl[T])
+                                              : AuctionLike.Ops[T, DiscriminatoryClearingImpl[T]] = {
+      new AuctionLike.Ops[T, DiscriminatoryClearingImpl[T]](a)
     }
 
-    implicit def auctionLike[T <: Tradable]: WithDiscriminatoryClearingPolicy[T, DiscriminatoryPricingImpl[T]] = {
-      new WithDiscriminatoryClearingPolicy[T, DiscriminatoryPricingImpl[T]] {
-        protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
-          new DiscriminatoryPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
+    implicit def auctionLike[T <: Tradable]: WithDiscriminatoryClearingPolicy[T, DiscriminatoryClearingImpl[T]] = {
+      new WithDiscriminatoryClearingPolicy[T, DiscriminatoryClearingImpl[T]] {
+        protected def withOrderBook(a: DiscriminatoryClearingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryClearingImpl[T] = {
+          new DiscriminatoryClearingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
         }
       }
     }
@@ -123,7 +123,7 @@ object OpenBidAuction {
     * @author davidrpugh
     * @since 0.1.0
     */
-  private case class UniformPricingImpl[T <: Tradable](
+  case class UniformClearingImpl[T <: Tradable](
       orderBook: FourHeapOrderBook[T],
       pricingPolicy: PricingPolicy[T],
       tickSize: Currency)
@@ -135,16 +135,16 @@ object OpenBidAuction {
     * @author davidrpugh
     * @since 0.1.0
     */
-  private object UniformPricingImpl {
+  private object UniformClearingImpl {
 
-    implicit def auctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): AuctionLike.Ops[T, UniformPricingImpl[T]] = {
-      new AuctionLike.Ops[T, UniformPricingImpl[T]](a)
+    implicit def auctionLikeOps[T <: Tradable](a: UniformClearingImpl[T]): AuctionLike.Ops[T, UniformClearingImpl[T]] = {
+      new AuctionLike.Ops[T, UniformClearingImpl[T]](a)
     }
 
-    implicit def auctionLike[T <: Tradable]: WithUniformClearingPolicy[T, UniformPricingImpl[T]] = {
-      new WithUniformClearingPolicy[T, UniformPricingImpl[T]] {
-        protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
-          new UniformPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
+    implicit def auctionLike[T <: Tradable]: WithUniformClearingPolicy[T, UniformClearingImpl[T]] = {
+      new WithUniformClearingPolicy[T, UniformClearingImpl[T]] {
+        protected def withOrderBook(a: UniformClearingImpl[T], orderBook: FourHeapOrderBook[T]): UniformClearingImpl[T] = {
+          new UniformClearingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
         }
       }
     }
