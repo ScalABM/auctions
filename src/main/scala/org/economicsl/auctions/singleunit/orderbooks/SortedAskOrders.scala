@@ -108,6 +108,10 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     }
   }
 
+  def tail: SortedAskOrders[T] = {
+    ???
+  }
+
 }
 
 

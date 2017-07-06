@@ -137,7 +137,7 @@ object SealedBidDoubleAuction {
       new AuctionLike.Ops[T, UniformPricingImpl[T]](a)
     }
 
-    implicit def doubleAuctionLike[T <: Tradable]: WithUniformClearingPolicy[T, UniformPricingImpl[T]] = {
+    implicit def auctionLike[T <: Tradable]: WithUniformClearingPolicy[T, UniformPricingImpl[T]] = {
       new WithUniformClearingPolicy[T, UniformPricingImpl[T]] {
         protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
           new UniformPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)

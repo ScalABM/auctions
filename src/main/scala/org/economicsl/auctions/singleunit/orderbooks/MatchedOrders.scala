@@ -19,6 +19,7 @@ import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
 import org.economicsl.core.Tradable
 
+
 /** Class for storing sets of matched `AskOrder` and `BidOrder` instances.
   *
   * @param askOrders a heap of `AskOrder` instances that have been matched with the `BidOrder` instances in `bidOrders`
@@ -28,12 +29,13 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class MatchedOrders[T <: Tradable] private(askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T]) {
+private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T]) {
 
-  /* Number of units supplied must equal the number of units demanded. */
-  require(askOrders.numberUnits == bidOrders.numberUnits)
+  type Match = ((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))
 
-  require(crossed, "Limit price of the best `BidOrder` must exceed the limit price of the best `AskOrder`.")
+  /* If `MatchedOrders` becomes public, then these should be changes to require!*/
+  assert(askOrders.numberUnits == bidOrders.numberUnits)
+  assert(invariantsHold, "Limit price of the best `BidOrder` must exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `MatchedOrders` instance. */
   val askOrdering: Ordering[(Reference, (Token, AskOrder[T]))] = askOrders.ordering
@@ -43,12 +45,13 @@ final class MatchedOrders[T <: Tradable] private(askOrders: SortedAskOrders[T], 
 
   /** Create a new `MatchedOrders` instance containing a matched pair of `(AskOrder, BidOrder)` instances.
     *
-    * @param kvs a matched pair of mappings `(Reference, AskOrder)`, `(Reference, BidOrder)` that should be added.
+    * @param kv1
+    * @param kv2
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `BidOrder` instances of this
     *         instance and that also contains the matched pair of  `orders`.
     */
-  def + (kvs: ((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))): MatchedOrders[T] = {
-    new MatchedOrders(askOrders + kvs._1, bidOrders + kvs._2)
+  def + (kv1: (Reference, (Token, AskOrder[T])), kv2: (Reference, (Token, BidOrder[T]))): MatchedOrders[T] = {
+    new MatchedOrders(askOrders + kv1, bidOrders + kv2)
   }
 
   /** Create a new `MatchedOrders` instance with the given matched pair of `(AskOrder, BidOrder)` removed.
@@ -66,9 +69,9 @@ final class MatchedOrders[T <: Tradable] private(askOrders: SortedAskOrders[T], 
       case None =>
         val (remainingBidOrders, removedBidOrder) = bidOrders - reference
         removedBidOrder match {
-          case Some(kv) =>
-            val (remainingAskOrders, marginalAskOrder) = askOrders.splitAtHead
-            (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((???, kv)))
+          case Some(bidOrder) =>
+            val (remainingAskOrders, Some((_, marginalAskOrder))) = askOrders.splitOffTopOrder
+            (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((marginalAskOrder, bidOrder)))
           case None =>
             (this, None)
         }
@@ -86,24 +89,32 @@ final class MatchedOrders[T <: Tradable] private(askOrders: SortedAskOrders[T], 
     askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
+  def head: ((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T]))) = {
+    (askOrders.head, bidOrders.head)
+  }
+
   def headOption: Option[((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))] = {
     askOrders.headOption.flatMap(askOrder => bidOrders.headOption.map(bidOrder => (askOrder, bidOrder)))
   }
 
   /** Replace an existing `AskOrder` instance with another `AskOrder` instance.
     *
-    * @param reference
-    * @param kv
+    * @param existing
+    * @param incoming
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` except the `reference` `AskOrder`
     *         instance and that also contains the `kv` mapping `(Reference, (Token, AskOrder))`.
     */
-  def replace(reference: Reference, kv: (Reference, (Token, Order[T]))): MatchedOrders[T] =  kv match {
-    case incoming @ (_,  (_, _: AskOrder[T])) if askOrders.contains(reference) =>
-      new MatchedOrders(askOrders - reference + incoming, bidOrders)
-    case incoming @ (_,  (_, _: BidOrder[T])) if bidOrders.contains(reference) =>
-      new MatchedOrders(askOrders, bidOrders - reference + incoming)
-    case _ =>
-      this  // should (probably!) never occur in practice...
+  def replace(existing: Reference, incoming: (Reference, (Token, Order[T]))): (MatchedOrders[T], (Token, Order[T])) = {
+    incoming match {
+      case (reference, (token, order: AskOrder[T])) =>
+        val (remainingAskOrders, Some(removedAskOrder)) = askOrders - existing
+        val updatedAskOrders = remainingAskOrders + (reference -> (token -> order))
+        (new MatchedOrders(updatedAskOrders, bidOrders), removedAskOrder)
+      case (reference, (token, order: BidOrder[T])) =>
+        val (remainingBidOrders, Some(removedBidOrder)) = bidOrders - existing
+        val updatedBidOrders = remainingBidOrders + (reference -> (token -> order))
+        (new MatchedOrders(askOrders, updatedBidOrders), removedBidOrder)
+    }
   }
 
   /** Split this `MatchedOrders` instance into an optional pair of matched `AskOrder` and `BidOrder` instances and a
@@ -113,24 +124,15 @@ final class MatchedOrders[T <: Tradable] private(askOrders: SortedAskOrders[T], 
     *         `MatchedOrders` instance is non empty (first element is `None` otherwise), and whose second element is
     *         the residual `MatchedOrders` instance.
     */
-  def splitAtTopMatch: (MatchedOrders[T], Option[((Reference, (Token, AskOrder[T])), (Reference, (Token, BidOrder[T])))]) = {
-    headOption match {
-      case Some((marginalAskOrder @ (k1, v1), marginalBidOrder @ (k2, v2))) =>
-        (this - (k1, k2), Some((marginalAskOrder, marginalBidOrder)))
-      case None =>
-        (this, None)
-    }
-    headOption match {
-      case Some(((r1, (_, askOrder)), (r2, (_, bidOrder)))) =>
-        val (remainingAskOrders, _) = askOrders - r1
-        val remainingUnits = numberUnits - askOrder.quantity
-        (new MatchedOrders(remainingOrders, sortedOrders.tail), headOption)
-      case None =>
-        (this, None)
-    }
+  def splitAtTopMatch: (MatchedOrders[T], Option[Match]) = {
+    headOption.fold((this, Option.empty[Match]))(head => (this.tail, Some(head)))
   }
 
-  private[this] def crossed: Boolean = {
+  def tail: MatchedOrders[T] = {
+    new MatchedOrders(askOrders.tail, bidOrders.tail)
+  }
+
+  private[this] def invariantsHold: Boolean = {
     bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
       askOrders.headOption.forall{ case (_, (_, askOrder)) =>
         bidOrder.limit >= askOrder.limit

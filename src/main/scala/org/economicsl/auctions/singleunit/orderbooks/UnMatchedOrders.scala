@@ -47,10 +47,10 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
     *         also contains the `order`.
     */
   def + (kv: (Reference, (Token, Order[T]))): UnMatchedOrders[T] = kv match {
-    case askOrder@(_, (_, _: AskOrder[T])) =>
-      new UnMatchedOrders(askOrders + askOrder, bidOrders)
-    case bidOrder@(_, (_, _: BidOrder[T])) =>
-      new UnMatchedOrders(askOrders, bidOrders + bidOrder)
+    case (reference, (token, order: AskOrder[T])) =>
+      new UnMatchedOrders(askOrders + (reference -> (token -> order)), bidOrders)
+    case (reference, (token, order: BidOrder[T])) =>
+      new UnMatchedOrders(askOrders, bidOrders + (reference -> (token -> order)))
   }
 
   /** Remove an order from the collection of unmatched orders.

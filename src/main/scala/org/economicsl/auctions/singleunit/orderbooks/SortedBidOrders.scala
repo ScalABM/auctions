@@ -109,7 +109,9 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[Reference, (Token
     }
   }
 
-  def tail: SortedBidOrders[T]
+  def tail: SortedBidOrders[T] = {
+    ???
+  }
 
 }
 
