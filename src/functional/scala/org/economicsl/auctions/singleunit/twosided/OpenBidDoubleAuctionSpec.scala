@@ -34,8 +34,8 @@ import scala.util.{Random, Success}
 class OpenBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
-  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[ParkingSpace] = OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule, tickSize = 1)
-  val withUniformPricing: OpenBidDoubleAuction.UniformPricingImpl[ParkingSpace] = OpenBidDoubleAuction.withUniformPricing(pricingRule, tickSize = 1)
+  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[ParkingSpace] = OpenBidDoubleAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
+  val withUniformPricing: OpenBidDoubleAuction.UniformPricingImpl[ParkingSpace] = OpenBidDoubleAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
 
   val prng = new Random(42)
 

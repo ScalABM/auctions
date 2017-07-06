@@ -29,11 +29,7 @@ trait AskPriceQuoting[T <: Tradable] {
   this: Auction[T] =>
 
   def receive(request: AskPriceQuoteRequest[T]): AskPriceQuote = {
-    askPriceQuotingPolicy(orderBook, request)
-  }
-
-  protected val askPriceQuotingPolicy: AskPriceQuotingPolicy[T] = {
-    new AskPriceQuotingPolicy[T]
+    AskPriceQuote(orderBook.askPriceQuote)
   }
 
 }

@@ -85,7 +85,7 @@ public class JSealedBidReverseAuction<T extends Tradable>
     }
 
     private SealedBidReverseAuctionLike.Ops<T, SealedBidReverseAuction<T>> mkReverseAuctionLikeOps(SealedBidReverseAuction<T> a) {
-        return SealedBidReverseAuction$.MODULE$.reverseAuctionLikeOps(a);
+        return SealedBidReverseAuction$.MODULE$.auctionLikeOps(a);
     }
 
 }

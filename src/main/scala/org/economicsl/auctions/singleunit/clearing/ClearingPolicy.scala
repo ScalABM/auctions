@@ -1,8 +1,9 @@
-package org.economicsl.auctions.singleunit.pricing
+package org.economicsl.auctions.singleunit.clearing
 
-import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.{ClearResult, Fill}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.{Auction, AuctionLike}
+import org.economicsl.auctions.{ClearResult, Fill}
 import org.economicsl.core.{Price, Tradable}
 
 
@@ -11,7 +12,8 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Pricing[T <: Tradable, A <: Auction[T]] {
+sealed trait ClearingPolicy[T <: Tradable, A <: Auction[T]] {
+  this: AuctionLike[T, A] =>
 
   def clear(a: A): ClearResult[A]
 
@@ -25,8 +27,9 @@ sealed trait Pricing[T <: Tradable, A <: Auction[T]] {
   * @author davidrpugh
   * @since 0.1.0
   */
-trait DiscriminatoryPricing[T <: Tradable, A <: Auction[T]]
-  extends Pricing[T, A] {
+trait DiscriminatoryClearingPolicy[T <: Tradable, A <: Auction[T]]
+    extends ClearingPolicy[T, A] {
+  this: AuctionLike[T, A] =>
 
   def clear(a: A): ClearResult[A] = {
 
@@ -56,8 +59,9 @@ trait DiscriminatoryPricing[T <: Tradable, A <: Auction[T]]
   * @author davidrpugh
   * @since 0.1.0
   */
-trait UniformPricing[T <: Tradable, A <: Auction[T]]
-  extends Pricing[T, A] {
+trait UniformClearingPolicy[T <: Tradable, A <: Auction[T]]
+    extends ClearingPolicy[T, A] {
+  this: AuctionLike[T, A] =>
 
   def clear(a: A): ClearResult[A] = {
     val uniformPrice = a.pricingPolicy.apply(a.orderBook)

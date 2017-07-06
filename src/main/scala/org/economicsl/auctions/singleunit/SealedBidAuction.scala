@@ -16,9 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Token
+import org.economicsl.auctions.singleunit.clearing.WithUniformClearingPolicy
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -34,8 +35,8 @@ import org.economicsl.core.{Currency, Tradable}
   * @since 0.1.0
   */
 class SealedBidAuction[T <: Tradable] private(
-    protected[singleunit] val orderBook: FourHeapOrderBook[T],
-    protected[singleunit] val pricingPolicy: PricingPolicy[T],
+    val orderBook: FourHeapOrderBook[T],
+    val pricingPolicy: PricingPolicy[T],
     val tickSize: Currency)
   extends Auction[T]
 
@@ -66,9 +67,8 @@ object SealedBidAuction {
     * @return an instance of the `SealedBidAuctionLike` trait that will be used by the compiler to generate the
     *         `SealedBidAuctionLike` methods for the `SealedBidAuction` type class.
     */
-  implicit def mkAuctionLike[T <: Tradable]
-                            : AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] = {
-    new AuctionLike[T, SealedBidAuction[T]] with UniformPricing[T, SealedBidAuction[T]] {
+  implicit def mkAuctionLike[T <: Tradable]: WithUniformClearingPolicy[T, SealedBidAuction[T]] = {
+    new WithUniformClearingPolicy[T, SealedBidAuction[T]] {
       protected def withOrderBook(a: SealedBidAuction[T], orderBook: FourHeapOrderBook[T]): SealedBidAuction[T] = {
         new SealedBidAuction(orderBook, a.pricingPolicy, a.tickSize)
       }

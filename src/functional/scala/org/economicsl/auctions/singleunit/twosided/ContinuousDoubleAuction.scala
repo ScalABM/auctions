@@ -37,7 +37,7 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
   val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
   val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[GoogleStock] = {
-    OpenBidDoubleAuction.withDiscriminatoryPricing(pricingRule, tickSize = 1)
+    OpenBidDoubleAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
   }
 
   // generate a very large stream of random orders...

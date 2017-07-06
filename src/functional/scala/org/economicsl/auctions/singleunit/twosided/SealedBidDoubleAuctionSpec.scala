@@ -35,7 +35,7 @@ class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
   val withDiscriminatoryPricing: SealedBidDoubleAuction.DiscriminatoryPricingImpl[ParkingSpace] = {
-    SealedBidDoubleAuction.withDiscriminatoryPricing(pricingRule, tickSize = 1)
+    SealedBidDoubleAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
   }
   val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[ParkingSpace] = {
     SealedBidDoubleAuction.withUniformPricing(pricingRule, tickSize = 1)

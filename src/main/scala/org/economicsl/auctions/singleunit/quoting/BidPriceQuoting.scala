@@ -29,10 +29,7 @@ trait BidPriceQuoting[T <: Tradable] {
   this: Auction[T] =>
 
   def receive(request: BidPriceQuoteRequest[T]): BidPriceQuote = {
-    bidPriceQuotingPolicy(orderBook, request)
+    BidPriceQuote(orderBook.bidPriceQuote)
   }
-
-  /* Defines how an `OpenBidReverseAuctionLike` instance will respond to `BidPriceQuoteRequests`. */
-  protected val bidPriceQuotingPolicy: BidPriceQuotingPolicy[T] = new BidPriceQuotingPolicy[T]
 
 }

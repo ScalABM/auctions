@@ -7,9 +7,9 @@ import org.economicsl.core.{Currency, Tradable}
 
 trait Auction[T <: Tradable] {
 
-  protected[singleunit] def orderBook: FourHeapOrderBook[T]
+  def orderBook: FourHeapOrderBook[T]
 
-  protected[singleunit] def pricingPolicy: PricingPolicy[T]
+  def pricingPolicy: PricingPolicy[T]
 
   def tickSize: Currency
 

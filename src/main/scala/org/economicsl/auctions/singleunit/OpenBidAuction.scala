@@ -16,11 +16,11 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Token
-import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.clearing.WithUniformClearingPolicy
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.AskOrder
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
-import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, AskPriceQuotingPolicy}
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
+import org.economicsl.auctions.singleunit.quoting.AskPriceQuoting
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -36,7 +36,7 @@ import org.economicsl.core.{Currency, Tradable}
   * @since 0.1.0
   */
 class OpenBidAuction[T <: Tradable] private(
-    protected[singleunit] val orderBook: FourHeapOrderBook[T],
+    val orderBook: FourHeapOrderBook[T],
     val pricingPolicy: PricingPolicy[T],
     val tickSize: Currency)
   extends Auction[T]
@@ -56,9 +56,8 @@ object OpenBidAuction {
     new AuctionLike.Ops[T, OpenBidAuction[T]](a)
   }
 
-  implicit def mkAuctionLike[T <: Tradable]
-                            : AuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] = {
-    new AuctionLike[T, OpenBidAuction[T]] with UniformPricing[T, OpenBidAuction[T]] {
+  implicit def mkAuctionLike[T <: Tradable]: WithUniformClearingPolicy[T, OpenBidAuction[T]] = {
+    new WithUniformClearingPolicy[T, OpenBidAuction[T]] {
       protected def withOrderBook(a: OpenBidAuction[T], orderBook: FourHeapOrderBook[T]): OpenBidAuction[T] = {
         new OpenBidAuction[T](orderBook, a.pricingPolicy, a.tickSize)
       }

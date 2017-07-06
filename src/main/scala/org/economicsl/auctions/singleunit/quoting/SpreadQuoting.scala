@@ -29,9 +29,7 @@ trait SpreadQuoting[T <: Tradable] {
   this: Auction[T] =>
 
   def receive(request: SpreadQuoteRequest[T]): SpreadQuote = {
-    spreadQuotingPolicy(orderBook, request)
+    SpreadQuote(orderBook.spread)
   }
-
-  protected val spreadQuotingPolicy: SpreadQuotingPolicy[T] = new SpreadQuotingPolicy[T]
 
 }

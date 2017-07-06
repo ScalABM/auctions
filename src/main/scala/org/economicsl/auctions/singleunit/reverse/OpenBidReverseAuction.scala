@@ -16,12 +16,12 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.reverse
 
 import org.economicsl.auctions.Token
-import org.economicsl.auctions.quotes.{BidPriceQuote, BidPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.clearing.WithUniformClearingPolicy
 import org.economicsl.auctions.singleunit.{Auction, AuctionLike}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.BidOrder
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy, UniformPricing}
-import org.economicsl.auctions.singleunit.quoting.{BidPriceQuoting, BidPriceQuotingPolicy}
+import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
+import org.economicsl.auctions.singleunit.quoting.BidPriceQuoting
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -37,7 +37,7 @@ import org.economicsl.core.{Currency, Tradable}
   * @since 0.1.0
   */
 class OpenBidReverseAuction[T <: Tradable] private(
-    protected[singleunit] val orderBook: FourHeapOrderBook[T],
+    val orderBook: FourHeapOrderBook[T],
     val pricingPolicy: PricingPolicy[T],
     val tickSize: Currency)
   extends Auction[T]
@@ -53,15 +53,14 @@ object OpenBidReverseAuction {
 
   import org.economicsl.auctions.singleunit.AuctionParticipant._
 
-  implicit def reverseAuctionLikeOps[T <: Tradable]
-                                    (a: OpenBidReverseAuction[T])
-                                    : AuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
+  implicit def auctionLikeOps[T <: Tradable]
+                             (a: OpenBidReverseAuction[T])
+                             : AuctionLike.Ops[T, OpenBidReverseAuction[T]] = {
     new AuctionLike.Ops[T, OpenBidReverseAuction[T]](a)
   }
 
-  implicit def reverseAuctionLike[T <: Tradable]
-                                 : AuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] = {
-    new AuctionLike[T, OpenBidReverseAuction[T]] with UniformPricing[T, OpenBidReverseAuction[T]] {
+  implicit def auctionLike[T <: Tradable]: WithUniformClearingPolicy[T, OpenBidReverseAuction[T]] = {
+    new WithUniformClearingPolicy[T, OpenBidReverseAuction[T]] {
       protected def withOrderBook(a: OpenBidReverseAuction[T], orderBook: FourHeapOrderBook[T]): OpenBidReverseAuction[T] = {
         new OpenBidReverseAuction[T](orderBook, a.pricingPolicy, a.tickSize)
       }
