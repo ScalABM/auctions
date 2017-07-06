@@ -16,9 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
-import org.economicsl.auctions.singleunit.OrderGenerator
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.singleunit.{OrderGenerator, SealedBidAuction}
+import org.economicsl.auctions.singleunit.orders.Order
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -29,40 +30,36 @@ import scala.util.{Random, Success}
   * @author davidrpugh
   * @since 0.1.0
   */
-class PeriodicDoubleAuction extends FlatSpec with Matchers with OrderGenerator {
+class PeriodicDoubleAuction
+    extends FlatSpec
+    with Matchers
+    with OrderGenerator {
 
   // generate a stream of random orders...
   val google: GoogleStock = GoogleStock()
   val prng = new Random(42)
-  val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = {
+  val orders: Stream[(Token, Order[GoogleStock])] = {
     randomOrders(100, google, prng)
   }
 
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
     val pricingRule = new MidPointPricingPolicy[GoogleStock]
-    val withUniformPricing: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
-      SealedBidDoubleAuction.withUniformPricing(pricingRule, tickSize = 1)
+    val withUniformPricing: SealedBidAuction.UniformClearingImpl[GoogleStock] = {
+      SealedBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
     }
 
     // this whole process is data parallel...
-    val withOrders: SealedBidDoubleAuction.UniformPricingImpl[GoogleStock] = {
-      orders.foldLeft(withUniformPricing){
-        case (auction, order) => order match {
-          case Left(askOrder) => auction.insert(askOrder) match {
-            case Success(withAsk) => withAsk
-            case _ => auction
-          }
-          case Right(bidOrder) => auction.insert(bidOrder) match {
-            case Success(withBid) => withBid
-            case _ => auction
-          }
-        }
+    val results: (Stream[Either[Rejected, Accepted]], SealedBidAuction.UniformClearingImpl[GoogleStock]) = {
+      orders.foldLeft((Stream.empty[Either[Rejected, Accepted]], withUniformPricing)){
+        case ((responses, auction), order) =>
+          val (withOrder, response) = auction.insert(order)
+          (response #:: responses, withOrder)
       }
     }
 
-    val results = withOrders.clear
-    results.fills.map(_.map(_.price).toSet).size should be(1)
+    val (_, withOrders) = results
+    withOrders.clear.fills.map(_.map(_.price).toSet).size should be(1)
 
   }
 

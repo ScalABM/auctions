@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.twosided
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.quotes.{SpreadQuote, SpreadQuoteRequest}
-import org.economicsl.auctions.singleunit.OrderGenerator
+import org.economicsl.auctions.singleunit.{OpenBidAuction, OrderGenerator}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
@@ -36,12 +36,12 @@ object ContinuousDoubleAuction extends App with OrderGenerator {
   val google: GoogleStock = GoogleStock()
   val orderBook = FourHeapOrderBook.empty[GoogleStock]
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
-  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[GoogleStock] = {
-    OpenBidDoubleAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
+  val withDiscriminatoryPricing: OpenBidAuction[GoogleStock] = {
+    OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
   }
 
   // generate a very large stream of random orders...
-  type DoubleAuction[T <: Tradable] = OpenBidDoubleAuction.DiscriminatoryPricingImpl[T]
+  type DoubleAuction[T <: Tradable] = OpenBidAuction.DiscriminatoryPricingImpl[T]
   type OrderFlow[T <: Tradable] = Stream[Either[AskOrder[T], BidOrder[T]]]
   val prng = new Random(42)
   val orders: Stream[Either[AskOrder[GoogleStock], BidOrder[GoogleStock]]] = randomOrders(1000000, google, prng)

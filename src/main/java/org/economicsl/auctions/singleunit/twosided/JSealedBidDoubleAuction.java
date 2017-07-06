@@ -19,6 +19,7 @@ package org.economicsl.auctions.singleunit.twosided;
 import org.economicsl.auctions.ClearResult;
 import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.singleunit.JClearResult;
+import org.economicsl.auctions.singleunit.SealedBidAuction;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
 import org.economicsl.auctions.singleunit.orders.AskOrder;
 import org.economicsl.auctions.singleunit.orders.BidOrder;
@@ -69,15 +70,15 @@ public class JSealedBidDoubleAuction {
             extends AbstractSealedBidDoubleAuction<T, DiscriminatoryPricingImpl<T>> {
 
         /* underlying Scala auction contains all of the interesting logic. */
-        private SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> auction;
+        private SealedBidAuction.DiscriminatoryPricingImpl<T> auction;
 
         public Try<DiscriminatoryPricingImpl<T>> insert(AskOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return ops.insert(order).map(a -> new DiscriminatoryPricingImpl<>(a));
         }
 
         public Try<DiscriminatoryPricingImpl<T>> insert(BidOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return ops.insert(order).map(a -> new DiscriminatoryPricingImpl<>(a));
         }
 
@@ -89,7 +90,7 @@ public class JSealedBidDoubleAuction {
          * `AskOrder` instances except the `order`.
          */
         public DiscriminatoryPricingImpl<T> remove(AskOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.cancel(order));
         }
 
@@ -101,7 +102,7 @@ public class JSealedBidDoubleAuction {
          * `BidOrder` instances except the `order`.
          */
         public DiscriminatoryPricingImpl<T> remove(BidOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new DiscriminatoryPricingImpl<>(ops.cancel(order));
         }
 
@@ -110,23 +111,23 @@ public class JSealedBidDoubleAuction {
          * @return an instance of `JClearResult` class.
          */
         public JClearResult<DiscriminatoryPricingImpl<T>> clear() {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
-            ClearResult<SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.DiscriminatoryPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            ClearResult<SealedBidAuction.DiscriminatoryPricingImpl<T>> results = ops.clear();
             Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
             return new JClearResult<>(fills, new DiscriminatoryPricingImpl<>(results.residual()));
         }
 
         DiscriminatoryPricingImpl(PricingPolicy<T> pricingPolicy, Long tickSize) {
             FourHeapOrderBook<T> orderBook = FourHeapOrderBook.empty();
-            this.auction = SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.apply(orderBook, pricingPolicy, tickSize);
+            this.auction = SealedBidAuction.DiscriminatoryPricingImpl$.MODULE$.apply(orderBook, pricingPolicy, tickSize);
         }
 
-        private DiscriminatoryPricingImpl(SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> a) {
+        private DiscriminatoryPricingImpl(SealedBidAuction.DiscriminatoryPricingImpl<T> a) {
             this.auction = a;
         }
 
-        private SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.DiscriminatoryPricingImpl<T>> mkSealedBidDoubleAuctionLikeOps(SealedBidDoubleAuction.DiscriminatoryPricingImpl<T> a) {
-            return SealedBidDoubleAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(a);
+        private SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.DiscriminatoryPricingImpl<T>> mkSealedBidDoubleAuctionLikeOps(SealedBidAuction.DiscriminatoryPricingImpl<T> a) {
+            return SealedBidAuction.DiscriminatoryPricingImpl$.MODULE$.doubleAuctionLikeOps(a);
         }
 
     }
@@ -141,15 +142,15 @@ public class JSealedBidDoubleAuction {
             extends AbstractSealedBidDoubleAuction<T, UniformPricingImpl<T>> {
 
         /* underlying Scala auction contains all of the interesting logic. */
-        private SealedBidDoubleAuction.UniformPricingImpl<T> auction;
+        private SealedBidAuction.UniformPricingImpl<T> auction;
 
         public Try<UniformPricingImpl<T>> insert(AskOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return ops.insert(order).map(a -> new UniformPricingImpl<>(a));
         }
 
         public Try<UniformPricingImpl<T>> insert(BidOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return ops.insert(order).map(a -> new UniformPricingImpl<>(a));
         }
 
@@ -161,7 +162,7 @@ public class JSealedBidDoubleAuction {
          * `AskOrder` instances except the `order`.
          */
         public UniformPricingImpl<T> remove(AskOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.cancel(order));
         }
 
@@ -173,28 +174,28 @@ public class JSealedBidDoubleAuction {
          * `BidOrder` instances except the `order`.
          */
         public UniformPricingImpl<T> remove(BidOrder<T> order) {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
             return new UniformPricingImpl<>(ops.cancel(order));
         }
 
         public JClearResult<UniformPricingImpl<T>> clear() {
-            SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
-            ClearResult<SealedBidDoubleAuction.UniformPricingImpl<T>> results = ops.clear();
+            SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.UniformPricingImpl<T>> ops = mkSealedBidDoubleAuctionLikeOps(this.auction);
+            ClearResult<SealedBidAuction.UniformPricingImpl<T>> results = ops.clear();
             Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false));
             return new JClearResult<>(fills, new UniformPricingImpl<>(results.residual()));
         }
 
         UniformPricingImpl(PricingPolicy<T> pricingPolicy, Long tickSize) {
             FourHeapOrderBook<T> orderBook = FourHeapOrderBook.empty();
-            this.auction = SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.apply(orderBook, pricingPolicy, tickSize);
+            this.auction = SealedBidAuction.UniformPricingImpl$.MODULE$.apply(orderBook, pricingPolicy, tickSize);
         }
 
-        private UniformPricingImpl(SealedBidDoubleAuction.UniformPricingImpl<T> a) {
+        private UniformPricingImpl(SealedBidAuction.UniformPricingImpl<T> a) {
             this.auction = a;
         }
 
-        private SealedBidDoubleAuctionLike.Ops<T, SealedBidDoubleAuction.UniformPricingImpl<T>> mkSealedBidDoubleAuctionLikeOps(SealedBidDoubleAuction.UniformPricingImpl<T> a) {
-            return SealedBidDoubleAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(a);
+        private SealedBidDoubleAuctionLike.Ops<T, SealedBidAuction.UniformPricingImpl<T>> mkSealedBidDoubleAuctionLikeOps(SealedBidAuction.UniformPricingImpl<T> a) {
+            return SealedBidAuction.UniformPricingImpl$.MODULE$.doubleAuctionLikeOps(a);
         }
 
     }

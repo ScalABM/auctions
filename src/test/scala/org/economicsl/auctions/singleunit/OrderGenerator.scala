@@ -17,6 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.{Token, TokenGenerator}
 import org.economicsl.auctions.singleunit.orders._
 import org.economicsl.core.{Price, Tradable}
 
@@ -28,22 +29,23 @@ import scala.util.Random
   * @author davidrpugh
   * @since 0.1.0
   */
-trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
+trait OrderGenerator extends TokenGenerator {
 
-  def randomOrder[T <: Tradable](tradable: T, prng: Random): Either[AskOrder[T], BidOrder[T]] = {
+  def randomOrder[T <: Tradable](tradable: T, prng: Random): (Token, Order[T]) = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
+    val token = randomToken()
     val limit = Price(prng.nextInt(Int.MaxValue))
     if (prng.nextDouble() <= 0.5) {
-      Left(LimitAskOrder(issuer, limit, tradable))
+      (token, LimitAskOrder(issuer, limit, tradable))
     } else {
-      Right(LimitBidOrder(issuer, limit, tradable))
+      (token, LimitBidOrder(issuer, limit, tradable))
     }
   }
 
 
-  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[Either[AskOrder[T], BidOrder[T]]] = {
+  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, Order[T])] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[Either[AskOrder[T], BidOrder[T]]], remaining: Int): Stream[Either[AskOrder[T], BidOrder[T]]] = {
+    def loop(accumulated: Stream[(Token, Order[T])], remaining: Int): Stream[(Token, Order[T])] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -51,7 +53,7 @@ trait OrderGenerator extends AskOrderGenerator with BidOrderGenerator {
         loop(order #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[Either[AskOrder[T], BidOrder[T]]], n)
+    loop(Stream.empty[(Token, Order[T])], n)
   }
 
 }

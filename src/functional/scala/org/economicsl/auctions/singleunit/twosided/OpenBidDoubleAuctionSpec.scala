@@ -18,6 +18,7 @@ package org.economicsl.auctions.singleunit.twosided
 import java.util.UUID
 
 import org.economicsl.auctions.ParkingSpace
+import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.core.Price
@@ -34,8 +35,8 @@ import scala.util.{Random, Success}
 class OpenBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
-  val withDiscriminatoryPricing: OpenBidDoubleAuction.DiscriminatoryPricingImpl[ParkingSpace] = OpenBidDoubleAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
-  val withUniformPricing: OpenBidDoubleAuction.UniformPricingImpl[ParkingSpace] = OpenBidDoubleAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
+  val withDiscriminatoryPricing: OpenBidAuction.DiscriminatoryPricingImpl[ParkingSpace] = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
+  val withUniformPricing: OpenBidAuction.UniformPricingImpl[ParkingSpace] = OpenBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
 
   val prng = new Random(42)
 

@@ -79,10 +79,10 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
   }
 
   def insert(kv: (Reference, (Token, Order[T]))): FourHeapOrderBook[T] = kv match {
-    case (reference, incoming @ (_, order: AskOrder[T])) =>
-      insert(reference, incoming)
-    case (reference, incoming @ (_, order: BidOrder[T])) =>
-      insert(reference, incoming)
+    case (reference, (token, order: AskOrder[T])) =>
+      insert(reference, token -> order)
+    case (reference, (token, order: BidOrder[T])) =>
+      insert(reference, token -> order)
   }
 
   /** Create a new `FourHeapOrderBook` with a given `AskOrder` removed from this order book.

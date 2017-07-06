@@ -15,95 +15,140 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.Token
-import org.economicsl.auctions.singleunit.clearing.WithUniformClearingPolicy
+import org.economicsl.auctions.singleunit.clearing.{WithDiscriminatoryClearingPolicy, WithUniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.AskOrder
-import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy, PricingPolicy}
-import org.economicsl.auctions.singleunit.quoting.AskPriceQuoting
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.quoting.{AskPriceQuoting, BidPriceQuoting, SpreadQuoting}
 import org.economicsl.core.{Currency, Tradable}
 
 
-/** Type class representing an "open-bid" auction mechanism.
+/** Base trait for representing an "open-bid" double auction mechanism.
   *
-  * @param orderBook a `FourHeapOrderBook` instance containing the reservation `AskOrder` and any previously submitted
-  *                  `BidOrder` instances.
-  * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
-  * @param tickSize the minimum price movement of a tradable.
-  * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
-  *           be for the same type of `Tradable`.
+  * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
+  *           type of `Tradable`.
   * @author davidrpugh
   * @since 0.1.0
   */
-class OpenBidAuction[T <: Tradable] private(
-    val orderBook: FourHeapOrderBook[T],
-    val pricingPolicy: PricingPolicy[T],
-    val tickSize: Currency)
-  extends Auction[T]
-  with AskPriceQuoting[T]
+trait OpenBidAuction[T <: Tradable]
+    extends SealedBidAuction[T]
+    with AskPriceQuoting[T]
+    with BidPriceQuoting[T]
+    with SpreadQuoting[T]
 
 
-  /** Companion object for the `OpenBidAuction` type class.
+/** Companion object for the `OpenBidAuction` trait.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
 object OpenBidAuction {
 
-  import AuctionParticipant._
-
-  implicit def mkAuctionOps[T <: Tradable](a: OpenBidAuction[T]): AuctionLike.Ops[T, OpenBidAuction[T]] = {
-    new AuctionLike.Ops[T, OpenBidAuction[T]](a)
+  /** Create an "open-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @param tickSize the minimum price movement of a tradable.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
+    *           type of `Tradable`.
+    * @return an `OpenBidDoubleAuction.DiscriminatoryPricingImpl` instance.
+    */
+  def withDiscriminatoryClearingPolicy[T <: Tradable]
+                                      (pricingPolicy: PricingPolicy[T], tickSize: Currency)
+                                      : OpenBidAuction[T] = {
+    new DiscriminatoryPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy, tickSize)
   }
 
-  implicit def mkAuctionLike[T <: Tradable]: WithUniformClearingPolicy[T, OpenBidAuction[T]] = {
-    new WithUniformClearingPolicy[T, OpenBidAuction[T]] {
-      protected def withOrderBook(a: OpenBidAuction[T], orderBook: FourHeapOrderBook[T]): OpenBidAuction[T] = {
-        new OpenBidAuction[T](orderBook, a.pricingPolicy, a.tickSize)
+  /** Create an "open-bid" double auction mechanism with uniform pricing.
+    *
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @param tickSize the minimum price movement of a tradable.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
+    *           type of `Tradable`.
+    * @return an `OpenBidDoubleAuction.UniformPricingImpl` instance.
+    */
+  def withUniformClearingPolicy[T <: Tradable]
+                               (pricingPolicy: PricingPolicy[T], tickSize: Currency)
+                               : OpenBidAuction[T] = {
+    new UniformPricingImpl[T](FourHeapOrderBook.empty, pricingPolicy, tickSize)
+  }
+
+  /** Type class representing an "open-bid" double auction mechanism with discriminatory pricing.
+    *
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
+    * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
+    * @param tickSize the minimum price movement of a tradable.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
+    */
+  private case class DiscriminatoryPricingImpl[T <: Tradable](
+      orderBook: FourHeapOrderBook[T],
+      pricingPolicy: PricingPolicy[T],
+      tickSize: Currency)
+    extends OpenBidAuction[T]
+
+
+  /** Companion object for the `DiscriminatoryPricingImpl` type class.
+    *
+    * @author davidrpugh
+    * @since 0.1.0
+    */
+  private object DiscriminatoryPricingImpl {
+
+    implicit def auctionLikeOps[T <: Tradable](a: DiscriminatoryPricingImpl[T])
+                                              : AuctionLike.Ops[T, DiscriminatoryPricingImpl[T]] = {
+      new AuctionLike.Ops[T, DiscriminatoryPricingImpl[T]](a)
+    }
+
+    implicit def auctionLike[T <: Tradable]: WithDiscriminatoryClearingPolicy[T, DiscriminatoryPricingImpl[T]] = {
+      new WithDiscriminatoryClearingPolicy[T, DiscriminatoryPricingImpl[T]] {
+        protected def withOrderBook(a: DiscriminatoryPricingImpl[T], orderBook: FourHeapOrderBook[T]): DiscriminatoryPricingImpl[T] = {
+          new DiscriminatoryPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
+        }
       }
     }
 
   }
 
-  /** Create an instance of an "open-bid" auction mechanism.
+
+  /** Type class representing an "open-bid" double auction mechanism with uniform pricing.
     *
-    * @param reservation an `AskOrder` instance representing the reservation price for the auction.
+    * @param orderBook a `FourHeapOrderBook` instance containing any previously submitted `AskOrder` and `BidOrder`
+    *                  instances.
     * @param pricingPolicy a `PricingPolicy` that maps a `FourHeapOrderBook` instance to an optional `Price`.
     * @param tickSize the minimum price movement of a tradable.
-    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
-    *           be for the same type of `Tradable`.
-    * @return an `OpenBidAuction` instance.
+    * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
+    *           type of `Tradable`.
+    * @author davidrpugh
+    * @since 0.1.0
     */
-  def withReservation[T <: Tradable]
-                     (reservation: (Token, AskOrder[T]), pricingPolicy: PricingPolicy[T], tickSize: Currency)
-                     : (OpenBidAuction[T], Either[Rejected, Accepted]) = {
-    val orderBook = FourHeapOrderBook.empty[T]
-    val auction = new OpenBidAuction[T](orderBook, pricingPolicy, tickSize)
-    auction.insert(reservation)
-  }
+  private case class UniformPricingImpl[T <: Tradable](
+      orderBook: FourHeapOrderBook[T],
+      pricingPolicy: PricingPolicy[T],
+      tickSize: Currency)
+    extends OpenBidAuction[T]
 
-  /** Create an instance of a first-price, open-bid auction (FPOBA) mechanism.
-    *
-    * @param tickSize the minimum price movement of a tradable.
-    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
-    *           be for the same type of `Tradable`.
-    * @return an `OpenBidAuction` instance.
-    */
-  def withAskQuotePricingPolicy[T <: Tradable](tickSize: Currency): OpenBidAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
-    new OpenBidAuction[T](orderBook, new AskQuotePricingPolicy[T], tickSize)
-  }
 
-  /** Create an instance of a second-price, open-bid auction (SPOBA) mechanism.
+  /** Companion object for the `UniformPricingImpl` type class.
     *
-    * @param tickSize the minimum price movement of a tradable.
-    * @tparam T the reservation `AskOrder` as well as all `BidOrder` instances submitted to the `OpenBidAuction` must
-    *           be for the same type of `Tradable`.
-    * @return an `OpenBidAuction` instance.
+    * @author davidrpugh
+    * @since 0.1.0
     */
-  def withBidQuotePricingPolicy[T <: Tradable](tickSize: Currency): OpenBidAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
-    new OpenBidAuction[T](orderBook, new BidQuotePricingPolicy[T], tickSize)
+  private object UniformPricingImpl {
+
+    implicit def auctionLikeOps[T <: Tradable](a: UniformPricingImpl[T]): AuctionLike.Ops[T, UniformPricingImpl[T]] = {
+      new AuctionLike.Ops[T, UniformPricingImpl[T]](a)
+    }
+
+    implicit def auctionLike[T <: Tradable]: WithUniformClearingPolicy[T, UniformPricingImpl[T]] = {
+      new WithUniformClearingPolicy[T, UniformPricingImpl[T]] {
+        protected def withOrderBook(a: UniformPricingImpl[T], orderBook: FourHeapOrderBook[T]): UniformPricingImpl[T] = {
+          new UniformPricingImpl[T](orderBook, a.pricingPolicy, a.tickSize)
+        }
+      }
+    }
+
   }
 
 }

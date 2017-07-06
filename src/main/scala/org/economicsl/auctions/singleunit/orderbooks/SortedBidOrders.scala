@@ -110,7 +110,9 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[Reference, (Token
   }
 
   def tail: SortedBidOrders[T] = {
-    ???
+    val (reference, (_, order)) = sortedOrders.head
+    val remainingUnits = numberUnits - order.quantity
+    new SortedBidOrders(orders - reference, sortedOrders.tail, remainingUnits)
   }
 
 }
@@ -130,9 +132,10 @@ object SortedBidOrders {
     * @return an instance of `SortedBidOrders`.
     */
   def empty[T <: Tradable](ordering: Ordering[BidOrder[T]]): SortedBidOrders[T] = {
-    val existing = immutable.HashMap.empty[Reference, (Token, BidOrder[T])]
-    val sorted = immutable.TreeSet.empty[(Reference, (Token, BidOrder[T]))](???) // todo need to convert ordering!
-    new SortedBidOrders(existing, sorted, Quantity.zero)
+    val orders = immutable.HashMap.empty[Reference, (Token, BidOrder[T])]
+    val byBidOrder = Ordering.by[(Reference, (Token, BidOrder[T])), BidOrder[T]]{ case (_, (_, order)) => order }(ordering)
+    val sortedOrders = immutable.TreeSet.empty[(Reference, (Token, BidOrder[T]))](byBidOrder)
+    new SortedBidOrders(orders, sortedOrders, Quantity.zero)
   }
 
 }
