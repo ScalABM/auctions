@@ -18,9 +18,11 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.auctions.singleunit.clearing.WithUniformClearingPolicy
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, ParkingSpace}
-import org.economicsl.core.{Currency, Price}
+import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
+import org.economicsl.auctions.{ClearResult, ParkingSpace, Token}
+import org.economicsl.core.{Currency, Price, Tradable}
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Random, Success}
@@ -40,12 +42,16 @@ class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGener
 
   // seller uses a first-priced, sealed bid auction...
   val tickSize: Currency = 1
-  val fpoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withAskQuotePricingPolicy(reservationPrice, tickSize)
+  val fpoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.UniformClearingImpl.withAskQuotePricingPolicy(tickSize)
+
+  def firstPriceOpenBidAuction[T <: Tradable](tickSize: Long): OpenBidAuction.UniformClearingImpl[T] = {
+    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[T], tickSize)
+  }
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
+  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = randomBidOrders(1000, parkingSpace, prng)
 
   // want withBids to include all successful bids
   val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(fpoba) { case (auction, bidOrder) =>

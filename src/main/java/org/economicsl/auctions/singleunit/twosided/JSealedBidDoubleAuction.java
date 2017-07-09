@@ -67,7 +67,7 @@ public class JSealedBidDoubleAuction {
      * @since 0.1.0
      */
     public static class DiscriminatoryPricingImpl<T extends Tradable>
-            extends AbstractSealedBidDoubleAuction<T, DiscriminatoryPricingImpl<T>> {
+            extends AbstractDoubleAuction<T, DiscriminatoryPricingImpl<T>> {
 
         /* underlying Scala auction contains all of the interesting logic. */
         private SealedBidAuction.DiscriminatoryPricingImpl<T> auction;
@@ -139,7 +139,7 @@ public class JSealedBidDoubleAuction {
      * @since 0.1.0
      */
     public static class UniformPricingImpl<T extends Tradable>
-            extends AbstractSealedBidDoubleAuction<T, UniformPricingImpl<T>> {
+            extends AbstractDoubleAuction<T, UniformPricingImpl<T>> {
 
         /* underlying Scala auction contains all of the interesting logic. */
         private SealedBidAuction.UniformPricingImpl<T> auction;

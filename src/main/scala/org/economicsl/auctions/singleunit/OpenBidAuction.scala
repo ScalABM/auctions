@@ -94,7 +94,7 @@ object OpenBidAuction {
     * @author davidrpugh
     * @since 0.1.0
     */
-  private object DiscriminatoryClearingImpl {
+  object DiscriminatoryClearingImpl {
 
     implicit def auctionLikeOps[T <: Tradable](a: DiscriminatoryClearingImpl[T])
                                               : AuctionLike.Ops[T, DiscriminatoryClearingImpl[T]] = {

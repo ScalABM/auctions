@@ -91,16 +91,16 @@ public class Sandbox {
         JClearResult<JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
         System.out.println(results.getFills().get());  // TODO: is Stream the best collection to use here?
 
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing, 1L);
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da2 = da.insert(order3).get();
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da3 = da2.insert(order4).get();
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da4 = da3.insert(order8).get();
+        JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing, 1L);
+        JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da2 = da.insert(order3).get();
+        JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da3 = da2.insert(order4).get();
+        JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da4 = da3.insert(order8).get();
 
         System.out.println(da4.receive(new AskPriceQuoteRequest<>()));
         System.out.println(da4.receive(new BidPriceQuoteRequest<>()));
 
-        JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock> da5 = da4.insert(order9).get();
-        JClearResult<JOpenBidDoubleAuction.DiscriminatoryPricingImpl<GoogleStock>> results3 = da5.clear();
+        JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da5 = da4.insert(order9).get();
+        JClearResult<JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock>> results3 = da5.clear();
         System.out.println(results3.getFills().get());
 
         JOpenBidDoubleAuction.UniformPricingImpl<GoogleStock> da6 = new JOpenBidDoubleAuction().withUniformPricing(midPointPricing, 1L);
