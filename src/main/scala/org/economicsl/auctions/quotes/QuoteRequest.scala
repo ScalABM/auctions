@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
-import org.economicsl.core.Tradable
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.core.{Currency, Price, Tradable}
 
 
 /** Base trait for all quote requests.
@@ -23,7 +24,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait QuoteRequest[T <: Tradable]
+sealed trait QuoteRequest[T <: Tradable] extends (FourHeapOrderBook[T] => Option[Any])
 
 
 /** Base trait for all price quote requests.
@@ -31,7 +32,9 @@ sealed trait QuoteRequest[T <: Tradable]
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T]
+trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T] {
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price]
+}
 
 
 /** Used by auction participants to request the current ask price quote.
@@ -39,7 +42,11 @@ sealed trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-case class AskPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
+final class AskPriceQuoteRequest[T <: Tradable] extends PriceQuoteRequest[T] {
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
+    orderBook.askPriceQuote
+  }
+}
 
 
 /** Used by auction participants to request the current bid price quote.
@@ -47,7 +54,11 @@ case class AskPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-case class BidPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
+final class BidPriceQuoteRequest[T <: Tradable] extends PriceQuoteRequest[T] {
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
+    orderBook.bidPriceQuote
+  }
+}
 
 
 /** Used by auction participants to request the current spread quote.
@@ -55,4 +66,8 @@ case class BidPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SpreadQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
+final class SpreadQuoteRequest[T <: Tradable]() extends QuoteRequest[T] {
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Currency] = {
+    orderBook.spread
+  }
+}

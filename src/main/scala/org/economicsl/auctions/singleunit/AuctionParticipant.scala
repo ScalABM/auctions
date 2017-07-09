@@ -29,19 +29,30 @@ trait AuctionParticipant
 
   def issuer: Issuer
 
-  def outstandingOrders: GenMap[Token, (Reference, Order[_ <: Tradable])]
+  protected def outstandingOrders: GenMap[Token, (Reference, Order[_ <: Tradable])]
 
 }
 
 
 object AuctionParticipant {
 
-  final case class Accepted(issuer: Issuer, reference: Reference)
+  final case class Accepted(issuer: Issuer, token: Token, order: Order[_ <: Tradable], reference: Reference)
 
   final case class Canceled(issuer: Issuer, token: Token)
 
   final case class Executed(issuer: Issuer, token: Token, price: Price, quantity: Quantity, matchNumber: UUID)
 
-  final case class Rejected(issuer: Issuer, reason: String)
+  final case class Rejected(issuer: Issuer, token: Token, order: Order[ _ <: Tradable], reason: Reason)
+
+  sealed trait Reason {
+
+    def message: String
+
+  }
+
+  final case class InvalidTickSize(order: Order[_ <: Tradable], tickSize: Long) extends Reason {
+    val message: String = s"Limit price of ${order.limit} is not a multiple of the tick size $tickSize"
+  }
+
 
 }

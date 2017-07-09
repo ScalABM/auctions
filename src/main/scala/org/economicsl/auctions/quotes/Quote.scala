@@ -24,9 +24,9 @@ import play.api.libs.json.{Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Quote[T] {
+sealed trait Quote {
 
-  def quote: Option[T]
+  def quote: Option[Any]
 
 }
 
@@ -36,7 +36,7 @@ sealed trait Quote[T] {
   * @author davidrpugh
   * @since 0.1.0
   */
-trait PriceQuote extends Quote[Price] {
+trait PriceQuote extends Quote {
 
   def quote: Option[Price]
 
@@ -82,7 +82,7 @@ object BidPriceQuote {
   * @todo a spread is the difference between two prices and as such the unit is not really `Price` but rather should
   *       be `Currency`.
   */
-case class SpreadQuote(quote: Option[Currency]) extends Quote[Currency]
+case class SpreadQuote(quote: Option[Currency]) extends Quote
 
 
 object SpreadQuote {

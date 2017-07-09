@@ -1,27 +1,29 @@
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.singleunit.clearing.UniformClearingPolicy2
+import org.economicsl.auctions.singleunit.clearing.UniformClearingPolicy
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
-import org.economicsl.core.Tradable
+import org.economicsl.core.{Currency, Tradable}
 
 
 final class FirstPriceSealedBidAuction[T <: Tradable] private(
-  protected val orderBook: FourHeapOrderBook[T],
+  orderBook: FourHeapOrderBook[T],
   tickSize: Long)
-    extends SealedBidAuction2[T, FirstPriceSealedBidAuction[T]]
-    with UniformClearingPolicy2[T, FirstPriceSealedBidAuction[T]] {
+    extends SealedBidAuction[T, FirstPriceSealedBidAuction[T]](orderBook, new AskQuotePricingPolicy[T], tickSize)
+    with UniformClearingPolicy[T, FirstPriceSealedBidAuction[T]] {
 
   protected def withOrderBook(orderBook: FourHeapOrderBook[T]): FirstPriceSealedBidAuction[T] = {
     new FirstPriceSealedBidAuction(orderBook, tickSize)
   }
-
-  protected val pricingPolicy: AskQuotePricingPolicy[T] = new AskQuotePricingPolicy[T]
 
 }
 
 
 object FirstPriceSealedBidAuction {
 
+  def withTickSize[T <: Tradable](tickSize: Currency): FirstPriceSealedBidAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new FirstPriceSealedBidAuction(orderBook, tickSize)
+  }
 
 }

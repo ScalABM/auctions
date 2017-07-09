@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
-import org.economicsl.core.Tradable
+import org.economicsl.core.{Quantity, Tradable}
 
 
 /** Class for storing sets of matched `AskOrder` and `BidOrder` instances.
@@ -43,6 +43,8 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
   /** The ordering used to sort the `BidOrder` instances contained in this `MatchedOrders` instance. */
   val bidOrdering: Ordering[(Reference, (Token, BidOrder[T]))] = bidOrders.ordering
 
+  val numberUnits: Quantity = askOrders.numberUnits  // or bidOrders.numberUnits!
+
   /** Create a new `MatchedOrders` instance containing a matched pair of `(AskOrder, BidOrder)` instances.
     *
     * @param kv1
@@ -60,18 +62,18 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `BidOrder` instances of this
     *         instance but that does not contain the matched pair of  `orders`.
     */
-  def - (reference: Reference): (MatchedOrders[T], Option[((Token, AskOrder[T]), (Token, BidOrder[T]))]) = {
+  def - (reference: Reference): (MatchedOrders[T], Option[((Token, Order[T]), (Reference, (Token, Order[T])))]) = {
     val (remainingAskOrders, removedAskOrder) = askOrders - reference
     removedAskOrder match {
       case Some(askOrder) =>
-        val (remainingBidOrders, Some((_, marginalBidOrder))) = bidOrders.splitOffTopOrder
+        val (remainingBidOrders, Some(marginalBidOrder)) = bidOrders.splitOffTopOrder
         (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((askOrder, marginalBidOrder)))
       case None =>
         val (remainingBidOrders, removedBidOrder) = bidOrders - reference
         removedBidOrder match {
           case Some(bidOrder) =>
-            val (remainingAskOrders, Some((_, marginalAskOrder))) = askOrders.splitOffTopOrder
-            (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((marginalAskOrder, bidOrder)))
+            val (remainingAskOrders, Some(marginalAskOrder)) = askOrders.splitOffTopOrder
+            (new MatchedOrders(remainingAskOrders, remainingBidOrders), Some((bidOrder, marginalAskOrder)))
           case None =>
             (this, None)
         }

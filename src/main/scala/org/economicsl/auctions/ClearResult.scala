@@ -15,13 +15,16 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.singleunit.Auction
+import org.economicsl.core.Tradable
+
 
 /** Class used to represent the results from clearing an auction.
   *
-  * @param fills
   * @param residual
+  * @param fills
   * @tparam A
   * @author davidrpugh
   * @since 0.1.0
   */
-case class ClearResult[A](fills: Option[Stream[Fill]], residual: A)
+case class ClearResult[A <: Auction[_ <: Tradable, A]](residual: A, fills: Option[Stream[Fill]])

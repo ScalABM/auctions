@@ -17,13 +17,13 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.quotes.AskPriceQuote
+import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, ParkingSpace, Token}
-import org.economicsl.core.{Currency, Price, Tradable}
+import org.economicsl.auctions.{Fill, ParkingSpace, Token}
+import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Random, Success}
+import scala.util.Random
 
 
 /**
@@ -31,48 +31,61 @@ import scala.util.{Random, Success}
   * @author davidrpugh
   * @since 0.1.0
   */
-class FirstPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
+class FirstPriceOpenBidAuctionSpec extends FlatSpec with Matchers with BidOrderGenerator {
 
-  // suppose that seller must sell the parking space at any positive price...
+  import AuctionParticipant._
+
+  // Seller that must sell at any positive price
   val seller: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace()
-  val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
+  val token: Token = randomToken()
+  val reservation: (Token, LimitAskOrder[ParkingSpace]) = (token, LimitAskOrder(seller, Price.MinValue, parkingSpace))
+
+  // suppose that there are lots of bidders
+  val prng: Random = new Random(42)
+  val numberBidOrders = 10000
+  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = randomBidOrders(numberBidOrders, parkingSpace, prng)
+
 
   // seller uses a first-priced, sealed bid auction...
   val tickSize: Currency = 1
   val fpoba: FirstPriceOpenBidAuction[ParkingSpace] = FirstPriceOpenBidAuction.withTickSize(tickSize)
+  val (withReservation, response) = fpoba.insert(reservation)
 
-  // suppose that there are lots of bidders
-  val prng: Random = new Random(42)
-  val numberBidOrders = 1000
-  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = randomBidOrders(1000, parkingSpace, prng)
-
-  // want withBids to include all successful bids
-  val withBids: FirstPriceOpenBidAuction[ParkingSpace] = bids.foldLeft(fpoba) { case (auction, bidOrder) =>
-    auction.insert(bidOrder) match {
-      case Success(withBid) => withBid
-      case _ => auction
-    }
+  response match {
+    case Left(Rejected(_, _, _, _)) =>
+      ???
+    case Right(Accepted(_, _, _, _)) =>
+      ???
   }
 
-  val results: ClearResult[OpenBidAuction[ParkingSpace]] = withBids.clear
+   val (_, highestPricedBidOrder) = bids.max
+
+  // withBids will include all accepted bids (this is trivially parallel..)
+  val withBids: FirstPriceOpenBidAuction[ParkingSpace] = bids.foldLeft(withReservation) {
+    case (auction, bidOrder) =>
+      val (updated, bidderResponses) = auction.insert(bidOrder)
+      updated
+  }
+
+  val (residual, fills): (FirstPriceOpenBidAuction[ParkingSpace], Option[Stream[Fill]]) = withBids.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {
 
-    val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
+    val askPriceQuote = withBids.receive(new AskPriceQuoteRequest)
+    askPriceQuote should be(AskPriceQuote(Some(highestPricedBidOrder.limit)))
 
   }
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
-    results.fills.map(_.map(_.issuer)) should be(Some(Stream(bids.max.issuer)))
+    fills.map(_.map(_.issuer)) should be(Some(Stream(highestPricedBidOrder.issuer)))
 
   }
 
   "The winning price of a First-Price, Open-Bid Auction (FPOBA)" should "be the highest submitted bid price." in {
 
-    results.fills.map(_.map(_.price)) should be(Some(Stream(bids.max.limit)))
+    fills.map(_.map(_.price)) should be(Some(Stream(highestPricedBidOrder.limit)))
 
   }
 

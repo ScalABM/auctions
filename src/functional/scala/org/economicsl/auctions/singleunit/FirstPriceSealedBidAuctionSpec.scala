@@ -30,7 +30,7 @@ import scala.util.{Random, Success}
   * @author davidrpugh
   * @since 0.1.0
   */
-class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
+class FirstPriceSealedBidAuctionSpec extends FlatSpec with Matchers with BidOrderGenerator {
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
@@ -39,7 +39,7 @@ class FirstPriceSealedBidAuction extends FlatSpec with Matchers with BidOrderGen
 
   // seller uses a first-priced, sealed bid auction...
   val tickSize: Currency = 1
-  val fpsba: SealedBidAuction[ParkingSpace] = SealedBidAuction.withAskPriceQuotingPolicy(reservationPrice, tickSize)
+  val fpsba: FirstPriceSealedBidAuction[ParkingSpace] = FirstPriceSealedBidAuction.withTickSize(tickSize)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
