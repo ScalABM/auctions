@@ -29,27 +29,66 @@ import scala.util.Random
   * @author davidrpugh
   * @since 0.1.0
   */
-trait OrderGenerator extends TokenGenerator {
+object OrderGenerator extends TokenGenerator {
 
-  def randomOrder[T <: Tradable](tradable: T, prng: Random): (Token, Order[T]) = {
+  def randomAskOrder[T <: Tradable](tradable: T, prng: Random): (Token, LimitAskOrder[T]) = {
+    val token = randomToken()
+    val issuer = UUID.randomUUID()  // todo make this reproducible!
+    val limit = Price(prng.nextInt(Int.MaxValue))
+    (token, LimitAskOrder(issuer, limit, tradable))
+  }
+
+
+  def randomAskOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, LimitAskOrder[T])] = {
+    @annotation.tailrec
+    def loop(accumulated: Stream[(Token, LimitAskOrder[T])], remaining: Int): Stream[(Token, LimitAskOrder[T])] = {
+      if (remaining == 0) {
+        accumulated
+      } else {
+        val ask = randomAskOrder(tradable, prng)
+        loop(ask #:: accumulated, remaining - 1)
+      }
+    }
+    loop(Stream.empty[(Token, LimitAskOrder[T])], n)
+  }
+
+  def randomBidOrder[T <: Tradable](tradable: T, prng: Random): (Token, LimitBidOrder[T]) = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val token = randomToken()
     val limit = Price(prng.nextInt(Int.MaxValue))
-    if (prng.nextDouble() <= 0.5) {
-      (token, LimitAskOrder(issuer, limit, tradable))
+    (token, LimitBidOrder(issuer, limit, tradable))
+  }
+
+  def randomBidOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, LimitBidOrder[T])] = {
+    @annotation.tailrec
+    def loop(accumulated: Stream[(Token, LimitBidOrder[T])], remaining: Int): Stream[(Token, LimitBidOrder[T])] = {
+      if (remaining == 0) {
+        accumulated
+      } else {
+        val bid = randomBidOrder(tradable, prng)
+        loop(bid #:: accumulated, remaining - 1)
+      }
+    }
+    loop(Stream.empty[(Token, LimitBidOrder[T])], n)
+  }
+
+
+  def randomOrder[T <: Tradable](askOrderProbability: Double)(tradable: T, prng: Random): (Token, Order[T]) = {
+    if (prng.nextDouble() <= askOrderProbability) {
+      randomAskOrder(tradable, prng)
     } else {
-      (token, LimitBidOrder(issuer, limit, tradable))
+      randomBidOrder(tradable, prng)
     }
   }
 
 
-  def randomOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, Order[T])] = {
+  def randomOrders[T <: Tradable](askOrderProbability: Double)(n: Int, tradable: T, prng: Random): Stream[(Token, Order[T])] = {
     @annotation.tailrec
     def loop(accumulated: Stream[(Token, Order[T])], remaining: Int): Stream[(Token, Order[T])] = {
       if (remaining == 0) {
         accumulated
       } else {
-        val order = randomOrder(tradable, prng)
+        val order = randomOrder(askOrderProbability)(tradable, prng)
         loop(order #:: accumulated, remaining - 1)
       }
     }
