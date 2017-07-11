@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.{Currency, Tradable}
@@ -27,10 +28,72 @@ import org.economicsl.core.{Currency, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-abstract class SealedBidAuction[T <: Tradable, A <: SealedBidAuction[T, A]](
-  orderBook: FourHeapOrderBook[T],
-  pricingPolicy: PricingPolicy[T],
-  tickSize: Currency)
-    extends Auction[T, A](orderBook, pricingPolicy, tickSize) {
-  this: A =>
+abstract class SealedBidAuction[T <: Tradable]
+    extends Auction[T, SealedBidAuction[T]] {
+  this: SealedBidAuction[T] =>
+}
+
+
+object SealedBidAuction {
+
+  def withDiscriminatoryClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency): SealedBidAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithDiscriminatoryClearingPolicy[T](orderBook, pricingPolicy, tickSize)
+  }
+
+  def withUniformClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency): SealedBidAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithUniformClearingPolicy[T](orderBook, pricingPolicy, tickSize)
+  }
+
+
+  private class WithDiscriminatoryClearingPolicy[T <: Tradable](
+    protected val orderBook: FourHeapOrderBook[T],
+    protected val pricingPolicy: PricingPolicy[T],
+    val tickSize: Currency)
+      extends SealedBidAuction[T]
+      with DiscriminatoryClearingPolicy[T, SealedBidAuction[T]] {
+
+    /** Returns an auction of type `A` with a particular pricing policy. */
+    def withPricingPolicy(updated: PricingPolicy[T]): SealedBidAuction[T] = {
+      new WithUniformClearingPolicy[T](orderBook, updated, tickSize)
+    }
+
+    /** Returns an auction of type `A` with a particular tick size. */
+    def withTickSize(updated: Currency): SealedBidAuction[T] = {
+      new WithUniformClearingPolicy[T](orderBook, pricingPolicy, updated)
+    }
+
+    /** Factory method used by sub-classes to create an `Auction` of type `A`. */
+    protected def withOrderBook(updated: FourHeapOrderBook[T]): SealedBidAuction[T] = {
+      new WithDiscriminatoryClearingPolicy[T](updated, pricingPolicy, tickSize)
+    }
+
+  }
+
+
+  private class WithUniformClearingPolicy[T <: Tradable](
+    protected val orderBook: FourHeapOrderBook[T],
+    protected val pricingPolicy: PricingPolicy[T],
+    val tickSize: Currency)
+      extends SealedBidAuction[T]
+      with UniformClearingPolicy[T, SealedBidAuction[T]] {
+
+    /** Returns an auction of type `A` with a particular pricing policy. */
+    def withPricingPolicy(updated: PricingPolicy[T]): SealedBidAuction[T] = {
+      new WithUniformClearingPolicy[T](orderBook, updated, tickSize)
+    }
+
+    /** Returns an auction of type `A` with a particular tick size. */
+    def withTickSize(updated: Currency): SealedBidAuction[T] = {
+      new WithUniformClearingPolicy[T](orderBook, pricingPolicy, updated)
+    }
+
+    /** Factory method used by sub-classes to create an `Auction` of type `A`. */
+    protected def withOrderBook(updated: FourHeapOrderBook[T]): SealedBidAuction[T] = {
+      new WithUniformClearingPolicy[T](updated, pricingPolicy, tickSize)
+    }
+
+  }
+
 }

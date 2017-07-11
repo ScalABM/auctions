@@ -9,7 +9,7 @@ sealed trait UUIDGenerator
 trait ReferenceGenerator
     extends UUIDGenerator {
 
-  def randomReference(): Reference = {
+  protected def randomReference(): Reference = {
     UUID.randomUUID()
   }
 
@@ -19,7 +19,7 @@ trait ReferenceGenerator
 trait TokenGenerator
   extends UUIDGenerator {
 
-  def randomToken(): Token = {
+  protected def randomToken(): Token = {
     UUID.randomUUID()
   }
 

@@ -22,10 +22,15 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.{Currency, Tradable}
 
 
-abstract class Auction[T <: Tradable, A <: Auction[T, A]](
-  protected val orderBook: FourHeapOrderBook[T],
-  protected val pricingPolicy: PricingPolicy[T],
-  val tickSize: Currency)
+/** Base trait for all auction implementations.
+  *
+  * @tparam T
+  * @tparam A
+  * @note Note the use of F-bounded polymorphism over Type classes. We developed an alternative implementation using the
+  *       Type class pattern that was quite elegant, however Type classes can not be used directly from Java. In order
+  *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers.
+  */
+trait Auction[T <: Tradable, A <: Auction[T, A]]
     extends ReferenceGenerator {
   this: A =>
 
@@ -69,17 +74,30 @@ abstract class Auction[T <: Tradable, A <: Auction[T, A]](
     val (token, order) = kv
     if (order.limit.value % tickSize > 0) {
       val reason = InvalidTickSize(order, tickSize)
-      val rejected = Rejected(order.issuer, token, reason)
+      val rejected = Rejected(order.issuer, token, order, reason)
       (this, Left(rejected))
     } else {
       val reference = randomReference()
-      val accepted = Accepted(order.issuer, reference)
+      val accepted = Accepted(order.issuer, token, order, reference)
       val updatedOrderBook = orderBook.insert(reference -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
     }
   }
 
+  /** Returns an auction of type `A` with a particular pricing policy. */
+  def withPricingPolicy(updated: PricingPolicy[T]): A
+
+  /** Returns an auction of type `A` with a particular tick size. */
+  def withTickSize(updated: Currency): A
+
+  /** Factory method used by sub-classes to create an `Auction` of sub-type `A`. */
   protected def withOrderBook(updated: FourHeapOrderBook[T]): A
+
+  protected val orderBook: FourHeapOrderBook[T]
+
+  protected val pricingPolicy: PricingPolicy[T]
+
+  def tickSize: Currency
 
 }
 
