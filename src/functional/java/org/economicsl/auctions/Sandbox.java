@@ -17,15 +17,24 @@ package org.economicsl.auctions;
 
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
 import org.economicsl.auctions.quotes.BidPriceQuoteRequest;
-import org.economicsl.auctions.singleunit.JClearResult;
-import org.economicsl.auctions.singleunit.JSealedBidAuction;
+import org.economicsl.auctions.singleunit.AuctionParticipant.*;
+import org.economicsl.auctions.singleunit.FirstPriceSealedBidAuction;
+import org.economicsl.auctions.singleunit.OrderGenerator;
+import org.economicsl.auctions.singleunit.SealedBidAuction;
+import org.economicsl.auctions.singleunit.SealedBidAuction$;
 import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
 import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook;
+import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.*;
 import org.economicsl.auctions.singleunit.twosided.*;
 import org.economicsl.core.Price;
+import org.economicsl.core.Tradable;
 import scala.Option;
+import scala.Tuple2;
+import scala.collection.immutable.Stream;
+import scala.util.Either;
+import scala.util.Random;
 
 import java.util.UUID;
 
@@ -85,13 +94,13 @@ public class Sandbox {
         };
 
         // try using the new Java API?
-        JSealedBidAuction<GoogleStock> fbsba = new JSealedBidAuction<GoogleStock>(order3, askQuotePricing, 1L);
-        JSealedBidAuction<GoogleStock> fpsba2 = fbsba.insert(order8).get();
-        JSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9).get();
+        SealedBidAuction<GoogleStock> doubleAuction = SealedBidAuction$.MODULE$.withDiscriminatoryClearingPolicy()
+        Tuple2<FirstPriceSealedBidAuction<GoogleStock>, Either<Rejected, Accepted>> result = fbsba.insert(order8);
+        FirstPriceSealedBidAuction<GoogleStock> fpsba3 = fpsba2.insert(order9).get();
         JClearResult<JSealedBidAuction<GoogleStock>> results = fpsba3.clear();
         System.out.println(results.getFills().get());  // TODO: is Stream the best collection to use here?
 
-        JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da = new JOpenBidDoubleAuction().withDiscriminatoryPricing(midPointPricing, 1L);
+        OpenBidDoubleAuction<GoogleStock> da = new OpenBidDoubleAuction.withDiscriminatoryPricing(midPointPricing);
         JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da2 = da.insert(order3).get();
         JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da3 = da2.insert(order4).get();
         JOpenBidDoubleAuction.DiscriminatoryClearingImpl<GoogleStock> da4 = da3.insert(order8).get();
