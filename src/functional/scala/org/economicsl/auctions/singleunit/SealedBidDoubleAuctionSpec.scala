@@ -13,14 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.twosided
+package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
 import org.economicsl.auctions.ParkingSpace
-import org.economicsl.auctions.singleunit.OpenBidAuction
-import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -32,15 +31,19 @@ import scala.util.{Random, Success}
   * @author davidrpugh
   * @since 0.1.0
   */
-class OpenBidDoubleAuctionSpec extends FlatSpec with Matchers {
+class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
-  val withDiscriminatoryPricing: OpenBidAuction.DiscriminatoryClearingImpl[ParkingSpace] = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
-  val withUniformPricing: OpenBidAuction.UniformClearingImpl[ParkingSpace] = OpenBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
+  val withDiscriminatoryPricing: SealedBidAuction.DiscriminatoryPricingImpl[ParkingSpace] = {
+    SealedBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
+  }
+  val withUniformPricing: SealedBidAuction.UniformPricingImpl[ParkingSpace] = {
+    SealedBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
+  }
 
   val prng = new Random(42)
 
-  "A DoubleAuction (DA)" should "generate the same number of fills as orders." in {
+  "A Sealed-Bid, DoubleAuction (SBDA)" should "generate the same number of fills as orders." in {
 
     val parkingSpace = ParkingSpace()
 
@@ -76,6 +79,7 @@ class OpenBidDoubleAuctionSpec extends FlatSpec with Matchers {
         case _ => auction
       }
     }
+
     // without rationing, the number of fills should match the number of orders
     val results = withOrders.clear
     results.fills.map(_.length) should be(Some(numberOrders))

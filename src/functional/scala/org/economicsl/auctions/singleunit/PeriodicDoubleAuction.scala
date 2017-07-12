@@ -13,16 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.twosided
+package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
-import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
-import org.economicsl.auctions.singleunit.{OrderGenerator, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Random, Success}
+import scala.util.Random
 
 
 /**
@@ -32,15 +31,12 @@ import scala.util.{Random, Success}
   */
 class PeriodicDoubleAuction
     extends FlatSpec
-    with Matchers
-    with OrderGenerator {
+    with Matchers {
 
   // generate a stream of random orders...
   val google: GoogleStock = GoogleStock()
   val prng = new Random(42)
-  val orders: Stream[(Token, Order[GoogleStock])] = {
-    randomOrders(100, google, prng)
-  }
+  val orders: Stream[(Token, Order[GoogleStock])] = OrderGenerator.randomOrders(0.5)(100, google, prng)
 
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 

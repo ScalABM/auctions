@@ -57,6 +57,7 @@ class SecondPriceSealedBidAuctionSpec
   val (withBidOrders, insertResults) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
     case ((auction, results), bidOrder) =>
       val (updatedAuction, result) = auction.insert(bidOrder)
+
       (updatedAuction, result #:: results)
   }
   val clearResults: (SealedBidAuction[ParkingSpace], Option[Stream[Fill]]) = withBidOrders.clear

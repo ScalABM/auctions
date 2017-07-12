@@ -13,12 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.reverse
+package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, Service}
+import org.economicsl.auctions.{ClearResult, Service, Token}
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -30,26 +30,28 @@ import scala.util.{Random, Success}
   * @author davidrpugh
   * @since 0.1.0
   */
-class FirstPriceSealedBidReverseAuction extends FlatSpec with Matchers with AskOrderGenerator {
+class FirstPriceSealedBidReverseAuctionSpec
+    extends FlatSpec
+    with Matchers {
 
   // suppose that buyer must procure some service...
   val buyer: UUID = UUID.randomUUID()
   val service = Service()
 
   val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
-  val fpsara: SealedBidReverseAuction[Service] = SealedBidReverseAuction.withBidQuotePricingPolicy(reservationPrice, tickSize = 1)
+  val fpsara: SealedBidAuction[Service] = SealedBidAuction.withBidQuotePricingPolicy(reservationPrice, tickSize = 1)
 
   // suppose that there are lots of bidders
   val prng = new Random(42)
-  val offers: Stream[LimitAskOrder[Service]] = randomAskOrders(1000, service, prng)
+  val offers: Stream[(Token, LimitAskOrder[Service])] = OrderGenerator.randomAskOrders(1000, service, prng)
 
-  val withAsks: SealedBidReverseAuction[Service] = offers.foldLeft(fpsara){ case (auction, askOrder) =>
+  val withAsks: SealedBidAuction[Service] = offers.foldLeft(fpsara){ case (auction, askOrder) =>
     auction.insert(askOrder) match {
       case Success(withAsk) => withAsk
       case _ => auction
     }
   }
-  val results: ClearResult[SealedBidReverseAuction[Service]] = withAsks.clear
+  val results: ClearResult[SealedBidAuction[Service]] = withAsks.clear
 
   "A First-Price, Sealed-Bid Reverse Auction (FPSBRA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 

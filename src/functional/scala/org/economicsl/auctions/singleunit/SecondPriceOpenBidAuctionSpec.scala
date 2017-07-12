@@ -19,7 +19,7 @@ import java.util.UUID
 
 import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, ParkingSpace}
+import org.economicsl.auctions.{ClearResult, ParkingSpace, Token}
 import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -31,7 +31,9 @@ import scala.util.{Random, Success}
   * @author davidrpugh
   * @since 0.1.0
   */
-class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGenerator {
+class SecondPriceOpenBidAuctionSpec
+    extends FlatSpec
+    with Matchers {
 
   // suppose that seller must sell the parking space at any positive price...
   val seller: UUID = UUID.randomUUID()
@@ -45,7 +47,7 @@ class SecondPriceOpenBidAuction extends FlatSpec with Matchers with BidOrderGene
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bids: Stream[LimitBidOrder[ParkingSpace]] = randomBidOrders(1000, parkingSpace, prng)
+  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
 
   // winner should be the bidder that submitted the highest bid
   val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(spoba) { case (auction, bidOrder) =>
