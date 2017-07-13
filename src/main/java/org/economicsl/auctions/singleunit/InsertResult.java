@@ -13,18 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
-
-import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.core.Tradable
+package org.economicsl.auctions.singleunit;
 
 
-/** Class used to represent the results from clearing an auction.
-  *
-  * @param residual
-  * @param fills
-  * @tparam A
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-case class ClearResult[A <: Auction[_ <: Tradable, A]](residual: A, fills: Option[Stream[Fill]])
+import org.economicsl.auctions.singleunit.AuctionParticipant.*;
+import scala.util.Either;
+
+
+public final class InsertResult<A> {
+
+    private A auction;
+    private Either<Rejected, Accepted> result;
+
+    public InsertResult(A auction, Either<Rejected, Accepted> result) {
+        this.auction = auction;
+        this.result = result;
+    }
+
+    public A getAuction() {
+        return auction;
+    }
+
+    public Either<Rejected, Accepted> getResult() {
+        return result;
+    }
+
+}
