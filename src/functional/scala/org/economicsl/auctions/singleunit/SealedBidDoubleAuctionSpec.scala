@@ -15,15 +15,13 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import java.util.UUID
-
-import org.economicsl.auctions.ParkingSpace
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.{ParkingSpace, Token}
+import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
+import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.auctions.singleunit.pricing.WeightedAveragePricingPolicy
-import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Random, Success}
+import scala.util.Random
 
 
 /**
@@ -34,11 +32,11 @@ import scala.util.{Random, Success}
 class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
 
   val pricingRule = new WeightedAveragePricingPolicy[ParkingSpace](weight = 0.5)
-  val withDiscriminatoryPricing: SealedBidAuction.DiscriminatoryPricingImpl[ParkingSpace] = {
-    SealedBidAuction.withDiscriminatoryClearingPolicy(pricingRule, tickSize = 1)
+  val withDiscriminatoryPricing: SealedBidAuction[ParkingSpace] = {
+    SealedBidAuction.withDiscriminatoryClearingPolicy(pricingRule)
   }
-  val withUniformPricing: SealedBidAuction.UniformPricingImpl[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(pricingRule, tickSize = 1)
+  val withUniformPricing: SealedBidAuction[ParkingSpace] = {
+    SealedBidAuction.withUniformClearingPolicy(pricingRule)
   }
 
   val prng = new Random(42)
@@ -51,38 +49,20 @@ class SealedBidDoubleAuctionSpec extends FlatSpec with Matchers {
     val numberOrders = 100
 
     // create some ask orders...
-    val offers = {
-      for (i <- 1 to numberOrders) yield {
-        val price = Price(prng.nextInt(Int.MaxValue))
-        LimitAskOrder(UUID.randomUUID(), price, parkingSpace)
-      }
-    }
+    val orders: Stream[(Token, Order[ParkingSpace])] = OrderGenerator.randomOrders(0.5)(100, parkingSpace, prng)
 
-    // create some bid orders (making sure that there will be no rationing)...
-    val bids = {
-      for (i <- 1 to numberOrders) yield {
-        val price = offers.max.limit + Price(prng.nextInt(Int.MaxValue))
-        LimitBidOrder(UUID.randomUUID(), price, parkingSpace)
-      }
-    }
-
-    // insert all of the orders...
-    val withBids = bids.foldLeft(withDiscriminatoryPricing){ case (auction, bidOrder) =>
-      auction.insert(bidOrder) match {
-        case Success(withBid) => withBid
-        case _ => auction
-      }
-    }
-    val withOrders = offers.foldLeft(withBids){ case (auction, askOrder) =>
-      auction.insert(askOrder) match {
-        case Success(withAsk) => withAsk
-        case _ => auction
+    // this whole process is data parallel...
+    val (withOrders, _) = {
+      orders.foldLeft((withUniformPricing, Stream.empty[Either[Rejected, Accepted]])){
+        case ((auction, insertResults), order) =>
+          val (updatedAuction, insertResult) = auction.insert(order)
+          (updatedAuction, insertResult #:: insertResults)
       }
     }
 
     // without rationing, the number of fills should match the number of orders
-    val results = withOrders.clear
-    results.fills.map(_.length) should be(Some(numberOrders))
+    val (clearedAuction, fills) = withOrders.clear
+    fills.map(_.length) should be(Some(numberOrders))
 
   }
 

@@ -17,13 +17,15 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.auctions.quotes.AskPriceQuoteRequest
+import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, ParkingSpace, Token}
+import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
+import org.economicsl.auctions.{Fill, ParkingSpace, Token}
 import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Random, Success}
+import scala.util.Random
 
 
 /**
@@ -35,54 +37,51 @@ class SecondPriceOpenBidAuctionSpec
     extends FlatSpec
     with Matchers {
 
-  // suppose that seller must sell the parking space at any positive price...
-  val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
-
-  // seller is willing to sell at any positive price
+  // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
   val tickSize: Currency = 1
-  val reservationPrice = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val spoba: OpenBidAuction[ParkingSpace] = OpenBidAuction.withBidQuotePricingPolicy(reservationPrice, tickSize)
+  val secondPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
+    OpenBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize)
+  }
+
+  val seller: UUID = UUID.randomUUID()
+  val sellersToken: Token = UUID.randomUUID()
+  val parkingSpace = ParkingSpace()
+  val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (sellersToken, LimitAskOrder(seller, Price.zero, parkingSpace))
+  val (withReservationAskOrder, _) = secondPriceOpenBidAuction.insert(reservationAskOrder)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
+  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
+  val (_, highestPricedBidOrder) = bidOrders.max
 
   // winner should be the bidder that submitted the highest bid
-  val withBids: OpenBidAuction[ParkingSpace] = bids.foldLeft(spoba) { case (auction, bidOrder) =>
-    auction.insert(bidOrder) match {
-      case Success(withBid) => withBid
-      case _ => auction
-    }
-  }
-  val results: ClearResult[OpenBidAuction[ParkingSpace]] = withBids.clear
+  val (withBidOrders, insertResults) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
+    case ((auction, results), bidOrder) =>
+      val (updatedAuction, result) = auction.insert(bidOrder)
 
+      (updatedAuction, result #:: results)
+  }
+  val (clearedAuction, fills): (OpenBidAuction[ParkingSpace], Option[Stream[Fill]]) = withBidOrders.clear
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process ask price quote requests" in {
 
-    val askPriceQuote = withBids.receive(AskPriceQuoteRequest())
-    askPriceQuote should be(AskPriceQuote(Some(bids.max.limit)))
+    val issuer: UUID = ???
+    val askPriceQuote = withBidOrders.receive(AskPriceQuoteRequest(issuer))
+    askPriceQuote.receiver should be(issuer)
+    askPriceQuote.quote should be(Some(highestPricedBidOrder.limit))
 
   }
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val winner = results.fills.map(_.map(_.issuer))
-    winner should be(Some(Stream(bids.max.issuer)))
+    val winner = fills.map(_.map(_.issuer))
+    winner should be(Some(highestPricedBidOrder.issuer))
 
   }
 
   "The winning price of a Second-Price, Open-Bid Auction (SPOBA)" should "be the second-highest submitted bid price" in {
-
-    // winning price from the original auction...
-    val winningPrice = results.fills.flatMap(_.headOption.map(_.price))
-
-
-    // remove the winning bid and then find the bid price of the winner of this new auction...
-    val withHighestBidRemoved = withBids.cancel(bids.max)
-    withHighestBidRemoved.orderBook.askPriceQuote should be (winningPrice)
-
+    ???
   }
 
 }

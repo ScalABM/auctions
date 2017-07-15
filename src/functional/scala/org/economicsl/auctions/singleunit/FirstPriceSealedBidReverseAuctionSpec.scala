@@ -17,12 +17,14 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
-import org.economicsl.auctions.{ClearResult, Service, Token}
+import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
+import org.economicsl.auctions.singleunit.orders.{BidOrder, LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
+import org.economicsl.auctions.{Issuer, Service, Token}
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.util.{Random, Success}
+import scala.util.Random
 
 
 /**
@@ -34,34 +36,43 @@ class FirstPriceSealedBidReverseAuctionSpec
     extends FlatSpec
     with Matchers {
 
-  // suppose that buyer must procure some service...
-  val buyer: UUID = UUID.randomUUID()
+  // reverse auction to procure a service at lowest possible cost...
+  val fpsbra: SealedBidAuction[Service] = SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service])
+
+  // buyer is willing to pay anything...
+  val buyer: Issuer = UUID.randomUUID()
+  val buyersToken: Token = UUID.randomUUID()
   val service = Service()
+  val reservationBidOrder: (Token, BidOrder[Service]) = (buyersToken, LimitBidOrder(buyer, Price.MaxValue, service))
+  val (withReservationBidOrder, _) = fpsbra.insert(reservationBidOrder)
 
-  val reservationPrice = LimitBidOrder(buyer, Price.MaxValue, service)
-  val fpsara: SealedBidAuction[Service] = SealedBidAuction.withBidQuotePricingPolicy(reservationPrice, tickSize = 1)
-
-  // suppose that there are lots of bidders
+  // generate some random sellers...
   val prng = new Random(42)
   val offers: Stream[(Token, LimitAskOrder[Service])] = OrderGenerator.randomAskOrders(1000, service, prng)
+  val (_, lowestPricedAskOrder): (Token, LimitAskOrder[Service]) = offers.min
 
-  val withAsks: SealedBidAuction[Service] = offers.foldLeft(fpsara){ case (auction, askOrder) =>
-    auction.insert(askOrder) match {
-      case Success(withAsk) => withAsk
-      case _ => auction
+  // insert the ask orders into the auction mechanism...can be done in parallel!
+  val (withAskOrders, _): (SealedBidAuction[Service], Stream[Either[Rejected, Accepted]]) = {
+    offers.foldLeft((withReservationBidOrder, Stream.empty[Either[Rejected, Accepted]])) {
+      case ((auction, insertResults), askOrder) =>
+        val (updatedAuction, insertResult) = auction.insert(askOrder)
+        (updatedAuction, insertResult #:: insertResults)
     }
   }
-  val results: ClearResult[SealedBidAuction[Service]] = withAsks.clear
+
+  val (clearedAuction, fills) = withAskOrders.clear
 
   "A First-Price, Sealed-Bid Reverse Auction (FPSBRA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
-    results.fills.map(_.map(_.counterparty)) should be (Some(Stream(offers.min.issuer)))
+    val winner: Option[Issuer] = fills.flatMap(_.headOption.map(_.issuer))
+    winner should be(Some(lowestPricedAskOrder.issuer))
 
   }
 
   "The price paid (received) by the buyer (seller) when using a FPSARA" should "be the lowest offered price" in {
 
-    results.fills.map(_.map(_.price)) should be (Some(Stream(offers.min.limit)))
+    val winningPrice: Option[Price] = fills.flatMap(_.headOption.map(_.price))
+    winningPrice should be(Some(lowestPricedAskOrder.limit))
 
   }
 

@@ -32,7 +32,7 @@ public class ImperativePeriodicDoubleAuction {
         int numberOrders = 10000;
         GoogleStock googleStock = new GoogleStock();
         Random prng = new Random(42);
-        Stream<Tuple2<UUID, Order<GoogleStock>>> orders = OrderGenerator.randomOrders(numberOrders, googleStock, prng);
+        Stream<Tuple2<UUID, Order<GoogleStock>>> orders = OrderGenerator.randomOrders(0.5, numberOrders, googleStock, prng);
 
         List<Either<Rejected, Accepted>> insertResults = new ArrayList<>();
 

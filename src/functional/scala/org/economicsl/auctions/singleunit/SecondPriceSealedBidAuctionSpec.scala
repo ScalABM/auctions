@@ -60,11 +60,10 @@ class SecondPriceSealedBidAuctionSpec
 
       (updatedAuction, result #:: results)
   }
-  val clearResults: (SealedBidAuction[ParkingSpace], Option[Stream[Fill]]) = withBidOrders.clear
+  val (clearedAuction, fills): (SealedBidAuction[ParkingSpace], Option[Stream[Fill]]) = withBidOrders.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
-    val (_, fills) = clearResults
     val winner: Option[Buyer] = fills.flatMap(_.headOption.map(_.issuer))
     winner should be(Some(bidOrders.max._2.issuer))
 
@@ -73,7 +72,6 @@ class SecondPriceSealedBidAuctionSpec
   "The winning price of a Second-Price, Sealed-Bid Auction (SPSBA)" should "be the second-highest submitted bid price" in {
 
     // winning price from the original auction...
-    val (_, fills) = clearResults
     val winningPrice: Option[Price] = fills.flatMap(_.headOption.map(_.price))
 
     // remove the winning bid and then find the bid price of the winner of this new auction...
@@ -84,7 +82,7 @@ class SecondPriceSealedBidAuctionSpec
         val (updatedAuction, result) = auction.insert(bidOrder)
         (updatedAuction, result #:: results)
     }
-    val clearResults = withBidOrders.clear
+    val (_, _) = withBidOrders.clear
 
     // winning price of the original auction should be equal to the limit price of the winner of an auction in which the winner or original auction did not participate!
 

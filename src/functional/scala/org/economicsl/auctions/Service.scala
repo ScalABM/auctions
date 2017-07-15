@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import java.util.UUID
+
 import org.economicsl.core.Tradable
 
 
@@ -23,4 +25,6 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-case class Service() extends Tradable
+case class Service() extends Tradable {
+  val uuid: UUID = UUID.randomUUID()
+}

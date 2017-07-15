@@ -17,12 +17,12 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.quotes.{AskPriceQuote, AskPriceQuoteRequest}
+import org.economicsl.auctions.quotes.AskPriceQuoteRequest
 import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder, Order}
+import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
-import org.economicsl.core.{Currency, Price, Tradable}
+import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -54,9 +54,9 @@ class FirstPriceOpenBidAuctionSpec
   val parkingSpace = ParkingSpace()
   val token: Token = randomToken()
   val reservation: (Token, LimitAskOrder[ParkingSpace]) = (token, LimitAskOrder(seller, Price.MinValue, parkingSpace))
-  val (withReservation, response) = fpoba.insert(reservation)
+  val (withReservation, insertResult) = fpoba.insert(reservation)
 
-  response match {
+  insertResult match {
     case Left(Rejected(_, _, _, _)) =>
       ???
     case Right(Accepted(_, _, _, _)) =>
@@ -65,23 +65,12 @@ class FirstPriceOpenBidAuctionSpec
 
    val (_, highestPricedBidOrder) = bids.max
 
-  // withBids will include all accepted bids (this is trivially parallel..)
+  // withBidOrders will include all accepted bids (this is trivially parallel..)
   val (withBidOrders, _) = bids.foldLeft((withReservation, Stream.empty[Either[Rejected, Accepted]])) {
     case ((auction, insertResults), bidOrder) =>
       val (updated, insertResult) = auction.insert(bidOrder)
       (updated, insertResult #:: insertResults)
   }
-
-  def insert[T <: Tradable, A <: Auction[T, A]](auction: A)(orders: Stream[(Token, Order[T])]): (A, Stream[Either[Rejected, Accepted]]) = {
-    ???
-  }
-
-  def clear[T <: Tradable, A <: Auction[T, A]](kv: (A, Stream[Either[Rejected, Accepted]])): (A, Option[Stream[Fill]]) = {
-    ???
-  }
-
-  clear(insert(withReservation)(bids))
-
   val (clearedAuction, clearResults) = withBidOrders.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {
