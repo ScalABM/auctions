@@ -20,7 +20,7 @@ import java.util.UUID
 import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{BidOrder, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
-import org.economicsl.auctions.{Issuer, Service, Token}
+import org.economicsl.auctions.{Issuer, Seller, Service, Token}
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -49,9 +49,10 @@ class SecondPriceSealedBidReverseAuctionSpec
   val (withReservationBidOrder, _) = secondPriceSealedBidReverseAuction.insert(reservationBidOrder)
 
   // generate some random sellers...
+  val numberOffers = 1000
   val prng = new Random(42)
-  val offers: Stream[(Token, LimitAskOrder[Service])] = OrderGenerator.randomAskOrders(1000, service, prng)
-  val (_, lowestPricedAskOrder): (Token, LimitAskOrder[Service]) = offers.min
+  val offers: Stream[(Token, LimitAskOrder[Service])] = OrderGenerator.randomAskOrders(numberOffers, service, prng)
+  val (_, lowestPricedAskOrder): (Token, LimitAskOrder[Service]) = offers.minBy{ case (_, order) => order.limit }
 
   // insert the ask orders into the auction mechanism...can be done in parallel!
   val (withAskOrders, _): (SealedBidAuction[Service], Stream[Either[Rejected, Accepted]]) = {
@@ -66,13 +67,18 @@ class SecondPriceSealedBidReverseAuctionSpec
 
   "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "purchase the Service from the seller who offers it at the lowest price." in {
 
-    val winner: Option[Issuer] = fills.flatMap(_.headOption.map(_.issuer))
+    val winner: Option[Seller] = fills.flatMap(_.headOption.map(_.counterparty))
     winner should be(Some(lowestPricedAskOrder.issuer))
 
   }
 
   "The price paid (received) by the buyer (seller) when using a SPSBRA" should "be the second-lowest offered price" in {
-    ???
+
+    val remainingAskOrders = offers.filter{ case (_, order) => order.limit > lowestPricedAskOrder.limit }
+    val (_, secondlowestPricedAskOrder) = remainingAskOrders.minBy{ case (_, order) => order.limit }
+
+    val winningPrice: Option[Price] = fills.flatMap(_.headOption.map(_.price))
+    winningPrice should be(Some(secondlowestPricedAskOrder.limit))
   }
 
 }

@@ -36,41 +36,29 @@ import scala.util.Random
 class FirstPriceOpenBidAuctionSpec
     extends FlatSpec
     with Matchers
+    with AuctionSimulation
     with TokenGenerator {
 
   // suppose that there are lots of bidders
-  val prng: Random = new Random(42)
   val numberBidOrders = 10000
-  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
-
+  val parkingSpace = ParkingSpace()
+  val prng: Random = new Random(42)
+  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
+  val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
   // seller uses a first-priced, open bid auction...
-  val fpoba: OpenBidAuction[ParkingSpace] = {
+  val firstPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
     OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace])
   }
 
   // Seller that must sell at any positive price
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
   val token: Token = randomToken()
   val reservation: (Token, LimitAskOrder[ParkingSpace]) = (token, LimitAskOrder(seller, Price.MinValue, parkingSpace))
-  val (withReservation, insertResult) = fpoba.insert(reservation)
-
-  insertResult match {
-    case Left(Rejected(_, _, _, _)) =>
-      ???
-    case Right(Accepted(_, _, _, _)) =>
-      ???
-  }
-
-   val (_, highestPricedBidOrder) = bids.max
+  val (withReservationAskOrder, _) = firstPriceOpenBidAuction.insert(reservation)
 
   // withBidOrders will include all accepted bids (this is trivially parallel..)
-  val (withBidOrders, _) = bids.foldLeft((withReservation, Stream.empty[Either[Rejected, Accepted]])) {
-    case ((auction, insertResults), bidOrder) =>
-      val (updated, insertResult) = auction.insert(bidOrder)
-      (updated, insertResult #:: insertResults)
-  }
+  val (withBidOrders, _) = insert[ParkingSpace, OpenBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
   val (clearedAuction, clearResults) = withBidOrders.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {

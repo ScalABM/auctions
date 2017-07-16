@@ -20,7 +20,7 @@ import java.util.UUID
 import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
-import org.economicsl.auctions.{Issuer, ParkingSpace, Token, TokenGenerator}
+import org.economicsl.auctions._
 import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -38,42 +38,44 @@ class FirstPriceSealedBidAuctionSpec
     with TokenGenerator {
 
   // seller uses a first-priced, sealed bid auction...
-  val tickSize: Currency = 1
-  val fpsba: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], tickSize)
+  val firstPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
+    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace])
   }
 
   // suppose that seller must sell the parking space at any positive price...
-  val seller: UUID = UUID.randomUUID()
+  val seller: Issuer = UUID.randomUUID()
   val parkingSpace = ParkingSpace()
   val token: Token = randomToken()
-  val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (token, LimitAskOrder(seller, Price.MinValue, parkingSpace))
-  val (withReservationAskOrder, _) = fpsba.insert(reservationAskOrder)
+  val order = LimitAskOrder(seller, Price.MinValue, parkingSpace)
+  val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (token, order)
+  val (withReservationAskOrder, _) = firstPriceSealedBidAuction.insert(reservationAskOrder)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bids: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
-  val (_, highestPricedBidOrder) = bids.max
+  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = {
+    OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
+  }
+  val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
-  val (withBidOrders, _) = bids.foldLeft((fpsba, Stream.empty[Either[Rejected, Accepted]])) {
+  val (withBidOrders, _) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
     case ((auction, insertResults), bidOrder) =>
       val (updated, insertResult) = auction.insert(bidOrder)
       (updated, insertResult #:: insertResults)
   }
 
-  val (clearedAuction, clearResults) = withBidOrders.clear
+  val (clearedAuction, fills) = withBidOrders.clear
 
   "A first-price, sealed-bid auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
 
-    val winner: Option[Issuer] = clearResults.flatMap(_.headOption.map(_.issuer))
+    val winner: Option[Buyer] = fills.flatMap(_.headOption.map(_.issuer))
     winner should be(Some(highestPricedBidOrder.issuer))
 
   }
 
   "The winning price of a first-price, sealed-bid auction (FPSBA)" should "be the highest submitted bid price." in {
 
-    val winningPrice: Option[Price] = clearResults.flatMap(_.headOption.map(_.price))
+    val winningPrice: Option[Price] = fills.flatMap(_.headOption.map(_.price))
     winningPrice should be(Some(highestPricedBidOrder.limit))
 
   }

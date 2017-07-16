@@ -20,7 +20,7 @@ import java.util.UUID
 import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{BidOrder, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
-import org.economicsl.auctions.{Issuer, Service, Token}
+import org.economicsl.auctions.{Issuer, Seller, Service, Token}
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -37,19 +37,22 @@ class FirstPriceSealedBidReverseAuctionSpec
     with Matchers {
 
   // reverse auction to procure a service at lowest possible cost...
-  val fpsbra: SealedBidAuction[Service] = SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service])
+  val firstPriceSealedBidReverseAuction: SealedBidAuction[Service] = {
+    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service])
+  }
 
   // buyer is willing to pay anything...
   val buyer: Issuer = UUID.randomUUID()
   val buyersToken: Token = UUID.randomUUID()
   val service = Service()
   val reservationBidOrder: (Token, BidOrder[Service]) = (buyersToken, LimitBidOrder(buyer, Price.MaxValue, service))
-  val (withReservationBidOrder, _) = fpsbra.insert(reservationBidOrder)
+  val (withReservationBidOrder, _) = firstPriceSealedBidReverseAuction.insert(reservationBidOrder)
 
   // generate some random sellers...
+  val numberOffers = 1000
   val prng = new Random(42)
-  val offers: Stream[(Token, LimitAskOrder[Service])] = OrderGenerator.randomAskOrders(1000, service, prng)
-  val (_, lowestPricedAskOrder): (Token, LimitAskOrder[Service]) = offers.min
+  val offers: Stream[(Token, LimitAskOrder[Service])] = OrderGenerator.randomAskOrders(numberOffers, service, prng)
+  val (_, lowestPricedAskOrder): (Token, LimitAskOrder[Service]) = offers.minBy{ case (_, askOrder) => askOrder.limit }
 
   // insert the ask orders into the auction mechanism...can be done in parallel!
   val (withAskOrders, _): (SealedBidAuction[Service], Stream[Either[Rejected, Accepted]]) = {
@@ -64,7 +67,7 @@ class FirstPriceSealedBidReverseAuctionSpec
 
   "A First-Price, Sealed-Bid Reverse Auction (FPSBRA)" should "purchse the Service from the seller who offers it at the lowest price." in {
 
-    val winner: Option[Issuer] = fills.flatMap(_.headOption.map(_.issuer))
+    val winner: Option[Seller] = fills.flatMap(_.headOption.map(_.counterparty))
     winner should be(Some(lowestPricedAskOrder.issuer))
 
   }

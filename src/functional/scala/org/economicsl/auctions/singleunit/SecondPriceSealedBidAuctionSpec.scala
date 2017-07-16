@@ -51,7 +51,8 @@ class SecondPriceSealedBidAuctionSpec
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
+  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
+  val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, order) => order.limit }
 
   // winner should be the bidder that submitted the highest bid
   val (withBidOrders, insertResults) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
@@ -65,27 +66,17 @@ class SecondPriceSealedBidAuctionSpec
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 
     val winner: Option[Buyer] = fills.flatMap(_.headOption.map(_.issuer))
-    winner should be(Some(bidOrders.max._2.issuer))
+    winner should be(Some(highestPricedBidOrder.issuer))
 
   }
 
   "The winning price of a Second-Price, Sealed-Bid Auction (SPSBA)" should "be the second-highest submitted bid price" in {
 
-    // winning price from the original auction...
+    val remainingBidOrders = bidOrders.filter{ case (_, order) => order.limit < highestPricedBidOrder.limit }
+    val (_, secondHighestPricedBidOrder) = remainingBidOrders.maxBy{ case (_, order) => order.limit }
+
     val winningPrice: Option[Price] = fills.flatMap(_.headOption.map(_.price))
-
-    // remove the winning bid and then find the bid price of the winner of this new auction...
-    val withoutHighestPricedBidOrder = bidOrders.filter(???)
-    val initialCondition = (withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])
-    val (withBidOrders, insertResults) = withoutHighestPricedBidOrder.foldLeft(initialCondition) {
-      case ((auction, results), bidOrder) =>
-        val (updatedAuction, result) = auction.insert(bidOrder)
-        (updatedAuction, result #:: results)
-    }
-    val (_, _) = withBidOrders.clear
-
-    // winning price of the original auction should be equal to the limit price of the winner of an auction in which the winner or original auction did not participate!
-
+    winningPrice should be(Some(secondHighestPricedBidOrder.limit))
   }
 
 }
