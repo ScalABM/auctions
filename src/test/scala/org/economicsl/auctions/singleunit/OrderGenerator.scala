@@ -34,7 +34,7 @@ object OrderGenerator extends TokenGenerator {
   def randomAskOrder[T <: Tradable](tradable: T, prng: Random): (Token, LimitAskOrder[T]) = {
     val token = randomToken()
     val issuer = UUID.randomUUID()  // todo make this reproducible!
-    val limit = Price(prng.nextInt(Int.MaxValue))
+    val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
     (token, LimitAskOrder(issuer, limit, tradable))
   }
 
@@ -55,7 +55,7 @@ object OrderGenerator extends TokenGenerator {
   def randomBidOrder[T <: Tradable](tradable: T, prng: Random): (Token, LimitBidOrder[T]) = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val token = randomToken()
-    val limit = Price(prng.nextInt(Int.MaxValue))
+    val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
     (token, LimitBidOrder(issuer, limit, tradable))
   }
 
@@ -93,6 +93,11 @@ object OrderGenerator extends TokenGenerator {
       }
     }
     loop(Stream.empty[(Token, Order[T])], n)
+  }
+
+
+  def randomPrice(minimum: Price, maximum: Price, prng: Random): Price = {
+    Price(minimum.value + math.abs(prng.nextLong()) % (maximum.value - minimum.value))
   }
 
 }

@@ -81,18 +81,18 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
   def insert(kv: (Reference, (Token, Order[T]))): FourHeapOrderBook[T] = kv match {
     case (reference, (token, order: AskOrder[T])) =>
       (matchedOrders.headOption, unMatchedOrders.bidOrders.headOption) match {
-        case (Some(((_, (_, matchedAskOrder)), _)), Some((existing, rationedBidOrder @ (_, bidOrder))))
-          if order.limit <= bidOrder.limit && matchedAskOrder.limit <= bidOrder.limit =>
+        case (Some(((_, (_, askOrder)), _)), Some((existing, rationedBidOrder @ (_, bidOrder))))
+          if order.limit <= bidOrder.limit && askOrder.limit <= bidOrder.limit =>
           val (remainingUnMatchedOrders, _) = unMatchedOrders - existing
           val updatedMatchedOrders = matchedOrders + (reference -> (token -> order), existing -> rationedBidOrder)
           new FourHeapOrderBook(updatedMatchedOrders, remainingUnMatchedOrders)
+        case (Some(((existing, (_, askOrder)), _)),  _) if order.limit < askOrder.limit =>
+          val (updatedMatchedOrders, replacedAskOrder) = matchedOrders.replace(existing, reference -> (token -> order))
+          new FourHeapOrderBook(updatedMatchedOrders, unMatchedOrders + (existing -> replacedAskOrder))
         case (None, Some((existing, unMatchedBidOrder @ (_, bidOrder)))) if order.limit < bidOrder.limit =>
           val (remainingUnMatchedOrders, _) = unMatchedOrders - existing
           val updatedMatchedOrders = matchedOrders + (reference -> (token -> order), existing -> unMatchedBidOrder)
-          new FourHeapOrderBook(updatedMatchedOrders,remainingUnMatchedOrders)
-        case (Some(((existing, (_, matchedAskOrder)), _)),  _) if order.limit < matchedAskOrder.limit =>
-          val (updatedMatchedOrders, matchedAskOrder) = matchedOrders.replace(existing, reference -> (token -> order))
-          new FourHeapOrderBook(updatedMatchedOrders, unMatchedOrders + (existing -> matchedAskOrder))
+          new FourHeapOrderBook(updatedMatchedOrders, remainingUnMatchedOrders)
         case _ =>
           new FourHeapOrderBook(matchedOrders, unMatchedOrders + (reference -> (token -> order)))
       }
@@ -103,13 +103,13 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
           val (remainingUnMatchedOrders, _) = unMatchedOrders - existing
           val updatedMatchedOrders = matchedOrders + (existing -> rationedAskOrder, reference -> (token -> order))
           new FourHeapOrderBook(updatedMatchedOrders, remainingUnMatchedOrders)
+        case (Some((_, (existing, (_, bidOrder)))), _) if order.limit > bidOrder.limit => // no rationing!
+          val (updatedMatchedOrders, replacedBidOrder) = matchedOrders.replace(existing, reference -> (token -> order))
+          new FourHeapOrderBook(updatedMatchedOrders, unMatchedOrders + (existing -> replacedBidOrder))
         case (None, Some((existing, unMatchedAskOrder @ (_, askOrder)))) if order.limit > askOrder.limit =>
           val (remainingUnMatchedOrders, _) = unMatchedOrders - existing
           val updatedMatchedOrders = matchedOrders + (existing -> unMatchedAskOrder, reference -> (token -> order))
           new FourHeapOrderBook(updatedMatchedOrders, remainingUnMatchedOrders)
-        case (Some(((existing, (_, bidOrder)), _)), _) if order.limit > bidOrder.limit => // no rationing!
-          val (updatedMatchedOrders, matchedBidOrder) = matchedOrders.replace(existing, reference -> (token -> order))
-          new FourHeapOrderBook(updatedMatchedOrders, unMatchedOrders + (existing -> matchedBidOrder))
         case _ =>
           new FourHeapOrderBook(matchedOrders, unMatchedOrders + (reference -> (token -> order)))
       }

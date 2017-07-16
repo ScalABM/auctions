@@ -36,7 +36,7 @@ class BidQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 object BidQuotePricingPolicy {
 
   def apply[T <: Tradable]: BidQuotePricingPolicy[T] = {
-    new BidQuotePricingPolicy()
+    new BidQuotePricingPolicy[T]()
   }
 
 }

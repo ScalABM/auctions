@@ -41,9 +41,19 @@ object SealedBidAuction {
     new WithDiscriminatoryClearingPolicy[T](orderBook, pricingPolicy, tickSize)
   }
 
+  def withDiscriminatoryClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T]): SealedBidAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithDiscriminatoryClearingPolicy[T](orderBook, pricingPolicy, 1L)
+  }
+
   def withUniformClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency): SealedBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
     new WithUniformClearingPolicy[T](orderBook, pricingPolicy, tickSize)
+  }
+
+  def withUniformClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T]): SealedBidAuction[T] = {
+    val orderBook = FourHeapOrderBook.empty[T]
+    new WithUniformClearingPolicy[T](orderBook, pricingPolicy, 1L)
   }
 
 
