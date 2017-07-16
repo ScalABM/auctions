@@ -74,6 +74,16 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
         return new InsertResult<>(jAuction, result._2());
     }
 
+    public JSealedBidAuction<T> withPricingPolicy(PricingPolicy<T> updated) {
+        SealedBidAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
+        return new JSealedBidAuction<>(withUpdatedPricingPolicy);
+    }
+
+    public JSealedBidAuction<T> withTickSize(Long updated) {
+        SealedBidAuction<T> withUpdatedTickSize = auction.withTickSize(updated);
+        return new JSealedBidAuction<>(withUpdatedTickSize);
+    }
+
     /** Factory method for creating sealed-bid auctions with uniform clearing policy.
      *
      * @param pricingPolicy
@@ -86,6 +96,17 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
         return new JSealedBidAuction<>(auction);
     }
 
+    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
+     *
+     * @param pricingPolicy
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy);
+        return new JSealedBidAuction<>(auction);
+    }
+
     /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
      *
      * @param pricingPolicy
@@ -95,6 +116,17 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      */
     public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize) {
         SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize);
+        return new JSealedBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
+     *
+     * @param pricingPolicy
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy);
         return new JSealedBidAuction<>(auction);
     }
 
