@@ -17,11 +17,11 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
-import org.economicsl.core.{Currency, Price}
+import org.economicsl.auctions.singleunit.OrderTracking.{Accepted, Rejected}
+import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random

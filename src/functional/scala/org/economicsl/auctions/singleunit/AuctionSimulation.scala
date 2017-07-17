@@ -1,7 +1,7 @@
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.Token
-import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
+import org.economicsl.auctions.singleunit.OrderTracking.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.core.Tradable
 

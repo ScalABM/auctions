@@ -12,7 +12,7 @@ import scala.util.Random
 
 
 class TestAuctionParticipantActor private(val issuer: UUID, val auctionRegistryTimeout: Duration, val auctionRegistryPath: String)
-    extends AuctionParticipant
+    extends AuctionParticipantActor
     with TokenProvider {
 
   import ContinuousDoubleAuctionActor._

@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.SpotContract;
-import org.economicsl.auctions.singleunit.AuctionParticipant.*;
+import org.economicsl.auctions.singleunit.OrderTracking.*;
 import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -58,7 +58,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @return an instance of `ClearResult` class.
      */
     public ClearResult<JSealedBidAuction<T>> clear() {
-        Tuple2<SealedBidAuction<T>, Option<Stream<Fill>>> result = auction.clear();
+        Tuple2<SealedBidAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
         JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1);
         return new ClearResult<>(jAuction, result._2);
     }

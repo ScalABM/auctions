@@ -11,6 +11,7 @@ import org.economicsl.core.Tradable
 
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
     extends Actor {
+  this: ClearingSchedule[T, A] =>
 
   import AuctionActor._
   import AuctionParticipantActor._
@@ -27,7 +28,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   def registeringAuctionParticipants: Receive = {
     case RegisterAuctionParticipant(participant) =>
       context.watch(participant)
-      participant ! AuctionProtocol(auction.tickSize, tradable)
+      participant ! AuctionProtocol(auction.tickSize, auction.tradable)
       participants = participants + participant
       ticker = ticker.addRoutee(participant)
     case DeregisterAuctionParticipant(participant) =>
@@ -41,7 +42,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   }
 
   def receive: Receive = {
-    case InsertOrder(token, order) =>
+    case InsertOrder(token, order: Order[T]) =>
       val (updatedAuction, insertResult) = auction.insert(token -> order)
       insertResult match {
         case Right(accepted) =>
@@ -57,7 +58,11 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           sender() ! canceled
           auction = updatedAuction
         case None =>
-          ???  // some kind of message indicated that cancel attempt was unsuccessful...
+          /* indicates that the reference was not found in the auction; could mean that CancelOrder was sent to wrong
+          AuctionActor, or, depending on the ClearingStrategy used by the AuctionActor, that the order corresponding
+          to the reference was cleared prior to the AuctionActor processing the CancelOrder message.
+          */
+          ???
       }
   }
 

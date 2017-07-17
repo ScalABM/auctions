@@ -14,13 +14,13 @@ class SealedBidAuctionActor[T <: Tradable] private(protected var auction: Sealed
 
 object SealedBidAuctionActor {
 
-  def withDiscriminatoryClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency): Props = {
-    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize)
+  def withDiscriminatoryClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency, tradable: T): Props = {
+    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
     Props(new SealedBidAuctionActor(auction))
   }
 
-  def withUniformClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency): Props = {
-    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize)
+  def withUniformClearingPolicy[T <: Tradable](pricingPolicy: PricingPolicy[T], tickSize: Currency, tradable: T): Props = {
+    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
     Props(new SealedBidAuctionActor(auction))
   }
 

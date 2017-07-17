@@ -24,7 +24,7 @@ import org.economicsl.auctions.TokenGenerator
 class TestOrderTracker private(val issuer: UUID)
     extends StackableActor
     with DiagnosticActorLogging
-    with OrderTracking
+    with OrderTrackingActor
     with TokenGenerator {
 
   wrappedBecome(trackingOrders)

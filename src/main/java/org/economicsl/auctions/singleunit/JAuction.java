@@ -29,6 +29,7 @@ public abstract class JAuction<T extends Tradable, A extends JAuction<T, A>> {
      *
      * @param order
      * @return
+     * @todo get rid of Tuple2 class!
      */
     public abstract InsertResult<A> insert(Tuple2<UUID, Order<T>> order);
 

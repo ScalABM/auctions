@@ -10,7 +10,7 @@ import scala.concurrent.duration.Duration
 
 
 class TestAuctionParticipant private(issuer: UUID, auctionRegistryTimeout: Duration)
-    extends AuctionParticipant
+    extends AuctionParticipantActor
     with TokenProvider {
 
 

@@ -90,6 +90,8 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
 
   def tickSize: Currency
 
+  def tradable: T
+
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
   def withPricingPolicy(updated: PricingPolicy[T]): A
 
