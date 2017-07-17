@@ -28,7 +28,7 @@ import org.economicsl.core.{Currency, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-abstract class SealedBidAuction[T <: Tradable]
+trait SealedBidAuction[T <: Tradable]
     extends Auction[T, SealedBidAuction[T]] {
   this: SealedBidAuction[T] =>
 }

@@ -77,27 +77,27 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       val rejected = Rejected(order.issuer, token, order, reason)
       (this, Left(rejected))
     } else {
-      val reference = randomReference()
+      val reference = randomReference() // SIDE EFFECT !!!
       val accepted = Accepted(order.issuer, token, order, reference)
       val updatedOrderBook = orderBook.insert(reference -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
     }
   }
 
-  /** Returns an auction of type `A` with a particular pricing policy. */
+  def tickSize: Currency
+
+  /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
   def withPricingPolicy(updated: PricingPolicy[T]): A
 
-  /** Returns an auction of type `A` with a particular tick size. */
+  /** Returns an auction of type `A` the encapsulates the current auction state but with a new tick size. */
   def withTickSize(updated: Currency): A
 
-  /** Factory method used by sub-classes to create an `Auction` of sub-type `A`. */
+  /** Factory method used by sub-classes to create an `A`. */
   protected def withOrderBook(updated: FourHeapOrderBook[T]): A
 
   protected val orderBook: FourHeapOrderBook[T]
 
   protected val pricingPolicy: PricingPolicy[T]
-
-  def tickSize: Currency
 
 }
 

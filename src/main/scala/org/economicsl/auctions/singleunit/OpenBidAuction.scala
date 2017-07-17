@@ -29,7 +29,7 @@ import org.economicsl.core.{Currency, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-abstract class OpenBidAuction[T <: Tradable]
+trait OpenBidAuction[T <: Tradable]
     extends Auction[T, OpenBidAuction[T]] {
   this: OpenBidAuction[T] =>
 
