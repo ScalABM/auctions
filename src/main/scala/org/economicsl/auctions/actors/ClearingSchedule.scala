@@ -15,15 +15,16 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.ActorRef
+import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
 import scala.concurrent.duration.FiniteDuration
 
 
 /** Mixin trait that specifies a schedule for auction clearing events. */
-sealed trait ClearingSchedule {
-  this: Actor =>
+sealed trait ClearingSchedule[T <: Tradable, A <: Auction[T, A]] {
+  this: AuctionActor[T, A] =>
 
   def clear: Receive
 
@@ -39,34 +40,33 @@ object ClearingSchedule {
 
 
 /** Schedules a clearing event to occur whenever a new order is inserted into the auction. */
-trait BidderActivity[T <: Tradable, A <: { def clear: ClearResult[A] }]
-    extends ClearingSchedule {
-  this: Actor =>
+trait BidderActivity[T <: Tradable, A <: Auction[T, A]]
+    extends ClearingSchedule[T, A] {
+  this: AuctionActor[T, A] =>
 
-  def settlementService: ActorRef
+  import AuctionActor._
 
   def clear: Receive = {
     case InsertOrder(token, order) =>
-      val results = auction.clear
-      results.contracts.foreach(contract => settlementService ! contract)
-      auction = results.residual
+      val (updatedAuction, contracts) = auction.clear
+      contracts.foreach(contract => settlementService ! contract)
+      auction = updatedAuction
   }
-
-  protected var auction: A
 
 }
 
 
 /** Schedules a clearing event to occur whenever no new orders have been received for a specified period. */
-trait BidderInActivity extends ClearingSchedule {
-  this: Actor =>
+trait BidderInActivity[T <: Tradable, A <: Auction[T, A]]
+    extends ClearingSchedule[T, A] {
+  this: AuctionActor[T, A] =>
 }
 
 
 /** Schedules a clearing event to occur after fixed time intervals. */
-trait PeriodicClearingSchedule[A <: { def clear: ClearResult[A] }]
-    extends ClearingSchedule {
-  this: Actor =>
+trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
+    extends ClearingSchedule[T, A] {
+  this: AuctionActor[T, A] =>
 
   import ClearingSchedule._
 
@@ -78,9 +78,9 @@ trait PeriodicClearingSchedule[A <: { def clear: ClearResult[A] }]
 
   def handleClearRequest: Receive = {
     case ClearRequest =>
-      val results = auction.clear
-      results.contracts.foreach(fills => settlementService ! fills)
-      auction = results.residual
+      val (updatedAuction, contracts) = auction.clear
+      contracts.foreach(contract => settlementService ! contract)
+      auction = updatedAuction
   }
 
   protected var auction: A
@@ -89,7 +89,7 @@ trait PeriodicClearingSchedule[A <: { def clear: ClearResult[A] }]
 
 
 /** Schedules a clearing event to occur after random time intervals. */
-trait RandomClearingSchedule[A <: { def clear: ClearResult[A] }]
-  extends PeriodicClearingSchedule[A] {
-  this: StackableActor =>
+trait RandomClearingSchedule[T <: Tradable, A <: Auction[T, A]]
+    extends PeriodicClearingSchedule[T, A] {
+  this: AuctionActor[T, A] =>
 }

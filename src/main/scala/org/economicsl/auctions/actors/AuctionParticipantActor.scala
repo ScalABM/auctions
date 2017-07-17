@@ -28,12 +28,12 @@ import org.economicsl.core.{Currency, Tradable}
   *       need to be re-identified; during re-identification auction participant should continue to process messages
   *       received by any auctions to which it has previously registered.
   */
-trait AuctionParticipant
+trait AuctionParticipantActor
     extends StackableActor
     with DiagnosticActorLogging
-    with OrderTracking {
+    with OrderTrackingActor {
 
-  import AuctionParticipant._
+  import AuctionParticipantActor._
 
   override def receive: Receive = {
     case protocol : AuctionProtocol =>
@@ -48,7 +48,7 @@ trait AuctionParticipant
 }
 
 
-object AuctionParticipant {
+object AuctionParticipantActor {
 
   /** Need some data structure to convey the information about an auction to participants. */
   final case class AuctionProtocol(tickSize: Currency, tradable: Tradable)

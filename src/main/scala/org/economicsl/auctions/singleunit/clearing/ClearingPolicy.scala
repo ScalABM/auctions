@@ -3,7 +3,7 @@ package org.economicsl.auctions.singleunit.clearing
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.Fill
+import org.economicsl.auctions.SpotContract
 import org.economicsl.core.{Price, Tradable}
 
 
@@ -15,7 +15,7 @@ import org.economicsl.core.{Price, Tradable}
 sealed trait ClearingPolicy[T <: Tradable, A <: Auction[T, A]] {
   this: A =>
 
-  def clear: (A, Option[Stream[Fill]])
+  def clear: (A, Option[Stream[SpotContract]])
 
 }
 
@@ -29,18 +29,18 @@ trait DiscriminatoryClearingPolicy[T <: Tradable, A <: Auction[T, A]]
     extends ClearingPolicy[T, A] {
   this: A =>
 
-  def clear: (A, Option[Stream[Fill]]) = {
+  def clear: (A, Option[Stream[SpotContract]]) = {
 
     @annotation.tailrec
-    def loop(pricingPolicy: PricingPolicy[T])(fills: Stream[Fill], ob: FourHeapOrderBook[T]): (A, Option[Stream[Fill]]) = {
+    def loop(pricingPolicy: PricingPolicy[T])(contracts: Stream[SpotContract], ob: FourHeapOrderBook[T]): (A, Option[Stream[SpotContract]]) = {
       val currentPrice = pricingPolicy(ob)
       val (residualOrderBook, topMatch) = ob.splitAtTopMatch
       topMatch match {
         case Some(((_, (_, askOrder)), (_, (_, bidOrder)))) =>
-          val fill = currentPrice.map(price => Fill.fromOrders(askOrder, bidOrder, price))
-          loop(pricingPolicy)(fill.fold(fills)(_ #:: fills), residualOrderBook)
+          val fill = currentPrice.map(price => SpotContract.fromOrders(askOrder, bidOrder, price))
+          loop(pricingPolicy)(fill.fold(contracts)(_ #:: contracts), residualOrderBook)
         case None =>
-          val results = if (fills.nonEmpty) Some(fills) else None
+          val results = if (contracts.nonEmpty) Some(contracts) else None
           (withOrderBook(ob), results)
       }
     }
@@ -61,26 +61,26 @@ trait UniformClearingPolicy[T <: Tradable, A <: Auction[T, A]]
     extends ClearingPolicy[T, A] {
   this: A =>
 
-  def clear: (A, Option[Stream[Fill]]) = {
+  def clear: (A, Option[Stream[SpotContract]]) = {
     val uniformPrice = pricingPolicy.apply(orderBook)
     uniformPrice match {
       case Some(price) =>
-        val (residualOrderBook, fills) = accumulate(price)(orderBook, Stream.empty)
-        val results = if (fills.nonEmpty) Some(fills) else None
+        val (residualOrderBook, contracts) = accumulate(price)(orderBook, Stream.empty)
+        val results = if (contracts.nonEmpty) Some(contracts) else None
         (withOrderBook(residualOrderBook), results)
       case None => (this, None)
     }
   }
 
   @annotation.tailrec
-  private[this] def accumulate(price: Price)(ob: FourHeapOrderBook[T], fills: Stream[Fill]): (FourHeapOrderBook[T], Stream[Fill]) = {
+  private[this] def accumulate(price: Price)(ob: FourHeapOrderBook[T], contracts: Stream[SpotContract]): (FourHeapOrderBook[T], Stream[SpotContract]) = {
     val (residualOrderBook, topMatch) = ob.splitAtTopMatch
     topMatch match {
       case Some(((_, (_, askOrder)), (_, (_, bidOrder)))) =>
-        val fill = Fill.fromOrders(askOrder, bidOrder, price)
-        accumulate(price)(residualOrderBook, fill #:: fills)
+        val fill = SpotContract.fromOrders(askOrder, bidOrder, price)
+        accumulate(price)(residualOrderBook, fill #:: contracts)
       case None =>
-        (ob, fills)
+        (ob, contracts)
     }
   }
 
