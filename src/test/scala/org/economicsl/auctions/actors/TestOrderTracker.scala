@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 KAPSARC
+Copyright 2016 David R. Pugh
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,17 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.actors
 
-import org.economicsl.core.securities.Stock
+import java.util.UUID
+
+import akka.actor.{DiagnosticActorLogging, Props}
+import org.economicsl.auctions.TokenGenerator
 
 
-/**
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-case class AppleStock() extends Stock {
-  val ticker: String = "APPL"
+class TestOrderTracker private(val issuer: UUID)
+    extends StackableActor
+    with DiagnosticActorLogging
+    with OrderTracking
+    with TokenGenerator {
+
+  wrappedBecome(trackingOrders)
+
 }
 
+
+object TestOrderTracker {
+
+  def props(issuer: UUID): Props = {
+    Props(new TestOrderTracker(issuer))
+  }
+
+}

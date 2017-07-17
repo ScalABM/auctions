@@ -28,3 +28,4 @@ import org.economicsl.core.Tradable
 case class ParkingSpace() extends Tradable {
   val uuid: UUID = UUID.randomUUID()
 }
+

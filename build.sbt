@@ -7,6 +7,9 @@ lazy val commonSettings = Seq(
   organizationName := "EconomicSL",
   organizationHomepage := Some(url("https://economicsl.github.io/")),
   libraryDependencies ++= Seq(
+    "org.scalactic" %% "scalactic" % "3.0.1",
+    "com.typesafe.akka" %% "akka-actor" % "2.5.2",
+    "com.typesafe.play" %% "play-json" % "2.6.0-RC2",
     "org.economicsl" %% "esl-core" % "0.1.0-SNAPSHOT"
   ),
   resolvers ++= Seq(
@@ -40,7 +43,8 @@ lazy val core = (project in file(".")).
   settings(inConfig(Functional)(Defaults.testSettings): _*).
   settings(
     libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % "3.0.1" % "functional, test"
+      "org.scalatest" %% "scalatest" % "3.0.1" % "functional, test",
+      "com.typesafe.akka" %% "akka-testkit" % "2.5.2" % "functional, test"
     ),
     parallelExecution in Functional := true
   )

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 KAPSARC
+Copyright 2016 David R. Pugh
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
-
-import java.util.UUID
-
-import org.economicsl.core.Tradable
+package org.economicsl.auctions.actors
 
 
-/**
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-case class Service() extends Tradable {
-  val uuid: UUID = UUID.randomUUID()
+// todo consider moving to esl-core?
+trait Timestamper {
+
+  protected def currentTimeMillis(): Timestamp = {
+    System.currentTimeMillis()
+  }
+
+  protected def currentTimeNanos(): Timestamp = {
+    System.nanoTime()
+  }
+
 }
 

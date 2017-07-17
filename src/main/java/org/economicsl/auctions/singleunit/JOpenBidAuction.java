@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.quotes.PriceQuote;
 import org.economicsl.auctions.quotes.PriceQuoteRequest;
 import org.economicsl.auctions.singleunit.AuctionParticipant.*;
@@ -25,7 +25,6 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.immutable.Stream;
 import scala.util.Either;
 
 import java.util.UUID;
@@ -128,7 +127,6 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
     /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
      *
      * @param pricingPolicy
-     * @param tickSize
      * @param <T>
      * @return
      */

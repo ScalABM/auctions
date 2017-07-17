@@ -17,15 +17,25 @@ package org.economicsl.auctions
 
 import java.util.UUID
 
-import org.economicsl.core.Tradable
+import akka.actor.ActorRef
 
 
-/**
+/** Package documentation for Actor-based auction implementations.
   *
   * @author davidrpugh
-  * @since 0.1.0
+  * @since 0.2.0
   */
-case class Service() extends Tradable {
-  val uuid: UUID = UUID.randomUUID()
-}
+package object actors {
 
+  /* Type representing unique (to some `AuctionParticipant`) order identifiers. */
+  type Token = UUID
+
+  /* Type representing unique (to some `AuctionActor`) order identifiers. */
+  type Reference = UUID
+
+  /* Type representing the `ActorRef` for some auction `Actor`. */
+  type AuctionRef = ActorRef
+
+  type Timestamp = Long
+
+}
