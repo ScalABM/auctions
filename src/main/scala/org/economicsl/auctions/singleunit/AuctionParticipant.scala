@@ -36,12 +36,6 @@ trait AuctionParticipant
 
 object AuctionParticipant {
 
-
-
   final case class Executed(issuer: Issuer, token: Token, price: Price, quantity: Quantity, matchNumber: UUID)
-
-
-
-
 
 }

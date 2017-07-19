@@ -1,6 +1,6 @@
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, ActorRef, Terminated}
+import akka.actor.{ActorRef, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.singleunit.orders.Order
@@ -10,8 +10,7 @@ import org.economicsl.core.Tradable
 
 
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
-    extends Actor {
-  this: ClearingSchedule[T, A] =>
+    extends StackableActor {
 
   import AuctionActor._
   import AuctionParticipantActor._
@@ -41,16 +40,17 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       ticker = ticker.removeRoutee(participant)
   }
 
-  def receive: Receive = {
-    case InsertOrder(token, order: Order[T]) =>
-      val (updatedAuction, insertResult) = auction.insert(token -> order)
-      insertResult match {
+  override def receive: Receive = {
+    case message @ InsertOrder(token, order: Order[T]) =>
+      val (updatedAuction, response) = auction.insert(token -> order)
+      response match {
         case Right(accepted) =>
           sender() ! accepted
           auction = updatedAuction
         case Left(rejected) =>
           sender() ! rejected
       }
+      super.receive(message)
     case CancelOrder(reference) =>
       val (updatedAuction, cancelResult) = auction.cancel(reference)
       cancelResult match {

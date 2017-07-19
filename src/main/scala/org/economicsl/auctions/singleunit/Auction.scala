@@ -19,6 +19,7 @@ import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.core.util.Timestamper
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -28,7 +29,8 @@ import org.economicsl.core.{Currency, Tradable}
   * @tparam A
   * @note Note the use of F-bounded polymorphism over Type classes. We developed an alternative implementation using the
   *       Type class pattern that was quite elegant, however Type classes can not be used directly from Java. In order
-  *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers.
+  *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
+  *       each auction implementation.
   */
 trait Auction[T <: Tradable, A <: Auction[T, A]]
     extends ReferenceGenerator
@@ -49,7 +51,8 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     removedOrder match {
       case Some((token, order)) =>
         val timestamp = currentTimeMillis()
-        val canceled = Canceled(timestamp, token, order, ???)
+        val reason: Reason = ???
+        val canceled = Canceled(timestamp, token, order, reason)
         (withOrderBook(residualOrderBook), Some(canceled))
       case None =>
         (this, None)

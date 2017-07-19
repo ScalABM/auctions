@@ -15,7 +15,7 @@ class TestAuctionParticipantActor private(val issuer: UUID, val auctionRegistryT
     extends AuctionParticipantActor
     with TokenProvider {
 
-  import ContinuousDoubleAuctionActor._
+  import ContinuousAuctionActor._
   import TestAuctionParticipantActor._
 
   @scala.throws[Exception](classOf[Exception]) override

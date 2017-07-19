@@ -42,7 +42,7 @@ object ExampleApplication extends App {
 
   val pricingPolicy = new MidPointPricingPolicy[TestStock]()
   val tickSize: Long = 1
-  val auctionProps: Props = ContinuousDoubleAuctionActor.props(
+  val auctionProps: Props = ContinuousAuctionActor.props(
     pricingPolicy,
     tickSize,
     tradable,
