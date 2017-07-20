@@ -41,7 +41,7 @@ trait BidderActivityQuotingSchedule[T <: Tradable]
 
   override def receive: Receive = {
     case message @ InsertOrder(_, _: Order[T]) =>
-      super.receive(message)  // inserts order and updates auction!
+      super.receive(message)
       ???
     case message =>
       super.receive(message)
@@ -50,7 +50,7 @@ trait BidderActivityQuotingSchedule[T <: Tradable]
 }
 
 
-/** Schedules a clearing event to occur whenever no new orders have been received for a specified period. */
+/** Schedules a quoting event to occur whenever no new orders have been received for a specified period. */
 trait BidderInActivityQuotingSchedule[T <: Tradable]
     extends QuotingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
@@ -66,6 +66,23 @@ trait BidderInActivityQuotingSchedule[T <: Tradable]
   override def receive: Receive = {
     case ReceiveTimeout =>
       ???
+    case message =>
+      super.receive(message)
+  }
+
+}
+
+
+/** Schedules a quoting event in response to an `AuctionParticipantActor` request. */
+trait OnDemandQuotingSchedule[T <: Tradable]
+    extends QuotingSchedule[T] {
+  this: AuctionActor[T, OpenBidAuction[T]] =>
+
+  override def receive: Receive = {
+    case request: QuoteRequest[T] =>
+      val quote = auction.receive(request)
+      sender() ! quote
+      super.receive(request)
     case message =>
       super.receive(message)
   }

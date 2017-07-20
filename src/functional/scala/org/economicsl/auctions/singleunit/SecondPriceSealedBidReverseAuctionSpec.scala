@@ -37,14 +37,14 @@ class SecondPriceSealedBidReverseAuctionSpec
     with Matchers {
 
   // reverse auction to procure a service at lowest possible cost...
+  val service = Service()
   val secondPriceSealedBidReverseAuction: SealedBidAuction[Service] = {
-    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[Service])
+    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[Service], service)
   }
 
   // buyer is willing to pay anything...
   val buyer: Issuer = UUID.randomUUID()
   val buyersToken: Token = UUID.randomUUID()
-  val service = Service()
   val reservationBidOrder: (Token, BidOrder[Service]) = (buyersToken, LimitBidOrder(buyer, Price.MaxValue, service))
   val (withReservationBidOrder, _) = secondPriceSealedBidReverseAuction.insert(reservationBidOrder)
 

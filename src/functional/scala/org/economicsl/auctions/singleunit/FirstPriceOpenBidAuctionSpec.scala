@@ -47,7 +47,7 @@ class FirstPriceOpenBidAuctionSpec
 
   // seller uses a first-priced, open bid auction...
   val firstPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
-    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace])
+    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
   }
 
   // Seller that must sell at any positive price

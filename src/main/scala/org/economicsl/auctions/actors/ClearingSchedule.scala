@@ -48,10 +48,10 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 
   override def receive: Receive = {
     case message @ InsertOrder(_, _: Order[T]) =>
-      super.receive(message)  // inserts order and updates auction!
       val (clearedAuction, contracts) = auction.clear
       contracts.foreach(contract => settlementService ! contract)
       auction = clearedAuction
+      super.receive(message)
     case message =>
       super.receive(message)
   }

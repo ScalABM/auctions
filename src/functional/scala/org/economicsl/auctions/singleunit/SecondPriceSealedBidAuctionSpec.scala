@@ -39,12 +39,12 @@ class SecondPriceSealedBidAuctionSpec
 
   // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
   val tickSize: Currency = 1
+  val parkingSpace = ParkingSpace()
   val secondPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize)
+    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
   }
 
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
   val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (randomToken(), LimitAskOrder(seller, Price.zero, parkingSpace))
   val (withReservationAskOrder, _) = secondPriceSealedBidAuction.insert(reservationAskOrder)
 

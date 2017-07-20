@@ -45,7 +45,7 @@ trait OrderTrackingActor
       log.debug(message.toString)
   }
 
-  var outstandingOrders: Map[Token, (Reference, Order[Tradable])]
+  protected var outstandingOrders: Map[Token, (Reference, Order[Tradable])]
 
 }
 

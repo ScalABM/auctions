@@ -4,7 +4,9 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 
 import akka.actor.Props
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.TokenGenerator
+import org.economicsl.auctions.actors.AuctionActor.InsertOrder
+import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder, Order}
 import org.economicsl.core.{Price, Tradable}
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
@@ -13,9 +15,8 @@ import scala.util.Random
 
 class TestAuctionParticipantActor private(val issuer: UUID, val auctionRegistryTimeout: Duration, val auctionRegistryPath: String)
     extends AuctionParticipantActor
-    with TokenProvider {
+    with TokenGenerator {
 
-  import ContinuousAuctionActor._
   import TestAuctionParticipantActor._
 
   @scala.throws[Exception](classOf[Exception]) override
@@ -32,9 +33,7 @@ class TestAuctionParticipantActor private(val issuer: UUID, val auctionRegistryT
       context.system.scheduler.scheduleOnce(delay(), self, GenerateOrder)(context.system.dispatcher)
   }
 
-  override def active: Receive = {
-    super.active orElse generateOrder
-  }
+  var outstandingOrders: Map[Token, (Reference, Order[Tradable])] = Map.empty[Token, (Reference, Order[Tradable])]
 
   private[this] def delay(): FiniteDuration = {
     val length = 1 + Random.nextInt(1000)
@@ -44,9 +43,9 @@ class TestAuctionParticipantActor private(val issuer: UUID, val auctionRegistryT
   private[this] def randomOrder[T <: Tradable](tradable: T): InsertOrder[T] = {
     val limit = Price(Random.nextInt(Int.MaxValue))
     if (Random.nextDouble() <= 0.5) {
-      InsertOrder(randomUUID(), LimitAskOrder(issuer, limit, tradable))
+      InsertOrder(random(), LimitAskOrder(issuer, limit, tradable))
     } else {
-      InsertOrder(randomUUID(), LimitBidOrder(issuer, limit, tradable))
+      InsertOrder(random(), LimitBidOrder(issuer, limit, tradable))
     }
   }
 

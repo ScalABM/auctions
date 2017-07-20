@@ -39,7 +39,7 @@ class FirstPriceSealedBidAuctionSpec
 
   // seller uses a first-priced, sealed bid auction...
   val firstPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace])
+    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
   }
 
   // suppose that seller must sell the parking space at any positive price...

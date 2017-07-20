@@ -19,28 +19,11 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   def settlementService: ActorRef
 
-  /**
-    *
-    * @return
-    * @todo
-    */
-  def registeringAuctionParticipants: Receive = {
-    case RegisterAuctionParticipant(participant) =>
-      context.watch(participant)
-      participant ! AuctionProtocol(auction.tickSize, auction.tradable)
-      participants = participants + participant
-      ticker = ticker.addRoutee(participant)
-    case DeregisterAuctionParticipant(participant) =>
-      context.unwatch(participant)
-      participants = participants - participant
-      ticker = ticker.removeRoutee(participant)
-    case Terminated(participant) if participants.contains(participant) =>
-      context.unwatch(participant)
-      participants = participants - participant
-      ticker = ticker.removeRoutee(participant)
+  override def receive: Receive = {
+    processOrders orElse registerAuctionParticipants
   }
 
-  override def receive: Receive = {
+  protected def processOrders: Receive = {
     case message @ InsertOrder(token, order: Order[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
       response match {
@@ -64,6 +47,26 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           */
           ???
       }
+  }
+
+  /** An `AuctionActor` needs to register `AuctionParticipantActors` in order for them to trade via the auction.
+    *
+    * @return a `PartialFunction` defining registration behavior.
+    */
+  protected def registerAuctionParticipants: Receive = {
+    case RegisterAuctionParticipant(participant) =>
+      context.watch(participant)  // now `AuctionActor` will be notified if `AuctionParticipantActor` "dies"...
+      participant ! AuctionProtocol(auction.tickSize, auction.tradable)
+      participants = participants + participant
+      ticker = ticker.addRoutee(participant)
+    case DeregisterAuctionParticipant(participant) =>
+      context.unwatch(participant)  // `AuctionActor` will no longer be notified if `AuctionParticipantActor` "dies"...
+      participants = participants - participant
+      ticker = ticker.removeRoutee(participant)
+    case Terminated(participant) if participants.contains(participant) =>
+      context.unwatch(participant)  // `AuctionParticipantActor` has actually died!
+      participants = participants - participant
+      ticker = ticker.removeRoutee(participant)
   }
 
   // Not sure that it is necessary to store refs...

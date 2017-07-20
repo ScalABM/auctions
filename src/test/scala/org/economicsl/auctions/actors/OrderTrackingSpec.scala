@@ -31,9 +31,9 @@ class OrderTrackingSpec
     with GivenWhenThen
     with Matchers {
 
-  import OrderTracking._
+  import org.economicsl.auctions.singleunit.OrderTracking._
 
-  val tradable = TestTradable(UUID.randomUUID())
+  val tradable = TestTradable()
 
   def afterAll(): Unit = {
     system.terminate()
@@ -89,7 +89,7 @@ class OrderTrackingSpec
       When("that OrderTracker receives a Canceled message for one of its previously accepted orders")
 
       val reason = "U" // stands for user cancelled?
-      orderTrackerRef ! Canceled(currentTimeMillis(), token, reason)
+      orderTrackerRef ! Canceled(currentTimeMillis(), token, ???, reason)
 
       Then("that OrderTracker should remove the canceled order from its collection of outstanding orders.")
 
