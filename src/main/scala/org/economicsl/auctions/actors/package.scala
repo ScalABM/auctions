@@ -15,27 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import java.util.UUID
-
-import akka.actor.ActorRef
-
 
 /** Package documentation for Actor-based auction implementations.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-package object actors {
-
-  /* Type representing unique (to some `AuctionParticipant`) order identifiers. */
-  type Token = UUID
-
-  /* Type representing unique (to some `AuctionActor`) order identifiers. */
-  type Reference = UUID
-
-  /* Type representing the `ActorRef` for some auction `Actor`. */
-  type AuctionRef = ActorRef
-
-  type Timestamp = Long
-
-}
+package object actors
