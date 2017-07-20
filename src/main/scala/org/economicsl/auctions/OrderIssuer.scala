@@ -16,16 +16,10 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-import org.economicsl.core.util.UUIDGenerator
+trait OrderIssuer[A <: OrderIssuer[A]]
+  extends TokenGenerator {
+  this: A =>
 
-
-trait ReferenceGenerator
-    extends UUIDGenerator {
-
-  protected def randomReference(): Reference = {
-    random()
-  }
+  def issuer: Issuer
 
 }
-
-

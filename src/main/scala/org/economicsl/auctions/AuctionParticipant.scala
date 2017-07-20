@@ -16,16 +16,8 @@ limitations under the License.
 package org.economicsl.auctions
 
 
-import org.economicsl.core.util.UUIDGenerator
-
-
-trait ReferenceGenerator
-    extends UUIDGenerator {
-
-  protected def randomReference(): Reference = {
-    random()
-  }
-
+trait AuctionParticipant[A <: AuctionParticipant[A]]
+    extends OrderIssuer[A]
+    with OrderTracker[A] {
+  this: A =>
 }
-
-

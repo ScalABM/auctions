@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
+import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{BidOrder, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
 import org.economicsl.auctions.{Issuer, Seller, Service, Token}
@@ -37,14 +37,14 @@ class FirstPriceSealedBidReverseAuctionSpec
     with Matchers {
 
   // reverse auction to procure a service at lowest possible cost...
+  val service = Service()
   val firstPriceSealedBidReverseAuction: SealedBidAuction[Service] = {
-    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service])
+    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service], service)
   }
 
   // buyer is willing to pay anything...
   val buyer: Issuer = UUID.randomUUID()
   val buyersToken: Token = UUID.randomUUID()
-  val service = Service()
   val reservationBidOrder: (Token, BidOrder[Service]) = (buyersToken, LimitBidOrder(buyer, Price.MaxValue, service))
   val (withReservationBidOrder, _) = firstPriceSealedBidReverseAuction.insert(reservationBidOrder)
 

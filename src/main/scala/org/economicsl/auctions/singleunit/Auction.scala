@@ -19,6 +19,7 @@ import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.core.util.Timestamper
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -31,10 +32,11 @@ import org.economicsl.core.{Currency, Tradable}
   *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers.
   */
 trait Auction[T <: Tradable, A <: Auction[T, A]]
-    extends ReferenceGenerator {
+    extends ReferenceGenerator
+    with Timestamper {
   this: A =>
 
-  import AuctionParticipant._
+  import OrderTracker._
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
@@ -44,10 +46,11 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         except the `order`.
     */
   def cancel(reference: Reference): (A, Option[Canceled]) = {
-    val (residualOrderBook, kv) = orderBook.remove(reference)
-    kv match {
-      case Some((token, removedOrder)) =>
-        val canceled = Canceled(removedOrder.issuer, token)
+    val (residualOrderBook, removedOrder) = orderBook.remove(reference)
+    removedOrder match {
+      case Some((token, order)) =>
+        val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
+        val canceled = CanceledByIssuer(timestamp, token, order)
         (withOrderBook(residualOrderBook), Some(canceled))
       case None =>
         (this, None)
@@ -73,18 +76,27 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = {
     val (token, order) = kv
     if (order.limit.value % tickSize > 0) {
+      val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTickSize(order, tickSize)
-      val rejected = Rejected(order.issuer, token, order, reason)
+      val rejected = Rejected(timestamp, token, order, reason)
+      (this, Left(rejected))
+    } else if (!order.tradable.equals(tradable)) {
+      val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
+      val reason = InvalidTradable(order, tradable)
+      val rejected = Rejected(timestamp, token, order, reason)
       (this, Left(rejected))
     } else {
-      val reference = randomReference() // SIDE EFFECT !!!
-      val accepted = Accepted(order.issuer, token, order, reference)
+      val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
+      val reference = randomReference() // todo would prefer that these not be randomly generated!
+      val accepted = Accepted(timestamp, token, order, reference)
       val updatedOrderBook = orderBook.insert(reference -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
     }
   }
 
   def tickSize: Currency
+
+  def tradable: T
 
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
   def withPricingPolicy(updated: PricingPolicy[T]): A

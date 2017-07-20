@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
+import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
 import org.economicsl.auctions._
@@ -39,12 +39,13 @@ class SecondPriceSealedBidAuctionSpec
 
   // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
   val tickSize: Currency = 1
+  val uuid: UUID = UUID.randomUUID()
+  val parkingSpace = ParkingSpace(uuid)
   val secondPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize)
+    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
   }
 
   val seller: UUID = UUID.randomUUID()
-  val parkingSpace = ParkingSpace()
   val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (randomToken(), LimitAskOrder(seller, Price.zero, parkingSpace))
   val (withReservationAskOrder, _) = secondPriceSealedBidAuction.insert(reservationAskOrder)
 

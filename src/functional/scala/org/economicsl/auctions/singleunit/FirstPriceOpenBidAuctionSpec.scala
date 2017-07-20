@@ -18,7 +18,6 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest
-import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
@@ -41,14 +40,15 @@ class FirstPriceOpenBidAuctionSpec
 
   // suppose that there are lots of bidders
   val numberBidOrders = 10000
-  val parkingSpace = ParkingSpace()
+  val uuid: UUID = UUID.randomUUID()
+  val parkingSpace = ParkingSpace(uuid)
   val prng: Random = new Random(42)
   val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
   // seller uses a first-priced, open bid auction...
   val firstPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
-    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace])
+    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
   }
 
   // Seller that must sell at any positive price

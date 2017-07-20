@@ -33,7 +33,7 @@ object ContinuousDoubleAuction extends App {
 
   val google: GoogleStock = GoogleStock()
   val pricingRule = new MidPointPricingPolicy[GoogleStock]
-  val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule)
+  val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, google)
 
   // generate a very large stream of random orders...
   type OrderFlow[T <: Tradable] = Stream[(Token, Order[T])]

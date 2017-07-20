@@ -15,8 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.scalatest.{FlatSpec, Matchers}
@@ -41,7 +41,7 @@ class PeriodicDoubleAuction
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
     val pricingRule = new MidPointPricingPolicy[GoogleStock]
-    val withUniformPricing = SealedBidAuction.withUniformClearingPolicy(pricingRule)
+    val withUniformPricing = SealedBidAuction.withUniformClearingPolicy(pricingRule, google)
 
     // this whole process is data parallel...
     val (withOrders, _) = {

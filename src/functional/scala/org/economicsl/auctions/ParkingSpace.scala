@@ -21,10 +21,8 @@ import org.economicsl.core.Tradable
 
 
 /**
-  *
+  * @param uuid each parking space should have a unique identifier.
   * @author davidrpugh
   * @since 0.1.0
   */
-case class ParkingSpace() extends Tradable {
-  val uuid: UUID = UUID.randomUUID()
-}
+case class ParkingSpace(uuid: UUID) extends Tradable

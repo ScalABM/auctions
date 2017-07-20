@@ -17,9 +17,9 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.quotes.PriceQuote;
 import org.economicsl.auctions.quotes.PriceQuoteRequest;
-import org.economicsl.auctions.singleunit.AuctionParticipant.*;
 import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -97,8 +97,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize);
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -108,8 +108,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy);
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tradable);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -120,20 +120,19 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize);
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
         return new JOpenBidAuction<>(auction);
     }
 
     /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
      *
      * @param pricingPolicy
-     * @param tickSize
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy);
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
         return new JOpenBidAuction<>(auction);
     }
 

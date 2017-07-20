@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.Fill;
-import org.economicsl.auctions.singleunit.AuctionParticipant.*;
+import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -91,8 +91,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize) {
-        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize);
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
         return new JSealedBidAuction<>(auction);
     }
 
@@ -102,8 +102,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy) {
-        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy);
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tradable);
         return new JSealedBidAuction<>(auction);
     }
 
@@ -114,8 +114,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize) {
-        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize);
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
         return new JSealedBidAuction<>(auction);
     }
 
@@ -125,8 +125,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy) {
-        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy);
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
         return new JSealedBidAuction<>(auction);
     }
 
