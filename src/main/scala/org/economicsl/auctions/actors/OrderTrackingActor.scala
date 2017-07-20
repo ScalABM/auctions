@@ -15,10 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.DiagnosticActorLogging
-import org.economicsl.auctions.singleunit.OrderTracking
-import org.economicsl.auctions.singleunit.orders.Order
-import org.economicsl.core.Tradable
+import org.economicsl.auctions.AuctionParticipant
 
 
 /** Mixin trait providing `OrderTracking` behavior.
@@ -26,26 +23,31 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.2.0
   */
-trait OrderTrackingActor
-    extends StackableActor
-    with DiagnosticActorLogging
-    with OrderTracking {
+trait OrderTrackingActor[A <: AuctionParticipant[A]]
+    extends StackableActor {
+  this: AuctionParticipantActor[A] =>
 
-  import OrderTracking._
+  import org.economicsl.auctions.OrderTracker._
 
-  /** Add any `Accepted` orders to the collection of outstanding orders; orders that have been `Canceled` are removed
-    * from the collection of outstanding orders; orders that have been `Rejected` are logged for debugging.
+  /** Forward received messages to `AuctionParticipant` for processing.
+    *
+    * @return
+    * @todo consider changing type signature of `trackOrders` can handle either `Accepted`, `Canceled` or `Rejected`.
+    *       This will also require creating a common super-type for these messages.
     */
-  def trackingOrders: Receive = {
-    case Accepted(_, token, order, reference) =>
-      outstandingOrders = outstandingOrders + (token -> (reference -> order))
-    case Canceled(_, token, _, _) =>
-      outstandingOrders = outstandingOrders - token
+  override def receive: Receive = {
+    case message: Accepted =>
+      auctionParticipant = auctionParticipant.trackOrders(message)
+      super.receive(message)
+    case message: Canceled =>
+      auctionParticipant = auctionParticipant.trackOrders(message)
+      super.receive(message)
     case message: Rejected =>
-      log.debug(message.toString)
+      auctionParticipant = auctionParticipant.trackOrders(message)
+      super.receive(message)
+    case message =>
+      super.receive(message)
   }
-
-  protected var outstandingOrders: Map[Token, (Reference, Order[Tradable])]
 
 }
 

@@ -19,7 +19,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
-import org.economicsl.auctions.TestTradable
+import org.economicsl.auctions.{Reference, TestTradable}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.core.Price
 import org.scalatest.{FeatureSpecLike, GivenWhenThen, Matchers}
@@ -31,7 +31,7 @@ class OrderTrackingSpec
     with GivenWhenThen
     with Matchers {
 
-  import org.economicsl.auctions.singleunit.OrderTracking._
+  import org.economicsl.auctions.OrderTracker._
 
   val tradable = TestTradable()
 

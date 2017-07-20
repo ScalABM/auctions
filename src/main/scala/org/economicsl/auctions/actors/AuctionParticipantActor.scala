@@ -16,7 +16,8 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 
-import akka.actor.DiagnosticActorLogging
+import akka.actor.ActorRef
+import org.economicsl.auctions.AuctionParticipant
 import org.economicsl.core.{Currency, Tradable}
 
 
@@ -28,10 +29,9 @@ import org.economicsl.core.{Currency, Tradable}
   *       need to be re-identified; during re-identification auction participant should continue to process messages
   *       received by any auctions to which it has previously registered.
   */
-trait AuctionParticipantActor
-    extends StackableActor
-    with DiagnosticActorLogging
-    with OrderTrackingActor {
+trait AuctionParticipantActor[A <: AuctionParticipant[A]]
+    extends OrderTrackingActor[A]
+    with OrderIssuingActor[A] {
 
   import AuctionParticipantActor._
 
@@ -43,7 +43,9 @@ trait AuctionParticipantActor
   }
 
   /* An `AuctionParticipant` needs to keep track of multiple auction protocols. */
-  protected var auctions: Map[AuctionRef, AuctionProtocol] = Map.empty
+  protected var auctions: Map[ActorRef, AuctionProtocol]
+
+  protected var auctionParticipant: A
 
 }
 
