@@ -15,11 +15,15 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.securities.Stock
+
 
 /**
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-case class GoogleStock() extends Security
+case class GoogleStock() extends Stock {
+  val ticker: String = "GOOG"
+}
 

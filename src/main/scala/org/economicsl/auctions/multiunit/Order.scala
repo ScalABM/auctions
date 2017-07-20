@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.{Contract, OrderLike}
+import org.economicsl.auctions.Contract
 import org.economicsl.core.Tradable
 
 
@@ -25,7 +25,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Order[+T <: Tradable] extends Contract with OrderLike[T]
+sealed trait Order[+T <: Tradable] extends Contract
 
 
 /** Base trait for all multi-unit orders to sell a particular `Tradable`.

@@ -15,8 +15,15 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import java.util.UUID
+
 
 /** The quotes package defines a mini vocabulary of messages that can be used by auction participants to query the
   * auction to obtain information.
   */
-package object quotes
+package object quotes {
+
+  /* Type alias for some type of unique identifier of the agent that should receive the quote. */
+  type Receiver = UUID
+
+}

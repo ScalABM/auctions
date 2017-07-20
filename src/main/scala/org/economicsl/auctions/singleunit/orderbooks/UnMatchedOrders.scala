@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder}
+import org.economicsl.auctions.{Reference, Token}
+import org.economicsl.auctions.singleunit.orders.{AskOrder, BidOrder, Order}
 import org.economicsl.core.Tradable
 
 
@@ -28,62 +29,65 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T], val bidOrders: SortedBidOrders[T]) {
+final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
+                                                   val bidOrders: SortedBidOrders[T]) {
 
-  /* Limit price of "best" `BidOrder` instance must not exceed the limit price of the "best" `AskOrder` instance. */
-  require(bidOrders.headOption.forall(bidOrder => askOrders.headOption.forall(askOrder => bidOrder.limit <= askOrder.limit)))
+  require(heapsNotCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `UnMatchedOrders` instance. */
-  val askOrdering: Ordering[AskOrder[T]] = askOrders.ordering
+  val askOrdering: Ordering[(Reference, (Token, AskOrder[T]))] = askOrders.ordering
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
-  val bidOrdering: Ordering[BidOrder[T]] = bidOrders.ordering
+  val bidOrdering: Ordering[(Reference, (Token, BidOrder[T]))] = bidOrders.ordering
 
   /** Create a new `UnMatchedOrders` instance containing the additional `AskOrder`.
     *
-    * @param order an `AskOrder` that should be added.
+    * @param kv
     * @return a new `UnMatchedOrders` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (order: AskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders + order, bidOrders)
+  def + (kv: (Reference, (Token, Order[T]))): UnMatchedOrders[T] = kv match {
+    case (reference, (token, order: AskOrder[T])) =>
+      new UnMatchedOrders(askOrders + (reference -> (token -> order)), bidOrders)
+    case (reference, (token, order: BidOrder[T])) =>
+      new UnMatchedOrders(askOrders, bidOrders + (reference -> (token -> order)))
+  }
 
-  /** Create a new `UnMatchedOrders` instance containing the additional `BidOrder`.
+  /** Remove an order from the collection of unmatched orders.
     *
-    * @param order an `BidOrder` that should be added.
-    * @return a new `UnMatchedOrders` instance that contains all of the `BidOrder` instances of this instance and that
-    *         also contains the `order`.
+    * @param reference
+    * @return a tuple whose first element is ??? and whose second element is ???
     */
-  def + (order: BidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders + order)
-
-  /** Create a new `UnMatchedOrders` instance with the given `AskOrder` removed from this `UnMatchedOrders` instance.
-    *
-    * @param order an `AskOrder` that should be removed.
-    * @return a new `UnMatchedOrders` instance that contains all of the `AskOrder` instances of this instance and that
-    *         also contains the `order`.
-    */
-  def - (order: AskOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders - order, bidOrders)
-
-  /** Create a new `UnMatchedOrders` instance with the given `BidOrder` removed from this `UnMatchedOrders` instance.
-    *
-    * @param order an `BidOrder` that should be removed.
-    * @return a new `UnMatchedOrders` instance that contains all of the `BidOrder` instances of this instance and that
-    *         also contains the `order`.
-    */
-  def - (order: BidOrder[T]): UnMatchedOrders[T] = new UnMatchedOrders(askOrders, bidOrders - order)
+  def - (reference: Reference): (UnMatchedOrders[T], Option[(Token, Order[T])]) = {
+    val (remainingAskOrders, removedAskOrder) = askOrders - reference
+    removedAskOrder match {
+      case Some(_) =>
+        (new UnMatchedOrders(remainingAskOrders, bidOrders), removedAskOrder)
+      case None =>
+        val (remainingBidOrders, removedBidOrder) = bidOrders - reference
+        (new UnMatchedOrders(askOrders, remainingBidOrders), removedBidOrder)
+    }
+  }
 
   /** Tests whether some `AskOrder` instance is contained in this `UnMatchedOrders` instance.
     *
-    * @param order the `AskOrder` instance to test for membership.
+    * @param reference the `AskOrder` instance to test for membership.
     * @return `true` if the `order` is contained in this `UnMatchedOrders` instance; `false` otherwise.
     */
-  def contains(order: AskOrder[T]): Boolean = askOrders.contains(order)
+  def contains(reference: Reference): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
 
-  /** Tests whether some `BidOrder` instance is contained in this `UnMatchedOrders` instance.
-    *
-    * @param order the `BidOrder` instance to test for membership.
-    * @return `true` if the `order` is contained in this `UnMatchedOrders` instance; `false` otherwise.
-    */
-  def contains(order: BidOrder[T]): Boolean = bidOrders.contains(order)
+  def get(reference: Reference): Option[(Token, Order[T])] = {
+    askOrders.get(reference).orElse(bidOrders.get(reference))
+  }
+
+  /* Used to check this invariant that must hold for all `UnMatchedOrders` instances. */
+  private[this] def heapsNotCrossed: Boolean = {
+    bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
+      askOrders.headOption.forall{ case (_, (_, askOrder)) =>
+        bidOrder.limit <= askOrder.limit
+      }
+    }
+  }
 
 }
 

@@ -16,80 +16,124 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.ClearResult;
 import org.economicsl.auctions.Fill;
-import org.economicsl.auctions.quotes.AskPriceQuote;
-import org.economicsl.auctions.quotes.AskPriceQuoteRequest;
-import org.economicsl.auctions.singleunit.orders.AskOrder;
-import org.economicsl.auctions.singleunit.orders.BidOrder;
+import org.economicsl.auctions.OrderTracker.*;
+import org.economicsl.auctions.quotes.PriceQuote;
+import org.economicsl.auctions.quotes.PriceQuoteRequest;
+import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
-
 import scala.Option;
-import scala.util.Try;
+import scala.Tuple2;
+import scala.collection.immutable.Stream;
+import scala.util.Either;
 
-import java.util.stream.Stream;
+import java.util.UUID;
 
 
-/** Class implementing an open-bid, auction.
+/** Abstract base class for all sealed-bid auction mechanisms.
  *
  * @param <T>
- * @author davidrpugh
- * @since 0.1.0
  */
-public class JOpenBidAuction<T extends Tradable> extends AbstractOpenBidAuction<T, JOpenBidAuction<T>> {
+class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>> {
 
-    /* underlying Scala auction contains all of the interesting logic. */
     private OpenBidAuction<T> auction;
 
-    public JOpenBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy, Long tickSize) {
-        this.auction = OpenBidAuction$.MODULE$.apply(reservation, pricingPolicy, tickSize);
+    private JOpenBidAuction(OpenBidAuction<T> auction) {
+        this.auction = auction;
     }
 
-    /** Create a new instance of `JOpenBidAuction` whose order book contains an additional `BidOrder`.
-     *
-     * @param order the `BidOrder` that should be added to the `orderBook`.
-     * @return an instance of `JOpenBidOrder` whose order book contains all previously submitted `BidOrder` instances.
-     */
-    public Try<JOpenBidAuction<T>> insert(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return ops.insert(order).map(a -> new JOpenBidAuction<>(a));
-    }
-
-    public AskPriceQuote receive(AskPriceQuoteRequest<T> request) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return ops.receive(request);
-    }
-
-    /** Create a new instance of `JOpenBidAuction` whose order book contains all previously submitted `BidOrder`
-     * instances except the `order`.
-     *
-     * @param order the `BidOrder` that should be added to the order Book.
-     * @return an instance of `JOpenBidAuction` whose order book contains all previously submitted `BidOrder` instances
+    /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
      * except the `order`.
+     *
+     * @param reference
+     * @return
      */
-    public JOpenBidAuction<T> remove(BidOrder<T> order) {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JOpenBidAuction<>(ops.remove(order));
+    public CancelResult<JOpenBidAuction<T>> cancel(UUID reference) {
+        Tuple2<OpenBidAuction<T>, Option<Canceled>> result = auction.cancel(reference);
+        JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
+        return new CancelResult<>(jAuction, result._2);
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
      *
-     * @return an instance of `JClearResult` class.
+     * @return an instance of `ClearResult` class.
      */
-    public JClearResult<JOpenBidAuction<T>> clear() {
-        OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        ClearResult<OpenBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
-        return new JClearResult<>(fills, new JOpenBidAuction<>(results.residual()));
+    public ClearResult<JOpenBidAuction<T>> clear() {
+        Tuple2<OpenBidAuction<T>, Option<Stream<Fill>>> result = auction.clear();
+        JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
+        return new ClearResult<>(jAuction, result._2);
     }
 
-    private JOpenBidAuction(OpenBidAuction<T> a) {
-        this.auction = a;
+    /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
+     *
+     * @param order
+     * @return
+     */
+    public InsertResult<JOpenBidAuction<T>> insert(Tuple2<UUID, Order<T>> order) {
+        Tuple2<OpenBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
+        JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1());
+        return new InsertResult<>(jAuction, result._2());
     }
 
-    private OpenBidAuctionLike.Ops<T, OpenBidAuction<T>> mkAuctionLikeOps(OpenBidAuction<T> a) {
-      return OpenBidAuction$.MODULE$.mkAuctionOps(a);
+    public PriceQuote receive(PriceQuoteRequest<T> request) {
+        return auction.receive(request);
     }
-    
+
+    public JOpenBidAuction<T> withPricingPolicy(PricingPolicy<T> updated) {
+        OpenBidAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
+        return new JOpenBidAuction<>(withUpdatedPricingPolicy);
+    }
+
+    public JOpenBidAuction<T> withTickSize(Long updated) {
+        OpenBidAuction<T> withUpdatedTickSize = auction.withTickSize(updated);
+        return new JOpenBidAuction<>(withUpdatedTickSize);
+    }
+
+    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
+     *
+     * @param pricingPolicy
+     * @param tickSize
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
+        return new JOpenBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
+     *
+     * @param pricingPolicy
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tradable);
+        return new JOpenBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
+     *
+     * @param pricingPolicy
+     * @param tickSize
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
+        return new JOpenBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
+     *
+     * @param pricingPolicy
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
+        return new JOpenBidAuction<>(auction);
+    }
+
 }

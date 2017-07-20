@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.quotes
 
+import org.economicsl.auctions.Issuer
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.core.Tradable
 
 
@@ -23,15 +25,25 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait QuoteRequest[T <: Tradable]
+sealed trait QuoteRequest[T <: Tradable] {
 
+  /* Unique identifier for the auction participant that issued the `QuoteRequest`. */
+  def issuer: Issuer
+
+  def query: FourHeapOrderBook[T] => Quote
+
+}
 
 /** Base trait for all price quote requests.
   *
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T]
+trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T] {
+
+  def query: (FourHeapOrderBook[T]) => PriceQuote
+
+}
 
 
 /** Used by auction participants to request the current ask price quote.
@@ -39,7 +51,13 @@ sealed trait PriceQuoteRequest[T <: Tradable] extends QuoteRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-case class AskPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
+final case class AskPriceQuoteRequest[T <: Tradable](issuer: Issuer) extends PriceQuoteRequest[T] {
+
+  val query: (FourHeapOrderBook[T]) => AskPriceQuote = {
+    ob => AskPriceQuote(issuer, ob.askPriceQuote)
+  }
+
+}
 
 
 /** Used by auction participants to request the current bid price quote.
@@ -47,7 +65,13 @@ case class AskPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-case class BidPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
+final case class BidPriceQuoteRequest[T <: Tradable](issuer: Issuer) extends PriceQuoteRequest[T] {
+
+  val query: FourHeapOrderBook[T] => BidPriceQuote = {
+    ob => BidPriceQuote(issuer, ob.bidPriceQuote)
+  }
+
+}
 
 
 /** Used by auction participants to request the current spread quote.
@@ -55,4 +79,10 @@ case class BidPriceQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SpreadQuoteRequest[T <: Tradable]() extends PriceQuoteRequest[T]
+final case class SpreadQuoteRequest[T <: Tradable](issuer: Issuer) extends QuoteRequest[T] {
+
+  val query: FourHeapOrderBook[T] => SpreadQuote = {
+    ob => SpreadQuote(issuer, ob.spread)
+  }
+
+}

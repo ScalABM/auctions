@@ -16,73 +16,118 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.ClearResult;
 import org.economicsl.auctions.Fill;
-import org.economicsl.auctions.singleunit.orders.AskOrder;
-import org.economicsl.auctions.singleunit.orders.BidOrder;
+import org.economicsl.auctions.OrderTracker.*;
+import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
-
 import scala.Option;
-import scala.util.Try;
+import scala.Tuple2;
+import scala.collection.immutable.Stream;
+import scala.util.Either;
 
-import java.util.stream.Stream;
+import java.util.UUID;
 
 
-/** Class implementing a sealed-bid auction.
- *
- * @param <T>
- * @author davidrpugh
- * @since 0.1.0
- */
-public class JSealedBidAuction<T extends Tradable> extends AbstractSealedBidAuction<T, JSealedBidAuction<T>> {
+/** Abstract base class for all sealed-bid auction mechanisms.
+  *
+  * @param <T>
+  */
+class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuction<T>> {
 
-    /* underlying Scala auction contains all of the interesting logic. */
     private SealedBidAuction<T> auction;
 
-    public JSealedBidAuction(AskOrder<T> reservation, PricingPolicy<T> pricingPolicy, Long tickSize) {
-        this.auction = SealedBidAuction$.MODULE$.apply(reservation, pricingPolicy, tickSize);
+    private JSealedBidAuction(SealedBidAuction<T> auction) {
+        this.auction = auction;
     }
 
-    /** Create a new instance of `JSealedBidAuction` whose order book contains an additional `BidOrder`.
+    /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
+     * except the `order`.
      *
-     * @param order the `BidOrder` that should be added to the `orderBook`.
-     * @return an instance of `JSealedBidOrder` whose order book contains all previously submitted `BidOrder` instances.
+     * @param reference
+     * @return
      */
-    public Try<JSealedBidAuction<T>> insert(BidOrder<T> order) {
-        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return ops.insert(order).map(a -> new JSealedBidAuction<>(a));
-    }
-
-    /** Create a new instance of `JSealedBidAuction` whose order book contains all previously submitted `BidOrder`
-     * instances except the `order`.
-     *
-     * @param order the `BidOrder` that should be added to the order Book.
-     * @return an instance of `JSealedBidAuction` whose order book contains all previously submitted `BidOrder`
-     * instances except the `order`.
-     */
-    public JSealedBidAuction<T> remove(BidOrder<T> order) {
-        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        return new JSealedBidAuction<>(ops.remove(order));
+    public CancelResult<JSealedBidAuction<T>> cancel(UUID reference) {
+        Tuple2<SealedBidAuction<T>, Option<Canceled>> result = auction.cancel(reference);
+        JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1);
+        return new CancelResult<>(jAuction, result._2);
     }
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
      *
-     * @return an instance of `JClearResult` class.
+     * @return an instance of `ClearResult` class.
      */
-    public JClearResult<JSealedBidAuction<T>> clear() {
-        SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> ops = mkAuctionLikeOps(this.auction);
-        ClearResult<SealedBidAuction<T>> results = ops.clear();
-        Option<Stream<Fill>> fills = results.fills().map(f -> toJavaStream(f, false)); // todo consider parallel=true
-        return new JClearResult<>(fills, new JSealedBidAuction<>(results.residual()));
+    public ClearResult<JSealedBidAuction<T>> clear() {
+        Tuple2<SealedBidAuction<T>, Option<Stream<Fill>>> result = auction.clear();
+        JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1);
+        return new ClearResult<>(jAuction, result._2);
     }
 
-    private JSealedBidAuction(SealedBidAuction<T> a) {
-      this.auction = a;
+    /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
+    *
+    * @param order
+    * @return
+    */
+    public InsertResult<JSealedBidAuction<T>> insert(Tuple2<UUID, Order<T>> order) {
+        Tuple2<SealedBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
+        JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1());
+        return new InsertResult<>(jAuction, result._2());
     }
 
-    private SealedBidAuctionLike.Ops<T, SealedBidAuction<T>> mkAuctionLikeOps(SealedBidAuction<T> a) {
-        return SealedBidAuction$.MODULE$.mkAuctionOps(a);
+    public JSealedBidAuction<T> withPricingPolicy(PricingPolicy<T> updated) {
+        SealedBidAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
+        return new JSealedBidAuction<>(withUpdatedPricingPolicy);
+    }
+
+    public JSealedBidAuction<T> withTickSize(Long updated) {
+        SealedBidAuction<T> withUpdatedTickSize = auction.withTickSize(updated);
+        return new JSealedBidAuction<>(withUpdatedTickSize);
+    }
+
+    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
+     *
+     * @param pricingPolicy
+     * @param tickSize
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
+        return new JSealedBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
+     *
+     * @param pricingPolicy
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tradable);
+        return new JSealedBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
+     *
+     * @param pricingPolicy
+     * @param tickSize
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
+        return new JSealedBidAuction<>(auction);
+    }
+
+    /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
+     *
+     * @param pricingPolicy
+     * @param <T>
+     * @return
+     */
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
+        return new JSealedBidAuction<>(auction);
     }
 
 }

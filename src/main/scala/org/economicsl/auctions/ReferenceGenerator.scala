@@ -13,25 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
-
-import java.util.UUID
+package org.economicsl.auctions
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+import org.economicsl.core.util.UUIDGenerator
 
-  type Buyer = UUID
 
-  type Seller = UUID
+trait ReferenceGenerator
+    extends UUIDGenerator {
 
-  /* Type alias used to denote a unique identifier for each auction participant. */
-  type Issuer = UUID
-
-  /* Type alias used to denote a unique (to the auction!) identifier for an accepted order. */
-  type Reference = UUID
-
-  /* Type alias used to denote a unique (to the auction participant!) identifier for an accepted order. */
-  type Token = UUID
+  protected def randomReference(): Reference = {
+    random()
+  }
 
 }
+
+

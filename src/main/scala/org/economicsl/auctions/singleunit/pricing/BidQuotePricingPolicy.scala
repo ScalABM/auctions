@@ -31,3 +31,12 @@ class BidQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.bidPriceQuote
 
 }
+
+
+object BidQuotePricingPolicy {
+
+  def apply[T <: Tradable]: BidQuotePricingPolicy[T] = {
+    new BidQuotePricingPolicy[T]()
+  }
+
+}

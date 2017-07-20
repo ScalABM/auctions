@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orders
 
-import org.economicsl.auctions.{Contract, OrderLike, SingleUnit}
+import org.economicsl.auctions.{Contract, SingleUnit}
 import org.economicsl.core.Tradable
 import play.api.libs.json.{JsValue, Json, Writes}
 
@@ -26,7 +26,7 @@ import play.api.libs.json.{JsValue, Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Order[+T <: Tradable] extends Contract with OrderLike[T] with SingleUnit[T]
+sealed trait Order[+T <: Tradable] extends Contract with SingleUnit[T]
 
 
 /** Companion object for the `Order` trait.

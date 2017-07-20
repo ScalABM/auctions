@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
+import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.orders.BidOrder
 import org.economicsl.core.{Quantity, Tradable}
 
@@ -23,7 +24,8 @@ import scala.collection.immutable
 
 /** Class that stores a set of single-unit `BidOrder` instances in sorted order.
   *
-  * @param orders a heap of single-unit `BidOrder` instances.
+  * @param orders
+  * @param sortedOrders a heap of single-unit `BidOrder` instances.
   * @param numberUnits the total number of `Tradablle` units demanded by the issuers of the `BidOrder` instances
   *                    contained in this `SortedBidOrder` instance. Since this `SortedBidOrders` instance contains only
   *                    single-unit `BidOrder` instances, the `numberUnits` is also equal to the total number of
@@ -32,55 +34,86 @@ import scala.collection.immutable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class SortedBidOrders[T <: Tradable] private(orders: immutable.TreeSet[BidOrder[T]], val numberUnits: Quantity) {
+final class SortedBidOrders[T <: Tradable] private(orders: Map[Reference, (Token, BidOrder[T])],
+                                                   sortedOrders: immutable.TreeSet[(Reference, (Token, BidOrder[T]))],
+                                                   val numberUnits: Quantity) {
 
   /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
-  val ordering: Ordering[BidOrder[T]] = orders.ordering
+  val ordering: Ordering[(Reference, (Token, BidOrder[T]))] = sortedOrders.ordering
 
   /** Create a new `SortedBidOrders` instance containing the additional `BidOrder`.
     *
-    * @param order a `BidOrder` that should be added.
+    * @param kv mapping between a unique identifier and an `BidOrder` that should be added.
     * @return a new `SortedBidOrder` instance that contains all of the `BidOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (order: BidOrder[T]): SortedBidOrders[T] = {
-    new SortedBidOrders(orders + order, numberUnits + order.quantity)
+  def + (kv: (Reference, (Token, BidOrder[T]))): SortedBidOrders[T] = {
+    val (_, (_, order)) = kv
+    new SortedBidOrders(orders + kv, sortedOrders + kv, numberUnits + order.quantity)
   }
 
-  /** Create a new `SortedBidOrders` instance with the given `BidOrder` removed from this `SortedBidOrders` instance.
+  /** Create a new `SortedBidOrders` instance with the given `AskOrder` removed from this `SortedBidOrders` instance.
     *
-    * @param order a `BidOrder` that should be removed.
-    * @return a new `SortedBidOrder` instance that contains all of the `BidOrder` instances of this instance and that
-    *         also contains the `order`.
+    * @param reference
+    * @return
     */
-  def - (order: BidOrder[T]): SortedBidOrders[T] = {
-    new SortedBidOrders(orders - order, numberUnits - order.quantity)
+  def - (reference: Reference): (SortedBidOrders[T], Option[(Token, BidOrder[T])]) = {
+    orders.get(reference) match {
+      case Some(kv @ (_, order)) =>
+        val remainingOrders = orders - reference
+        val remainingSortedOrders = sortedOrders - (reference -> kv)
+        val remainingUnits = numberUnits - order.quantity
+        (new SortedBidOrders(remainingOrders, remainingSortedOrders, remainingUnits), Some(kv))
+      case None =>  // attempt to remove ask order that had already been processed!
+        (this, None)
+    }
   }
 
   /** Tests whether some `BidOrder` instance is contained in this `SortedBidOrders` instance.
     *
-    * @param order the `BidOrder` instance to test for membership.
+    * @param reference the `BidOrder` instance to test for membership.
     * @return `true` if the `order` is contained in this `SortedBidOrders` instance; `false` otherwise.
     */
-  def contains(order: BidOrder[T]): Boolean = orders.contains(order)
+  def contains(reference: Reference): Boolean = orders.contains(reference)
+
+  def get(reference: Reference): Option[(Token, BidOrder[T])] = {
+    orders.get(reference)
+  }
 
   /** Selects the first `BidOrder` instance contained in this `SortedBidOrders` instance.
     *
     * @return the first `BidOrder` instance contained in this `SortedBidOrders` instance.
     */
-  def  head: BidOrder[T] = orders.head
+  def head: (Reference, (Token, BidOrder[T])) = sortedOrders.head
 
   /** Optionally selects the first `BidOrder` instance contained in this `SortedBidOrders` instance.
     *
     * @return Some `BidOrder` instance if this `SortedBidOrders` instance is non empty; `None` otherwise.
     */
-  def headOption: Option[BidOrder[T]] = orders.headOption
+  def headOption: Option[(Reference, (Token, BidOrder[T]))] = sortedOrders.headOption
 
   /** Tests whether this `SortedBidOrder` instance is empty.
     *
     * @return `true` is there is no `BidOrder` instance in this `SortedBidOrders` instance; `false` otherwise.
     */
-  def isEmpty: Boolean = orders.isEmpty
+  def isEmpty: Boolean = sortedOrders.isEmpty
+
+  def splitOffTopOrder: (SortedBidOrders[T], Option[(Reference, (Token, BidOrder[T]))]) = {
+    headOption match {
+      case Some((reference, (_, askOrder))) =>
+        val remainingOrders = orders - reference
+        val remainingUnits = numberUnits - askOrder.quantity
+        (new SortedBidOrders(remainingOrders, sortedOrders.tail, remainingUnits), headOption)
+      case None =>
+        (this, None)
+    }
+  }
+
+  def tail: SortedBidOrders[T] = {
+    val (reference, (_, order)) = sortedOrders.head
+    val remainingUnits = numberUnits - order.quantity
+    new SortedBidOrders(orders - reference, sortedOrders.tail, remainingUnits)
+  }
 
 }
 
@@ -99,7 +132,10 @@ object SortedBidOrders {
     * @return an instance of `SortedBidOrders`.
     */
   def empty[T <: Tradable](ordering: Ordering[BidOrder[T]]): SortedBidOrders[T] = {
-    new SortedBidOrders(immutable.TreeSet.empty[BidOrder[T]](ordering), Quantity(0))
+    val orders = immutable.HashMap.empty[Reference, (Token, BidOrder[T])]
+    val byBidOrder = Ordering.by[(Reference, (Token, BidOrder[T])), BidOrder[T]]{ case (_, (_, order)) => order }(ordering)
+    val sortedOrders = immutable.TreeSet.empty[(Reference, (Token, BidOrder[T]))](byBidOrder)
+    new SortedBidOrders(orders, sortedOrders, Quantity.zero)
   }
 
 }

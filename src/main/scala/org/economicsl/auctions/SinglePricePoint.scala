@@ -26,7 +26,7 @@ import scala.collection.immutable
   * @since 0.1.0
   */
 trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
-  this: Contract with OrderLike[T] =>
+  this: Contract =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
     *
@@ -56,7 +56,7 @@ object SinglePricePoint {
     * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
     * @return `Ordering` defined over `Order[T] with SinglePricePoint[T]` instances.
     */
-  def ordering[O <: Contract with OrderLike[_ <: Tradable] with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
+  def ordering[O <: Contract with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
     Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
   }
 

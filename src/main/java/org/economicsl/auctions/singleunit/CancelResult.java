@@ -13,25 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
-
-import java.util.UUID
+package org.economicsl.auctions.singleunit;
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+import org.economicsl.auctions.OrderTracker.*;
+import scala.Option;
 
-  type Buyer = UUID
 
-  type Seller = UUID
+public final class CancelResult<A> {
 
-  /* Type alias used to denote a unique identifier for each auction participant. */
-  type Issuer = UUID
+    private A auction;
+    private Option<Canceled> result;
 
-  /* Type alias used to denote a unique (to the auction!) identifier for an accepted order. */
-  type Reference = UUID
+    public CancelResult(A auction, Option<Canceled> result) {
+        this.auction = auction;
+        this.result = result;
+    }
 
-  /* Type alias used to denote a unique (to the auction participant!) identifier for an accepted order. */
-  type Token = UUID
+    public A getAuction() {
+        return auction;
+    }
+
+    public Option<Canceled> getResult() {
+        return result;
+    }
 
 }
