@@ -73,25 +73,23 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
     *         instances.
     */
-  def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = {
-    val (token, order) = kv
-    if (order.limit.value % tickSize > 0) {
+  def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = kv match {
+    case (token, order) if order.limit.value % tickSize > 0 =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTickSize(order, tickSize)
       val rejected = Rejected(timestamp, token, order, reason)
       (this, Left(rejected))
-    } else if (!order.tradable.equals(tradable)) {
+    case (token, order) if !order.tradable.equals(tradable) =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTradable(order, tradable)
       val rejected = Rejected(timestamp, token, order, reason)
       (this, Left(rejected))
-    } else {
+    case (token, order) =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reference = randomReference() // todo would prefer that these not be randomly generated!
       val accepted = Accepted(timestamp, token, order, reference)
       val updatedOrderBook = orderBook.insert(reference -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
-    }
   }
 
   def tickSize: Currency
