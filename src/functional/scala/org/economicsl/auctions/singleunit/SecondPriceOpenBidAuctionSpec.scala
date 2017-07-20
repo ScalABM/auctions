@@ -17,11 +17,11 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
+import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
+import org.economicsl.auctions._
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest
-import org.economicsl.auctions.singleunit.OrderTracking.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
-import org.economicsl.auctions._
 import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -39,7 +39,8 @@ class SecondPriceOpenBidAuctionSpec
 
   // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
   val tickSize: Currency = 1
-  val parkingSpace = ParkingSpace()
+  val uuid: UUID = UUID.randomUUID()
+  val parkingSpace = ParkingSpace(uuid)
   val secondPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
     OpenBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
   }

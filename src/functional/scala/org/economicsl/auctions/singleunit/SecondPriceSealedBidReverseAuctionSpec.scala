@@ -17,7 +17,8 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.OrderTracking.{Accepted, Rejected}
+
+import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{BidOrder, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions.{Issuer, Seller, Service, Token}

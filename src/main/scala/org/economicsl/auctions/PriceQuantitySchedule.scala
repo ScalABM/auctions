@@ -26,7 +26,7 @@ import scala.collection.GenIterable
   * @since 0.1.0
   */
 trait PriceQuantitySchedule[+T <: Tradable] {
-  this: Contract with OrderLike[T] =>
+  this: Contract =>
 
   type PricePoint = (Price, Quantity)
 
@@ -34,5 +34,7 @@ trait PriceQuantitySchedule[+T <: Tradable] {
     * of a `Tradable` at specific, discrete price-points.
     */
   def schedule: GenIterable[PricePoint]
+
+  def tradable: T
 
 }

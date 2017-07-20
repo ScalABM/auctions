@@ -1,7 +1,7 @@
 package org.economicsl.auctions;
 
 
-import org.economicsl.auctions.singleunit.AuctionParticipant.*;
+import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.singleunit.OpenBidAuction;
 import org.economicsl.auctions.singleunit.OrderGenerator;
 import org.economicsl.auctions.singleunit.orders.Order;
@@ -25,12 +25,12 @@ public class ImperativePeriodicDoubleAuction {
     public static void main(String[] args) {
 
         // define the auction mechanism...
+        GoogleStock googleStock = new GoogleStock();
         MidPointPricingPolicy<GoogleStock> midpointPricingPolicy = new MidPointPricingPolicy<>();
-        OpenBidAuction<GoogleStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy);
+        OpenBidAuction<GoogleStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy, googleStock);
 
         // generate some random order flow...
         int numberOrders = 10000;
-        GoogleStock googleStock = new GoogleStock();
         Random prng = new Random(42);
         Stream<Tuple2<UUID, Order<GoogleStock>>> orders = OrderGenerator.randomOrders(0.5, numberOrders, googleStock, prng);
 

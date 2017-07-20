@@ -16,10 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
+import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.quotes.Quote;
 import org.economicsl.auctions.quotes.QuoteRequest;
-import org.economicsl.auctions.singleunit.OrderTracking.*;
 import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;

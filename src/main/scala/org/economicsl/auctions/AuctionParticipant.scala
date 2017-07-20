@@ -15,25 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.core.Tradable
 
-
-/** Mixin trait indicating that a `Contract` is `OrderLke`.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-trait OrderLike[+T <: Tradable] {
-  this: Contract =>
-
-  /** The type of tradable for which the order has been issued. */
-  def tradable: T
-
+trait AuctionParticipant[A <: AuctionParticipant[A]]
+    extends OrderIssuer[A]
+    with OrderTracker[A] {
+  this: A =>
 }
-
-
-
-
-
-
-

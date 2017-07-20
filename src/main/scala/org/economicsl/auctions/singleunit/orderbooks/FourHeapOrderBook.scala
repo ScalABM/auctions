@@ -38,7 +38,7 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
                                                      val unMatchedOrders: UnMatchedOrders[T]) {
 
   /** If the constructor for `FourHeapOrderBook` becomes public, then this should be changed to require. */
-  assert(orderBookInvariantsHold, ???)
+  assert(orderBookInvariantsHold, "FourHeapOrderBook invariants failed!")
 
   /** The ask price quote is the price that a buyer would need to exceed in order for its bid to be matched had the
     * auction cleared at the time the quote was issued.

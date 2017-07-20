@@ -25,6 +25,9 @@ import org.economicsl.core.{Currency, Tradable}
   *
   * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidAuction` must be for the same
   *           type of `Tradable`.
+  * @note `SealedBidAuction` is an abstract class rather than a trait in order to facilitate Java interop. Specifically
+  *      abstract class implementation allows Java methods to access the methods defined on the `SealedBidAuction`
+  *      companion object from a static context.
   * @author davidrpugh
   * @since 0.1.0
   */
@@ -73,17 +76,17 @@ object SealedBidAuction {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
     def withPricingPolicy(updated: PricingPolicy[T]): SealedBidAuction[T] = {
-      new WithDiscriminatoryClearingPolicy(orderBook, updated, tickSize, tradable)
+      new WithDiscriminatoryClearingPolicy[T](orderBook, updated, tickSize, tradable)
     }
 
     /** Returns an auction of type `A` with a particular tick size. */
     def withTickSize(updated: Currency): SealedBidAuction[T] = {
-      new WithDiscriminatoryClearingPolicy(orderBook, pricingPolicy, updated, tradable)
+      new WithDiscriminatoryClearingPolicy[T](orderBook, pricingPolicy, updated, tradable)
     }
 
     /** Factory method used by sub-classes to create an `Auction` of type `A`. */
     protected def withOrderBook(updated: FourHeapOrderBook[T]): SealedBidAuction[T] = {
-      new WithDiscriminatoryClearingPolicy(updated, pricingPolicy, tickSize, tradable)
+      new WithDiscriminatoryClearingPolicy[T](updated, pricingPolicy, tickSize, tradable)
     }
 
   }
@@ -99,17 +102,17 @@ object SealedBidAuction {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
     def withPricingPolicy(updated: PricingPolicy[T]): SealedBidAuction[T] = {
-      new WithUniformClearingPolicy(orderBook, updated, tickSize, tradable)
+      new WithUniformClearingPolicy[T](orderBook, updated, tickSize, tradable)
     }
 
     /** Returns an auction of type `A` with a particular tick size. */
     def withTickSize(updated: Currency): SealedBidAuction[T] = {
-      new WithUniformClearingPolicy(orderBook, pricingPolicy, updated, tradable)
+      new WithUniformClearingPolicy[T](orderBook, pricingPolicy, updated, tradable)
     }
 
     /** Factory method used by sub-classes to create an `Auction` of type `A`. */
     protected def withOrderBook(updated: FourHeapOrderBook[T]): SealedBidAuction[T] = {
-      new WithUniformClearingPolicy(updated, pricingPolicy, tickSize, tradable)
+      new WithUniformClearingPolicy[T](updated, pricingPolicy, tickSize, tradable)
     }
 
   }

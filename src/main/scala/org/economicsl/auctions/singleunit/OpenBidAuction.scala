@@ -26,6 +26,9 @@ import org.economicsl.core.{Currency, Tradable}
   *
   * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
   *           type of `Tradable`.
+  * @note `OpenBidAuction` is an abstract class rather than a trait in order to facilitate Java interop. Specifically
+  *      abstract class implementation allows Java methods to access the methods defined on the `OpenBidAuction`
+  *      companion object from a static context.
   * @author davidrpugh
   * @since 0.1.0
   */

@@ -40,7 +40,8 @@ class FirstPriceOpenBidAuctionSpec
 
   // suppose that there are lots of bidders
   val numberBidOrders = 10000
-  val parkingSpace = ParkingSpace()
+  val uuid: UUID = UUID.randomUUID()
+  val parkingSpace = ParkingSpace(uuid)
   val prng: Random = new Random(42)
   val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
