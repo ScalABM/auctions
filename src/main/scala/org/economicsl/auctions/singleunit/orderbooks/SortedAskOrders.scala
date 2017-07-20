@@ -47,8 +47,9 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     * @return a new `SortedAskOrder` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (Reference, (Token, AskOrder[T]))): SortedAskOrders[T] = {
-    new SortedAskOrders(orders + kv, sortedOrders + kv, numberUnits + kv._2._2.quantity)
+  def + (kv: (Reference, (Token, AskOrder[T]))): SortedAskOrders[T] = kv match {
+    case (_, (_, order)) =>
+      new SortedAskOrders(orders + kv, sortedOrders + kv, numberUnits + order.quantity)
   }
 
   /** Create a new `SortedAskOrders` instance with the given `AskOrder` removed from this `SortedAskOrders` instance.
