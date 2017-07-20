@@ -24,7 +24,7 @@ import org.economicsl.core.{Quantity, Tradable}
   * @since 0.1.0
   */
 trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
-  this: Contract with OrderLike[T] =>
+  this: Contract =>
 
   val quantity: Quantity = Quantity.single
 
@@ -45,7 +45,7 @@ object SingleUnit {
     * @tparam O the sub-type of `Contract with OrderLike[_] with SingleUnit[_]` that is being ordered.
     * @return `Ordering` defined over `Contract with OrderLike[_] with SingleUnit[_]` instances.
     */
-  def ordering[O <: Contract with OrderLike[_ <: Tradable] with SingleUnit[_ <: Tradable]]: Ordering[O] = {
+  def ordering[O <: Contract with SingleUnit[_ <: Tradable]]: Ordering[O] = {
     SinglePricePoint.ordering
   }
 

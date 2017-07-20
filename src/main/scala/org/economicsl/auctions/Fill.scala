@@ -39,8 +39,8 @@ object Fill {
     Fill(issuer, counterparty, price, Quantity(1), tradable)
   }
 
-  def fromOrders[T <: Tradable](askOrder: Contract with OrderLike[T] with SinglePricePoint[T],
-                                bidOrder: Contract with OrderLike[T] with SinglePricePoint[T],
+  def fromOrders[T <: Tradable](askOrder: Contract with SinglePricePoint[T],
+                                bidOrder: Contract with SinglePricePoint[T],
                                 price: Price): Fill = {
     // checking individual rationality constraints!
     require(askOrder.limit <= price); require(price <= bidOrder.limit)
