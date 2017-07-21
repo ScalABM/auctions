@@ -25,17 +25,24 @@ trait OrderTracker[A <: OrderTracker[A]] {
 
   import OrderTracker._
 
-  def trackOrders(response: Either[Rejected, Accepted]): A = response match {
-    case Left(_) =>
-      this  // not sure what default behavior should be when response indicates order was rejected...
-    case Right(accepted) =>
-      val updatedOutstandingOrders = outstandingOrders + (accepted.token -> (accepted.reference -> accepted.order))
-      withOutstandingOrders(updatedOutstandingOrders)
+  final def trackOrders(accepted: Accepted): A = {
+      val updated = outstandingOrders + accepted.kv
+      withOutstandingOrders(updated)
   }
 
-  def trackOrders(canceled: Canceled): A = {
-    val updatedOutstandingOrders = outstandingOrders - canceled.token
-    withOutstandingOrders(updatedOutstandingOrders)
+  /**
+    *
+    * @param rejected
+    * @return
+    * @note sub-classes should almost certainly override this method and call super.
+    */
+  def trackOrders(rejected: Rejected): A = {
+    this  // todo is this the most appropriate default behavior?
+  }
+
+  final def trackOrders(canceled: Canceled): A = {
+    val updated = outstandingOrders - canceled.token
+    withOutstandingOrders(updated)
   }
 
   /** Factory method used by sub-classes to create an `A`. */
@@ -57,7 +64,11 @@ object OrderTracker {
     * @author davidrpugh
     * @since 0.2.0
     */
-  final case class Accepted(timestamp: Timestamp, token: Token, order: Contract, reference: Reference)
+  final case class Accepted(timestamp: Timestamp, token: Token, order: Contract, reference: Reference) {
+
+    val kv: (Token, (Reference, Contract)) = token -> (reference -> order)
+
+  }
 
 
   /** Base trait for all canceled messages.

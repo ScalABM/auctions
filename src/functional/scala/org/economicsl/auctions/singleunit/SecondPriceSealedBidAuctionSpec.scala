@@ -18,9 +18,9 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
+import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
-import org.economicsl.auctions._
 import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -62,7 +62,7 @@ class SecondPriceSealedBidAuctionSpec
 
       (updatedAuction, result #:: results)
   }
-  val (clearedAuction, fills): (SealedBidAuction[ParkingSpace], Option[Stream[Fill]]) = withBidOrders.clear
+  val (clearedAuction, fills): (SealedBidAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 

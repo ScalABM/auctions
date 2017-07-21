@@ -28,3 +28,4 @@ import org.economicsl.core.Tradable
 case class Service() extends Tradable {
   val uuid: UUID = UUID.randomUUID()
 }
+

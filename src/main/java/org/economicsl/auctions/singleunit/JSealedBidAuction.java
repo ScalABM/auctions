@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Fill;
+import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
@@ -58,7 +58,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @return an instance of `ClearResult` class.
      */
     public ClearResult<JSealedBidAuction<T>> clear() {
-        Tuple2<SealedBidAuction<T>, Option<Stream<Fill>>> result = auction.clear();
+        Tuple2<SealedBidAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
         JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1);
         return new ClearResult<>(jAuction, result._2);
     }

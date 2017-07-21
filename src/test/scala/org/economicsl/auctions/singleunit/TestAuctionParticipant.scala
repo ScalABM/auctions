@@ -17,26 +17,23 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 
-import scala.collection.immutable.HashMap
 
-
-class TestOrderTracker private(
-  protected val outstandingOrders: Map[Token, (Reference, Contract)])
-    extends OrderTracker[TestOrderTracker] {
+class TestAuctionParticipant private(val issuer: Issuer, val outstandingOrders: Map[Token, (Reference, Contract)])
+    extends AuctionParticipant[TestAuctionParticipant] {
 
   /** Factory method used by sub-classes to create an `A`. */
-  protected def withOutstandingOrders(updated: Map[Token, (Reference, Contract)]): TestOrderTracker = {
-    new TestOrderTracker(updated)
+  protected def withOutstandingOrders(updated: Map[Token, (Reference, Contract)]): TestAuctionParticipant = {
+    new TestAuctionParticipant(issuer, updated)
   }
 
 }
 
 
-object TestOrderTracker {
+object TestAuctionParticipant {
 
-  def withNoOutstandingOrder: TestOrderTracker = {
-    val emptyOutstandingOrders = HashMap.empty[Token, (Reference, Contract)]
-    new TestOrderTracker(emptyOutstandingOrders)
+  def withNoOutstandingOrders(issuer: Issuer): TestAuctionParticipant = {
+    val noOutstandingOrders = Map.empty[Token, (Reference, Contract)]
+    new TestAuctionParticipant(issuer, noOutstandingOrders)
   }
 
 }

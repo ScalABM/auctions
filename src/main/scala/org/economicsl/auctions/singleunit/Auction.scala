@@ -29,7 +29,8 @@ import org.economicsl.core.{Currency, Tradable}
   * @tparam A
   * @note Note the use of F-bounded polymorphism over Type classes. We developed an alternative implementation using the
   *       Type class pattern that was quite elegant, however Type classes can not be used directly from Java. In order
-  *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers.
+  *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
+  *       each auction implementation.
   */
 trait Auction[T <: Tradable, A <: Auction[T, A]]
     extends ReferenceGenerator
@@ -63,7 +64,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
     *         `AskOrder` and `BidOrder` instances.
     */
-  def clear: (A, Option[Stream[Fill]])
+  def clear: (A, Option[Stream[SpotContract]])
 
   /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
     *

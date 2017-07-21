@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.quotes.{PriceQuote, PriceQuoteRequest}
+import org.economicsl.auctions.quotes.{Quote, QuoteRequest}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -36,7 +36,7 @@ abstract class OpenBidAuction[T <: Tradable]
     extends Auction[T, OpenBidAuction[T]] {
   this: OpenBidAuction[T] =>
 
-  def receive(request: PriceQuoteRequest[T]): PriceQuote = {
+  def receive(request: QuoteRequest[T]): Quote = {
     request.query(orderBook)
   }
 

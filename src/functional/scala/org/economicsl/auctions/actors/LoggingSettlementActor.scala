@@ -13,17 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.actors
 
-import org.economicsl.core.securities.Stock
+import akka.actor.{Actor, DiagnosticActorLogging}
+import org.economicsl.auctions.SpotContract
 
 
-/**
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-case class AppleStock() extends Stock {
-  val ticker: String = "APPL"
+class LoggingSettlementActor
+    extends Actor
+    with DiagnosticActorLogging {
+
+  def receive: Receive = {
+    case contract: SpotContract => log.info(contract.toString)
+  }
+
 }
-

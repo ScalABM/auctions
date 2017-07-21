@@ -16,10 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Fill;
 import org.economicsl.auctions.OrderTracker.*;
-import org.economicsl.auctions.quotes.PriceQuote;
-import org.economicsl.auctions.quotes.PriceQuoteRequest;
+import org.economicsl.auctions.SpotContract;
+import org.economicsl.auctions.quotes.Quote;
+import org.economicsl.auctions.quotes.QuoteRequest;
 import org.economicsl.auctions.singleunit.orders.Order;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -31,7 +31,7 @@ import scala.util.Either;
 import java.util.UUID;
 
 
-/** Abstract base class for all sealed-bid auction mechanisms.
+/**
  *
  * @param <T>
  */
@@ -60,7 +60,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return an instance of `ClearResult` class.
      */
     public ClearResult<JOpenBidAuction<T>> clear() {
-        Tuple2<OpenBidAuction<T>, Option<Stream<Fill>>> result = auction.clear();
+        Tuple2<OpenBidAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
         return new ClearResult<>(jAuction, result._2);
     }
@@ -76,7 +76,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
         return new InsertResult<>(jAuction, result._2());
     }
 
-    public PriceQuote receive(PriceQuoteRequest<T> request) {
+    public Quote receive(QuoteRequest<T> request) {
         return auction.receive(request);
     }
 

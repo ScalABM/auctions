@@ -31,44 +31,44 @@ import scala.util.Random
   */
 object ContinuousDoubleAuction extends App {
 
-  val google: GoogleStock = GoogleStock()
-  val pricingRule = new MidPointPricingPolicy[GoogleStock]
+  val google: TestStock = TestStock()
+  val pricingRule = new MidPointPricingPolicy[TestStock]
   val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, google)
 
   // generate a very large stream of random orders...
   type OrderFlow[T <: Tradable] = Stream[(Token, Order[T])]
   val prng = new Random(42)
-  val orders: OrderFlow[GoogleStock] = OrderGenerator.randomOrders(0.5)(1000000, google, prng)
+  val orders: OrderFlow[TestStock] = OrderGenerator.randomOrders(0.5)(1000000, google, prng)
 
   // A lazy, tail-recursive implementation of a continuous double auction!
-  def continuous[T <: Tradable, A <: Auction[T, A]](auction: A)(incoming: OrderFlow[T]): Stream[(A, Option[Stream[Fill]])] = {
+  def continuous[T <: Tradable, A <: Auction[T, A]](auction: A)(incoming: OrderFlow[T]): Stream[(A, Option[Stream[SpotContract]])] = {
     @annotation.tailrec
-    def loop(da: A, in: OrderFlow[T], out: Stream[(A, Option[Stream[Fill]])]): Stream[(A, Option[Stream[Fill]])] = in match {
+    def loop(da: A, in: OrderFlow[T], out: Stream[(A, Option[Stream[SpotContract]])]): Stream[(A, Option[Stream[SpotContract]])] = in match {
       case Stream.Empty => out
       case head #:: tail =>
         val (updatedAuction, _) = da.insert(head)
         val results @ (residual, _) = updatedAuction.clear
         loop(residual, tail, results #:: out)
     }
-    loop(auction, incoming, Stream.empty[(A, Option[Stream[Fill]])])
+    loop(auction, incoming, Stream.empty[(A, Option[Stream[SpotContract]])])
   }
 
   /** Stream of clear results contains not only the individual filled order streams, but also the residual auction
     * containing the unmatched orders following each clear.  Basically the entire auction history is stored in the
     * stream of clear results.
     */
-  val results = continuous[GoogleStock, OpenBidAuction[GoogleStock]](withDiscriminatoryPricing)(orders)
+  val results = continuous[TestStock, OpenBidAuction[TestStock]](withDiscriminatoryPricing)(orders)
 
   val prices: Stream[Price] = results.flatMap{ case (_, fills) =>
     fills.flatMap(_.headOption).map(_.price)
   }
 
-  val askPriceQuotes: Stream[PriceQuote] = results.map{ case (auction, _) =>
-    auction.receive(AskPriceQuoteRequest[GoogleStock](???))
+  val askPriceQuotes: Stream[Quote] = results.map{ case (auction, _) =>
+    auction.receive(AskPriceQuoteRequest[TestStock](???))
   }
 
-  val bidPriceQuotes: Stream[PriceQuote] = results.map{ case (auction, _) =>
-    auction.receive(BidPriceQuoteRequest[GoogleStock](???))
+  val bidPriceQuotes: Stream[Quote] = results.map{ case (auction, _) =>
+    auction.receive(BidPriceQuoteRequest[TestStock](???))
   }
 
   // print off the first 10 prices...

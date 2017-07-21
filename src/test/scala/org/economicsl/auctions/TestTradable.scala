@@ -30,3 +30,4 @@ case class TestTradable() extends Tradable {
   val uuid: UUID = UUID.randomUUID()
 
 }
+

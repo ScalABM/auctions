@@ -15,15 +15,10 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.core.securities.Stock
 
-
-/**
+/** Package documentation for Actor-based auction implementations.
   *
   * @author davidrpugh
-  * @since 0.1.0
+  * @since 0.2.0
   */
-case class GoogleStock() extends Stock {
-  val ticker: String = "GOOG"
-}
-
+package object actors
