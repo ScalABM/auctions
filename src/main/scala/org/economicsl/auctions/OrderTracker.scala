@@ -25,14 +25,22 @@ trait OrderTracker[A <: OrderTracker[A]] {
 
   import OrderTracker._
 
-  def trackOrders(accepted: Accepted): A = {
+  final def trackOrders(accepted: Accepted): A = {
       val updated = outstandingOrders + accepted.kv
       withOutstandingOrders(updated)
   }
 
-  def trackOrders(rejected: Rejected): A
+  /**
+    *
+    * @param rejected
+    * @return
+    * @note sub-classes should almost certainly override this method and call super.
+    */
+  def trackOrders(rejected: Rejected): A = {
+    this  // todo is this the most appropriate default behavior?
+  }
 
-  def trackOrders(canceled: Canceled): A = {
+  final def trackOrders(canceled: Canceled): A = {
     val updated = outstandingOrders - canceled.token
     withOutstandingOrders(updated)
   }
