@@ -25,29 +25,29 @@ public class ImperativePeriodicDoubleAuction {
     public static void main(String[] args) {
 
         // define the auction mechanism...
-        GoogleStock googleStock = new GoogleStock();
-        MidPointPricingPolicy<GoogleStock> midpointPricingPolicy = new MidPointPricingPolicy<>();
-        OpenBidAuction<GoogleStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy, googleStock);
+        TestStock googleStock = new TestStock();
+        MidPointPricingPolicy<TestStock> midpointPricingPolicy = new MidPointPricingPolicy<>();
+        OpenBidAuction<TestStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy, googleStock);
 
         // generate some random order flow...
         int numberOrders = 10000;
         Random prng = new Random(42);
-        Stream<Tuple2<UUID, Order<GoogleStock>>> orders = OrderGenerator.randomOrders(0.5, numberOrders, googleStock, prng);
+        Stream<Tuple2<UUID, Order<TestStock>>> orders = OrderGenerator.randomOrders(0.5, numberOrders, googleStock, prng);
 
         List<Either<Rejected, Accepted>> insertResults = new ArrayList<>();
 
-        for (Tuple2<UUID, Order<GoogleStock>> order:JavaConverters.seqAsJavaList(orders)) {
-            Tuple2<OpenBidAuction<GoogleStock>, Either<Rejected, Accepted>> insertResult = doubleAuction.insert(order);
+        for (Tuple2<UUID, Order<TestStock>> order:JavaConverters.seqAsJavaList(orders)) {
+            Tuple2<OpenBidAuction<TestStock>, Either<Rejected, Accepted>> insertResult = doubleAuction.insert(order);
             doubleAuction = insertResult._1();
             insertResults.add(insertResult._2());
         }
 
         // clear the auction...
-        Tuple2<OpenBidAuction<GoogleStock>, Option<Stream<Fill>>> results = doubleAuction.clear();
-        List<Fill> fills = JavaConverters.seqAsJavaList(results._2().get());
+        Tuple2<OpenBidAuction<TestStock>, Option<Stream<SpotContract>>> results = doubleAuction.clear();
+        List<SpotContract> fills = JavaConverters.seqAsJavaList(results._2().get());
 
         // print the results to console...
-        for (Fill fill:fills) {
+        for (SpotContract fill:fills) {
             System.out.println(fill);
         }
 
