@@ -15,10 +15,14 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.{Actor, DiagnosticActorLogging}
-import org.economicsl.auctions.SpotContract
+import akka.actor.DiagnosticActorLogging
+import org.economicsl.auctions.Contract
 
 
+/** Stub `SettlementActor` that logs contracts.
+  *
+  * @todo this Actor should be moved down to the esl-settlement.
+  */
 class LoggingSettlementActor
     extends StackableActor
     with DiagnosticActorLogging {
@@ -26,7 +30,7 @@ class LoggingSettlementActor
   wrappedBecome(contractLogger)
 
   def contractLogger: Receive = {
-    case contract: SpotContract => log.info(contract.toString)
+    case contract: Contract => log.info(contract.toString)
   }
 
 }
