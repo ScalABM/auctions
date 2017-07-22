@@ -20,10 +20,12 @@ import org.economicsl.auctions.SpotContract
 
 
 class LoggingSettlementActor
-    extends Actor
+    extends StackableActor
     with DiagnosticActorLogging {
 
-  def receive: Receive = {
+  wrappedBecome(contractLogger)
+
+  def contractLogger: Receive = {
     case contract: SpotContract => log.info(contract.toString)
   }
 
