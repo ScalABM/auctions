@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.quotes._
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder$
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.economicsl.core.{Price, Tradable}
 

@@ -21,7 +21,7 @@ import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.{Currency, Tradable}
 
 
-/** Base trait for all "sealed-bid" auction mechanisms.
+/** Base class for all "sealed-bid" auction mechanisms.
   *
   * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidAuction` must be for the same
   *           type of `Tradable`.

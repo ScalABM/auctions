@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.{TestStock, Token}
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder$
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.scalatest.{FlatSpec, Matchers}
 

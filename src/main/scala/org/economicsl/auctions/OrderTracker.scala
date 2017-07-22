@@ -25,9 +25,16 @@ trait OrderTracker[A <: OrderTracker[A]] {
 
   import OrderTracker._
 
-  final def trackOrders(accepted: Accepted): A = {
+  val outstandingOrders: Map[Token, (Reference, Contract)]
+
+  def trackOrders(accepted: Accepted): A = {
       val updated = outstandingOrders + accepted.kv
       withOutstandingOrders(updated)
+  }
+
+  def trackOrders(canceled: Canceled): A = {
+    val updated = outstandingOrders - canceled.token
+    withOutstandingOrders(updated)
   }
 
   /**
@@ -40,15 +47,8 @@ trait OrderTracker[A <: OrderTracker[A]] {
     this  // todo is this the most appropriate default behavior?
   }
 
-  final def trackOrders(canceled: Canceled): A = {
-    val updated = outstandingOrders - canceled.token
-    withOutstandingOrders(updated)
-  }
-
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOutstandingOrders(updated: Map[Token, (Reference, Contract)]): A
-
-  protected val outstandingOrders: Map[Token, (Reference, Contract)]
 
 }
 

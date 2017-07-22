@@ -15,15 +15,24 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.Auction.AuctionProtocol
 import org.economicsl.auctions._
+import org.economicsl.core.Tradable
 
 
-class TestAuctionParticipant private(val issuer: Issuer, val outstandingOrders: Map[Token, (Reference, Contract)])
+class TestAuctionParticipant private(
+  val issuer: Issuer,
+  protected val auctions: Map[Tradable, AuctionProtocol],
+  val outstandingOrders: Map[Token, (Reference, Contract)])
     extends AuctionParticipant[TestAuctionParticipant] {
+
+  protected def withAuctions(updated: Map[Tradable, AuctionProtocol]): TestAuctionParticipant = {
+    new TestAuctionParticipant(issuer, updated, outstandingOrders)
+  }
 
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOutstandingOrders(updated: Map[Token, (Reference, Contract)]): TestAuctionParticipant = {
-    new TestAuctionParticipant(issuer, updated)
+    new TestAuctionParticipant(issuer, auctions, updated)
   }
 
 }
@@ -31,9 +40,10 @@ class TestAuctionParticipant private(val issuer: Issuer, val outstandingOrders: 
 
 object TestAuctionParticipant {
 
-  def withNoOutstandingOrders(issuer: Issuer): TestAuctionParticipant = {
-    val noOutstandingOrders = Map.empty[Token, (Reference, Contract)]
-    new TestAuctionParticipant(issuer, noOutstandingOrders)
+  def apply(issuer: Issuer): TestAuctionParticipant = {
+    val emptyAuctions = Map.empty[Tradable, AuctionProtocol]
+    val emptyOutstandingOrders = Map.empty[Token, (Reference, Contract)]
+    new TestAuctionParticipant(issuer, emptyAuctions, emptyOutstandingOrders)
   }
 
 }

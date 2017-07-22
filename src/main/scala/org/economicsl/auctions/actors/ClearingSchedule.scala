@@ -79,7 +79,7 @@ trait BidderInActivityClearingSchedule[T <: Tradable, O <: Order[T], A <: Auctio
   }
 
   override def receive: Receive = {
-    case message @ ReceiveTimeout =>
+    case ReceiveTimeout =>
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, contracts) = auction.clear
@@ -90,7 +90,7 @@ trait BidderInActivityClearingSchedule[T <: Tradable, O <: Order[T], A <: Auctio
               // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
               // location of the SettlementActor (and hence without knowledge of the ActorRef).
       }
-      super.receive(message)
+      super.receive(ReceiveTimeout)
     case message =>
       super.receive(message)
   }
@@ -117,7 +117,7 @@ trait PeriodicClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, 
   }
 
   override def receive: Receive = {
-    case message @ ClearRequest =>
+    case ClearRequest =>
       settlementService match {
         case Some(actorRef) =>
           val (updatedAuction, contracts) = auction.clear
@@ -129,13 +129,40 @@ trait PeriodicClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, 
         // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
         // location of the SettlementActor (and hence without knowledge of the ActorRef).
       }
-      super.receive(message)
+      super.receive(ClearRequest)
     case message =>
       super.receive(message)
   }
 
   protected def scheduleClear(interval: FiniteDuration)(implicit ec: ExecutionContext): Unit = {
     context.system.scheduler.scheduleOnce(interval, self, ClearRequest)(ec)
+  }
+
+}
+
+
+/** Schedules a clearing event in response to a specific request. */
+trait OnDemandClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
+  extends ClearingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
+
+  import ClearingSchedule._
+
+  override def receive: Receive = {
+    case ClearRequest =>
+      settlementService match {
+        case Some(actorRef) =>
+          val (updatedAuction, contracts) = auction.clear
+          contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
+          auction = updatedAuction
+        case None =>
+          ??? // todo how to handle this case?
+        // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
+        // location of the SettlementActor (and hence without knowledge of the ActorRef).
+      }
+      super.receive(ClearRequest)
+    case message =>
+      super.receive(message)
   }
 
 }
