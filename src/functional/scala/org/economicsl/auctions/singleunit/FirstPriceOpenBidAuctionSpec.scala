@@ -21,6 +21,7 @@ import org.economicsl.auctions.quotes.AskPriceQuoteRequest
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
+import org.economicsl.auctions.participants.{OrderGenerator, Token, TokenGenerator}
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 

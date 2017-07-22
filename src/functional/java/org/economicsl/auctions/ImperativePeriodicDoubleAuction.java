@@ -1,9 +1,9 @@
 package org.economicsl.auctions;
 
 
-import org.economicsl.auctions.OrderTracker.*;
+import org.economicsl.auctions.participants.OrderGenerator;
+import org.economicsl.auctions.participants.OrderTracker.*;
 import org.economicsl.auctions.singleunit.OpenBidSingleUnitAuction;
-import org.economicsl.auctions.singleunit.OrderGenerator;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy;
 
