@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import org.economicsl.auctions.AuctionParticipant
+import org.economicsl.auctions.participants.AuctionParticipant
 
 
 /** Mixin trait providing `OrderTracking` behavior.
@@ -27,7 +27,7 @@ trait OrderTrackingActor[A <: AuctionParticipant[A]]
     extends StackableActor {
   this: AuctionParticipantActor[A] =>
 
-  import org.economicsl.auctions.OrderTracker._
+  import org.economicsl.auctions.participants.OrderTracker._
 
   /** Forward received messages to `AuctionParticipant` for processing.
     *

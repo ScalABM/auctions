@@ -1,5 +1,5 @@
 /*
-Copyright 2016 David R. Pugh
+Copyright (c) 2017 KAPSARC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,13 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.actors
+package org.economicsl.auctions
 
-import org.economicsl.auctions.participants.AuctionParticipant
+import java.util.UUID
 
 
-trait OrderIssuingActor[A <: AuctionParticipant[A]]
-    extends StackableActor {
-  this: AuctionParticipantActor[A] =>
+/** Traits defining an interface for all auction participants.
+  *
+  * The auctions library should be agnostic about auction participant behavior and only define a thin
+  * interface that all implementations of auction participants must satisfy.
+  *
+  * @since 0.2.0
+  */
+package object participants {
+
+  /* Type alias used to denote a unique (to the auction participant!) identifier for an accepted order. */
+  type Token = UUID
 
 }

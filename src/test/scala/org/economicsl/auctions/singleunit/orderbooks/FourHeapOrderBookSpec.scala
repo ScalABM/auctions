@@ -15,8 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.singleunit.OrderGenerator
-import org.economicsl.auctions.{Reference, ReferenceGenerator, TestTradable, Token}
+import org.economicsl.auctions.participants.{OrderGenerator, Token}
+import org.economicsl.auctions.{Reference, ReferenceGenerator, TestTradable}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.core.Quantity
 import org.scalatest.{FlatSpec, Matchers}

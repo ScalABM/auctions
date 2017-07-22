@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.OrderTracker.*;
+import org.economicsl.auctions.participants.OrderTracker.*;
 import scala.util.Either;
 
 

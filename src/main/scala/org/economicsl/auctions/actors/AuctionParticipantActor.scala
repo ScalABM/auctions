@@ -17,7 +17,8 @@ package org.economicsl.auctions.actors
 
 
 import akka.actor.ActorRef
-import org.economicsl.auctions.{Auction, AuctionParticipant}
+import org.economicsl.auctions.Auction
+import org.economicsl.auctions.participants.AuctionParticipant
 import org.economicsl.core.Tradable
 
 

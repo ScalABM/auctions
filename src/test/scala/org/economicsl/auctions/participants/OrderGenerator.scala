@@ -13,11 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.participants
 
 import java.util.UUID
 
-import org.economicsl.auctions.{Token, TokenGenerator}
 import org.economicsl.auctions.singleunit.orders._
 import org.economicsl.core.{Price, Tradable}
 

@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.participants.Token
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -35,7 +36,7 @@ trait SingleUnitAuction[T <: Tradable, +A <: SingleUnitAuction[T, A]]
     extends Auction[T, SingleUnitOrder[T], A] {
   this: A =>
 
-  import OrderTracker._
+  import org.economicsl.auctions.participants.OrderTracker._
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.

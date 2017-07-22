@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.{Reference, Token}
+import org.economicsl.auctions.Reference
+import org.economicsl.auctions.participants.Token
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
 import org.economicsl.core.{Quantity, Tradable}
 

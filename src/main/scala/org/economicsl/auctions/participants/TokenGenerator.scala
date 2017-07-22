@@ -13,13 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.participants
+
+import org.economicsl.core.util.UUIDGenerator
 
 
-trait OrderIssuer[A <: OrderIssuer[A]]
-  extends TokenGenerator {
-  this: A =>
+trait TokenGenerator
+  extends UUIDGenerator {
 
-  def issuer: Issuer
+  protected def randomToken(): Token = {
+    random()
+  }
 
 }

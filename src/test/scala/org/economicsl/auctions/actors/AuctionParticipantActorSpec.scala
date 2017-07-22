@@ -19,8 +19,9 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
-import org.economicsl.auctions.OrderTracker.{Accepted, CanceledByIssuer}
-import org.economicsl.auctions.{ReferenceGenerator, TestTradable, TokenGenerator}
+import org.economicsl.auctions.participants.OrderTracker.{Accepted, CanceledByIssuer}
+import org.economicsl.auctions.participants.TokenGenerator
+import org.economicsl.auctions.{ReferenceGenerator, TestTradable}
 import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
 import org.economicsl.core.Price
 import org.economicsl.core.util.Timestamper

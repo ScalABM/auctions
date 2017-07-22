@@ -17,7 +17,7 @@ package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
 import org.economicsl.auctions.Issuer
-import org.economicsl.auctions.singleunit.TestAuctionParticipant
+import org.economicsl.auctions.participants.TestAuctionParticipant
 import org.economicsl.core.Tradable
 
 

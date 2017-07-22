@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.participants.Token
 import org.economicsl.core.util.Timestamper
 import org.economicsl.core.{Currency, Tradable}
 
@@ -33,7 +34,7 @@ trait Auction[T <: Tradable, O <: Order[T], +A <: Auction[T, O, A]]
     with Timestamper {
   this: A =>
 
-  import OrderTracker._
+  import org.economicsl.auctions.participants.OrderTracker._
 
   def cancel(reference: Reference): (A, Option[Canceled])
 
