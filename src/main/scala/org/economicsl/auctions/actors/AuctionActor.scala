@@ -2,19 +2,15 @@ package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
-import org.economicsl.auctions.{Reference, Token}
-import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions._
 import org.economicsl.core.Tradable
 
 
-
-
-trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
+trait AuctionActor[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
     extends StackableActor {
 
   import AuctionActor._
-  import AuctionParticipantActor._
+  import Auction._
 
   var auction: A
 
@@ -30,16 +26,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   }
 
   protected def processOrders: Receive = {
-    case message @ InsertOrder(token, order: Order[T]) =>
-      val (updatedAuction, response) = auction.insert(token -> order)
-      response match {
-        case Right(accepted) =>
-          sender() ! accepted
-          auction = updatedAuction
-        case Left(rejected) =>
-          sender() ! rejected
-      }
-      super.receive(message)
     case CancelOrder(reference) =>
       val (updatedAuction, cancelResult) = auction.cancel(reference)
       cancelResult match {
@@ -88,7 +74,7 @@ object AuctionActor {
 
   final case class CancelOrder(reference: Reference)
 
-  final case class InsertOrder[T <: Tradable](token: Token, order: Order[T])
+  final case class InsertOrder[+T <: Tradable](token: Token, order: Order[T])
 
   final case class DeregisterAuctionParticipant(participant: ActorRef)
 

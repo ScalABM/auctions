@@ -47,8 +47,8 @@ class FirstPriceOpenBidAuctionSpec
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
   // seller uses a first-priced, open bid auction...
-  val firstPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
-    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
+  val firstPriceOpenBidAuction: OpenBidSingleUnitAuction[ParkingSpace] = {
+    OpenBidSingleUnitAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
   }
 
   // Seller that must sell at any positive price
@@ -58,7 +58,7 @@ class FirstPriceOpenBidAuctionSpec
   val (withReservationAskOrder, _) = firstPriceOpenBidAuction.insert(reservation)
 
   // withBidOrders will include all accepted bids (this is trivially parallel..)
-  val (withBidOrders, _) = insert[ParkingSpace, OpenBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
+  val (withBidOrders, _) = insert[ParkingSpace, OpenBidSingleUnitAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
   val (clearedAuction, clearResults) = withBidOrders.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {

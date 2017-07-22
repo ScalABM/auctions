@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
-import org.economicsl.auctions.singleunit.orders.{BidOrder, LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitBidOrder$, LimitAskOrder, LimitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
 import org.economicsl.auctions.{Issuer, Seller, Service, Token}
 import org.economicsl.core.Price
@@ -38,14 +38,14 @@ class FirstPriceSealedBidReverseAuctionSpec
 
   // reverse auction to procure a service at lowest possible cost...
   val service = Service()
-  val firstPriceSealedBidReverseAuction: SealedBidAuction[Service] = {
-    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service], service)
+  val firstPriceSealedBidReverseAuction: SealedBidSingleUnitAuction[Service] = {
+    SealedBidSingleUnitAuction.withUniformClearingPolicy(BidQuotePricingPolicy[Service], service)
   }
 
   // buyer is willing to pay anything...
   val buyer: Issuer = UUID.randomUUID()
   val buyersToken: Token = UUID.randomUUID()
-  val reservationBidOrder: (Token, BidOrder[Service]) = (buyersToken, LimitBidOrder(buyer, Price.MaxValue, service))
+  val reservationBidOrder: (Token, SingleUnitBidOrder[Service]) = (buyersToken, LimitBidOrder(buyer, Price.MaxValue, service))
   val (withReservationBidOrder, _) = firstPriceSealedBidReverseAuction.insert(reservationBidOrder)
 
   // generate some random sellers...
@@ -55,7 +55,7 @@ class FirstPriceSealedBidReverseAuctionSpec
   val (_, lowestPricedAskOrder): (Token, LimitAskOrder[Service]) = offers.minBy{ case (_, askOrder) => askOrder.limit }
 
   // insert the ask orders into the auction mechanism...can be done in parallel!
-  val (withAskOrders, _): (SealedBidAuction[Service], Stream[Either[Rejected, Accepted]]) = {
+  val (withAskOrders, _): (SealedBidSingleUnitAuction[Service], Stream[Either[Rejected, Accepted]]) = {
     offers.foldLeft((withReservationBidOrder, Stream.empty[Either[Rejected, Accepted]])) {
       case ((auction, insertResults), askOrder) =>
         val (updatedAuction, insertResult) = auction.insert(askOrder)

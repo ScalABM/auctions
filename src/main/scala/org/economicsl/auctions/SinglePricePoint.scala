@@ -26,7 +26,6 @@ import scala.collection.immutable
   * @since 0.1.0
   */
 trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
-  this: Contract =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
     *

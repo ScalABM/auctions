@@ -16,19 +16,20 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
+import org.economicsl.auctions.singleunit.{SealedBidSingleUnitAuction, SingleUnitAuction}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.{Currency, Tradable}
 
 import scala.concurrent.duration.FiniteDuration
 
 
-trait PeriodicAuctionActor[T <: Tradable, A <: Auction[T, A]]
-    extends AuctionActor[T, A]
-    with PeriodicClearingSchedule[T, A]
+trait PeriodicSingleUnitAuctionActor[T <: Tradable, A <: SingleUnitAuction[T, A]]
+    extends SingleUnitAuctionActor[T, A]
+    with PeriodicClearingSchedule[T, SingleUnitOrder[T], A]
 
 
-object PeriodicAuctionActor {
+object PeriodicSingleUnitAuctionActor {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
                                       (initialDelay: FiniteDuration,
@@ -38,8 +39,8 @@ object PeriodicAuctionActor {
                                        tickSize: Currency,
                                        tradable: T)
                                        : Props = {
-    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
+    val auction = SealedBidSingleUnitAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
+    Props(new PeriodicSingleUnitAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
   }
 
   def withUniformClearingPolicy[T <: Tradable]
@@ -50,18 +51,16 @@ object PeriodicAuctionActor {
                                 tickSize: Currency,
                                 tradable: T)
                                 : Props = {
-    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
+    val auction = SealedBidSingleUnitAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
+    Props(new PeriodicSingleUnitAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
   }
 
 
-  private class PeriodicAuctionActorImpl[T <: Tradable](
-    var auction: SealedBidAuction[T],
+  private class PeriodicSingleUnitAuctionActorImpl[T <: Tradable](
+    var auction: SealedBidSingleUnitAuction[T],
     val initialDelay: FiniteDuration,
     val interval: FiniteDuration,
     val settlementService: Option[ActorRef])
-      extends PeriodicAuctionActor[T, SealedBidAuction[T]] {
-
-  }
+      extends PeriodicSingleUnitAuctionActor[T, SealedBidSingleUnitAuction[T]]
 
 }

@@ -41,8 +41,8 @@ class SecondPriceOpenBidAuctionSpec
   val tickSize: Currency = 1
   val uuid: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(uuid)
-  val secondPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
-    OpenBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
+  val secondPriceOpenBidAuction: OpenBidSingleUnitAuction[ParkingSpace] = {
+    OpenBidSingleUnitAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
   }
 
   val seller: UUID = UUID.randomUUID()
@@ -62,7 +62,7 @@ class SecondPriceOpenBidAuctionSpec
       val (updatedAuction, result) = auction.insert(bidOrder)
       (updatedAuction, result #:: results)
   }
-  val (clearedAuction, fills): (OpenBidAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
+  val (clearedAuction, fills): (OpenBidSingleUnitAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process ask price quote requests" in {
 

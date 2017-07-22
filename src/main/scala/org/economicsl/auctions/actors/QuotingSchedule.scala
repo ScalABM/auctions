@@ -16,9 +16,8 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.ReceiveTimeout
+import org.economicsl.auctions.{Auction, Order, QuotingPolicy}
 import org.economicsl.auctions.quotes.QuoteRequest
-import org.economicsl.auctions.singleunit.OpenBidAuction
-import org.economicsl.auctions.singleunit.orders.Order
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
@@ -26,16 +25,16 @@ import scala.concurrent.duration.FiniteDuration
 
 
 /** Mixin trait that specifies a schedule for auction quoting events. */
-sealed trait QuotingSchedule[T <: Tradable]
+sealed trait QuotingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A] with QuotingPolicy[T]]
     extends StackableActor {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, O, A] =>
 }
 
 
 /** Schedules a quoting event to occur whenever a new order is inserted into the auction. */
-trait BidderActivityQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+trait BidderActivityQuotingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A] with QuotingPolicy[T]]
+    extends QuotingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   import AuctionActor._
 
@@ -51,9 +50,9 @@ trait BidderActivityQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a quoting event to occur whenever no new orders have been received for a specified period. */
-trait BidderInActivityQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+trait BidderInActivityQuotingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A] with QuotingPolicy[T]]
+    extends QuotingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   def timeout: FiniteDuration
 
@@ -74,9 +73,9 @@ trait BidderInActivityQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a quoting event in response to an `AuctionParticipantActor` request. */
-trait OnDemandQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+trait OnDemandQuotingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A] with QuotingPolicy[T]]
+    extends QuotingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   override def receive: Receive = {
     case request: QuoteRequest[T] =>
@@ -91,9 +90,9 @@ trait OnDemandQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a clearing event to occur after fixed time intervals. */
-trait PeriodicQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+trait PeriodicQuotingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A] with QuotingPolicy[T]]
+    extends QuotingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   import context.dispatcher  // implicitly passed to the scheduleQuoteRequest method!
 
@@ -120,7 +119,7 @@ trait PeriodicQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a quoting event to occur after random time intervals. */
-trait RandomQuotingSchedule[T <: Tradable]
-    extends PeriodicQuotingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+trait RandomQuotingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A] with QuotingPolicy[T]]
+    extends PeriodicQuotingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 }

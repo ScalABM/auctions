@@ -15,9 +15,30 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.core.Tradable
+
 
 trait AuctionParticipant[A <: AuctionParticipant[A]]
     extends OrderIssuer[A]
     with OrderTracker[A] {
   this: A =>
+
+  import Auction._
+
+  def + (protocol: AuctionProtocol): A = {
+    val updatedAuctions = auctions + (protocol.tradable -> protocol)
+    withAuctions(updatedAuctions)
+  }
+
+  def - (tradable: Tradable): A = {
+    val updatedAuctions = auctions - tradable
+    withAuctions(updatedAuctions)
+  }
+
+  protected def withAuctions(updated: Map[Tradable, AuctionProtocol]): A
+
+  /** Each `AuctionParticipant` should maintain a collection of auctions in which it actively participates. */
+  protected def auctions: Map[Tradable, AuctionProtocol]
+
 }
+

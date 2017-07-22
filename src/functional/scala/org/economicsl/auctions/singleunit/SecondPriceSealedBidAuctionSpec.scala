@@ -41,8 +41,8 @@ class SecondPriceSealedBidAuctionSpec
   val tickSize: Currency = 1
   val uuid: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(uuid)
-  val secondPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
+  val secondPriceSealedBidAuction: SealedBidSingleUnitAuction[ParkingSpace] = {
+    SealedBidSingleUnitAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
   }
 
   val seller: UUID = UUID.randomUUID()
@@ -62,7 +62,7 @@ class SecondPriceSealedBidAuctionSpec
 
       (updatedAuction, result #:: results)
   }
-  val (clearedAuction, fills): (SealedBidAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
+  val (clearedAuction, fills): (SealedBidSingleUnitAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {
 

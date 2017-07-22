@@ -17,10 +17,9 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
-import org.economicsl.core.util.Timestamper
-import org.economicsl.core.{Currency, Tradable}
+import org.economicsl.core.Tradable
 
 
 /** Base trait for all auction implementations.
@@ -32,9 +31,8 @@ import org.economicsl.core.{Currency, Tradable}
   *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
   *       each auction implementation.
   */
-trait Auction[T <: Tradable, A <: Auction[T, A]]
-    extends ReferenceGenerator
-    with Timestamper {
+trait SingleUnitAuction[T <: Tradable, +A <: SingleUnitAuction[T, A]]
+    extends Auction[T, SingleUnitOrder[T], A] {
   this: A =>
 
   import OrderTracker._
@@ -74,7 +72,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
     *         instances.
     */
-  def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = kv match {
+  def insert(kv: (Token, SingleUnitOrder[T])): (A, Either[Rejected, Accepted]) = kv match {
     case (token, order) if order.limit.value % tickSize > 0 =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTickSize(order, tickSize)
@@ -93,22 +91,15 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       (withOrderBook(updatedOrderBook), Right(accepted))
   }
 
-  def tickSize: Currency
-
-  def tradable: T
-
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
   def withPricingPolicy(updated: PricingPolicy[T]): A
 
-  /** Returns an auction of type `A` the encapsulates the current auction state but with a new tick size. */
-  def withTickSize(updated: Currency): A
+  protected def orderBook: FourHeapOrderBook[T]
+
+  protected def pricingPolicy: PricingPolicy[T]
 
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOrderBook(updated: FourHeapOrderBook[T]): A
-
-  protected val orderBook: FourHeapOrderBook[T]
-
-  protected val pricingPolicy: PricingPolicy[T]
 
 }
 

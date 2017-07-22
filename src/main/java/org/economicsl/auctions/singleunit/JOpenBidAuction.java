@@ -20,7 +20,7 @@ import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.quotes.Quote;
 import org.economicsl.auctions.quotes.QuoteRequest;
-import org.economicsl.auctions.singleunit.orders.Order;
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;
@@ -37,9 +37,9 @@ import java.util.UUID;
  */
 class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>> {
 
-    private OpenBidAuction<T> auction;
+    private OpenBidSingleUnitAuction<T> auction;
 
-    private JOpenBidAuction(OpenBidAuction<T> auction) {
+    private JOpenBidAuction(OpenBidSingleUnitAuction<T> auction) {
         this.auction = auction;
     }
 
@@ -50,7 +50,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public CancelResult<JOpenBidAuction<T>> cancel(UUID reference) {
-        Tuple2<OpenBidAuction<T>, Option<Canceled>> result = auction.cancel(reference);
+        Tuple2<OpenBidSingleUnitAuction<T>, Option<Canceled>> result = auction.cancel(reference);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
         return new CancelResult<>(jAuction, result._2);
     }
@@ -60,7 +60,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return an instance of `ClearResult` class.
      */
     public ClearResult<JOpenBidAuction<T>> clear() {
-        Tuple2<OpenBidAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
+        Tuple2<OpenBidSingleUnitAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
         return new ClearResult<>(jAuction, result._2);
     }
@@ -70,8 +70,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param order
      * @return
      */
-    public InsertResult<JOpenBidAuction<T>> insert(Tuple2<UUID, Order<T>> order) {
-        Tuple2<OpenBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
+    public InsertResult<JOpenBidAuction<T>> insert(Tuple2<UUID, SingleUnitOrder<T>> order) {
+        Tuple2<OpenBidSingleUnitAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }
@@ -81,12 +81,12 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
     }
 
     public JOpenBidAuction<T> withPricingPolicy(PricingPolicy<T> updated) {
-        OpenBidAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
+        OpenBidSingleUnitAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
         return new JOpenBidAuction<>(withUpdatedPricingPolicy);
     }
 
     public JOpenBidAuction<T> withTickSize(Long updated) {
-        OpenBidAuction<T> withUpdatedTickSize = auction.withTickSize(updated);
+        OpenBidSingleUnitAuction<T> withUpdatedTickSize = auction.withTickSize(updated);
         return new JOpenBidAuction<>(withUpdatedTickSize);
     }
 
@@ -98,7 +98,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
+        OpenBidSingleUnitAuction<T> auction = OpenBidSingleUnitAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -109,7 +109,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, tradable);
+        OpenBidSingleUnitAuction<T> auction = OpenBidSingleUnitAuction.withUniformClearingPolicy(pricingPolicy, tradable);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -121,7 +121,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
+        OpenBidSingleUnitAuction<T> auction = OpenBidSingleUnitAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -132,7 +132,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
+        OpenBidSingleUnitAuction<T> auction = OpenBidSingleUnitAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
         return new JOpenBidAuction<>(auction);
     }
 

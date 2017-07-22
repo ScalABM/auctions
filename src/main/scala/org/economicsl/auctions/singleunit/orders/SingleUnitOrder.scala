@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orders
 
-import org.economicsl.auctions.{Contract, SingleUnit}
+import org.economicsl.auctions.{Order, SingleUnit}
 import org.economicsl.core.Tradable
 import play.api.libs.json.{JsValue, Json, Writes}
 
@@ -26,7 +26,7 @@ import play.api.libs.json.{JsValue, Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Order[+T <: Tradable] extends Contract with SingleUnit[T]
+sealed trait SingleUnitOrder[+T <: Tradable] extends Order[T] with SingleUnit[T]
 
 
 /** Companion object for the `Order` trait.
@@ -36,9 +36,9 @@ sealed trait Order[+T <: Tradable] extends Contract with SingleUnit[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-object Order {
+object SingleUnitOrder {
 
-  implicit def writes[O <: Order[_ <: Tradable]]: Writes[O] = new Writes[O] {
+  implicit def writes[O <: SingleUnitOrder[_ <: Tradable]]: Writes[O] = new Writes[O] {
     def writes(o: O): JsValue = Json.obj(
       "issuer" -> o.issuer,
       "limit" -> o.limit,
@@ -52,7 +52,7 @@ object Order {
     * @tparam O the sub-type of `Order` that is being ordered.
     * @return an `Ordering` defined over `Order` instances.
     */
-  implicit def ordering[O <: Order[_ <: Tradable]]: Ordering[O] = {
+  implicit def ordering[O <: SingleUnitOrder[_ <: Tradable]]: Ordering[O] = {
     SingleUnit.ordering
   }
 
@@ -65,12 +65,12 @@ object Order {
   * @author davidrpugh
   * @since 0.1.0
   */
-trait AskOrder[+T <: Tradable] extends Order[T]
+trait SingleUnitAskOrder[+T <: Tradable] extends SingleUnitOrder[T]
 
 
-object AskOrder {
+object SingleUnitAskOrder {
 
-  implicit def writes[T <: Tradable]: Writes[AskOrder[T]] = Order.writes[AskOrder[T]]
+  implicit def writes[T <: Tradable]: Writes[SingleUnitAskOrder[T]] = SingleUnitOrder.writes[SingleUnitAskOrder[T]]
 
 }
 
@@ -81,11 +81,11 @@ object AskOrder {
   * @author davidrpugh
   * @since 0.1.0
   */
-trait BidOrder[+T <: Tradable] extends Order[T]
+trait SingleUnitBidOrder[+T <: Tradable] extends SingleUnitOrder[T]
 
 
-object BidOrder {
+object SingleUnitBidOrder {
 
-  implicit def writes[T <: Tradable]: Writes[BidOrder[T]] = Order.writes[BidOrder[T]]
+  implicit def writes[T <: Tradable]: Writes[SingleUnitBidOrder[T]] = SingleUnitOrder.writes[SingleUnitBidOrder[T]]
 
 }

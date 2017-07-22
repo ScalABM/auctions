@@ -24,7 +24,6 @@ import org.economicsl.core.{Quantity, Tradable}
   * @since 0.1.0
   */
 trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
-  this: Contract =>
 
   val quantity: Quantity = Quantity.single
 

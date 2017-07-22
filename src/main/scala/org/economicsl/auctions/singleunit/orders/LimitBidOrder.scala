@@ -29,7 +29,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends BidOrder[T]
+class LimitBidOrder[+T <: Tradable](val issuer: UUID, val limit: Price, val tradable: T) extends SingleUnitBidOrder[T]
 
 
 /** Companion object for `LimitBidOrder`.

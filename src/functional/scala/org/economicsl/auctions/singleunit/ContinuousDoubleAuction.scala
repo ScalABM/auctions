@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.quotes._
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder$
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.economicsl.core.{Price, Tradable}
 
@@ -33,15 +33,15 @@ object ContinuousDoubleAuction extends App {
 
   val google: TestStock = TestStock()
   val pricingRule = new MidPointPricingPolicy[TestStock]
-  val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, google)
+  val withDiscriminatoryPricing = OpenBidSingleUnitAuction.withDiscriminatoryClearingPolicy(pricingRule, google)
 
   // generate a very large stream of random orders...
-  type OrderFlow[T <: Tradable] = Stream[(Token, Order[T])]
+  type OrderFlow[T <: Tradable] = Stream[(Token, SingleUnitOrder[T])]
   val prng = new Random(42)
   val orders: OrderFlow[TestStock] = OrderGenerator.randomOrders(0.5)(1000000, google, prng)
 
   // A lazy, tail-recursive implementation of a continuous double auction!
-  def continuous[T <: Tradable, A <: Auction[T, A]](auction: A)(incoming: OrderFlow[T]): Stream[(A, Option[Stream[SpotContract]])] = {
+  def continuous[T <: Tradable, A <: SingleUnitAuction[T, A]](auction: A)(incoming: OrderFlow[T]): Stream[(A, Option[Stream[SpotContract]])] = {
     @annotation.tailrec
     def loop(da: A, in: OrderFlow[T], out: Stream[(A, Option[Stream[SpotContract]])]): Stream[(A, Option[Stream[SpotContract]])] = in match {
       case Stream.Empty => out
@@ -57,7 +57,7 @@ object ContinuousDoubleAuction extends App {
     * containing the unmatched orders following each clear.  Basically the entire auction history is stored in the
     * stream of clear results.
     */
-  val results = continuous[TestStock, OpenBidAuction[TestStock]](withDiscriminatoryPricing)(orders)
+  val results = continuous[TestStock, OpenBidSingleUnitAuction[TestStock]](withDiscriminatoryPricing)(orders)
 
   val prices: Stream[Price] = results.flatMap{ case (_, fills) =>
     fills.flatMap(_.headOption).map(_.price)

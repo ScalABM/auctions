@@ -16,8 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.ReceiveTimeout
-import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.{Auction, Order}
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
@@ -25,9 +24,9 @@ import scala.concurrent.duration.FiniteDuration
 
 
 /** Mixin trait that specifies a schedule for auction clearing events. */
-sealed trait ClearingSchedule[T <: Tradable, A <: Auction[T, A]]
+sealed trait ClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
     extends StackableActor {
-  this: AuctionActor[T, A] =>
+  this: AuctionActor[T, O, A] =>
 }
 
 
@@ -40,14 +39,14 @@ object ClearingSchedule {
 
 
 /** Schedules a clearing event to occur whenever a new order is inserted into the auction. */
-trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
-    extends ClearingSchedule[T, A] {
-  this: AuctionActor[T, A] =>
+trait BidderActivityClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
+    extends ClearingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   import AuctionActor._
 
   override def receive: Receive = {
-    case message @ InsertOrder(_, _: Order[T]) =>
+    case message @ InsertOrder(_, _: O) =>
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, contracts) = auction.clear
@@ -67,9 +66,9 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 
 
 /** Schedules a clearing event to occur whenever no new orders have been received for a specified period. */
-trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
-    extends ClearingSchedule[T, A] {
-  this: AuctionActor[T, A] =>
+trait BidderInActivityClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
+    extends ClearingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   def timeout: FiniteDuration
 
@@ -100,9 +99,9 @@ trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 
 
 /** Schedules a clearing event to occur after fixed time intervals. */
-trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
-    extends ClearingSchedule[T, A] {
-  this: AuctionActor[T, A] =>
+trait PeriodicClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
+    extends ClearingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 
   import ClearingSchedule._
   import context.dispatcher  // implicitly passed to the scheduleClear method!
@@ -143,7 +142,7 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 
 
 /** Schedules a clearing event to occur after random time intervals. */
-trait RandomClearingSchedule[T <: Tradable, A <: Auction[T, A]]
-    extends PeriodicClearingSchedule[T, A] {
-  this: AuctionActor[T, A] =>
+trait RandomClearingSchedule[T <: Tradable, O <: Order[T], A <: Auction[T, O, A]]
+    extends PeriodicClearingSchedule[T, O, A] {
+  this: AuctionActor[T, O, A] =>
 }

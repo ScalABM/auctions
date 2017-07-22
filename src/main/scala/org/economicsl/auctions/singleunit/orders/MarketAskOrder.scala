@@ -28,7 +28,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class MarketAskOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends AskOrder[T] {
+class MarketAskOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends SingleUnitAskOrder[T] {
 
   val limit: Price = Price.MinValue
 

@@ -31,7 +31,7 @@ import org.economicsl.core.{Price, Quantity, Tradable}
   * @since 0.1.0
   */
 class MarketBidOrder[+T <: Tradable](val issuer: UUID, val quantity: Quantity, val tradable: T)
-  extends BidOrder[T] with SinglePricePoint[T] {
+  extends SinglePricePointBidOrder[T] with SinglePricePoint[T] {
 
   val limit: Price = Price.MaxValue
 

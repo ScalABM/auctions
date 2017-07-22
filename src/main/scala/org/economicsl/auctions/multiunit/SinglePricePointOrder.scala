@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit
 
-import org.economicsl.auctions.Contract
+import org.economicsl.auctions.{Order, SinglePricePoint}
 import org.economicsl.core.Tradable
 
 
@@ -25,7 +25,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait Order[+T <: Tradable] extends Contract
+sealed trait SinglePricePointOrder[+T <: Tradable] extends Order[T] with SinglePricePoint[T]
 
 
 /** Base trait for all multi-unit orders to sell a particular `Tradable`.
@@ -34,7 +34,7 @@ sealed trait Order[+T <: Tradable] extends Contract
   * @author davidrpugh
   * @since 0.1.0
   */
-trait AskOrder[+T <: Tradable] extends Order[T]
+trait SinglePricePointAskOrder[+T <: Tradable] extends SinglePricePointOrder[T]
 
 
 /** Base trait for all multi-unit orders to buy a particular `Tradable`
@@ -43,4 +43,4 @@ trait AskOrder[+T <: Tradable] extends Order[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-trait BidOrder[+T <: Tradable] extends Order[T]
+trait SinglePricePointBidOrder[+T <: Tradable] extends SinglePricePointOrder[T]

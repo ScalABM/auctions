@@ -16,17 +16,18 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
+import org.economicsl.auctions.singleunit.{SealedBidSingleUnitAuction, SingleUnitAuction}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.{Currency, Tradable}
 
 
-trait ContinuousAuctionActor[T <: Tradable, A <: Auction[T, A]]
-  extends AuctionActor[T, A]
-  with BidderActivityClearingSchedule[T, A]
+trait ContinuousSingleUnitAuctionActor[T <: Tradable, A <: SingleUnitAuction[T, A]]
+  extends SingleUnitAuctionActor[T, A]
+  with BidderActivityClearingSchedule[T, SingleUnitOrder[T], A]
 
 
-object ContinuousAuctionActor {
+object ContinuousSingleUnitAuctionActor {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
                                       (pricingPolicy: PricingPolicy[T],
@@ -34,8 +35,8 @@ object ContinuousAuctionActor {
                                        tickSize: Currency,
                                        tradable: T)
                                       : Props = {
-    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new ContinuousAuctionActorImpl(auction, Some(settlementService)))
+    val auction = SealedBidSingleUnitAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
+    Props(new ContinuousSingleUnitAuctionActorImpl(auction, Some(settlementService)))
   }
 
   def withUniformClearingPolicy[T <: Tradable]
@@ -44,14 +45,14 @@ object ContinuousAuctionActor {
                                 tickSize: Currency,
                                 tradable: T)
                                : Props = {
-    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new ContinuousAuctionActorImpl(auction, Some(settlementService)))
+    val auction = SealedBidSingleUnitAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
+    Props(new ContinuousSingleUnitAuctionActorImpl(auction, Some(settlementService)))
   }
 
 
-  private class ContinuousAuctionActorImpl[T <: Tradable](
-    var auction: SealedBidAuction[T],
+  private class ContinuousSingleUnitAuctionActorImpl[T <: Tradable](
+    var auction: SealedBidSingleUnitAuction[T],
     val settlementService: Option[ActorRef])
-      extends ContinuousAuctionActor[T, SealedBidAuction[T]]
+      extends ContinuousSingleUnitAuctionActor[T, SealedBidSingleUnitAuction[T]]
 
 }

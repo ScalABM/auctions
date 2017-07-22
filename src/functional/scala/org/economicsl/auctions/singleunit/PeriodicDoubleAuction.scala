@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.{TestStock, Token}
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder$
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -36,12 +36,12 @@ class PeriodicDoubleAuction
   // generate a stream of random orders...
   val google: TestStock = TestStock()
   val prng = new Random(42)
-  val orders: Stream[(Token, Order[TestStock])] = OrderGenerator.randomOrders(0.5)(100, google, prng)
+  val orders: Stream[(Token, SingleUnitOrder[TestStock])] = OrderGenerator.randomOrders(0.5)(100, google, prng)
 
   "A PeriodicDoubleAuction with uniform pricing" should "produce a single price at which all filled orders are processed." in {
 
     val pricingRule = new MidPointPricingPolicy[TestStock]
-    val withUniformPricing = SealedBidAuction.withUniformClearingPolicy(pricingRule, google)
+    val withUniformPricing = SealedBidSingleUnitAuction.withUniformClearingPolicy(pricingRule, google)
 
     // this whole process is data parallel...
     val (withOrders, _) = {
