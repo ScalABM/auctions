@@ -39,7 +39,7 @@ object PeriodicAuctionActor {
                                        tradable: T)
                                        : Props = {
     val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, settlementService))
+    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
   }
 
   def withUniformClearingPolicy[T <: Tradable]
@@ -51,7 +51,7 @@ object PeriodicAuctionActor {
                                 tradable: T)
                                 : Props = {
     val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, settlementService))
+    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
   }
 
 
@@ -59,7 +59,7 @@ object PeriodicAuctionActor {
     var auction: SealedBidAuction[T],
     val initialDelay: FiniteDuration,
     val interval: FiniteDuration,
-    val settlementService: ActorRef)
+    val settlementService: Option[ActorRef])
       extends PeriodicAuctionActor[T, SealedBidAuction[T]] {
 
   }

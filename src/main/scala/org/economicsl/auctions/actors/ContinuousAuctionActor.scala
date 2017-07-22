@@ -35,7 +35,7 @@ object ContinuousAuctionActor {
                                        tradable: T)
                                       : Props = {
     val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new ContinuousAuctionActorImpl(auction, settlementService))
+    Props(new ContinuousAuctionActorImpl(auction, Some(settlementService)))
   }
 
   def withUniformClearingPolicy[T <: Tradable]
@@ -45,13 +45,13 @@ object ContinuousAuctionActor {
                                 tradable: T)
                                : Props = {
     val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
-    Props(new ContinuousAuctionActorImpl(auction, settlementService))
+    Props(new ContinuousAuctionActorImpl(auction, Some(settlementService)))
   }
 
 
   private class ContinuousAuctionActorImpl[T <: Tradable](
     var auction: SealedBidAuction[T],
-    val settlementService: ActorRef)
+    val settlementService: Option[ActorRef])
       extends ContinuousAuctionActor[T, SealedBidAuction[T]]
 
 }
