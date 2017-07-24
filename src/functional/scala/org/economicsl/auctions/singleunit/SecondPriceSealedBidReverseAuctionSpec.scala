@@ -17,11 +17,10 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
-import org.economicsl.auctions.singleunit.orders.{BidOrder, SingleUnitAskOrder$, SingleUnitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
-import org.economicsl.auctions.{Issuer, Seller, Service, Token}
+import org.economicsl.auctions._
 import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -46,13 +45,13 @@ class SecondPriceSealedBidReverseAuctionSpec
   // buyer is willing to pay anything...
   val buyer: Issuer = UUID.randomUUID()
   val buyersToken: Token = UUID.randomUUID()
-  val reservationBidOrder: (Token, BidOrder[Service]) = (buyersToken, SingleUnitBidOrder(buyer, Price.MaxValue, service))
+  val reservationBidOrder: (Token, SingleUnitBidOrder[Service]) = (buyersToken, SingleUnitBidOrder(buyer, Price.MaxValue, service))
   val (withReservationBidOrder, _) = secondPriceSealedBidReverseAuction.insert(reservationBidOrder)
 
   // generate some random sellers...
   val numberOffers = 1000
   val prng = new Random(42)
-  val offers: Stream[(Token, SingleUnitAskOrder[Service])] = OrderGenerator.randomAskOrders(numberOffers, service, prng)
+  val offers: Stream[(Token, SingleUnitAskOrder[Service])] = OrderGenerator.randomSingleUnitAskOrders(numberOffers, service, prng)
   val (_, lowestPricedAskOrder): (Token, SingleUnitAskOrder[Service]) = offers.minBy{ case (_, order) => order.limit }
 
   // insert the ask orders into the auction mechanism...can be done in parallel!

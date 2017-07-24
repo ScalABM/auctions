@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
-import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder$, SingleUnitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
 import org.economicsl.core.Price
@@ -55,7 +55,7 @@ class FirstPriceSealedBidAuctionSpec
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
   val bidOrders: Stream[(Token, SingleUnitBidOrder[ParkingSpace])] = {
-    OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
+    OrderGenerator.randomSingleUnitBidOrders(numberBidOrders, parkingSpace, prng)
   }
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 

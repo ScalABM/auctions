@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.quotes._
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy
 import org.economicsl.core.{Price, Tradable}
 
@@ -36,9 +36,9 @@ object ContinuousDoubleAuction extends App {
   val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, google)
 
   // generate a very large stream of random orders...
-  type OrderFlow[T <: Tradable] = Stream[(Token, Order[T])]
+  type OrderFlow[T <: Tradable] = Stream[(Token, SingleUnitOrder[T])]
   val prng = new Random(42)
-  val orders: OrderFlow[TestStock] = OrderGenerator.randomOrders(0.5)(1000000, google, prng)
+  val orders: OrderFlow[TestStock] = OrderGenerator.randomSingleUnitOrders(0.5)(1000000, google, prng)
 
   // A lazy, tail-recursive implementation of a continuous double auction!
   def continuous[T <: Tradable, A <: Auction[T, A]](auction: A)(incoming: OrderFlow[T]): Stream[(A, Option[Stream[SpotContract]])] = {
