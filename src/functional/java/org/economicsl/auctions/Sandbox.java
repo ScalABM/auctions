@@ -15,8 +15,8 @@
 
 package org.economicsl.auctions;
 
-import org.economicsl.auctions.singleunit.orders.LimitAskOrder;
-import org.economicsl.auctions.singleunit.orders.LimitBidOrder;
+import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder;
+import org.economicsl.auctions.singleunit.orders.SingleUnitBidOrder;
 
 import java.util.UUID;
 
@@ -28,12 +28,12 @@ public class Sandbox {
         TestStock google = new TestStock();
 
         // Create some single-unit limit ask orders...
-        LimitAskOrder<TestStock> order3 = new LimitAskOrder<>(issuer, 5, google);
-        LimitAskOrder<TestStock> order4 = new LimitAskOrder<>(issuer, 6, google);
+        SingleUnitAskOrder<TestStock> order3 = new SingleUnitAskOrder<>(issuer, 5, google);
+        SingleUnitAskOrder<TestStock> order4 = new SingleUnitAskOrder<>(issuer, 6, google);
 
         // Create some single-unit limit bid orders...
-        LimitBidOrder<TestStock> order8 = new LimitBidOrder<>(issuer, 10, google);
-        LimitBidOrder<TestStock> order9 = new LimitBidOrder<>(issuer, 6, google);
+        SingleUnitBidOrder<TestStock> order8 = new SingleUnitBidOrder<>(issuer, 10, google);
+        SingleUnitBidOrder<TestStock> order9 = new SingleUnitBidOrder<>(issuer, 6, google);
 
         /*
         // Create a four-heap order book and add some orders...

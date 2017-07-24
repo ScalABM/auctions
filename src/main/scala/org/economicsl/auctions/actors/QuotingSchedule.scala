@@ -18,7 +18,7 @@ package org.economicsl.auctions.actors
 import akka.actor.ReceiveTimeout
 import org.economicsl.auctions.quotes.QuoteRequest
 import org.economicsl.auctions.singleunit.OpenBidAuction
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
@@ -40,7 +40,7 @@ trait BidderActivityQuotingSchedule[T <: Tradable]
   import AuctionActor._
 
   override def receive: Receive = {
-    case message @ InsertOrder(_, _: Order[T]) =>
+    case message @ InsertOrder(_, _: SingleUnitOrder[T]) =>
       super.receive(message)
       ???
     case message =>

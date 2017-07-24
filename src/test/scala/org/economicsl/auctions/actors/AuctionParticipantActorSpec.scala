@@ -21,7 +21,7 @@ import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
 import org.economicsl.auctions.OrderTracker.{Accepted, CanceledByIssuer}
 import org.economicsl.auctions.{ReferenceGenerator, TestTradable, TokenGenerator}
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.Price
 import org.economicsl.core.util.Timestamper
 import org.scalatest.{FeatureSpecLike, GivenWhenThen, Matchers}
@@ -54,7 +54,7 @@ class AuctionParticipantActorSpec
       When("an AuctionParticipantActor receives an Accepted message")
 
       val token = randomToken()
-      val order = LimitBidOrder(issuer, Price(10), tradable)
+      val order = SingleUnitBidOrder(issuer, Price(10), tradable)
 
       val timestamp = currentTimeMillis()
       val reference = randomReference()
@@ -80,7 +80,7 @@ class AuctionParticipantActorSpec
       Given("that an AuctionParticipantActor has already had at least one order accepted")
 
       val token = randomToken()
-      val order = LimitAskOrder(issuer, Price(137), tradable)
+      val order = SingleUnitAskOrder(issuer, Price(137), tradable)
 
       val timestamp = currentTimeMillis()
       val reference = randomReference()

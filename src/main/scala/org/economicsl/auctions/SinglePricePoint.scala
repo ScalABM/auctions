@@ -26,7 +26,6 @@ import scala.collection.immutable
   * @since 0.1.0
   */
 trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
-  this: Contract =>
 
   /** Limit price (per unit of the `Tradable`) for the Order.
     *
@@ -38,27 +37,6 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   def quantity: Quantity
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
-
-}
-
-
-/** Companion object for the `SinglePricePoint` trait.
-  *
-  * Defines a basic ordering for anything that mixes in the `SinglePricePoint` trait.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object SinglePricePoint {
-
-  /** All `Contract with OrderLike` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
-    *
-    * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return `Ordering` defined over `Order[T] with SinglePricePoint[T]` instances.
-    */
-  def ordering[O <: Contract with SinglePricePoint[_ <: Tradable]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
-  }
 
 }
 

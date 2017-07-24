@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
 import org.economicsl.core.Price
@@ -47,15 +47,15 @@ class FirstPriceSealedBidAuctionSpec
   // suppose that seller must sell the parking space at any positive price...
   val seller: Issuer = UUID.randomUUID()
   val token: Token = randomToken()
-  val order = LimitAskOrder(seller, Price.MinValue, parkingSpace)
-  val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (token, order)
+  val order = SingleUnitAskOrder(seller, Price.MinValue, parkingSpace)
+  val reservationAskOrder: (Token, SingleUnitAskOrder[ParkingSpace]) = (token, order)
   val (withReservationAskOrder, _) = firstPriceSealedBidAuction.insert(reservationAskOrder)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = {
-    OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
+  val bidOrders: Stream[(Token, SingleUnitBidOrder[ParkingSpace])] = {
+    OrderGenerator.randomSingleUnitBidOrders(numberBidOrders, parkingSpace, prng)
   }
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 

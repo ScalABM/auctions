@@ -15,9 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.singleunit.OrderGenerator
-import org.economicsl.auctions.{Reference, ReferenceGenerator, TestTradable, Token}
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions._
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.Quantity
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -38,11 +37,11 @@ class FourHeapOrderBookSpec
 
   val numberBids = 100
   val bidReferences: Iterable[Reference] = for (i <- 0 until numberBids) yield randomReference()
-  val bids: Stream[(Token, LimitBidOrder[TestTradable])] = OrderGenerator.randomBidOrders(numberBids, tradable, new Random(42))
+  val bids: Stream[(Token, SingleUnitBidOrder[TestTradable])] = OrderGenerator.randomSingleUnitBidOrders(numberBids, tradable, new Random(42))
 
   val numberOffers = 100
   val offerReferences: Iterable[Reference] = for (i <- 0 until numberOffers) yield randomReference()
-  val offers: Stream[(Token, LimitAskOrder[TestTradable])] = OrderGenerator.randomAskOrders(numberOffers, tradable, new Random(42))
+  val offers: Stream[(Token, SingleUnitAskOrder[TestTradable])] = OrderGenerator.randomSingleUnitAskOrders(numberOffers, tradable, new Random(42))
 
   val initial: FourHeapOrderBook[TestTradable] = FourHeapOrderBook.empty[TestTradable]
   val withBids: FourHeapOrderBook[TestTradable] = bidReferences.zip(bids).foldLeft(initial){

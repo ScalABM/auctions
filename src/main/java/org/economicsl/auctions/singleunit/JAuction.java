@@ -1,7 +1,7 @@
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.singleunit.orders.Order;
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Tuple2;
@@ -31,7 +31,7 @@ public abstract class JAuction<T extends Tradable, A extends JAuction<T, A>> {
      * @return
      * @todo get rid of Tuple2 class!
      */
-    public abstract InsertResult<A> insert(Tuple2<UUID, Order<T>> order);
+    public abstract InsertResult<A> insert(Tuple2<UUID, SingleUnitOrder<T>> order);
 
     /** Returns an auction of type `A` with a particular pricing policy. */
     public abstract A withPricingPolicy(PricingPolicy<T> updated);

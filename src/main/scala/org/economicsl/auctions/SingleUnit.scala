@@ -24,29 +24,7 @@ import org.economicsl.core.{Quantity, Tradable}
   * @since 0.1.0
   */
 trait SingleUnit[+T <: Tradable] extends SinglePricePoint[T] {
-  this: Contract =>
 
   val quantity: Quantity = Quantity.single
-
-}
-
-
-/** Companion object for the `SingleUnit` trait.
-  *
-  * Defines a basic ordering for anything that mixes in the `SingleUnit` trait.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object SingleUnit {
-
-  /** All `Contract with OrderLike` instances that mixin `SingleUnit` are ordered by `limit` from lowest to highest.
-    *
-    * @tparam O the sub-type of `Contract with OrderLike[_] with SingleUnit[_]` that is being ordered.
-    * @return `Ordering` defined over `Contract with OrderLike[_] with SingleUnit[_]` instances.
-    */
-  def ordering[O <: Contract with SingleUnit[_ <: Tradable]]: Ordering[O] = {
-    SinglePricePoint.ordering
-  }
 
 }

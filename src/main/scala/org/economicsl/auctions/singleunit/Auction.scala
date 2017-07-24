@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.util.Timestamper
 import org.economicsl.core.{Currency, Tradable}
@@ -74,7 +74,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
     *         instances.
     */
-  def insert(kv: (Token, Order[T])): (A, Either[Rejected, Accepted]) = kv match {
+  def insert(kv: (Token, SingleUnitOrder[T])): (A, Either[Rejected, Accepted]) = kv match {
     case (token, order) if order.limit.value % tickSize > 0 =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTickSize(order, tickSize)

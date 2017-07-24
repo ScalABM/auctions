@@ -15,8 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
+import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder
 import org.economicsl.auctions.{Reference, Token}
-import org.economicsl.auctions.singleunit.orders.AskOrder
 import org.economicsl.core.{Quantity, Tradable}
 
 import scala.collection.immutable
@@ -34,12 +34,12 @@ import scala.collection.immutable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token, AskOrder[T])],
-                                                   sortedOrders: immutable.TreeSet[(Reference, (Token, AskOrder[T]))],
+final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token, SingleUnitAskOrder[T])],
+                                                   sortedOrders: immutable.TreeSet[(Reference, (Token, SingleUnitAskOrder[T]))],
                                                    val numberUnits: Quantity) {
 
   /** The ordering used to sort the `AskOrder` instances contained in this `SortedAskOrders` instance. */
-  val ordering: Ordering[(Reference, (Token, AskOrder[T]))] = sortedOrders.ordering
+  val ordering: Ordering[(Reference, (Token, SingleUnitAskOrder[T]))] = sortedOrders.ordering
 
   /** Create a new `SortedAskOrders` instance containing the additional `AskOrder`.
     *
@@ -47,7 +47,7 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     * @return a new `SortedAskOrder` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (Reference, (Token, AskOrder[T]))): SortedAskOrders[T] = kv match {
+  def + (kv: (Reference, (Token, SingleUnitAskOrder[T]))): SortedAskOrders[T] = kv match {
     case (_, (_, order)) =>
       new SortedAskOrders(orders + kv, sortedOrders + kv, numberUnits + order.quantity)
   }
@@ -57,7 +57,7 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     * @param reference
     * @return
     */
-  def - (reference: Reference): (SortedAskOrders[T], Option[(Token, AskOrder[T])]) = {
+  def - (reference: Reference): (SortedAskOrders[T], Option[(Token, SingleUnitAskOrder[T])]) = {
     orders.get(reference) match {
       case Some(kv @ (_, order)) =>
         val remainingOrders = orders - reference
@@ -76,7 +76,7 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     */
   def contains(reference: Reference): Boolean = orders.contains(reference)
 
-  def get(reference: Reference): Option[(Token, AskOrder[T])] = {
+  def get(reference: Reference): Option[(Token, SingleUnitAskOrder[T])] = {
     orders.get(reference)
   }
 
@@ -84,13 +84,13 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     *
     * @return the first the first key-value mapping contained in this `SortedAskOrders` instance.
     */
-  def head: (Reference, (Token, AskOrder[T])) = sortedOrders.head
+  def head: (Reference, (Token, SingleUnitAskOrder[T])) = sortedOrders.head
 
   /** Optionally selects the first key-value mapping contained in this `SortedAskOrders` instance.
     *
     * @return Some key-value mapping if this `SortedAskOrders` instance is non empty; `None` otherwise.
     */
-  def headOption: Option[(Reference, (Token, AskOrder[T]))] = sortedOrders.headOption
+  def headOption: Option[(Reference, (Token, SingleUnitAskOrder[T]))] = sortedOrders.headOption
 
   /** Tests whether this `SortedAskOrder` instance is empty.
     *
@@ -98,7 +98,7 @@ final class SortedAskOrders[T <: Tradable] private(orders: Map[Reference, (Token
     */
   def isEmpty: Boolean = sortedOrders.isEmpty
 
-  def splitOffTopOrder: (SortedAskOrders[T], Option[(Reference, (Token, AskOrder[T]))]) = {
+  def splitOffTopOrder: (SortedAskOrders[T], Option[(Reference, (Token, SingleUnitAskOrder[T]))]) = {
     headOption match {
       case Some((reference, (_, askOrder))) =>
         val remainingOrders = orders - reference
@@ -131,10 +131,10 @@ object SortedAskOrders {
     * @tparam T all `AskOrder` instances stored in the heap should be for the same type of `Tradable`.
     * @return an instance of `SortedAskOrders`.
     */
-  def empty[T <: Tradable](ordering: Ordering[AskOrder[T]]): SortedAskOrders[T] = {
-    val existing = immutable.HashMap.empty[Reference, (Token, AskOrder[T])]
-    val byAskOrder = Ordering.by[(Reference, (Token, AskOrder[T])), AskOrder[T]]{ case (_, (_, order)) => order }(ordering)
-    val sorted = immutable.TreeSet.empty[(Reference, (Token, AskOrder[T]))](byAskOrder)
+  def empty[T <: Tradable](ordering: Ordering[SingleUnitAskOrder[T]]): SortedAskOrders[T] = {
+    val existing = immutable.HashMap.empty[Reference, (Token, SingleUnitAskOrder[T])]
+    val byAskOrder = Ordering.by[(Reference, (Token, SingleUnitAskOrder[T])), SingleUnitAskOrder[T]]{ case (_, (_, order)) => order }(ordering)
+    val sorted = immutable.TreeSet.empty[(Reference, (Token, SingleUnitAskOrder[T]))](byAskOrder)
     new SortedAskOrders(existing, sorted, Quantity.zero)
   }
 

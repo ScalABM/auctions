@@ -20,7 +20,7 @@ import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.quotes.Quote;
 import org.economicsl.auctions.quotes.QuoteRequest;
-import org.economicsl.auctions.singleunit.orders.Order;
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;
@@ -70,7 +70,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param order
      * @return
      */
-    public InsertResult<JOpenBidAuction<T>> insert(Tuple2<UUID, Order<T>> order) {
+    public InsertResult<JOpenBidAuction<T>> insert(Tuple2<UUID, SingleUnitOrder<T>> order) {
         Tuple2<OpenBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());

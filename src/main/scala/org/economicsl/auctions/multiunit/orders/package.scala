@@ -13,18 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.multiunit
 
 
-/** Type used to indicate that something is a contract.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  * @todo move this to the settlement repo when ready.
-  */
-trait Contract extends Serializable {
-
-  /** Some kind of unique identifier indicating the actor for whom this `Contract` is a liability. */
-  def issuer: Issuer
-
-}
+package object orders
