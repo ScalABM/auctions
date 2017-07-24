@@ -20,7 +20,7 @@ import java.util.UUID
 import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions._
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder$, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
 import org.economicsl.core.{Currency, Price}
 import org.scalatest.{FlatSpec, Matchers}
@@ -47,13 +47,13 @@ class SecondPriceOpenBidAuctionSpec
 
   val seller: UUID = UUID.randomUUID()
   val sellersToken: Token = UUID.randomUUID()
-  val reservationAskOrder: (Token, LimitAskOrder[ParkingSpace]) = (sellersToken, LimitAskOrder(seller, Price.MinValue, parkingSpace))
+  val reservationAskOrder: (Token, SingleUnitAskOrder[ParkingSpace]) = (sellersToken, SingleUnitAskOrder(seller, Price.MinValue, parkingSpace))
   val (withReservationAskOrder, _) = secondPriceOpenBidAuction.insert(reservationAskOrder)
 
   // suppose that there are lots of bidders
   val prng: Random = new Random(42)
   val numberBidOrders = 1000
-  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
+  val bidOrders: Stream[(Token, SingleUnitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(1000, parkingSpace, prng)
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, order) => order.limit }
 
   // winner should be the bidder that submitted the highest bid

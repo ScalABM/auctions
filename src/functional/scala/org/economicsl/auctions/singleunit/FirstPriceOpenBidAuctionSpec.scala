@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest
-import org.economicsl.auctions.singleunit.orders.{LimitAskOrder, LimitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder$, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
 import org.economicsl.core.Price
@@ -43,7 +43,7 @@ class FirstPriceOpenBidAuctionSpec
   val uuid: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(uuid)
   val prng: Random = new Random(42)
-  val bidOrders: Stream[(Token, LimitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
+  val bidOrders: Stream[(Token, SingleUnitBidOrder[ParkingSpace])] = OrderGenerator.randomBidOrders(numberBidOrders, parkingSpace, prng)
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
   // seller uses a first-priced, open bid auction...
@@ -54,7 +54,7 @@ class FirstPriceOpenBidAuctionSpec
   // Seller that must sell at any positive price
   val seller: UUID = UUID.randomUUID()
   val token: Token = randomToken()
-  val reservation: (Token, LimitAskOrder[ParkingSpace]) = (token, LimitAskOrder(seller, Price.MinValue, parkingSpace))
+  val reservation: (Token, SingleUnitAskOrder[ParkingSpace]) = (token, SingleUnitAskOrder(seller, Price.MinValue, parkingSpace))
   val (withReservationAskOrder, _) = firstPriceOpenBidAuction.insert(reservation)
 
   // withBidOrders will include all accepted bids (this is trivially parallel..)

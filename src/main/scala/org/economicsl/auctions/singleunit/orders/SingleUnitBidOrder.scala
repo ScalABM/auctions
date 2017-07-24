@@ -15,35 +15,29 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orders
 
-import java.util.UUID
-
+import org.economicsl.auctions.{BidOrder, Issuer, SingleUnit}
 import org.economicsl.core.{Price, Tradable}
 
 
-/** An order to buy a single-unit of a `Tradable` at any positive price.
+/** Class representing a single-unit orders to buy a particular `Tradable`.
   *
-  * @param issuer
-  * @param tradable
-  * @tparam T the type of `Tradable` for which the `MarketBidOrder` is being issued.
+  * @tparam T the type of `Tradable` for which the `BidOrder` is being issued.
   * @author davidrpugh
   * @since 0.1.0
   */
-class MarketBidOrder[+T <: Tradable](val issuer: UUID, val tradable: T) extends BidOrder[T] {
-
-  val limit: Price = Price.MaxValue
-
-}
+case class SingleUnitBidOrder[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
+  extends BidOrder[T] with SingleUnit[T]
 
 
-/** Companion object for `MarketBidOrder`.
+/** Companion object for SingleUnitBidOrder.
   *
   * @author davidrpugh
-  * @since 0.1.0
+  * @since 0.2.0
   */
-object MarketBidOrder {
+object SingleUnitBidOrder {
 
-  def apply[T <: Tradable](issuer: UUID, tradable: T): MarketBidOrder[T] = {
-    new MarketBidOrder[T](issuer, tradable)
+  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitBidOrder[T] = {
+    new SingleUnitBidOrder(issuer, Price.MinValue, tradable)
   }
 
 }

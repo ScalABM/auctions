@@ -31,17 +31,17 @@ import scala.util.Random
   */
 object OrderGenerator extends TokenGenerator {
 
-  def randomAskOrder[T <: Tradable](tradable: T, prng: Random): (Token, LimitAskOrder[T]) = {
+  def randomAskOrder[T <: Tradable](tradable: T, prng: Random): (Token, SingleUnitAskOrder[T]) = {
     val token = randomToken()
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
-    (token, LimitAskOrder(issuer, limit, tradable))
+    (token, SingleUnitAskOrder(issuer, limit, tradable))
   }
 
 
-  def randomAskOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, LimitAskOrder[T])] = {
+  def randomAskOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, SingleUnitAskOrder[T])] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[(Token, LimitAskOrder[T])], remaining: Int): Stream[(Token, LimitAskOrder[T])] = {
+    def loop(accumulated: Stream[(Token, SingleUnitAskOrder[T])], remaining: Int): Stream[(Token, SingleUnitAskOrder[T])] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -49,19 +49,19 @@ object OrderGenerator extends TokenGenerator {
         loop(ask #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[(Token, LimitAskOrder[T])], n)
+    loop(Stream.empty[(Token, SingleUnitAskOrder[T])], n)
   }
 
-  def randomBidOrder[T <: Tradable](tradable: T, prng: Random): (Token, LimitBidOrder[T]) = {
+  def randomBidOrder[T <: Tradable](tradable: T, prng: Random): (Token, SingleUnitBidOrder[T]) = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val token = randomToken()
     val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
-    (token, LimitBidOrder(issuer, limit, tradable))
+    (token, SingleUnitBidOrder(issuer, limit, tradable))
   }
 
-  def randomBidOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, LimitBidOrder[T])] = {
+  def randomBidOrders[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(Token, SingleUnitBidOrder[T])] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[(Token, LimitBidOrder[T])], remaining: Int): Stream[(Token, LimitBidOrder[T])] = {
+    def loop(accumulated: Stream[(Token, SingleUnitBidOrder[T])], remaining: Int): Stream[(Token, SingleUnitBidOrder[T])] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -69,7 +69,7 @@ object OrderGenerator extends TokenGenerator {
         loop(bid #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[(Token, LimitBidOrder[T])], n)
+    loop(Stream.empty[(Token, SingleUnitBidOrder[T])], n)
   }
 
 
