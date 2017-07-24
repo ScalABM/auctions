@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.SingleUnit;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
