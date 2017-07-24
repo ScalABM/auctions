@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
 import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder // need to generalize the Auction!
 import org.economicsl.core.Tradable
 
 
@@ -30,7 +30,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   }
 
   protected def processOrders: Receive = {
-    case message @ InsertOrder(token, order: Order[T]) =>
+    case message @ InsertOrder(token, order: SingleUnitOrder[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
       response match {
         case Right(accepted) =>
@@ -88,7 +88,7 @@ object AuctionActor {
 
   final case class CancelOrder(reference: Reference)
 
-  final case class InsertOrder[T <: Tradable](token: Token, order: Order[T])
+  final case class InsertOrder[T <: Tradable](token: Token, order: SingleUnitOrder[T])
 
   final case class DeregisterAuctionParticipant(participant: ActorRef)
 

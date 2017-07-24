@@ -20,6 +20,7 @@ package org.economicsl.auctions
   *
   * @author davidrpugh
   * @since 0.1.0
+  * @todo move this to the settlement repo when ready.
   */
 trait Contract extends Serializable {
 

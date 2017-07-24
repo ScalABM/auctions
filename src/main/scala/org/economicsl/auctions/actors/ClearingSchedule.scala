@@ -17,7 +17,7 @@ package org.economicsl.auctions.actors
 
 import akka.actor.ReceiveTimeout
 import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.singleunit.orders.Order
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
@@ -47,7 +47,7 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
   import AuctionActor._
 
   override def receive: Receive = {
-    case message @ InsertOrder(_, _: Order[T]) =>
+    case message @ InsertOrder(_, _: SingleUnitOrder[T]) =>
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, contracts) = auction.clear
@@ -80,7 +80,7 @@ trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
   }
 
   override def receive: Receive = {
-    case message @ ReceiveTimeout =>
+    case ReceiveTimeout =>
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, contracts) = auction.clear
@@ -91,7 +91,7 @@ trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
               // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
               // location of the SettlementActor (and hence without knowledge of the ActorRef).
       }
-      super.receive(message)
+      super.receive(ReceiveTimeout)
     case message =>
       super.receive(message)
   }
@@ -118,7 +118,7 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
   }
 
   override def receive: Receive = {
-    case message @ ClearRequest =>
+    case ClearRequest =>
       settlementService match {
         case Some(actorRef) =>
           val (updatedAuction, contracts) = auction.clear
@@ -130,7 +130,7 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
         // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
         // location of the SettlementActor (and hence without knowledge of the ActorRef).
       }
-      super.receive(message)
+      super.receive(ClearRequest)
     case message =>
       super.receive(message)
   }

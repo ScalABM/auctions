@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions
 
 import org.economicsl.core.{Price, Quantity, Tradable}
-import play.api.libs.json.{Json, Writes}
 
 import scala.collection.immutable
 
@@ -38,36 +37,6 @@ trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
   def quantity: Quantity
 
   val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
-
-}
-
-
-/** Companion object for the `SinglePricePoint` trait.
-  *
-  * Defines a basic ordering for anything that mixes in the `SinglePricePoint` trait.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-object SinglePricePoint {
-
-  implicit def writes[T <: Tradable, O <: Order[T] with SinglePricePoint[T]]: Writes[O] = {
-    order => Json.obj(
-      "issuer" -> order.issuer,
-      "limit" -> order.limit,
-      "quantity" -> order.quantity,
-      "tradable" -> order.tradable
-    )
-  }
-
-  /** All `Contract with OrderLike` instances that mixin `SinglePricePoint` are ordered by `limit` from lowest to highest.
-    *
-    * @tparam O the sub-type of `Order with SinglePricePoint` that is being ordered.
-    * @return `Ordering` defined over `Order[T] with SinglePricePoint[T]` instances.
-    */
-  def ordering[T <: Tradable, O <: Order[T] with SinglePricePoint[T]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
-  }
 
 }
 

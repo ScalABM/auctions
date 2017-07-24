@@ -16,9 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
+import org.economicsl.auctions.SingleUnit;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.OrderTracker.*;
-import org.economicsl.auctions.singleunit.orders.Order;
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;
@@ -68,7 +69,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
     * @param order
     * @return
     */
-    public InsertResult<JSealedBidAuction<T>> insert(Tuple2<UUID, Order<T>> order) {
+    public InsertResult<JSealedBidAuction<T>> insert(Tuple2<UUID, SingleUnitOrder<T>> order) {
         Tuple2<SealedBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
         JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());

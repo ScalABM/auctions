@@ -15,13 +15,5 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{Order, SingleUnit}
-import org.economicsl.core.Tradable
 
-
-package object orders {
-
-  /* Type alias used to shorten type signatures throughout the singleunit package. */
-  type SingleUnitOrder[T <: Tradable] = Order[T] with SingleUnit[T]
-
-}
+package object orders
