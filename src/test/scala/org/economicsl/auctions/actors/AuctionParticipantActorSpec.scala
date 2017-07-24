@@ -21,7 +21,7 @@ import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
 import org.economicsl.auctions.OrderTracker.{Accepted, CanceledByIssuer}
 import org.economicsl.auctions.{ReferenceGenerator, TestTradable, TokenGenerator}
-import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder$, SingleUnitBidOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.Price
 import org.economicsl.core.util.Timestamper
 import org.scalatest.{FeatureSpecLike, GivenWhenThen, Matchers}
