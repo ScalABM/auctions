@@ -11,11 +11,14 @@ trait AuctionSimulation {
   type InsertResult[T <: Tradable, A <: Auction[T, A]] = (A, Stream[Either[Rejected, Accepted]])
 
   def insert[T <: Tradable, A <: Auction[T, A]](initial: A)(orders: Stream[(Token, SingleUnitOrder[T])]): (A, Stream[Either[Rejected, Accepted]]) = {
-    orders.foldLeft((initial, Stream.empty[Either[Rejected, Accepted]])) {
+    orders.aggregate((initial, Stream.empty[Either[Rejected, Accepted]]))({
       case ((auction, insertResults), order) =>
         val (updated, insertResult) = auction.insert(order)
         (updated, insertResult #:: insertResults)
+    }, {
+      case ((auction1, results1), (auction2, results2)) => (auction1.combineWith(auction2), results1.append(results2))
     }
+    )
   }
 
 }
