@@ -17,7 +17,6 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
@@ -35,6 +34,7 @@ import scala.util.Random
 class SecondPriceSealedBidAuctionSpec
     extends FlatSpec
     with Matchers
+    with AuctionSimulation
     with TokenGenerator {
 
   // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
@@ -56,12 +56,7 @@ class SecondPriceSealedBidAuctionSpec
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, order) => order.limit }
 
   // winner should be the bidder that submitted the highest bid
-  val (withBidOrders, insertResults) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
-    case ((auction, results), bidOrder) =>
-      val (updatedAuction, result) = auction.insert(bidOrder)
-
-      (updatedAuction, result #:: results)
-  }
+  val (withBidOrders, _) = collectOrders[ParkingSpace, SealedBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
   val (clearedAuction, fills): (SealedBidAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
 
   "A Second-Price, Sealed-Bid Auction (SPSBA)" should "allocate the Tradable to the bidder that submitted the bid with the highest price." in {

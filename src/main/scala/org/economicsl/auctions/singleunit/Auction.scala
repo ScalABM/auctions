@@ -66,6 +66,20 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     */
   def clear: (A, Option[Stream[SpotContract]])
 
+  /** Combines and `Auction` mechanism with some other `Auction`.
+  *
+    * @param that
+    * @return
+    * @note this method is necessary in order to parallelize auction simulations.
+    */
+  def combineWith(that: A): A = {
+    require(tradable.equals(that.tradable), "Auctions can only be combined if they are for the same Tradable!")
+    val combinedOrderBooks = orderBook.combineWith(that.orderBook)
+    val withCombinedOrderBooks = withOrderBook(combinedOrderBooks)
+    val updatedTickSize = tickSize * that.tickSize  // todo compute least-common-multiple of tick sizes! overflow!
+    withCombinedOrderBooks.withTickSize(updatedTickSize)
+  }
+
   /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
     *
     * @param kv a mapping between a unique (to the auction participant) `Token` and the `BidOrder` that should be

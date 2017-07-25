@@ -8,14 +8,20 @@ import org.economicsl.core.Tradable
 
 trait AuctionSimulation {
 
-  type InsertResult[T <: Tradable, A <: Auction[T, A]] = (A, Stream[Either[Rejected, Accepted]])
+  type OrderFlow[+T <: Tradable] = Stream[(Token, SingleUnitOrder[T])]
 
-  def insert[T <: Tradable, A <: Auction[T, A]](initial: A)(orders: Stream[(Token, SingleUnitOrder[T])]): (A, Stream[Either[Rejected, Accepted]]) = {
-    orders.foldLeft((initial, Stream.empty[Either[Rejected, Accepted]])) {
-      case ((auction, insertResults), order) =>
-        val (updated, insertResult) = auction.insert(order)
-        (updated, insertResult #:: insertResults)
-    }
+  type Result[T <: Tradable, A <: Auction[T, A]] = (A, Stream[Either[Rejected, Accepted]])
+
+  def collectOrders[T <: Tradable, A <: Auction[T, A]](auction: A)(orders: OrderFlow[T]): Result[T, A] = {
+    val initialResult: Result[T, A] = (auction, Stream.empty[Either[Rejected, Accepted]])
+    orders.aggregate(initialResult)({
+      case ((currentAuction, results), order) =>
+        val (updatedAuction, result) = currentAuction.insert(order)
+        (updatedAuction, result #:: results)
+    }, {
+      case ((auction1, results1), (auction2, results2)) =>
+        (auction1.combineWith(auction2), results1.append(results2))
+    })
   }
 
 }

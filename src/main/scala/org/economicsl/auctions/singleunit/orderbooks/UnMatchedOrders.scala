@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.orders._
-import org.economicsl.core.Tradable
+import org.economicsl.core.{Quantity, Tradable}
 
 
 /** Class for storing sets of unmatched `AskOrder` and `BidOrder` instances.
@@ -29,8 +29,9 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
-                                                   val bidOrders: SortedBidOrders[T]) {
+final class UnMatchedOrders[T <: Tradable] private(
+  val askOrders: SortedAskOrders[T],
+  val bidOrders: SortedBidOrders[T]) {
 
   require(heapsNotCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
 
@@ -39,6 +40,9 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
   val bidOrdering: Ordering[(Reference, (Token, SingleUnitBidOrder[T]))] = bidOrders.ordering
+
+  /** Total number of units of the `Tradable` contained in the `UnMatchedOrders`. */
+  val numberUnits: Quantity = askOrders.numberUnits + bidOrders.numberUnits
 
   /** Create a new `UnMatchedOrders` instance containing the additional `AskOrder`.
     *
@@ -80,7 +84,29 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
     askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
-  /* Used to check this invariant that must hold for all `UnMatchedOrders` instances. */
+  def headOption: (Option[(Reference, (Token, SingleUnitAskOrder[T]))], Option[(Reference, (Token, SingleUnitBidOrder[T]))]) = {
+    (askOrders.headOption, bidOrders.headOption)
+  }
+
+  def isEmpty: Boolean = {
+    askOrders.isEmpty && bidOrders.isEmpty
+  }
+
+  /**
+    *
+    * @return
+    */
+  def tail: UnMatchedOrders[T] = {
+    if (askOrders.isEmpty) {
+      new UnMatchedOrders(askOrders, bidOrders.tail)
+    } else if (bidOrders.isEmpty) {
+      new UnMatchedOrders(askOrders.tail, bidOrders)
+    } else {
+      new UnMatchedOrders(askOrders.tail, bidOrders.tail)  // with throw exception if empty!
+    }
+  }
+
+  /* Used to check that highest priced bid order does not match with lowest priced ask order. */
   private[this] def heapsNotCrossed: Boolean = {
     bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
       askOrders.headOption.forall{ case (_, (_, askOrder)) =>

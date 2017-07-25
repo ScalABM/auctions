@@ -17,7 +17,9 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
 import org.economicsl.auctions.{Reference, Token}
-import org.economicsl.core.{Currency, Price, Tradable}
+import org.economicsl.core.{Currency, Price, Quantity, Tradable}
+
+import scala.collection.{GenIterable, GenSet}
 
 
 /** Class implementing the four-heap order book algorithm.
@@ -34,11 +36,15 @@ import org.economicsl.core.{Currency, Price, Tradable}
   *       Orders are distinguished by whether or not they are `AskOrder` or `BidOrder` instances, and whether or not
   *       they are in the current matched set.
   */
-final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedOrders[T],
-                                                     val unMatchedOrders: UnMatchedOrders[T]) {
+final class FourHeapOrderBook[T <: Tradable] private(
+  val matchedOrders: MatchedOrders[T],
+  val unMatchedOrders: UnMatchedOrders[T]) {
 
   /** If the constructor for `FourHeapOrderBook` becomes public, then this should be changed to require. */
   assert(orderBookInvariantsHold, "FourHeapOrderBook invariants failed!")
+
+  /** Total number of units of the `Tradable` contained in the `FourHeapOrderBook`. */
+  val numberUnits: Quantity = matchedOrders.numberUnits + unMatchedOrders.numberUnits
 
   /** The ask price quote is the price that a buyer would need to exceed in order for its bid to be matched had the
     * auction cleared at the time the quote was issued.
@@ -74,8 +80,15 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
       None
   }
 
-  def spread: Option[Currency] = {
-    bidPriceQuote.flatMap(bidPrice => askPriceQuote.map(askPrice => bidPrice.value - askPrice.value))
+  def combineWith(that: FourHeapOrderBook[T]): FourHeapOrderBook[T] = {
+    // drain that order book of its matched and unmatched orders...
+    val (withOutMatchedOrders, additionalMatchedOrders) = that.removeAllMatchedOrders
+    val (residualOrderBook, additionalUnMatchedOrders) = withOutMatchedOrders.removeAllUnMatchedOrders
+    assert(residualOrderBook.isEmpty, "After removing all matched and un-matched orders, order book should be empty!")
+
+    // ...and add them to this order book!
+    val withAdditionalMatchedOrders = insert(additionalMatchedOrders)
+    withAdditionalMatchedOrders.insert(additionalUnMatchedOrders)
   }
 
   def insert(kv: (Reference, (Token, SingleUnitOrder[T]))): FourHeapOrderBook[T] = kv match {
@@ -113,6 +126,32 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
         case _ =>
           new FourHeapOrderBook(matchedOrders, unMatchedOrders + (reference -> (token -> order)))
       }
+  }
+
+  /** Create a new `FourHeapOrderBook` containing the collection of orders.
+    *
+    * @param kvs
+    * @return
+    * @note depending on the type of collection `kvs` this method might be done in parallel.
+    */
+  def insert(kvs: GenIterable[(Reference, (Token, SingleUnitOrder[T]))]): FourHeapOrderBook[T] = {
+    kvs.aggregate(this)((orderBook, kv) => orderBook.insert(kv), (ob1, ob2) => ob1.combineWith(ob2))
+  }
+
+  /**
+    *
+    * @return `true` if this `FourHeapOrderBook` contains no orders; `false` otherwise.
+    */
+  def isEmpty: Boolean = {
+    matchedOrders.isEmpty && unMatchedOrders.isEmpty
+  }
+
+  /**
+    *
+    * @return `true` if this `FourHeapOrderBook` contains orders; `false` otherwise.
+    */
+  def nonEmpty: Boolean = {
+    !isEmpty
   }
 
   /** Create a new `FourHeapOrderBook` with a given `AskOrder` removed from this order book.
@@ -174,6 +213,65 @@ final class FourHeapOrderBook[T <: Tradable] private(val matchedOrders: MatchedO
   def splitAtTopMatch: (FourHeapOrderBook[T], Option[((Reference, (Token, SingleUnitAskOrder[T])), (Reference, (Token, SingleUnitBidOrder[T])))]) = {
     val (remainingMatchedOrders, topMatchedOrders) = matchedOrders.splitAtTopMatch
     (new FourHeapOrderBook(remainingMatchedOrders, unMatchedOrders), topMatchedOrders)
+  }
+
+  def spread: Option[Currency] = {
+    bidPriceQuote.flatMap(bidPrice => askPriceQuote.map(askPrice => bidPrice.value - askPrice.value))
+  }
+
+  /**
+    *
+    * @return
+    * @todo benchmark this method!
+    */
+  private def removeAllMatchedOrders: (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
+
+    @annotation.tailrec
+    def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(Reference, (Token, SingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
+      val (residualOrderBook, topMatch) = orderBook.splitAtTopMatch
+      topMatch match {
+        case Some((askOrder, bidOrder)) =>
+          val updatedOrders = orders + askOrder + bidOrder
+          accumulate(residualOrderBook, updatedOrders)
+        case None =>
+          (residualOrderBook, orders)
+      }
+    }
+
+    accumulate(this, GenSet.empty)
+  }
+
+  /**
+    *
+    * @return
+    * @todo benchmark this method!
+    */
+  private def removeAllUnMatchedOrders: (FourHeapOrderBook[T], GenIterable[(Reference, (Token, SingleUnitOrder[T]))]) = {
+
+    @annotation.tailrec
+    def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(Reference, (Token, SingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
+      orderBook.unMatchedOrders.headOption match {
+        case (Some(askOrder), Some(bidOrder)) =>
+          val updatedOrders = orders + askOrder + bidOrder
+          val residualUnMatchedOrders = orderBook.unMatchedOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, residualUnMatchedOrders)
+          accumulate(residualOrderBook, updatedOrders)
+        case (Some(askOrder), None) =>
+          val updatedOrders = orders + askOrder
+          val residualUnMatchedOrders = orderBook.unMatchedOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, residualUnMatchedOrders)
+          accumulate(residualOrderBook, updatedOrders)
+        case (None, Some(bidOrder)) =>
+          val updatedOrders = orders + bidOrder
+          val residualUnMatchedOrders = orderBook.unMatchedOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, residualUnMatchedOrders)
+          accumulate(residualOrderBook, updatedOrders)
+        case (None, None) =>
+          (orderBook, orders)
+      }
+    }
+
+    accumulate(this, GenSet.empty)
   }
 
   /**

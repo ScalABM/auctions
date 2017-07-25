@@ -17,7 +17,6 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
@@ -34,6 +33,7 @@ import scala.util.Random
   */
 class SecondPriceSealedBidReverseAuctionSpec
     extends FlatSpec
+    with AuctionSimulation
     with Matchers {
 
   // reverse auction to procure a service at lowest possible cost...
@@ -55,14 +55,7 @@ class SecondPriceSealedBidReverseAuctionSpec
   val (_, lowestPricedAskOrder): (Token, SingleUnitAskOrder[Service]) = offers.minBy{ case (_, order) => order.limit }
 
   // insert the ask orders into the auction mechanism...can be done in parallel!
-  val (withAskOrders, _): (SealedBidAuction[Service], Stream[Either[Rejected, Accepted]]) = {
-    offers.foldLeft((withReservationBidOrder, Stream.empty[Either[Rejected, Accepted]])) {
-      case ((auction, insertResults), askOrder) =>
-        val (updatedAuction, insertResult) = auction.insert(askOrder)
-        (updatedAuction, insertResult #:: insertResults)
-    }
-  }
-
+  val (withAskOrders, _) = collectOrders[Service, SealedBidAuction[Service]](withReservationBidOrder)(offers)
   val (clearedAuction, fills) = withAskOrders.clear
 
   "A Second-Price, Sealed-Ask Reverse Auction (SPSBRA)" should "purchase the Service from the seller who offers it at the lowest price." in {

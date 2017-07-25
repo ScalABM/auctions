@@ -17,7 +17,6 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.AskQuotePricingPolicy
 import org.economicsl.auctions._
@@ -35,6 +34,7 @@ import scala.util.Random
 class FirstPriceSealedBidAuctionSpec
     extends FlatSpec
     with Matchers
+    with AuctionSimulation
     with TokenGenerator {
 
   // seller uses a first-priced, sealed bid auction...
@@ -59,12 +59,7 @@ class FirstPriceSealedBidAuctionSpec
   }
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
-  val (withBidOrders, _) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
-    case ((auction, insertResults), bidOrder) =>
-      val (updated, insertResult) = auction.insert(bidOrder)
-      (updated, insertResult #:: insertResults)
-  }
-
+  val (withBidOrders, _) = collectOrders[ParkingSpace, SealedBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
   val (clearedAuction, fills) = withBidOrders.clear
 
   "A first-price, sealed-bid auction (FPSBA)" should "allocate the Tradable to the bidder that submits the bid with the highest price." in {
