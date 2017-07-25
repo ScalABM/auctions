@@ -58,7 +58,7 @@ class FirstPriceOpenBidAuctionSpec
   val (withReservationAskOrder, _) = firstPriceOpenBidAuction.insert(reservation)
 
   // withBidOrders will include all accepted bids (this is trivially parallel..)
-  val (withBidOrders, _) = insert[ParkingSpace, OpenBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
+  val (withBidOrders, _) = collectOrders[ParkingSpace, OpenBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
   val (clearedAuction, clearResults) = withBidOrders.clear
 
   "A First-Price, Open-Bid Auction (FPOBA)" should "be able to process ask price quote requests" in {

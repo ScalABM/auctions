@@ -17,7 +17,6 @@ package org.economicsl.auctions.singleunit
 
 import java.util.UUID
 
-import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
 import org.economicsl.auctions._
 import org.economicsl.auctions.quotes.AskPriceQuoteRequest
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
@@ -35,6 +34,7 @@ import scala.util.Random
   */
 class SecondPriceOpenBidAuctionSpec
     extends FlatSpec
+    with AuctionSimulation
     with Matchers {
 
   // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
@@ -57,11 +57,7 @@ class SecondPriceOpenBidAuctionSpec
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, order) => order.limit }
 
   // winner should be the bidder that submitted the highest bid
-  val (withBidOrders, insertResults) = bidOrders.foldLeft((withReservationAskOrder, Stream.empty[Either[Rejected, Accepted]])) {
-    case ((auction, results), bidOrder) =>
-      val (updatedAuction, result) = auction.insert(bidOrder)
-      (updatedAuction, result #:: results)
-  }
+  val (withBidOrders, _) = collectOrders[ParkingSpace, OpenBidAuction[ParkingSpace]](withReservationAskOrder)(bidOrders)
   val (clearedAuction, fills): (OpenBidAuction[ParkingSpace], Option[Stream[SpotContract]]) = withBidOrders.clear
 
   "A Second-Price, Open-Bid Auction (SPOBA)" should "be able to process ask price quote requests" in {
