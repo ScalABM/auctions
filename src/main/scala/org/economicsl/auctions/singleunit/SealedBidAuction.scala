@@ -123,7 +123,7 @@ object SealedBidAuction {
     def combineWith(that: SealedBidAuction[T]): SealedBidAuction[T] = {
       require(tradable.equals(that.tradable), "Auctions can only be combined if they are for the same Tradable!")
       val combinedOrderBooks = orderBook.combineWith(that.orderBook)
-      val updatedTickSize = tickSize * that.tickSize  // todo compute least-common-multiple of tick sizes!
+      val updatedTickSize = tickSize * that.tickSize  // todo compute least-common-multiple of tick sizes! overflow!
       val updatedPricingPolicy: PricingPolicy[T] = ???
       new WithUniformClearingPolicy(combinedOrderBooks, updatedPricingPolicy, updatedTickSize, tradable)
     }

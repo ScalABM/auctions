@@ -19,7 +19,7 @@ import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnit
 import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.core.{Currency, Price, Tradable}
 
-import scala.collection.GenIterable
+import scala.collection.{GenIterable, GenSet}
 
 
 /** Class implementing the four-heap order book algorithm.
@@ -135,10 +135,18 @@ final class FourHeapOrderBook[T <: Tradable] private(
     kvs.aggregate(this)((orderBook, kv) => orderBook.insert(kv), (ob1, ob2) => ob1.combineWith(ob2))
   }
 
+  /**
+    *
+    * @return `true` if this `FourHeapOrderBook` contains no orders; `false` otherwise.
+    */
   def isEmpty: Boolean = {
     matchedOrders.isEmpty && unMatchedOrders.isEmpty
   }
 
+  /**
+    *
+    * @return `true` if this `FourHeapOrderBook` contains orders; `false` otherwise.
+    */
   def nonEmpty: Boolean = {
     !isEmpty
   }
@@ -208,12 +216,57 @@ final class FourHeapOrderBook[T <: Tradable] private(
     bidPriceQuote.flatMap(bidPrice => askPriceQuote.map(askPrice => bidPrice.value - askPrice.value))
   }
 
-  private def removeAllMatchedOrders: (FourHeapOrderBook[T], GenIterable[(Reference, (Token, SingleUnitOrder[T]))]) = {
-    ???
+  /**
+    *
+    * @return
+    * @todo benchmark this method!
+    */
+  private def removeAllMatchedOrders: (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
+
+    @annotation.tailrec
+    def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(Reference, (Token, SingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
+      val (residualOrderBook, topMatch) = splitAtTopMatch
+      topMatch match {
+        case Some((askOrder, bidOrder)) =>
+          val updatedOrders = orders + askOrder + bidOrder
+          accumulate(residualOrderBook, updatedOrders)
+        case None =>
+          (residualOrderBook, orders)
+      }
+    }
+
+    accumulate(this, GenSet.empty)
   }
 
+  /**
+    *
+    * @return
+    * @todo benchmark this method!
+    */
   private def removeAllUnMatchedOrders: (FourHeapOrderBook[T], GenIterable[(Reference, (Token, SingleUnitOrder[T]))]) = {
-    ???
+
+    @annotation.tailrec
+    def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(Reference, (Token, SingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
+      unMatchedOrders.headOption match {
+        case (Some(askOrder), Some(bidOrder)) =>
+          val updatedOrders = orders + askOrder + bidOrder
+          unMatchedOrders.askOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, unMatchedOrders.tail)
+          accumulate(residualOrderBook, updatedOrders)
+        case (Some(askOrder), None) =>
+          val updatedOrders = orders + askOrder
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, unMatchedOrders.tail)
+          accumulate(residualOrderBook, updatedOrders)
+        case (None, Some(bidOrder)) =>
+          val updatedOrders = orders + bidOrder
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, unMatchedOrders.tail)
+          accumulate(residualOrderBook, updatedOrders)
+        case (None, None) =>
+          (orderBook, orders)
+      }
+    }
+
+    accumulate(this, GenSet.empty)
   }
 
   /**

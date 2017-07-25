@@ -29,8 +29,9 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrders[T],
-                                                   val bidOrders: SortedBidOrders[T]) {
+final class UnMatchedOrders[T <: Tradable] private(
+  val askOrders: SortedAskOrders[T],
+  val bidOrders: SortedBidOrders[T]) {
 
   require(heapsNotCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
 
@@ -80,11 +81,19 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
     askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
+  def headOption: (Option[(Reference, (Token, SingleUnitAskOrder[T]))], Option[(Reference, (Token, SingleUnitBidOrder[T]))]) = {
+    (askOrders.headOption, bidOrders.headOption)
+  }
+
   def isEmpty: Boolean = {
     askOrders.isEmpty && bidOrders.isEmpty
   }
 
-  /* Used to check this invariant that must hold for all `UnMatchedOrders` instances. */
+  def tail: UnMatchedOrders[T] = {
+    new UnMatchedOrders(askOrders.tail, bidOrders.tail)
+  }
+
+  /* Used to check that highest priced bid order does not match with lowest priced ask order. */
   private[this] def heapsNotCrossed: Boolean = {
     bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>
       askOrders.headOption.forall{ case (_, (_, askOrder)) =>
