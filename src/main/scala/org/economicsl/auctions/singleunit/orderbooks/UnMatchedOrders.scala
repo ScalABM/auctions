@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.orders._
-import org.economicsl.core.Tradable
+import org.economicsl.core.{Quantity, Tradable}
 
 
 /** Class for storing sets of unmatched `AskOrder` and `BidOrder` instances.
@@ -40,6 +40,9 @@ final class UnMatchedOrders[T <: Tradable] private(
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
   val bidOrdering: Ordering[(Reference, (Token, SingleUnitBidOrder[T]))] = bidOrders.ordering
+
+  /** Total number of units of the `Tradable` contained in the `UnMatchedOrders`. */
+  val numberUnits: Quantity = askOrders.numberUnits + bidOrders.numberUnits
 
   /** Create a new `UnMatchedOrders` instance containing the additional `AskOrder`.
     *
@@ -89,8 +92,18 @@ final class UnMatchedOrders[T <: Tradable] private(
     askOrders.isEmpty && bidOrders.isEmpty
   }
 
+  /**
+    *
+    * @return
+    */
   def tail: UnMatchedOrders[T] = {
-    new UnMatchedOrders(askOrders.tail, bidOrders.tail)
+    if (askOrders.isEmpty) {
+      new UnMatchedOrders(askOrders, bidOrders.tail)
+    } else if (bidOrders.isEmpty) {
+      new UnMatchedOrders(askOrders.tail, bidOrders)
+    } else {
+      new UnMatchedOrders(askOrders.tail, bidOrders.tail)  // with throw exception if empty!
+    }
   }
 
   /* Used to check that highest priced bid order does not match with lowest priced ask order. */

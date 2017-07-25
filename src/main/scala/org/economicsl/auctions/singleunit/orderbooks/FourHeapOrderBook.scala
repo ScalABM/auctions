@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
 import org.economicsl.auctions.{Reference, Token}
-import org.economicsl.core.{Currency, Price, Tradable}
+import org.economicsl.core.{Currency, Price, Quantity, Tradable}
 
 import scala.collection.{GenIterable, GenSet}
 
@@ -42,6 +42,9 @@ final class FourHeapOrderBook[T <: Tradable] private(
 
   /** If the constructor for `FourHeapOrderBook` becomes public, then this should be changed to require. */
   assert(orderBookInvariantsHold, "FourHeapOrderBook invariants failed!")
+
+  /** Total number of units of the `Tradable` contained in the `FourHeapOrderBook`. */
+  val numberUnits: Quantity = matchedOrders.numberUnits + unMatchedOrders.numberUnits
 
   /** The ask price quote is the price that a buyer would need to exceed in order for its bid to be matched had the
     * auction cleared at the time the quote was issued.
@@ -225,7 +228,7 @@ final class FourHeapOrderBook[T <: Tradable] private(
 
     @annotation.tailrec
     def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(Reference, (Token, SingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
-      val (residualOrderBook, topMatch) = splitAtTopMatch
+      val (residualOrderBook, topMatch) = orderBook.splitAtTopMatch
       topMatch match {
         case Some((askOrder, bidOrder)) =>
           val updatedOrders = orders + askOrder + bidOrder
@@ -247,19 +250,21 @@ final class FourHeapOrderBook[T <: Tradable] private(
 
     @annotation.tailrec
     def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(Reference, (Token, SingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(Reference, (Token, SingleUnitOrder[T]))]) = {
-      unMatchedOrders.headOption match {
+      orderBook.unMatchedOrders.headOption match {
         case (Some(askOrder), Some(bidOrder)) =>
           val updatedOrders = orders + askOrder + bidOrder
-          unMatchedOrders.askOrders.tail
-          val residualOrderBook = new FourHeapOrderBook(matchedOrders, unMatchedOrders.tail)
+          val residualUnMatchedOrders = orderBook.unMatchedOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, residualUnMatchedOrders)
           accumulate(residualOrderBook, updatedOrders)
         case (Some(askOrder), None) =>
           val updatedOrders = orders + askOrder
-          val residualOrderBook = new FourHeapOrderBook(matchedOrders, unMatchedOrders.tail)
+          val residualUnMatchedOrders = orderBook.unMatchedOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, residualUnMatchedOrders)
           accumulate(residualOrderBook, updatedOrders)
         case (None, Some(bidOrder)) =>
           val updatedOrders = orders + bidOrder
-          val residualOrderBook = new FourHeapOrderBook(matchedOrders, unMatchedOrders.tail)
+          val residualUnMatchedOrders = orderBook.unMatchedOrders.tail
+          val residualOrderBook = new FourHeapOrderBook(matchedOrders, residualUnMatchedOrders)
           accumulate(residualOrderBook, updatedOrders)
         case (None, None) =>
           (orderBook, orders)

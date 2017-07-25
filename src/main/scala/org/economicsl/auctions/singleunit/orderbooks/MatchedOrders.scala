@@ -43,7 +43,8 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
   /** The ordering used to sort the `BidOrder` instances contained in this `MatchedOrders` instance. */
   val bidOrdering: Ordering[(Reference, (Token, SingleUnitBidOrder[T]))] = bidOrders.ordering
 
-  val numberUnits: Quantity = askOrders.numberUnits  // or bidOrders.numberUnits!
+  /** Total number of units of the `Tradable` contained in the `MatchedOrders`. */
+  val numberUnits: Quantity = askOrders.numberUnits + bidOrders.numberUnits
 
   /** Create a new `MatchedOrders` instance containing a matched pair of `(AskOrder, BidOrder)` instances.
     *

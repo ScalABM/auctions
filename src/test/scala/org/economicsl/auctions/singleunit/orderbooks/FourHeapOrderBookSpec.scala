@@ -51,7 +51,6 @@ class FourHeapOrderBookSpec
     case (orderBook, (reference, askOrder)) => orderBook.insert(reference -> askOrder)
   }
 
-
   "A FourHeapOrderBook" should "be able to insert bid orders" in {
 
     withBids.matchedOrders.numberUnits should be(Quantity.zero)
@@ -89,6 +88,14 @@ class FourHeapOrderBookSpec
         residual
     }
     assert(withOutBids.unMatchedOrders.bidOrders.isEmpty)
+
+  }
+
+  "A FourHeapOrderBook" should "be able to combine with another FourHeapOrderBook" in {
+
+    val withOrders = withBids.combineWith(withOffers)
+    val expectedNumberUnits = withBids.numberUnits + withOffers.numberUnits
+    withOrders.numberUnits should be(expectedNumberUnits)
 
   }
 
