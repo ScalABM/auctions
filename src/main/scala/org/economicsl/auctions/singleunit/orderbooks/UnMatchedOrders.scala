@@ -80,6 +80,10 @@ final class UnMatchedOrders[T <: Tradable] private(val askOrders: SortedAskOrder
     askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
+  def isEmpty: Boolean = {
+    askOrders.isEmpty && bidOrders.isEmpty
+  }
+
   /* Used to check this invariant that must hold for all `UnMatchedOrders` instances. */
   private[this] def heapsNotCrossed: Boolean = {
     bidOrders.headOption.forall{ case (_, (_, bidOrder)) =>

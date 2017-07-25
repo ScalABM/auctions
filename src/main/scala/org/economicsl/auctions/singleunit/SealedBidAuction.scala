@@ -74,6 +74,20 @@ object SealedBidAuction {
       extends SealedBidAuction[T]
       with DiscriminatoryClearingPolicy[T, SealedBidAuction[T]] {
 
+    /** Combines this `SealedBidAuction` mechanism with some other `SealedBidAuction`.
+      *
+      * @param that
+      * @return
+      * @note this method is necessary in order to parallelize auction simulations.
+      */
+    def combineWith(that: SealedBidAuction[T]): SealedBidAuction[T] = {
+      require(tradable.equals(that.tradable), "Auctions can only be combined if they are for the same Tradable!")
+      val combinedOrderBooks = orderBook.combineWith(that.orderBook)
+      val updatedTickSize = tickSize * that.tickSize  // todo compute least-common-multiple of tick sizes!
+      val updatedPricingPolicy: PricingPolicy[T] = ???
+      new WithDiscriminatoryClearingPolicy(combinedOrderBooks, updatedPricingPolicy, updatedTickSize, tradable)
+    }
+
     /** Returns an auction of type `A` with a particular pricing policy. */
     def withPricingPolicy(updated: PricingPolicy[T]): SealedBidAuction[T] = {
       new WithDiscriminatoryClearingPolicy[T](orderBook, updated, tickSize, tradable)
@@ -99,6 +113,20 @@ object SealedBidAuction {
     val tradable: T)
       extends SealedBidAuction[T]
       with UniformClearingPolicy[T, SealedBidAuction[T]] {
+
+    /** Combines this `SealedBidAuction` mechanism with some other `SealedBidAuction`.
+      *
+      * @param that
+      * @return
+      * @note this method is necessary in order to parallelize auction simulations.
+      */
+    def combineWith(that: SealedBidAuction[T]): SealedBidAuction[T] = {
+      require(tradable.equals(that.tradable), "Auctions can only be combined if they are for the same Tradable!")
+      val combinedOrderBooks = orderBook.combineWith(that.orderBook)
+      val updatedTickSize = tickSize * that.tickSize  // todo compute least-common-multiple of tick sizes!
+      val updatedPricingPolicy: PricingPolicy[T] = ???
+      new WithUniformClearingPolicy(combinedOrderBooks, updatedPricingPolicy, updatedTickSize, tradable)
+    }
 
     /** Returns an auction of type `A` with a particular pricing policy. */
     def withPricingPolicy(updated: PricingPolicy[T]): SealedBidAuction[T] = {

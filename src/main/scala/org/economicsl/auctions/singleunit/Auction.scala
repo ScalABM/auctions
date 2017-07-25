@@ -66,6 +66,14 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     */
   def clear: (A, Option[Stream[SpotContract]])
 
+  /** Combines and `Auction` mechanism with some other `Auction`.
+  *
+    * @param that
+    * @return
+    * @note this method is necessary in order to parallelize auction simulations.
+    */
+  def combineWith(that: A): A
+
   /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
     *
     * @param kv a mapping between a unique (to the auction participant) `Token` and the `BidOrder` that should be

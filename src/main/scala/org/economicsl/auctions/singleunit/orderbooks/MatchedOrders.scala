@@ -99,6 +99,10 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
     askOrders.headOption.flatMap(askOrder => bidOrders.headOption.map(bidOrder => (askOrder, bidOrder)))
   }
 
+  def isEmpty: Boolean = {
+    askOrders.isEmpty && bidOrders.isEmpty
+  }
+
   /** Replace an existing `AskOrder` instance with another `AskOrder` instance.
     *
     * @param existing
