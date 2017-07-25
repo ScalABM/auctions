@@ -99,6 +99,33 @@ trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 }
 
 
+/** Schedules a clearing event in response to an external request. */
+trait OnDemandClearingSchedule[T <: Tradable, A <: Auction[T, A]]
+  extends ClearingSchedule[T, A] {
+  this: AuctionActor[T, A] =>
+
+  import ClearingSchedule._
+
+  override def receive: Receive = {
+    case ClearRequest =>
+      settlementService match {
+        case Some(actorRef) =>
+          val (updatedAuction, contracts) = auction.clear
+          contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
+          auction = updatedAuction
+        case None =>
+          ??? // todo how to handle this case?
+        // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
+        // location of the SettlementActor (and hence without knowledge of the ActorRef).
+      }
+      super.receive(ClearRequest)
+    case message =>
+      super.receive(message)
+  }
+
+}
+
+
 /** Schedules a clearing event to occur after fixed time intervals. */
 trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     extends ClearingSchedule[T, A] {
