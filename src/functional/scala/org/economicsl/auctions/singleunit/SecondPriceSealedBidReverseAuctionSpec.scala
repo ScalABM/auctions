@@ -38,8 +38,9 @@ class SecondPriceSealedBidReverseAuctionSpec
 
   // reverse auction to procure a service at lowest possible cost...
   val service = Service()
+  val protocol = AuctionProtocol(service)
   val secondPriceSealedBidReverseAuction: SealedBidAuction[Service] = {
-    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[Service], service)
+    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[Service], protocol)
   }
 
   // buyer is willing to pay anything...

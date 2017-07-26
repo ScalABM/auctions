@@ -32,8 +32,9 @@ import scala.util.Random
 object ContinuousDoubleAuction extends App {
 
   val google: TestStock = TestStock()
+  val protocol = AuctionProtocol(google)
   val pricingRule = new MidPointPricingPolicy[TestStock]
-  val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, google)
+  val withDiscriminatoryPricing = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingRule, protocol)
 
   // generate a very large stream of random orders...
   type OrderFlow[T <: Tradable] = Stream[(Token, SingleUnitOrder[T])]

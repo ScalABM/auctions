@@ -40,8 +40,9 @@ class FirstPriceSealedBidAuctionSpec
   // seller uses a first-priced, sealed bid auction...
   val uuid: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(uuid)
+  val protocol = AuctionProtocol(parkingSpace)
   val firstPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
+    SealedBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], protocol)
   }
 
   // suppose that seller must sell the parking space at any positive price...

@@ -28,3 +28,25 @@ trait AuctionProtocol[+T <: Tradable] {
   def withTickSize(updated: Currency): AuctionProtocol[T]
 
 }
+
+
+object AuctionProtocol {
+
+  def apply[T <: Tradable](tickSize: Currency, tradable: T): AuctionProtocol[T] = {
+    AuctionProtocolImpl(tickSize, tradable)
+  }
+
+  def apply[T <: Tradable](tradable: T): AuctionProtocol[T] = {
+    AuctionProtocolImpl(1L, tradable)
+  }
+
+  private case class AuctionProtocolImpl[+T <: Tradable](tickSize: Currency, tradable: T)
+      extends AuctionProtocol[T] {
+
+    def withTickSize(updated: Currency): AuctionProtocol[T] = {
+      AuctionProtocolImpl(updated, tradable)
+    }
+
+  }
+
+}

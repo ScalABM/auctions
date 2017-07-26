@@ -26,7 +26,8 @@ public class ImperativePeriodicDoubleAuction {
         // define the auction mechanism...
         TestStock googleStock = new TestStock();
         MidPointPricingPolicy<TestStock> midpointPricingPolicy = new MidPointPricingPolicy<>();
-        OpenBidAuction<TestStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy, googleStock);
+        AuctionProtocol<TestStock> protocol = AuctionProtocol$.MODULE$.apply(googleStock);  // todo create JAuctionProtocol?
+        OpenBidAuction<TestStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy, protocol);
 
         // generate some random order flow...
         int numberOrders = 10000;

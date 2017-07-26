@@ -20,7 +20,7 @@ import java.util.UUID
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.auctions.singleunit.pricing.BidQuotePricingPolicy
-import org.economicsl.core.{Currency, Price}
+import org.economicsl.core.Price
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -38,11 +38,11 @@ class SecondPriceSealedBidAuctionSpec
     with TokenGenerator {
 
   // seller is willing to sell at any positive price...but wants incentive compatible mechanism for buyers!
-  val tickSize: Currency = 1
   val uuid: UUID = UUID.randomUUID()
   val parkingSpace = ParkingSpace(uuid)
+  val protocol = AuctionProtocol(parkingSpace)
   val secondPriceSealedBidAuction: SealedBidAuction[ParkingSpace] = {
-    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], tickSize, parkingSpace)
+    SealedBidAuction.withUniformClearingPolicy(BidQuotePricingPolicy[ParkingSpace], protocol)
   }
 
   val seller: UUID = UUID.randomUUID()
