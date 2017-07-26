@@ -79,54 +79,32 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
         return new JSealedBidAuction<>(withUpdatedPricingPolicy);
     }
 
-    public JSealedBidAuction<T> withTickSize(Long updated) {
-        SealedBidAuction<T> withUpdatedTickSize = auction.withTickSize(updated);
+    public JSealedBidAuction<T> withProtocol(Auction.AuctionProtocol<T> updated) {
+        SealedBidAuction<T> withUpdatedTickSize = auction.withProtocol(updated);
         return new JSealedBidAuction<>(withUpdatedTickSize);
     }
 
-    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
-     *
-     * @param pricingPolicy
-     * @param tickSize
-     * @param <T>
-     * @return
-     */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
-        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable);
-        return new JSealedBidAuction<>(auction);
-    }
-
-    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
-     *
-     * @param pricingPolicy
-     * @param <T>
-     * @return
-     */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
-        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tradable);
-        return new JSealedBidAuction<>(auction);
-    }
-
     /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
      *
      * @param pricingPolicy
-     * @param tickSize
+     * @param protocol
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Long tickSize, T tradable) {
-        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable);
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Auction.AuctionProtocol<T> protocol) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
 
-    /** Factory method for creating sealed-bid auctons with discriminatory clearing policy.
+    /** Factory method for creating sealed-bid auctions with uniform clearing policy.
      *
      * @param pricingPolicy
+     * @param protocol
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, T tradable) {
-        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tradable);
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Auction.AuctionProtocol<T> protocol) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
 

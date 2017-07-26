@@ -18,7 +18,8 @@ package org.economicsl.auctions.actors
 
 import akka.actor.ActorRef
 import org.economicsl.auctions.AuctionParticipant
-import org.economicsl.core.{Currency, Tradable}
+import org.economicsl.auctions.singleunit.Auction.AuctionProtocol
+import org.economicsl.core.Tradable
 
 
 /** Base trait for all `AuctionParticipant` actors.
@@ -33,26 +34,16 @@ trait AuctionParticipantActor[A <: AuctionParticipant[A]]
     extends OrderTrackingActor[A]
     with OrderIssuingActor[A] {
 
-  import AuctionParticipantActor._
-
   override def receive: Receive = {
-    case protocol : AuctionProtocol =>
+    case protocol : AuctionProtocol[Tradable] =>
       auctions = auctions + (sender() -> protocol)
     case message =>
       super.receive(message)
   }
 
   /* An `AuctionParticipant` needs to keep track of multiple auction protocols. */
-  protected var auctions: Map[ActorRef, AuctionProtocol]
+  protected var auctions: Map[ActorRef, AuctionProtocol[Tradable]]
 
   protected var auctionParticipant: A
-
-}
-
-
-object AuctionParticipantActor {
-
-  /** Need some data structure to convey the information about an auction to participants. */
-  final case class AuctionProtocol(tickSize: Currency, tradable: Tradable)
 
 }
