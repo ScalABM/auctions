@@ -16,15 +16,15 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.Issuer
-import org.economicsl.auctions.actors.AuctionParticipantActor.AuctionProtocol
+import org.economicsl.auctions.{AuctionProtocol, Issuer}
 import org.economicsl.auctions.singleunit.TestAuctionParticipant
+import org.economicsl.core.Tradable
 
 
 class TestAuctionParticipantActor private(var auctionParticipant: TestAuctionParticipant)
     extends AuctionParticipantActor[TestAuctionParticipant] {
 
-  protected var auctions: Map[ActorRef, AuctionProtocol] = Map.empty[ActorRef, AuctionProtocol]
+  protected var auctions: Map[ActorRef, AuctionProtocol[Tradable]] = Map.empty[ActorRef, AuctionProtocol[Tradable]]
 
 }
 

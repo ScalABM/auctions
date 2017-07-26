@@ -16,9 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
+import org.economicsl.auctions.AuctionProtocol
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
-import org.economicsl.core.{Currency, Tradable}
+import org.economicsl.core.Tradable
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -34,11 +35,10 @@ object PeriodicAuctionActor {
                                       (initialDelay: FiniteDuration,
                                        interval: FiniteDuration,
                                        pricingPolicy: PricingPolicy[T],
-                                       settlementService: ActorRef,
-                                       tickSize: Currency,
-                                       tradable: T)
+                                       protocol: AuctionProtocol[T],
+                                       settlementService: ActorRef)
                                        : Props = {
-    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, tickSize, tradable)
+    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol)
     Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
   }
 
@@ -46,11 +46,10 @@ object PeriodicAuctionActor {
                                (initialDelay: FiniteDuration,
                                 interval: FiniteDuration,
                                 pricingPolicy: PricingPolicy[T],
-                                settlementService: ActorRef,
-                                tickSize: Currency,
-                                tradable: T)
+                                protocol: AuctionProtocol[T],
+                                settlementService: ActorRef)
                                 : Props = {
-    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, tickSize, tradable)
+    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, protocol)
     Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
   }
 

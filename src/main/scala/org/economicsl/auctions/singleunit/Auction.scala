@@ -20,7 +20,7 @@ import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.util.Timestamper
-import org.economicsl.core.{Currency, Tradable}
+import org.economicsl.core.Tradable
 
 
 /** Base trait for all auction implementations.
@@ -73,11 +73,12 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     * @note this method is necessary in order to parallelize auction simulations.
     */
   def combineWith(that: A): A = {
-    require(tradable.equals(that.tradable), "Auctions can only be combined if they are for the same Tradable!")
+    require(protocol.tradable.equals(that.protocol.tradable), "Only auctions for the same Tradable can be combined!")
     val combinedOrderBooks = orderBook.combineWith(that.orderBook)
     val withCombinedOrderBooks = withOrderBook(combinedOrderBooks)
-    val updatedTickSize = tickSize * that.tickSize  // todo compute least-common-multiple of tick sizes! overflow!
-    withCombinedOrderBooks.withTickSize(updatedTickSize)
+    val combinedTickSize = protocol.tickSize * that.protocol.tickSize  // todo compute least-common-multiple of tick sizes! overflow!
+    val updatedProtocol = protocol.withTickSize(combinedTickSize)
+    withCombinedOrderBooks.withProtocol(updatedProtocol)
   }
 
   /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
@@ -89,14 +90,14 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         instances.
     */
   def insert(kv: (Token, SingleUnitOrder[T])): (A, Either[Rejected, Accepted]) = kv match {
-    case (token, order) if order.limit.value % tickSize > 0 =>
+    case (token, order) if order.limit.value % protocol.tickSize > 0 =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val reason = InvalidTickSize(order, tickSize)
+      val reason = InvalidTickSize(order, protocol)
       val rejected = Rejected(timestamp, token, order, reason)
       (this, Left(rejected))
-    case (token, order) if !order.tradable.equals(tradable) =>
+    case (token, order) if !order.tradable.equals(protocol.tradable) =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val reason = InvalidTradable(order, tradable)
+      val reason = InvalidTradable(order, protocol)
       val rejected = Rejected(timestamp, token, order, reason)
       (this, Left(rejected))
     case (token, order) =>
@@ -107,15 +108,14 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       (withOrderBook(updatedOrderBook), Right(accepted))
   }
 
-  def tickSize: Currency
-
-  def tradable: T
+  /** An `Auction` must have some protocol that contains all relevant information about auction. */
+  def protocol: AuctionProtocol[T]
 
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
   def withPricingPolicy(updated: PricingPolicy[T]): A
 
-  /** Returns an auction of type `A` the encapsulates the current auction state but with a new tick size. */
-  def withTickSize(updated: Currency): A
+  /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
+  def withProtocol(updated: AuctionProtocol[T]): A
 
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOrderBook(updated: FourHeapOrderBook[T]): A

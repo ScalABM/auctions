@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
 import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder // need to generalize the Auction!
+import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 
 
@@ -14,7 +14,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
     extends StackableActor {
 
   import AuctionActor._
-  import AuctionParticipantActor._
 
   var auction: A
 
@@ -62,7 +61,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   protected def registerAuctionParticipants: Receive = {
     case RegisterAuctionParticipant(participant) =>
       context.watch(participant)  // now `AuctionActor` will be notified if `AuctionParticipantActor` "dies"...
-      participant ! AuctionProtocol(auction.tickSize, auction.tradable)
+      participant ! auction.protocol
       participants = participants + participant
       ticker = ticker.addRoutee(participant)
     case DeregisterAuctionParticipant(participant) =>

@@ -47,8 +47,9 @@ class FirstPriceOpenBidAuctionSpec
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
   // seller uses a first-priced, open bid auction...
+  val protocol = AuctionProtocol(parkingSpace)
   val firstPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
-    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], parkingSpace)
+    OpenBidAuction.withUniformClearingPolicy(AskQuotePricingPolicy[ParkingSpace], protocol)
   }
 
   // Seller that must sell at any positive price
