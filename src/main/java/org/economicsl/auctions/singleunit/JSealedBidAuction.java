@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
+import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
@@ -79,7 +80,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
         return new JSealedBidAuction<>(withUpdatedPricingPolicy);
     }
 
-    public JSealedBidAuction<T> withProtocol(Auction.AuctionProtocol<T> updated) {
+    public JSealedBidAuction<T> withProtocol(AuctionProtocol<T> updated) {
         SealedBidAuction<T> withUpdatedTickSize = auction.withProtocol(updated);
         return new JSealedBidAuction<>(withUpdatedTickSize);
     }
@@ -91,7 +92,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Auction.AuctionProtocol<T> protocol) {
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
         SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
@@ -103,7 +104,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Auction.AuctionProtocol<T> protocol) {
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
         SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }

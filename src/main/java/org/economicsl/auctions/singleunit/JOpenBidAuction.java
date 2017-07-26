@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
+import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.OrderTracker.*;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.quotes.Quote;
@@ -85,7 +86,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
         return new JOpenBidAuction<>(withUpdatedPricingPolicy);
     }
 
-    public JOpenBidAuction<T> withProtocol(Auction.AuctionProtocol<T> updated) {
+    public JOpenBidAuction<T> withProtocol(AuctionProtocol<T> updated) {
         OpenBidAuction<T> withUpdatedTickSize = auction.withProtocol(updated);
         return new JOpenBidAuction<>(withUpdatedTickSize);
     }
@@ -97,7 +98,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, Auction.AuctionProtocol<T> protocol) {
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
         OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
@@ -109,7 +110,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, Auction.AuctionProtocol<T> protocol) {
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
         OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }

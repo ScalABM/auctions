@@ -15,7 +15,6 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.singleunit.Auction.AuctionProtocol
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
 

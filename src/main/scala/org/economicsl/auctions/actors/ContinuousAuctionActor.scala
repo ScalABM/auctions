@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.singleunit.Auction.AuctionProtocol
+import org.economicsl.auctions.AuctionProtocol
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.Tradable

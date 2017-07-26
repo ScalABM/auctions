@@ -16,12 +16,11 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.Auction.AuctionProtocol
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.util.Timestamper
-import org.economicsl.core.{Currency, Tradable}
+import org.economicsl.core.Tradable
 
 
 /** Base trait for all auction implementations.
@@ -124,21 +123,6 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   protected val orderBook: FourHeapOrderBook[T]
 
   protected val pricingPolicy: PricingPolicy[T]
-
-}
-
-
-object Auction {
-
-  /** Need some data structure to convey the information about an auction to participants. */
-  final case class AuctionProtocol[+T <: Tradable](tickSize: Currency, tradable: T) {
-
-    def withTickSize(updated: Currency): AuctionProtocol[T] = {
-      AuctionProtocol(updated, tradable)
-    }
-
-  }
-
 
 }
 
