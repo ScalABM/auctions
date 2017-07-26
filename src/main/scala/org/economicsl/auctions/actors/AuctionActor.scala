@@ -17,13 +17,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   var auction: A
 
-  /** ActorRef for the settlement service.
-    *
-    * @note in a remote context one might need to create an `AuctionActor` without knowing the location of the
-    *       `SettlementServiceActor`. Use of `Option[ActorRef]` as type allows user to initialize this field to `None`.
-    */
-  def settlementService: Option[ActorRef]
-
   override def receive: Receive = {
     processOrders orElse registerAuctionParticipants
   }

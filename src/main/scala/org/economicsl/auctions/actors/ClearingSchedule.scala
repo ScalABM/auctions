@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.ReceiveTimeout
+import akka.actor.{ActorRef, ReceiveTimeout}
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
@@ -28,6 +28,14 @@ import scala.concurrent.duration.FiniteDuration
 sealed trait ClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     extends StackableActor {
   this: AuctionActor[T, A] =>
+
+  /** ActorRef for the settlement service.
+    *
+    * @note in a remote context one might need to create an `AuctionActor` without knowing the location of the
+    *       `SettlementServiceActor`. Use of `Option[ActorRef]` as type allows user to initialize this field to `None`.
+    */
+  def settlementService: Option[ActorRef]
+
 }
 
 
