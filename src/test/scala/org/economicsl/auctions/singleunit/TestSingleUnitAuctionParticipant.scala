@@ -32,13 +32,13 @@ import scala.util.Random
   * @param outstandingOrders
   * @param valuations
   */
-class TestSingleUnitOrderIssuer private(
+class TestSingleUnitAuctionParticipant private(
   prng: Random,
   askOrderProbability: Double,
   val issuer: Issuer,
   protected val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
   protected val valuations: Map[Tradable, Price])
-    extends OrderIssuer[TestSingleUnitOrderIssuer] {
+    extends AuctionParticipant[TestSingleUnitAuctionParticipant] {
 
   /** Each `OrderIssuer` needs to issue orders given some `AuctionProtocol`.
     *
@@ -48,7 +48,7 @@ class TestSingleUnitOrderIssuer private(
     *         element is an `Order`.
     * @note care is needed in order to guarantee that the limit price is a multiple of the tick size.
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): (TestSingleUnitOrderIssuer, (Token, SingleUnitOrder[T])) = {
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): (TestSingleUnitAuctionParticipant, (Token, SingleUnitOrder[T])) = {
     if (prng.nextDouble() <= askOrderProbability) {
       // if valuation is not multiple of tick size, price is smallest multiple of tick size greater than valuation.
       val valuation = valuations.getOrElse(protocol.tradable, Price.MinValue)
@@ -65,22 +65,22 @@ class TestSingleUnitOrderIssuer private(
   }
 
   /** Factory method used by sub-classes to create an `A`. */
-  protected def withOutstandingOrders(updated: Map[Token, (Reference, Order[Tradable])]): TestSingleUnitOrderIssuer = {
-    new TestSingleUnitOrderIssuer(prng, askOrderProbability, issuer, updated, valuations)
+  protected def withOutstandingOrders(updated: Map[Token, (Reference, Order[Tradable])]): TestSingleUnitAuctionParticipant = {
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, updated, valuations)
   }
 
 }
 
 
-object TestSingleUnitOrderIssuer {
+object TestSingleUnitAuctionParticipant {
 
   def withNoOutstandingOrders(prng: Random,
                               askOrderProbability: Double,
                               issuer: Issuer,
                               valuations: Map[Tradable, Price])
-                             : TestSingleUnitOrderIssuer = {
+                             : TestSingleUnitAuctionParticipant = {
     val emptyOutstandingOrders = immutable.HashMap.empty[Token, (Reference, Order[Tradable])]
-    new TestSingleUnitOrderIssuer(prng, askOrderProbability, issuer, emptyOutstandingOrders, valuations)
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, emptyOutstandingOrders, valuations)
   }
 
 }

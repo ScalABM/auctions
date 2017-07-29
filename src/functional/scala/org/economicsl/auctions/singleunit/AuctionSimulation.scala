@@ -1,6 +1,6 @@
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.OrderTracker.{Accepted, Rejected}
+import org.economicsl.auctions.AuctionParticipant.{Accepted, Rejected}
 import org.economicsl.auctions.Token
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable

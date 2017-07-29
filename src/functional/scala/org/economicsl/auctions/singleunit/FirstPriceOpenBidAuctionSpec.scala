@@ -46,6 +46,8 @@ class FirstPriceOpenBidAuctionSpec
   val bidOrders: Stream[(Token, SingleUnitBidOrder[ParkingSpace])] = OrderGenerator.randomSingleUnitBidOrders(numberBidOrders, parkingSpace, prng)
   val (_, highestPricedBidOrder) = bidOrders.maxBy{ case (_, bidOrder) => bidOrder.limit }
 
+  val bidders: Set[TestAuctionParticipant] = ???
+
   // seller uses a first-priced, open bid auction...
   val protocol = AuctionProtocol(parkingSpace)
   val firstPriceOpenBidAuction: OpenBidAuction[ParkingSpace] = {
