@@ -37,7 +37,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     with Timestamper {
   this: A =>
 
-  import OrderTracker._
+  import AuctionParticipant._
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.

@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
-import org.economicsl.auctions.OrderTracker.*;
+import org.economicsl.auctions.AuctionParticipant.*;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
