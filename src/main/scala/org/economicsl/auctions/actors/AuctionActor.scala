@@ -15,14 +15,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   import AuctionActor._
 
-  var auction: A
-
   override def receive: Receive = {
-    processOrders orElse registerAuctionParticipants
-  }
-
-  protected def processOrders: Receive = {
-    case message @ InsertOrder(token, order: SingleUnitOrder[T]) =>
+    case InsertOrder(token, order: SingleUnitOrder[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
       response match {
         case Right(accepted) =>
@@ -31,7 +25,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         case Left(rejected) =>
           sender() ! rejected
       }
-      super.receive(message)
     case CancelOrder(reference) =>
       val (updatedAuction, cancelResult) = auction.cancel(reference)
       cancelResult match {
@@ -45,15 +38,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           */
           ???
       }
-  }
-
-  /** An `AuctionActor` needs to register `AuctionParticipantActors` in order for them to trade via the auction.
-    *
-    * @return a `PartialFunction` defining registration behavior.
-    */
-  protected def registerAuctionParticipants: Receive = {
     case RegisterAuctionParticipant(participant) =>
-      context.watch(participant)  // now `AuctionActor` will be notified if `AuctionParticipantActor` "dies"...
+      context.watch(participant)  // `AuctionActor` will be notified if `AuctionParticipantActor` "dies"...
       participant ! auction.protocol
       participants = participants + participant
       ticker = ticker.addRoutee(participant)
@@ -66,6 +52,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       participants = participants - participant
       ticker = ticker.removeRoutee(participant)
   }
+
+  protected var auction: A
 
   // Not sure that it is necessary to store refs...
   protected var participants = Set.empty[ActorRef]

@@ -51,7 +51,6 @@ trait AuctionParticipant[+A <: AuctionParticipant[A]]
     withOutstandingOrders(outstandingOrders)
   }
 
-
   /** Returns a new `AuctionParticipant` whose outstanding orders no longer contains the canceled order.
     *
     * @param canceled

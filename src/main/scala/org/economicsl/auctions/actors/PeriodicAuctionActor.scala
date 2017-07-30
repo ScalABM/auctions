@@ -16,9 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.AuctionProtocol
-import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
 import scala.concurrent.duration.FiniteDuration
@@ -31,36 +29,18 @@ trait PeriodicAuctionActor[T <: Tradable, A <: Auction[T, A]]
 
 object PeriodicAuctionActor {
 
-  def withDiscriminatoryClearingPolicy[T <: Tradable]
-                                      (initialDelay: FiniteDuration,
-                                       interval: FiniteDuration,
-                                       pricingPolicy: PricingPolicy[T],
-                                       protocol: AuctionProtocol[T],
-                                       settlementService: ActorRef)
-                                       : Props = {
-    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol)
-    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
-  }
-
-  def withUniformClearingPolicy[T <: Tradable]
-                               (initialDelay: FiniteDuration,
-                                interval: FiniteDuration,
-                                pricingPolicy: PricingPolicy[T],
-                                protocol: AuctionProtocol[T],
-                                settlementService: ActorRef)
-                                : Props = {
-    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, protocol)
-    Props(new PeriodicAuctionActorImpl(auction, initialDelay, interval, Some(settlementService)))
+  def props[T <: Tradable, A <: Auction[T, A]]
+           (initialDelay: FiniteDuration, interval: FiniteDuration, auction: A, settlementService: ActorRef)
+           : Props = {
+    Props(new PeriodicAuctionActorImpl[T, A](auction, initialDelay, interval, Some(settlementService)))
   }
 
 
-  private class PeriodicAuctionActorImpl[T <: Tradable](
-    var auction: SealedBidAuction[T],
+  private class PeriodicAuctionActorImpl[T <: Tradable, A <: Auction[T, A]](
+    protected var auction: A,
     val initialDelay: FiniteDuration,
     val interval: FiniteDuration,
     val settlementService: Option[ActorRef])
-      extends PeriodicAuctionActor[T, SealedBidAuction[T]] {
-
-  }
+      extends PeriodicAuctionActor[T, A]
 
 }

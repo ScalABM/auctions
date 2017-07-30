@@ -16,9 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.AuctionProtocol
-import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
 
@@ -29,28 +27,13 @@ trait ContinuousAuctionActor[T <: Tradable, A <: Auction[T, A]]
 
 object ContinuousAuctionActor {
 
-  def withDiscriminatoryClearingPolicy[T <: Tradable]
-                                      (pricingPolicy: PricingPolicy[T],
-                                       protocol: AuctionProtocol[T],
-                                       settlementService: ActorRef)
-                                      : Props = {
-    val auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol)
-    Props(new ContinuousAuctionActorImpl(auction, Some(settlementService)))
+  def props[T <: Tradable, A <: Auction[T, A]](auction: A, settlementService: ActorRef): Props = {
+    Props(new ContinuousAuctionActorImpl[T, A](auction, Some(settlementService)))
   }
 
-  def withUniformClearingPolicy[T <: Tradable]
-                               (pricingPolicy: PricingPolicy[T],
-                                protocol: AuctionProtocol[T],
-                                settlementService: ActorRef)
-                               : Props = {
-    val auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, protocol)
-    Props(new ContinuousAuctionActorImpl(auction, Some(settlementService)))
-  }
-
-
-  private class ContinuousAuctionActorImpl[T <: Tradable](
-    var auction: SealedBidAuction[T],
+  private class ContinuousAuctionActorImpl[T <: Tradable, A <: Auction[T, A]](
+    protected var auction: A,
     val settlementService: Option[ActorRef])
-      extends ContinuousAuctionActor[T, SealedBidAuction[T]]
+      extends ContinuousAuctionActor[T, A]
 
 }
