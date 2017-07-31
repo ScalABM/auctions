@@ -34,7 +34,7 @@ sealed trait ClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     * @note in a remote context one might need to create an `AuctionActor` without knowing the location of the
     *       `SettlementServiceActor`. Use of `Option[ActorRef]` as type allows user to initialize this field to `None`.
     */
-  def settlementService: Option[ActorRef]
+  protected def settlementService: Option[ActorRef]
 
 }
 
