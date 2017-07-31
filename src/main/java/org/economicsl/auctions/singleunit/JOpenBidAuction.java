@@ -68,11 +68,13 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
 
     /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
      *
+     * @param token
      * @param order
      * @return
      */
-    public InsertResult<JOpenBidAuction<T>> insert(Tuple2<UUID, SingleUnitOrder<T>> order) {
-        Tuple2<OpenBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(order);
+    public InsertResult<JOpenBidAuction<T>> insert(UUID token, SingleUnitOrder<T> order) {
+        Tuple2<UUID, SingleUnitOrder<T>> kv = new Tuple2<>(token, order);
+        Tuple2<OpenBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(kv);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }
