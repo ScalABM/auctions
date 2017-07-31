@@ -74,7 +74,7 @@ trait AuctionParticipant[+A <: AuctionParticipant[A]]
   def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): (A, (Token, Order[T]))
 
   /** An `AuctionParticipant` needs to keep track of its previously issued `Order` instances. */
-  protected def outstandingOrders: Map[Token, (Reference, Order[Tradable])]
+  def outstandingOrders: Map[Token, (Reference, Order[Tradable])]
 
   /** An `AuctionParticipant` needs to keep track of its valuations for each `Tradable`. */
   protected def valuations: Map[Tradable, Price]

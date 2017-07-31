@@ -31,7 +31,7 @@ import scala.collection.immutable
   */
 class TestSingleUnitBidOrderIssuer private(
   val issuer: Issuer,
-  protected val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
+  val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
   protected val valuations: Map[Tradable, Price])
     extends AuctionParticipant[TestSingleUnitBidOrderIssuer] {
 
@@ -47,7 +47,7 @@ class TestSingleUnitBidOrderIssuer private(
     // if valuation is not multiple of tick size, price is largest multiple of tick size less than valuation.
     val valuation = valuations.getOrElse(protocol.tradable, Price.MaxValue)
     val remainder = valuation.value % protocol.tickSize
-    val limit = if (remainder == 0) valuation else Price(valuation.value - remainder)
+    val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
     (this, (randomToken(), SingleUnitBidOrder(issuer, limit, protocol.tradable)))
   }
 
