@@ -34,6 +34,4 @@ trait PriceQuantitySchedule[+T <: Tradable] {
     */
   def schedule: GenIterable[PricePoint]
 
-  def tradable: T
-
 }

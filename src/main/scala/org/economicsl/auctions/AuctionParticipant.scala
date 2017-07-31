@@ -121,7 +121,7 @@ object AuctionParticipant {
 
     def token: Token
 
-    def order: Contract
+    def order: Order[Tradable]
 
     def reason: Reason
 
@@ -134,7 +134,8 @@ object AuctionParticipant {
     * @author davidrpugh
     * @since 0.2.0
     */
-  final case class CanceledByIssuer(timestamp: Timestamp, token: Token, order: Order[Tradable]) extends Canceled {
+  final case class CanceledByIssuer(timestamp: Timestamp, token: Token, order: Order[Tradable])
+      extends Canceled {
     val reason: Reason = IssuerRequestedCancel(order)
   }
 
@@ -156,23 +157,24 @@ object AuctionParticipant {
   }
 
 
-  final case class IssuerRequestedCancel(order: Order[Tradable]) extends Reason {
+  final case class IssuerRequestedCancel(order: Order[Tradable])
+      extends Reason {
     val message: String = s"Issuer ${order.issuer} requested cancel."
   }
 
 
   final case class InvalidTickSize[+T <: Tradable](
-                                                    order: Order[T] with SinglePricePoint[T],
-                                                    protocol: AuctionProtocol[T])
-    extends Reason {
+    order: Order[T] with SinglePricePoint[T],
+    protocol: AuctionProtocol[T])
+      extends Reason {
     val message: String = s"Limit price of ${order.limit} is not a multiple of the tick size ${protocol.tickSize}."
   }
 
 
   final case class InvalidTradable[+T <: Tradable](
-                                                    order: Order[T] with SinglePricePoint[T],
-                                                    protocol: AuctionProtocol[T])
-    extends Reason {
+    order: Order[T],
+    protocol: AuctionProtocol[T])
+      extends Reason {
     val message: String = s"Order tradable ${order.tradable} must be the same as auction ${protocol.tradable}."
   }
 

@@ -39,8 +39,8 @@ object SpotContract {
     SpotContract(issuer, counterparty, price, Quantity.single, tradable)
   }
 
-  def fromOrders[T <: Tradable](askOrder: Contract with SinglePricePoint[T],
-                                bidOrder: Contract with SinglePricePoint[T],
+  def fromOrders[T <: Tradable](askOrder: Order[T] with SinglePricePoint[T],
+                                bidOrder: Order[T] with SinglePricePoint[T],
                                 price: Price): SpotContract = {
     // checking individual rationality constraints!
     require(askOrder.limit <= price); require(price <= bidOrder.limit)
