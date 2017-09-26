@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -36,8 +37,6 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     extends ReferenceGenerator
     with Timestamper {
   this: A =>
-
-  import AuctionParticipant._
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.

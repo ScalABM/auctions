@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit;
 
-import org.economicsl.auctions.AuctionParticipant.Canceled;
+import org.economicsl.auctions.messages.Canceled;
 import scala.Option;
 
 

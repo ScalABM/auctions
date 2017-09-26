@@ -15,8 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
 import org.economicsl.core.{Price, Tradable}
-import org.economicsl.core.util.Timestamp
 
 
 /** Trait that encapsulates auction participant behavior.
@@ -28,8 +28,6 @@ import org.economicsl.core.util.Timestamp
 trait AuctionParticipant[+A <: AuctionParticipant[A]]
     extends TokenGenerator {
   this: A =>
-
-  import AuctionParticipant._
 
   /** Returns a new `AuctionParticipant` whose outstanding orders contains the accepted order.
     *
@@ -68,10 +66,11 @@ trait AuctionParticipant[+A <: AuctionParticipant[A]]
     *
     * @param protocol
     * @tparam T
+    * @tparam O
     * @return a `Tuple2` whose first element contains a `Token` that uniquely identifies an `Order` and whose second
     *         element is an `Order`.
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): (A, (Token, Order[T]))
+  def issueOrder[T <: Tradable, O <: Order[T]](protocol: AuctionProtocol[T]): (A, (Token, O))
 
   /** An `AuctionParticipant` needs to keep track of its previously issued `Order` instances. */
   def outstandingOrders: Map[Token, (Reference, Order[Tradable])]
@@ -81,102 +80,6 @@ trait AuctionParticipant[+A <: AuctionParticipant[A]]
 
   /** Factory method used to delegate instance creation to sub-classes. */
   protected def withOutstandingOrders(updated: Map[Token, (Reference, Order[Tradable])]): A
-
-}
-
-
-/** Companion object for the `AuctionParticipant` trait.
-  *
-  * Contains various messages that the `AuctionParticipant` needs to handle.
-  *
-  * @author davidrpugh
-  * @since 0.2.0
-  */
-object AuctionParticipant {
-
-  /** Message used to indicate that a previously submitted order was accepted.
-    *
-    * @param timestamp
-    * @param token the unique (to the auction participant) identifier of the previously accepted order.
-    * @param order the previously submitted order that has been accepted.
-    * @param reference A unique (to the auction) reference number assigned to the order at the time of receipt.
-    * @author davidrpugh
-    * @since 0.2.0
-    */
-  final case class Accepted(timestamp: Timestamp, token: Token, order: Order[Tradable], reference: Reference) {
-
-    val kv: (Token, (Reference, Order[Tradable])) = token -> (reference -> order)
-
-  }
-
-
-  /** Base trait for all canceled messages.
-    *
-    * @author davidrpugh
-    * @since 0.2.0
-    */
-  trait Canceled {
-
-    def timestamp: Timestamp
-
-    def token: Token
-
-    def order: Order[Tradable]
-
-    def reason: Reason
-
-  }
-
-  /** Message used to indicate that a previously accepted order has been canceled by its issuer.
-    *
-    * @param timestamp
-    * @param token the unique (to the auction participant) identifier of the previously accepted order.
-    * @author davidrpugh
-    * @since 0.2.0
-    */
-  final case class CanceledByIssuer(timestamp: Timestamp, token: Token, order: Order[Tradable])
-      extends Canceled {
-    val reason: Reason = IssuerRequestedCancel(order)
-  }
-
-
-  /** Message used to indicate that a previously submitted order has been rejected.
-    *
-    * @param timestamp
-    * @param token the unique (to the auction participant) identifier of the previously accepted order.
-    * @param reason
-    * @author davidrpugh
-    * @since 0.2.0
-    */
-  final case class Rejected(timestamp: Timestamp, token: Token, order: Order[Tradable], reason: Reason)
-
-  sealed trait Reason {
-
-    def message: String
-
-  }
-
-
-  final case class IssuerRequestedCancel(order: Order[Tradable])
-      extends Reason {
-    val message: String = s"Issuer ${order.issuer} requested cancel."
-  }
-
-
-  final case class InvalidTickSize[+T <: Tradable](
-    order: Order[T] with SinglePricePoint[T],
-    protocol: AuctionProtocol[T])
-      extends Reason {
-    val message: String = s"Limit price of ${order.limit} is not a multiple of the tick size ${protocol.tickSize}."
-  }
-
-
-  final case class InvalidTradable[+T <: Tradable](
-    order: Order[T],
-    protocol: AuctionProtocol[T])
-      extends Reason {
-    val message: String = s"Order tradable ${order.tradable} must be the same as auction ${protocol.tradable}."
-  }
 
 }
 

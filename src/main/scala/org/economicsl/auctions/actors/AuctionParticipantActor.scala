@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import org.economicsl.auctions.AuctionParticipant
+import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
 
 
 /** Base trait for all `AuctionParticipantActor` implementations.
@@ -25,8 +26,6 @@ import org.economicsl.auctions.AuctionParticipant
   */
 trait AuctionParticipantActor[A <: AuctionParticipant[A]]
     extends StackableActor {
-
-  import org.economicsl.auctions.AuctionParticipant._
 
   /** Forward received messages to `AuctionParticipant` for processing.
     *
