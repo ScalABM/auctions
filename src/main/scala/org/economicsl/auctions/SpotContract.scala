@@ -28,21 +28,17 @@ import play.api.libs.json.{Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SpotContract(issuer: Buyer, counterparty: Seller, price: Price, quantity: Quantity, tradable: Tradable) extends Contract
+case class SpotContract(issuer: Buyer, counterparty: Seller, price: Price, quantity: Quantity, tradable: Tradable)
+  extends Contract
 
 
 object SpotContract {
 
   implicit val writes: Writes[SpotContract] = Json.writes[SpotContract]
 
-  def singleUnit(issuer: Buyer, counterparty: Seller, price: Price, tradable: Tradable): SpotContract = {
-    SpotContract(issuer, counterparty, price, Quantity.single, tradable)
-  }
-
-  def fromOrders[T <: Tradable](askOrder: Contract with SinglePricePoint[T],
-                                bidOrder: Contract with SinglePricePoint[T],
+  def fromOrders[T <: Tradable](askOrder: Order[T] with SinglePricePoint[T],
+                                bidOrder: Order[T] with SinglePricePoint[T],
                                 price: Price): SpotContract = {
-    // checking individual rationality constraints!
     require(askOrder.limit <= price); require(price <= bidOrder.limit)
     SpotContract(bidOrder.issuer, askOrder.issuer, price, askOrder.quantity min bidOrder.quantity, askOrder.tradable)
   }

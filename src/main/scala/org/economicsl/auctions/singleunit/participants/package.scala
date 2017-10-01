@@ -13,13 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.singleunit
 
 
-trait OrderIssuer[A <: OrderIssuer[A]]
-  extends TokenGenerator {
-  this: A =>
-
-  def issuer: Issuer
-
-}
+/** Base classes and traits for modeling single-unit auction participants. */
+package object participants

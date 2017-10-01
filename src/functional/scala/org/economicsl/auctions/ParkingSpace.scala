@@ -26,3 +26,12 @@ import org.economicsl.core.Tradable
   * @since 0.1.0
   */
 case class ParkingSpace(uuid: UUID) extends Tradable
+
+
+object ParkingSpace {
+
+  def apply(): ParkingSpace = {
+    new ParkingSpace(UUID.randomUUID())
+  }
+
+}

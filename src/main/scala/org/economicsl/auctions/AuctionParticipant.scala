@@ -15,9 +15,86 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
+import org.economicsl.core.{Price, Tradable}
 
-trait AuctionParticipant[A <: AuctionParticipant[A]]
-    extends OrderIssuer[A]
-    with OrderTracker[A] {
-  this: A =>
+
+/** Trait that encapsulates auction participant behavior.
+  *
+  * @tparam P
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait AuctionParticipant[+P <: AuctionParticipant[P]]
+    extends TokenGenerator {
+  this: P =>
+
+  /** Returns a new `AuctionParticipant` ...
+    *
+    * @param result
+    * @return
+    * @note implementation delegates to overloaded `handle` depending on whether result is `Accepted` or `Rejected`.
+    */
+  final def handle(result: Either[Rejected, Accepted]): P = {
+    result match {
+      case Left(rejected) => handle(rejected)
+      case Right(accepted) => handle(accepted)
+    }
+  }
+
+  /** Returns a new `AuctionParticipant` whose outstanding orders contains the accepted order.
+    *
+    * @param accepted
+    * @return
+    */
+  final def handle(accepted: Accepted): P = {
+    val updated = outstandingOrders + accepted.kv
+    withOutstandingOrders(updated)
+  }
+
+  /** Returns an `AuctionParticipant` whose outstanding orders do not contain the rejected order.
+    *
+    * @param rejected
+    * @return
+    * @note sub-classes may want to override this method and call super.
+    */
+  def handle(rejected: Rejected): P = {
+    withOutstandingOrders(outstandingOrders)
+  }
+
+  /** Returns a new `AuctionParticipant` whose outstanding orders no longer contains the canceled order.
+    *
+    * @param canceled
+    * @return
+    */
+  final def handle(canceled: Canceled): P = {
+    val updated = outstandingOrders - canceled.token
+    withOutstandingOrders(updated)
+  }
+
+  /** Each `AuctionParticipant` needs to be uniquely identified. */
+  def issuer: Issuer
+
+  /** Each `AuctionParticipant` needs to issue orders given some `AuctionProtocol`.
+    *
+    * @param protocol
+    * @tparam T
+    * @return a `Tuple2` whose first element contains a `Token` that uniquely identifies an `Order` and whose second
+    *         element is an `Order`.
+    */
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(P, (Token, Order[T]))]
+
+  /** An `AuctionParticipant` needs to keep track of its previously issued `Order` instances. */
+  def outstandingOrders: Map[Token, (Reference, Order[Tradable])]
+
+  /** An `AuctionParticipant` needs to keep track of its valuations for each `Tradable`. */
+  def valuations: Map[Tradable, Price]
+
+  /** Factory method used to delegate instance creation to sub-classes. */
+  protected def withOutstandingOrders(updated: Map[Token, (Reference, Order[Tradable])]): P
+
+  /** Factory method used to delegate instance creation to sub-classes. */
+  protected def withValuations(updated: Map[Tradable, Price]): P
+
 }
+

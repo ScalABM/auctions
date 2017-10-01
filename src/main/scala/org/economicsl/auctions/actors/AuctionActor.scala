@@ -1,35 +1,50 @@
+/*
+Copyright (c) 2017 KAPSARC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package org.economicsl.auctions.actors
 
-import akka.actor.{ActorRef, Terminated}
+import akka.actor.{ActorRef, Props, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
-import org.economicsl.auctions.{Reference, Token}
-import org.economicsl.auctions.singleunit.Auction
+import org.economicsl.auctions.messages.{CancelOrder, InsertOrder}
+import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
 
 
-
+/** Base trait for all `AuctionActor` implementations.
+  *
+  * The base `AuctionActor` encapsulates the state of the `auction` mechanism. An `AuctionActor` updates this state by
+  * processing `InsertOrder` and `CancelOrder` messages received from registered `AuctionParticipantActor` instances.
+  * In addition to encapsulating the `auction` mechanism state, an `AuctionActor` is also responsible for registering
+  * and de-registering `AuctionParticipantActor` instances. An `AuctionActor` can communicate with the registered
+  * `AuctionParticipantActor` instances by sending messages to its `ticker`. All messages received by the `ticker` are
+  * broadcast to registered `AuctionParticipantActor` instances.
+  * @tparam T
+  * @tparam A
+  */
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
     extends StackableActor {
+  this: ClearingSchedule[T, A] =>
 
   import AuctionActor._
 
-  var auction: A
-
-  /** ActorRef for the settlement service.
-    *
-    * @note in a remote context one might need to create an `AuctionActor` without knowing the location of the
-    *       `SettlementServiceActor`. Use of `Option[ActorRef]` as type allows user to initialize this field to `None`.
-    */
-  def settlementService: Option[ActorRef]
-
   override def receive: Receive = {
-    processOrders orElse registerAuctionParticipants
-  }
-
-  protected def processOrders: Receive = {
-    case message @ InsertOrder(token, order: SingleUnitOrder[T]) =>
+    case InsertOrder(_, token, order: SingleUnitOrder[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
       response match {
         case Right(accepted) =>
@@ -38,8 +53,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         case Left(rejected) =>
           sender() ! rejected
       }
-      super.receive(message)
-    case CancelOrder(reference) =>
+    case CancelOrder(reference, _, _) =>
       val (updatedAuction, cancelResult) = auction.cancel(reference)
       cancelResult match {
         case Some(canceled) =>
@@ -52,32 +66,21 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           */
           ???
       }
-  }
-
-  /** An `AuctionActor` needs to register `AuctionParticipantActors` in order for them to trade via the auction.
-    *
-    * @return a `PartialFunction` defining registration behavior.
-    */
-  protected def registerAuctionParticipants: Receive = {
     case RegisterAuctionParticipant(participant) =>
-      context.watch(participant)  // now `AuctionActor` will be notified if `AuctionParticipantActor` "dies"...
-      participant ! auction.protocol
-      participants = participants + participant
+      context.watch(participant)  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
       ticker = ticker.addRoutee(participant)
     case DeregisterAuctionParticipant(participant) =>
-      context.unwatch(participant)  // `AuctionActor` will no longer be notified if `AuctionParticipantActor` "dies"...
-      participants = participants - participant
+      context.unwatch(participant)  // `AuctionActor` no longer be notified if `AuctionParticipantActor` "dies"...
       ticker = ticker.removeRoutee(participant)
-    case Terminated(participant) if participants.contains(participant) =>
-      context.unwatch(participant)  // `AuctionParticipantActor` has actually died!
-      participants = participants - participant
+    case Terminated(participant) =>
+      context.unwatch(participant)
       ticker = ticker.removeRoutee(participant)
   }
 
-  // Not sure that it is necessary to store refs...
-  protected var participants = Set.empty[ActorRef]
+  /* `Auction` mechanism encapsulates the relevant state. */
+  protected var auction: A
 
-  /* Router will broadcast messages to all registered auction participants (even if participants are remote!) */
+  /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
   protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
 
 }
@@ -85,12 +88,78 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
 object AuctionActor {
 
-  final case class CancelOrder(reference: Reference)
+  /** Creates `Props` for an `AuctionActor with BidderActivityClearingSchedule`.
+    *
+    * @param auction a `SealedBidAuction` mechanism.
+    * @param settlementService the `ActorRef` for the `SettlementService`.
+    * @tparam T
+    * @return a `Props` instance used to create an instance of an `AuctionActor with BidderActivityClearingSchedule`.
+    */
+  def withBidderActivityClearingSchedule[T <: Tradable]
+                                        (auction: SealedBidAuction[T], settlementService: ActorRef)
+                                        : Props = {
+    Props(new WithBidderActivityClearingSchedule[T](auction, Some(settlementService)))
+  }
 
-  final case class InsertOrder[T <: Tradable](token: Token, order: SingleUnitOrder[T])
+  /** Creates `Props` for an `AuctionActor with PeriodicClearingSchedule`.
+    *
+    * @param auction a `SealedBidAuction` mechanism.
+    * @param executionContext
+    * @param initialDelay a `FiniteDuration` specifying the delay between the time the `AuctionActor` is created and
+    *                     the initial clearing event.
+    * @param interval a `FiniteDuration` specifying the interval between clearing events.
+    * @param settlementService
+    * @tparam T
+    * @return a `Props` instance used to create an instance of an `AuctionActor with PeriodicClearingSchedule`.
+    */
+  def withPeriodicClearingSchedule[T <: Tradable]
+                                  (auction: SealedBidAuction[T],
+                                   executionContext: ExecutionContext,
+                                   initialDelay: FiniteDuration,
+                                   interval: FiniteDuration,
+                                   settlementService: ActorRef)
+                                  : Props = {
+    Props(new WithPeriodicClearingSchedule[T](auction, executionContext, initialDelay, interval, Some(settlementService)))
+  }
+
 
   final case class DeregisterAuctionParticipant(participant: ActorRef)
 
+
   final case class RegisterAuctionParticipant(participant: ActorRef)
+
+
+  /** Default implementation of an `AuctionActor with BidderActivityClearingSchedule`.
+    *
+    * An `AuctionActor with BidderActivityClearingSchedule` is used for modeling sealed-bid continuous double
+    * auctions.
+    * @param auction a `SealedBidAuction` mechanism.
+    * @param settlementService
+    * @tparam T
+    */
+  private class WithBidderActivityClearingSchedule[T <: Tradable](
+    protected var auction: SealedBidAuction[T],
+    protected var settlementService: Option[ActorRef])
+      extends AuctionActor[T, SealedBidAuction[T]]
+      with BidderActivityClearingSchedule[T, SealedBidAuction[T]]
+
+
+  /** Default implementation of an `AuctionActor with PeriodicClearingSchedule`.
+    *
+    * @param auction a `SealedBidAuction` mechanism.
+    * @param executionContext
+    * @param initialDelay
+    * @param interval
+    * @param settlementService
+    * @tparam T
+    */
+  private class WithPeriodicClearingSchedule[T <: Tradable](
+    protected var auction: SealedBidAuction[T],
+    val executionContext: ExecutionContext,
+    val initialDelay: FiniteDuration,
+    val interval: FiniteDuration,
+    protected var settlementService: Option[ActorRef])
+      extends AuctionActor[T, SealedBidAuction[T]]
+      with PeriodicClearingSchedule[T, SealedBidAuction[T]]
 
 }

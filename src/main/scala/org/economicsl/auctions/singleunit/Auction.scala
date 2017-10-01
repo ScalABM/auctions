@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -36,8 +37,6 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     extends ReferenceGenerator
     with Timestamper {
   this: A =>
-
-  import OrderTracker._
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
@@ -76,7 +75,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     require(protocol.tradable.equals(that.protocol.tradable), "Only auctions for the same Tradable can be combined!")
     val combinedOrderBooks = orderBook.combineWith(that.orderBook)
     val withCombinedOrderBooks = withOrderBook(combinedOrderBooks)
-    val combinedTickSize = protocol.tickSize * that.protocol.tickSize  // todo compute least-common-multiple of tick sizes! overflow!
+    val combinedTickSize = leastCommonMultiple(protocol.tickSize, that.protocol.tickSize)
     val updatedProtocol = protocol.withTickSize(combinedTickSize)
     withCombinedOrderBooks.withProtocol(updatedProtocol)
   }
@@ -123,6 +122,18 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   protected val orderBook: FourHeapOrderBook[T]
 
   protected val pricingPolicy: PricingPolicy[T]
+
+  /** Computest the least common multiple of two tick sizes. */
+  private[this] def leastCommonMultiple(a: Long, b: Long) = {
+
+    @annotation.tailrec
+    def gcd(a: Long, b: Long): Long = {
+      if (b == 0) a.abs else gcd(b, a % b)
+    }
+
+    (a.abs / gcd(a,b)) * (b.abs / gcd(a, b))  // todo check for overflow?
+
+  }
 
 }
 

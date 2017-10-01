@@ -15,34 +15,38 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-
-import akka.actor.ActorRef
-import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
-import org.economicsl.core.Tradable
+import org.economicsl.auctions.AuctionParticipant
+import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
 
 
-/** Base trait for all `AuctionParticipant` actors.
+/** Base trait for all `AuctionParticipantActor` implementations.
   *
+  * @tparam P the type of `AuctionParticipant` being wrapped by the `AuctionParticipantActor`.
   * @author davidrpugh
   * @since 0.2.0
-  * @todo if auction registry fails for some reason while the auction participant is "active", the auction registry will
-  *       need to be re-identified; during re-identification auction participant should continue to process messages
-  *       received by any auctions to which it has previously registered.
   */
-trait AuctionParticipantActor[A <: AuctionParticipant[A]]
-    extends OrderTrackingActor[A]
-    with OrderIssuingActor[A] {
+trait AuctionParticipantActor[P <: AuctionParticipant[P]]
+    extends StackableActor {
 
+  /** Forward received messages to `AuctionParticipant` for processing.
+    *
+    * @return
+    */
   override def receive: Receive = {
-    case protocol : AuctionProtocol[Tradable] =>
-      auctions = auctions + (sender() -> protocol)
+    case message: Accepted =>
+      participant = participant.handle(message)
+      super.receive(message)
+    case message: Canceled =>
+      participant = participant.handle(message)
+      super.receive(message)
+    case message: Rejected =>
+      participant = participant.handle(message)
+      super.receive(message)
     case message =>
       super.receive(message)
   }
 
-  /* An `AuctionParticipant` needs to keep track of multiple auction protocols. */
-  protected var auctions: Map[ActorRef, AuctionProtocol[Tradable]]
-
-  protected var auctionParticipant: A
+  var participant: P
 
 }
+

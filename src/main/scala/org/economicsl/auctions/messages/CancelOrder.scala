@@ -13,24 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit.pricing
+package org.economicsl.auctions.messages
 
-import org.economicsl.core.Tradable
-
-
-/** Class implementing a mid-point pricing policy.
-  *
-  * @tparam T
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-class MidPointPricingPolicy[T <: Tradable] extends WeightedAveragePricingPolicy[T](0.5)
+import org.economicsl.auctions.{Reference, Token}
+import org.economicsl.core.util.Timestamp
 
 
-object MidPointPricingPolicy {
-
-  def apply[T <: Tradable](): MidPointPricingPolicy[T] = {
-    new MidPointPricingPolicy()
-  }
-
-}
+final case class CancelOrder(reference: Reference, timestamp: Timestamp, token: Token) extends TradingMessage

@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.ReceiveTimeout
+import akka.actor.{ActorRef, ReceiveTimeout}
+import org.economicsl.auctions.messages.InsertOrder
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
@@ -28,6 +29,14 @@ import scala.concurrent.duration.FiniteDuration
 sealed trait ClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     extends StackableActor {
   this: AuctionActor[T, A] =>
+
+  /** ActorRef for the settlement service.
+    *
+    * @note in a remote context one might need to create an `AuctionActor` without knowing the location of the
+    *       `SettlementServiceActor`. Use of `Option[ActorRef]` as type allows user to initialize this field to `None`.
+    */
+  protected def settlementService: Option[ActorRef]
+
 }
 
 
@@ -44,10 +53,9 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     extends ClearingSchedule[T, A] {
   this: AuctionActor[T, A] =>
 
-  import AuctionActor._
-
   override def receive: Receive = {
-    case message @ InsertOrder(_, _: SingleUnitOrder[T]) =>
+    case message @ InsertOrder(_, _, _: SingleUnitOrder[T]) =>
+      super.receive(message)  // need to insert order into auction prior to clear!
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, contracts) = auction.clear
@@ -58,7 +66,6 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
         // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
         // location of the SettlementActor (and hence without knowledge of the ActorRef).
       }
-      super.receive(message)
     case message =>
       super.receive(message)
   }
@@ -101,7 +108,7 @@ trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 
 /** Schedules a clearing event in response to an external request. */
 trait OnDemandClearingSchedule[T <: Tradable, A <: Auction[T, A]]
-  extends ClearingSchedule[T, A] {
+    extends ClearingSchedule[T, A] {
   this: AuctionActor[T, A] =>
 
   import ClearingSchedule._
@@ -132,7 +139,8 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
   this: AuctionActor[T, A] =>
 
   import ClearingSchedule._
-  import context.dispatcher  // implicitly passed to the scheduleClear method!
+
+  def executionContext: ExecutionContext
 
   def initialDelay: FiniteDuration
 
@@ -141,7 +149,7 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
   @scala.throws[Exception](classOf[Exception])
   override def preStart(): Unit = {
     super.preStart()
-    scheduleClear(initialDelay)
+    scheduleClear(initialDelay, executionContext)
   }
 
   override def receive: Receive = {
@@ -151,7 +159,7 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
           val (updatedAuction, contracts) = auction.clear
           contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
           auction = updatedAuction
-          scheduleClear(interval)
+          scheduleClear(interval, executionContext)
         case None =>
           ??? // todo how to handle this case?
         // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
@@ -162,7 +170,7 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
       super.receive(message)
   }
 
-  protected def scheduleClear(interval: FiniteDuration)(implicit ec: ExecutionContext): Unit = {
+  protected def scheduleClear(interval: FiniteDuration, ec: ExecutionContext): Unit = {
     context.system.scheduler.scheduleOnce(interval, self, ClearRequest)(ec)
   }
 

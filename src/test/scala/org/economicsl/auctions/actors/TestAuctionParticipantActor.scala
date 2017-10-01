@@ -15,25 +15,26 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.{ActorRef, Props}
-import org.economicsl.auctions.{AuctionProtocol, Issuer}
-import org.economicsl.auctions.singleunit.TestAuctionParticipant
-import org.economicsl.core.Tradable
+import akka.actor.Props
+import org.economicsl.auctions.singleunit.TestSingleUnitAuctionParticipant
+import org.economicsl.auctions.Issuer
+import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
+import org.economicsl.core.{Price, Tradable}
+
+import scala.util.Random
 
 
-class TestAuctionParticipantActor private(var auctionParticipant: TestAuctionParticipant)
-    extends AuctionParticipantActor[TestAuctionParticipant] {
-
-  protected var auctions: Map[ActorRef, AuctionProtocol[Tradable]] = Map.empty[ActorRef, AuctionProtocol[Tradable]]
+class TestAuctionParticipantActor(var participant: SingleUnitAuctionParticipant)
+    extends AuctionParticipantActor[SingleUnitAuctionParticipant] {
 
 }
 
 
 object TestAuctionParticipantActor {
 
-  def props(issuer: Issuer): Props = {
-    val auctionParticipant = TestAuctionParticipant.withNoOutstandingOrders(issuer)
-    Props(new TestAuctionParticipantActor(auctionParticipant))
+  def props(prng: Random, askOrderProbability: Double, issuer: Issuer, valuations: Map[Tradable, Price]): Props = {
+    val participant = TestSingleUnitAuctionParticipant.withNoOutstandingOrders(prng, askOrderProbability, issuer, valuations)
+    Props(new TestAuctionParticipantActor(participant))
   }
 
 }

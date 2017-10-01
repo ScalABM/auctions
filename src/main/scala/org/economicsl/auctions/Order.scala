@@ -11,4 +11,7 @@ import org.economicsl.core.Tradable
   */
 trait Order[+T <: Tradable] extends Contract {
   this: PriceQuantitySchedule[T] =>
+
+  def tradable: T
+
 }
