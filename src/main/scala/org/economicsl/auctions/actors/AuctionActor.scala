@@ -17,11 +17,12 @@ package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
-import org.economicsl.auctions.{Reference, Token}
+import org.economicsl.auctions.messages.{CancelOrder, InsertOrder}
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 
 
@@ -43,7 +44,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   import AuctionActor._
 
   override def receive: Receive = {
-    case InsertOrder(token, order: SingleUnitOrder[T]) =>
+    case InsertOrder(_, token, order: SingleUnitOrder[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
       response match {
         case Right(accepted) =>
@@ -52,7 +53,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         case Left(rejected) =>
           sender() ! rejected
       }
-    case CancelOrder(reference) =>
+    case CancelOrder(reference, _, _) =>
       val (updatedAuction, cancelResult) = auction.cancel(reference)
       cancelResult match {
         case Some(canceled) =>
@@ -103,6 +104,7 @@ object AuctionActor {
   /** Creates `Props` for an `AuctionActor with PeriodicClearingSchedule`.
     *
     * @param auction a `SealedBidAuction` mechanism.
+    * @param executionContext
     * @param initialDelay a `FiniteDuration` specifying the delay between the time the `AuctionActor` is created and
     *                     the initial clearing event.
     * @param interval a `FiniteDuration` specifying the interval between clearing events.
@@ -112,18 +114,13 @@ object AuctionActor {
     */
   def withPeriodicClearingSchedule[T <: Tradable]
                                   (auction: SealedBidAuction[T],
+                                   executionContext: ExecutionContext,
                                    initialDelay: FiniteDuration,
                                    interval: FiniteDuration,
                                    settlementService: ActorRef)
                                   : Props = {
-    Props(new WithPeriodicClearingSchedule[T](auction, initialDelay, interval, Some(settlementService)))
+    Props(new WithPeriodicClearingSchedule[T](auction, executionContext, initialDelay, interval, Some(settlementService)))
   }
-
-
-  final case class CancelOrder(reference: Reference)
-
-
-  final case class InsertOrder[T <: Tradable](token: Token, order: SingleUnitOrder[T])
 
 
   final case class DeregisterAuctionParticipant(participant: ActorRef)
@@ -143,13 +140,14 @@ object AuctionActor {
   private class WithBidderActivityClearingSchedule[T <: Tradable](
     protected var auction: SealedBidAuction[T],
     protected var settlementService: Option[ActorRef])
-  extends AuctionActor[T, SealedBidAuction[T]]
-  with BidderActivityClearingSchedule[T, SealedBidAuction[T]]
+      extends AuctionActor[T, SealedBidAuction[T]]
+      with BidderActivityClearingSchedule[T, SealedBidAuction[T]]
 
 
   /** Default implementation of an `AuctionActor with PeriodicClearingSchedule`.
     *
     * @param auction a `SealedBidAuction` mechanism.
+    * @param executionContext
     * @param initialDelay
     * @param interval
     * @param settlementService
@@ -157,10 +155,11 @@ object AuctionActor {
     */
   private class WithPeriodicClearingSchedule[T <: Tradable](
     protected var auction: SealedBidAuction[T],
+    val executionContext: ExecutionContext,
     val initialDelay: FiniteDuration,
     val interval: FiniteDuration,
     protected var settlementService: Option[ActorRef])
-  extends AuctionActor[T, SealedBidAuction[T]]
-  with PeriodicClearingSchedule[T, SealedBidAuction[T]]
+      extends AuctionActor[T, SealedBidAuction[T]]
+      with PeriodicClearingSchedule[T, SealedBidAuction[T]]
 
 }

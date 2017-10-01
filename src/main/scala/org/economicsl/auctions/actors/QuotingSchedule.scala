@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.ReceiveTimeout
+import org.economicsl.auctions.messages.InsertOrder
 import org.economicsl.auctions.quotes.QuoteRequest
 import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
@@ -37,10 +38,8 @@ trait BidderActivityQuotingSchedule[T <: Tradable]
     extends QuotingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 
-  import AuctionActor._
-
   override def receive: Receive = {
-    case message @ InsertOrder(_, _: SingleUnitOrder[T]) =>
+    case message @ InsertOrder(_, _, _: SingleUnitOrder[T]) =>
       super.receive(message)
       ???
     case message =>
@@ -95,7 +94,7 @@ trait PeriodicQuotingSchedule[T <: Tradable]
     extends QuotingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 
-  import context.dispatcher  // implicitly passed to the scheduleQuoteRequest method!
+  def executionContext: ExecutionContext
 
   def initialDelay: FiniteDuration
 
@@ -105,13 +104,12 @@ trait PeriodicQuotingSchedule[T <: Tradable]
     case request: QuoteRequest[T] =>
       val quote = auction.receive(request)
       ticker.route(quote, self)
-      scheduleQuoteRequest(interval, request)
+      scheduleQuoteRequest(interval, request, executionContext)
     case message =>
       super.receive(message)
   }
 
-  protected def scheduleQuoteRequest(interval: FiniteDuration, request: QuoteRequest[T])
-                                    (implicit ec: ExecutionContext)
+  protected def scheduleQuoteRequest(interval: FiniteDuration, request: QuoteRequest[T], ec: ExecutionContext)
                                     : Unit = {
     context.system.scheduler.scheduleOnce(interval, self, request)(ec)
   }
