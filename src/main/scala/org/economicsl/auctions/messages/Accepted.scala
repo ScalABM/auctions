@@ -14,7 +14,10 @@ import org.economicsl.core.util.Timestamp
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class Accepted(timestamp: Timestamp, token: Token, order: Order[Tradable], reference: Reference)
+final case class Accepted(
+    timestamp: Timestamp,
+    token: Token, order: Order[Tradable],
+    reference: Reference)
   extends TradingMessage {
 
   val kv: (Token, (Reference, Order[Tradable])) = token -> (reference -> order)

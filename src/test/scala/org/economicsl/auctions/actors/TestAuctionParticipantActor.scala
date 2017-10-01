@@ -16,15 +16,15 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.Props
-import org.economicsl.auctions.singleunit.TestSingleUnitAuctionParticipant
+import org.economicsl.auctions.singleunit.{SingleUnitAuctionParticipant, TestSingleUnitAuctionParticipant}
 import org.economicsl.auctions.Issuer
 import org.economicsl.core.{Price, Tradable}
 
 import scala.util.Random
 
 
-class TestAuctionParticipantActor private(var participant: TestSingleUnitAuctionParticipant)
-    extends AuctionParticipantActor[TestSingleUnitAuctionParticipant] {
+class TestAuctionParticipantActor(var participant: SingleUnitAuctionParticipant)
+    extends AuctionParticipantActor[SingleUnitAuctionParticipant] {
 
 }
 

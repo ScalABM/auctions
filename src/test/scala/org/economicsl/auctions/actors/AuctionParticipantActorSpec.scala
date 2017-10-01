@@ -19,7 +19,7 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
-import org.economicsl.auctions.AuctionParticipant.{Accepted, CanceledByIssuer}
+import org.economicsl.auctions.messages.{Accepted, CanceledByIssuer}
 import org.economicsl.auctions.{ReferenceGenerator, TestTradable, TokenGenerator}
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.{Price, Tradable}

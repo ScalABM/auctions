@@ -21,10 +21,11 @@ import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
 
 /** Base trait for all `AuctionParticipantActor` implementations.
   *
+  * @tparam P the type of `AuctionParticipant` being wrapped by the `AuctionParticipantActor`.
   * @author davidrpugh
   * @since 0.2.0
   */
-trait AuctionParticipantActor[A <: AuctionParticipant[A]]
+trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     extends StackableActor {
 
   /** Forward received messages to `AuctionParticipant` for processing.
@@ -45,7 +46,7 @@ trait AuctionParticipantActor[A <: AuctionParticipant[A]]
       super.receive(message)
   }
 
-  protected var participant: A
+  var participant: P
 
 }
 

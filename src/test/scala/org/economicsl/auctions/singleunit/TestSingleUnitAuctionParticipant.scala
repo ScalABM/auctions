@@ -37,8 +37,8 @@ class TestSingleUnitAuctionParticipant private(
   askOrderProbability: Double,
   val issuer: Issuer,
   val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
-  protected val valuations: Map[Tradable, Price])
-    extends AuctionParticipant[TestSingleUnitAuctionParticipant] {
+  val valuations: Map[Tradable, Price])
+    extends SingleUnitAuctionParticipant {
 
   /** Each `OrderIssuer` needs to issue orders given some `AuctionProtocol`.
     *
@@ -48,25 +48,30 @@ class TestSingleUnitAuctionParticipant private(
     *         element is an `Order`.
     * @note care is needed in order to guarantee that the limit price is a multiple of the tick size.
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): (TestSingleUnitAuctionParticipant, (Token, SingleUnitOrder[T])) = {
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(TestSingleUnitAuctionParticipant, (Token, SingleUnitOrder[T]))] = {
     if (prng.nextDouble() <= askOrderProbability) {
       // if valuation is not multiple of tick size, price is smallest multiple of tick size greater than valuation.
       val valuation = valuations.getOrElse(protocol.tradable, Price.MinValue)
       val remainder = valuation.value % protocol.tickSize
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value + (protocol.tickSize - remainder))
-      (this, (randomToken(), SingleUnitAskOrder(issuer, limit, protocol.tradable)))
+      Some((this, (randomToken(), SingleUnitAskOrder(issuer, limit, protocol.tradable))))
     } else {
       // if valuation is not multiple of tick size, price is largest multiple of tick size less than valuation.
       val valuation = valuations.getOrElse(protocol.tradable, Price.MaxValue)
       val remainder = valuation.value % protocol.tickSize
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
-      (this, (randomToken(), SingleUnitBidOrder(issuer, limit, protocol.tradable)))
+      Some((this, (randomToken(), SingleUnitBidOrder(issuer, limit, protocol.tradable))))
     }
   }
 
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOutstandingOrders(updated: Map[Token, (Reference, Order[Tradable])]): TestSingleUnitAuctionParticipant = {
     new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, updated, valuations)
+  }
+
+  /** Factory method used to delegate instance creation to sub-classes. */
+  protected def withValuations(updated: Map[Tradable, Price]): TestSingleUnitAuctionParticipant = {
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, outstandingOrders, updated)
   }
 
 }
