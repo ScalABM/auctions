@@ -37,4 +37,14 @@ class WeightedAveragePricingPolicy[T <: Tradable](weight: Double) extends Pricin
     val weightedAverage = k * bid.value.toDouble + (1 - k) * ask.value.toDouble
     Price(weightedAverage.round)  // be mindful of possible overflow!
   }
+
+}
+
+
+object WeightedAveragePricingPolicy {
+
+  def apply[T <: Tradable](weight: Double): WeightedAveragePricingPolicy[T] = {
+    new WeightedAveragePricingPolicy(weight)
+  }
+
 }

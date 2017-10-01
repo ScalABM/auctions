@@ -25,3 +25,12 @@ import org.economicsl.core.Tradable
   * @since 0.1.0
   */
 class MidPointPricingPolicy[T <: Tradable] extends WeightedAveragePricingPolicy[T](0.5)
+
+
+object MidPointPricingPolicy {
+
+  def apply[T <: Tradable](): MidPointPricingPolicy[T] = {
+    new MidPointPricingPolicy()
+  }
+
+}

@@ -35,7 +35,7 @@ class AskQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 
 object AskQuotePricingPolicy {
 
-  def apply[T <: Tradable]: AskQuotePricingPolicy[T] = {
+  def apply[T <: Tradable](): AskQuotePricingPolicy[T] = {
     new AskQuotePricingPolicy[T]()
   }
 
