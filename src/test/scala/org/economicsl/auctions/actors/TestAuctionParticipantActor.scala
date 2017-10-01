@@ -16,8 +16,9 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.Props
-import org.economicsl.auctions.singleunit.{SingleUnitAuctionParticipant, TestSingleUnitAuctionParticipant}
+import org.economicsl.auctions.singleunit.TestSingleUnitAuctionParticipant
 import org.economicsl.auctions.Issuer
+import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
 
 import scala.util.Random

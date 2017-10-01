@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
+import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy}
 import org.economicsl.auctions.{AuctionProtocol, Contract, SpotContract, Token}
 import org.economicsl.core.{Currency, Tradable}

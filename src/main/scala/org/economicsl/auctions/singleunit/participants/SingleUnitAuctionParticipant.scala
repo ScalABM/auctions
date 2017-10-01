@@ -1,4 +1,4 @@
-package org.economicsl.auctions.singleunit
+package org.economicsl.auctions.singleunit.participants
 
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol, Token}
