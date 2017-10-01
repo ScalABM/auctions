@@ -30,16 +30,6 @@ trait SingleUnitAuctionSimulation {
   /** Type representing the state of an auction simulation. */
   type State[T <: Tradable, A <: Auction[T, A]] = (A, Iterable[SingleUnitAuctionParticipant])
 
-  /** Simulate a periodic auction. */
-  def periodic[T <: Tradable, A <: Auction[T, A]](initial: State[T, A]): (State[T, A], Option[Iterable[Contract]]) = {
-    ???
-  }
-
-  /** Simulate a continuous auction. */
-  def continuous[T <: Tradable, A <: Auction[T, A]](initial: State[T, A]): (State[T, A], Option[Iterable[Contract]]) = {
-    ???
-  }
-
   /** Issues orders for some auction.
     *
     * @param protocol
@@ -265,7 +255,9 @@ trait SingleUnitAuctionSimulation {
   private[this] def combine[T <: Tradable, A <: Auction[T, A]]
                         (state1:(A, Seq[SingleUnitAuctionParticipant]), state2: (A, Seq[SingleUnitAuctionParticipant]))
                         : (A, Seq[SingleUnitAuctionParticipant]) = {
-    (state1._1.combineWith(state2._1), state1._2 ++ state2._2)
+    val (auction, participants) = state1
+    val (otherAuction, otherParticipants) = state2
+    (auction.combineWith(otherAuction), participants ++ otherParticipants)
   }
 
 }

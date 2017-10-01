@@ -21,12 +21,9 @@ import scala.concurrent.duration.FiniteDuration
 
 /** Mixin trait used to schedule the issuing of orders. */
 trait OrderIssuingSchedule
-    extends StackableActor
+    extends StackableActor {
 
-
-object OrderIssuingSchedule {
-
-  case object IssueOrder
+  protected case object IssueOrder
 
 }
 
@@ -34,27 +31,26 @@ object OrderIssuingSchedule {
 trait RandomOrderIssuingSchedule
     extends OrderIssuingSchedule {
 
-  import context.dispatcher  // execution context used to schedule order issuance
-  import OrderIssuingSchedule._
-
   def delay: FiniteDuration
+
+  def executionContext: ExecutionContext
 
   @scala.throws[Exception](classOf[Exception])
   override def preStart(): Unit = {
     super.preStart()
-    scheduleOrderIssuance(delay)
+    scheduleOrderIssuance(delay, executionContext)
   }
 
   override def receive: Receive = {
     case IssueOrder =>
-      scheduleOrderIssuance(delay)
+      scheduleOrderIssuance(delay, executionContext)
       super.receive(IssueOrder)
     case message =>
       super.receive(message)
   }
 
   /** Schedule this `Actor` to receive an `IssueOrder` message after some delay. */
-  protected def scheduleOrderIssuance(delay: FiniteDuration)(implicit ec: ExecutionContext): Unit = {
+  protected def scheduleOrderIssuance(delay: FiniteDuration, ec: ExecutionContext): Unit = {
     context.system.scheduler.scheduleOnce(delay, self, IssueOrder)(ec)
   }
 
