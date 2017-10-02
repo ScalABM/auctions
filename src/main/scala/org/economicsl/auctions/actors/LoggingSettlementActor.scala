@@ -15,7 +15,6 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.DiagnosticActorLogging
 import org.economicsl.auctions.Contract
 
 
