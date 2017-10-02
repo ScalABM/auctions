@@ -24,8 +24,7 @@ import org.economicsl.auctions.Contract
   * @todo this Actor should be moved down to the esl-settlement.
   */
 class LoggingSettlementActor
-    extends StackableActor
-    with DiagnosticActorLogging {
+    extends StackableActor {
 
   wrappedBecome(contractLogger)
 
