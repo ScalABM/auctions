@@ -15,11 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.Actor
+import akka.actor.{Actor, ActorLogging}
 
 
 trait StackableActor
-    extends Actor {
+  extends Actor
+  with ActorLogging {
 
   /** The receive method checks if `wrappedReceive` is defined for a `message` and if so calls it. Otherwise it calls
     * `unhandled`. In other words, `receive` delegates messages to `wrappedReceive` where possible.

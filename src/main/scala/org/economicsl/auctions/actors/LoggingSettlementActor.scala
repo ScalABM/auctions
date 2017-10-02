@@ -15,7 +15,6 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.DiagnosticActorLogging
 import org.economicsl.auctions.Contract
 
 
@@ -24,8 +23,7 @@ import org.economicsl.auctions.Contract
   * @todo this Actor should be moved down to the esl-settlement.
   */
 class LoggingSettlementActor
-    extends StackableActor
-    with DiagnosticActorLogging {
+    extends StackableActor {
 
   wrappedBecome(contractLogger)
 
