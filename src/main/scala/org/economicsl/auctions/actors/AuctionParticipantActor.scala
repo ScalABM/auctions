@@ -37,6 +37,8 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     * @return
     */
   override def receive: Receive = {
+    case message: AuctionProtocol[Tradable] =>
+      auctions = auctions.updated(message, sender()) // `AuctionActor` response to `RegisterParticipant` message!
     case message: Accepted =>
       participant = participant.handle(message)
       super.receive(message)

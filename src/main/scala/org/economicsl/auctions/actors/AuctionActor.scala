@@ -69,6 +69,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
     case RegisterAuctionParticipant(participant) =>
       context.watch(participant)  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
       ticker = ticker.addRoutee(participant)
+      participant ! auction.protocol
     case DeregisterAuctionParticipant(participant) =>
       context.unwatch(participant)  // `AuctionActor` no longer be notified if `AuctionParticipantActor` "dies"...
       ticker = ticker.removeRoutee(participant)
