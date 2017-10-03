@@ -57,8 +57,8 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     case message @ InsertOrder(_, _, _: SingleUnitOrder[T]) =>
       settlementService match {
         case Some(actorRef) =>
-          val (clearedAuction, contracts) = auction.clear
-          contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
+          val (clearedAuction, results) = auction.clear
+          results.foreach(contracts => contracts.foreach(contract => actorRef ! contract))  // eager eval of stream!
           auction = clearedAuction
         case None =>
           ???  // todo how to handle this case?
@@ -90,8 +90,8 @@ trait BidderInActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     case ReceiveTimeout =>
       settlementService match {
         case Some(actorRef) =>
-          val (clearedAuction, contracts) = auction.clear
-          contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
+          val (clearedAuction, results) = auction.clear
+          results.foreach(contracts => contracts.foreach(contract => actorRef ! contract))  // eager eval of stream!
           auction = clearedAuction
         case None =>
           ??? // todo how to handle this case?
@@ -117,9 +117,9 @@ trait OnDemandClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     case ClearRequest =>
       settlementService match {
         case Some(actorRef) =>
-          val (updatedAuction, contracts) = auction.clear
-          contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
-          auction = updatedAuction
+          val (clearedAuction, results) = auction.clear
+          results.foreach(contracts => contracts.foreach(contract => actorRef ! contract))  // eager eval of stream!
+          auction = clearedAuction
         case None =>
           ??? // todo how to handle this case?
         // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
@@ -156,9 +156,9 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     case ClearRequest =>
       settlementService match {
         case Some(actorRef) =>
-          val (updatedAuction, contracts) = auction.clear
-          contracts.foreach(contract => actorRef ! contract)  // eager eval of stream!
-          auction = updatedAuction
+          val (clearedAuction, results) = auction.clear
+          results.foreach(contracts => contracts.foreach(contract => actorRef ! contract))  // eager eval of stream!
+          auction = clearedAuction
           scheduleClear(interval, executionContext)
         case None =>
           ??? // todo how to handle this case?
