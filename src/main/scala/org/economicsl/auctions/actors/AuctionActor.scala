@@ -44,7 +44,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   import AuctionActor._
 
   override def receive: Receive = {
-    case InsertOrder(_, token, order: SingleUnitOrder[T]) =>
+    case message @ InsertOrder(_, token, order: SingleUnitOrder[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
       response match {
         case Right(accepted) =>
@@ -53,7 +53,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         case Left(rejected) =>
           sender() ! rejected
       }
-    case CancelOrder(reference, _, _) =>
+      super.receive(message)
+    case message @ CancelOrder(reference, _, _) =>
       val (updatedAuction, cancelResult) = auction.cancel(reference)
       cancelResult match {
         case Some(canceled) =>
@@ -66,16 +67,22 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           */
           ???
       }
-    case RegisterAuctionParticipant(participant) =>
+      super.receive(message)
+    case message @ RegisterAuctionParticipant(participant) =>
       context.watch(participant)  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
       ticker = ticker.addRoutee(participant)
       participant ! auction.protocol
-    case DeregisterAuctionParticipant(participant) =>
+      super.receive(message)
+    case message @ DeregisterAuctionParticipant(participant) =>
       context.unwatch(participant)  // `AuctionActor` no longer be notified if `AuctionParticipantActor` "dies"...
       ticker = ticker.removeRoutee(participant)
-    case Terminated(participant) =>
+      super.receive(message)
+    case message @ Terminated(participant) =>
       context.unwatch(participant)
       ticker = ticker.removeRoutee(participant)
+      super.receive(message)
+    case message =>
+      super.receive(message)
   }
 
   /* `Auction` mechanism encapsulates the relevant state. */
