@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.Props
+import akka.actor.{ActorRef, Props}
 import org.economicsl.auctions.singleunit.TestSingleUnitAuctionParticipant
-import org.economicsl.auctions.Issuer
+import org.economicsl.auctions.{AuctionProtocol, Issuer}
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
 
@@ -26,6 +26,9 @@ import scala.util.Random
 
 class TestAuctionParticipantActor(var participant: SingleUnitAuctionParticipant)
     extends AuctionParticipantActor[SingleUnitAuctionParticipant] {
+
+  /** Maps various auction protocols to their corresponding actor refs. */
+  protected var auctions: Map[AuctionProtocol[Tradable], ActorRef] = Map.empty[AuctionProtocol[Tradable], ActorRef]
 
 }
 
