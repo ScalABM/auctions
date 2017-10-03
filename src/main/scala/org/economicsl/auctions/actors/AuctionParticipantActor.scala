@@ -15,8 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import org.economicsl.auctions.AuctionParticipant
+import akka.actor.ActorRef
+import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
 import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
+import org.economicsl.core.Tradable
+import org.economicsl.core.util.Timestamper
 
 
 /** Base trait for all `AuctionParticipantActor` implementations.
@@ -26,7 +29,8 @@ import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
   * @since 0.2.0
   */
 trait AuctionParticipantActor[P <: AuctionParticipant[P]]
-    extends StackableActor {
+  extends StackableActor
+  with Timestamper {
 
   /** Forward received messages to `AuctionParticipant` for processing.
     *
@@ -46,7 +50,10 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
       super.receive(message)
   }
 
-  var participant: P
+  /** Maps various auction protocols to their corresponding actor refs. */
+  protected var auctions: Map[AuctionProtocol[Tradable], ActorRef]
+
+  protected var participant: P
 
 }
 

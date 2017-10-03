@@ -15,8 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Token
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
+import org.economicsl.auctions.{Order, Token}
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
 
@@ -28,5 +27,4 @@ import org.economicsl.core.util.Timestamp
   * @param order
   * @tparam T
   */
-final case class InsertOrder[T <: Tradable](timestamp: Timestamp, token: Token, order: SingleUnitOrder[T])
-    extends TradingMessage
+final case class InsertOrder[+T <: Tradable](timestamp: Timestamp, token: Token, order: Order[T]) extends TradingMessage
