@@ -55,7 +55,6 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 
   override def receive: Receive = {
     case message @ InsertOrder(_, _, _: SingleUnitOrder[T]) =>
-      super.receive(message)  // need to insert order into auction prior to clear!
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, contracts) = auction.clear
@@ -66,6 +65,7 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
         // Can only occur in remote context where AuctionActor might need to be created without knowledge of the
         // location of the SettlementActor (and hence without knowledge of the ActorRef).
       }
+      super.receive(message)
     case message =>
       super.receive(message)
   }
