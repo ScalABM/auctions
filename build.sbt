@@ -22,8 +22,6 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-deprecation",  // issue warning if we use any deprecated API features
     "-feature",  // tells the compiler to provide information about misused language features
-    "-language:implicitConversions",  // eliminates the need to import implicit conversions for each usage
-    "-language:reflectiveCalls",  // needed in order to enable structural (or duck) typing
     "-Xlint",
     "-Ywarn-unused-import",
     "-Ywarn-dead-code"
