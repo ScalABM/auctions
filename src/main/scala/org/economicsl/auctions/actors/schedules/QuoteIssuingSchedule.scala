@@ -28,21 +28,22 @@ import scala.concurrent.duration.FiniteDuration
 
 
 /** Mixin trait that specifies a schedule for auction quoting events. */
-sealed trait QuotingSchedule[T <: Tradable]
+sealed trait QuoteIssuingSchedule[T <: Tradable]
     extends StackableActor {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 }
 
 
 /** Schedules a quoting event to occur whenever a new order is inserted into the auction. */
-trait BidderActivityQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
+trait BidderActivityQuoteIssuingSchedule[T <: Tradable]
+    extends QuoteIssuingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 
   override def receive: Receive = {
     case message @ InsertOrder(_, _, _: SingleUnitOrder[T]) =>
+      val quote = auction.receive(???)
+      ticker.route(quote, self)
       super.receive(message)
-      ???
     case message =>
       super.receive(message)
   }
@@ -51,8 +52,8 @@ trait BidderActivityQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a quoting event to occur whenever no new orders have been received for a specified period. */
-trait BidderInActivityQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
+trait BidderInActivityQuoteIssuingSchedule[T <: Tradable]
+    extends QuoteIssuingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 
   def timeout: FiniteDuration
@@ -74,8 +75,8 @@ trait BidderInActivityQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a quoting event in response to an `AuctionParticipantActor` request. */
-trait OnDemandQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
+trait OnDemandQuoteIssuingSchedule[T <: Tradable]
+    extends QuoteIssuingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 
   override def receive: Receive = {
@@ -91,13 +92,11 @@ trait OnDemandQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a clearing event to occur after fixed time intervals. */
-trait PeriodicQuotingSchedule[T <: Tradable]
-    extends QuotingSchedule[T] {
+trait PeriodicQuoteIssuingSchedule[T <: Tradable]
+    extends QuoteIssuingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 
   def executionContext: ExecutionContext
-
-  def initialDelay: FiniteDuration
 
   def interval: FiniteDuration
 
@@ -110,8 +109,7 @@ trait PeriodicQuotingSchedule[T <: Tradable]
       super.receive(message)
   }
 
-  protected def scheduleQuoteRequest(interval: FiniteDuration, request: QuoteRequest[T], ec: ExecutionContext)
-                                    : Unit = {
+  protected def scheduleQuoteRequest(interval: FiniteDuration, request: QuoteRequest[T], ec: ExecutionContext): Unit = {
     context.system.scheduler.scheduleOnce(interval, self, request)(ec)
   }
 
@@ -119,7 +117,7 @@ trait PeriodicQuotingSchedule[T <: Tradable]
 
 
 /** Schedules a quoting event to occur after random time intervals. */
-trait RandomQuotingSchedule[T <: Tradable]
-    extends PeriodicQuotingSchedule[T] {
+trait RandomQuoteIssuingSchedule[T <: Tradable]
+    extends PeriodicQuoteIssuingSchedule[T] {
   this: AuctionActor[T, OpenBidAuction[T]] =>
 }
