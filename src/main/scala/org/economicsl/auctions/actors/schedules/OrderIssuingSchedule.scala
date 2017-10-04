@@ -76,6 +76,18 @@ trait PeriodicOrderIssuingSchedule[P <: AuctionParticipant[P]]
 }
 
 
+/** Mixin trait for scheduling order issuing via some random process.
+  *
+  * @tparam P
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait RandomOrderIssuingSchedule[P <: AuctionParticipant[P]]
+    extends PeriodicOrderIssuingSchedule[P] {
+  this: AuctionParticipantActor[P] =>
+}
+
+
 /** Mixin trait for scheduling order issuing via a Poisson process.
   *
   * @tparam P
@@ -83,27 +95,9 @@ trait PeriodicOrderIssuingSchedule[P <: AuctionParticipant[P]]
   * @since 0.2.0
   */
 trait PoissonOrderIssuingSchedule[P <: AuctionParticipant[P]]
-    extends PeriodicOrderIssuingSchedule[P] {
+    extends RandomOrderIssuingSchedule[P]
+    with PoissonProcess {
   this: AuctionParticipantActor[P] =>
-
-  /** The mean arrival rate will be 1 / lambda. */
-  def lambda: Double
-
-  /** Source of randomness. */
-  def prng: Random
-
-  /** Specifies the time unit used to define the interval. */
-  def timeUnit: TimeUnit
-
-  def delay: FiniteDuration = {
-    val deltaT = quantile(lambda, prng.nextDouble())
-    FiniteDuration(deltaT.toLong, timeUnit)
-  }
-
-  private[this] def quantile(lambda: Double, q: Double): Double = {
-    -math.log(1 - q) / lambda
-  }
-
 }
 
 

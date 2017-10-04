@@ -183,3 +183,17 @@ trait RandomClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     extends PeriodicClearingSchedule[T, A] {
   this: AuctionActor[T, A] =>
 }
+
+
+/** Mixin trait for scheduling order issuing via a Poisson process.
+  *
+  * @tparam T
+  * @tparam A
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait PoissonClearingSchedule[T <: Tradable, A <: Auction[T, A]]
+    extends RandomClearingSchedule[T, A]
+    with PoissonProcess {
+  this: AuctionActor[T, A] =>
+}
