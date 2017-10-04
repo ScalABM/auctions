@@ -13,9 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.actors
+package org.economicsl.auctions.actors.schedules
 
 import akka.actor.{ActorRef, ReceiveTimeout}
+import org.economicsl.auctions.actors.{AuctionActor, StackableActor}
 import org.economicsl.auctions.messages.InsertOrder
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
@@ -180,5 +181,19 @@ trait PeriodicClearingSchedule[T <: Tradable, A <: Auction[T, A]]
 /** Schedules a clearing event to occur after random time intervals. */
 trait RandomClearingSchedule[T <: Tradable, A <: Auction[T, A]]
     extends PeriodicClearingSchedule[T, A] {
+  this: AuctionActor[T, A] =>
+}
+
+
+/** Mixin trait for scheduling order issuing via a Poisson process.
+  *
+  * @tparam T
+  * @tparam A
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait PoissonClearingSchedule[T <: Tradable, A <: Auction[T, A]]
+    extends RandomClearingSchedule[T, A]
+    with PoissonProcess {
   this: AuctionActor[T, A] =>
 }
