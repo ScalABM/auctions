@@ -13,9 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.actors
+package org.economicsl.auctions.actors.schedules
 
 import akka.actor.{ActorRef, ReceiveTimeout}
+import org.economicsl.auctions.actors.{AuctionActor, StackableActor}
 import org.economicsl.auctions.messages.InsertOrder
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
