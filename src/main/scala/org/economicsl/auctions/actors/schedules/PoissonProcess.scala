@@ -41,8 +41,8 @@ trait PoissonProcess {
   }
 
   /** Inverse cumulative distribution function for an exponential random variable. */
-  private[this] def inverseCumulativeDistributionFunction(lambda: Double, F: Double): Double = {
-    -math.log(1 - F) / lambda
+  private[this] def inverseCumulativeDistributionFunction(lambda: Double, quantile: Double): Double = {
+    -math.log(1 - quantile) / lambda
   }
 
 }
