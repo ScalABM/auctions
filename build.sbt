@@ -44,7 +44,7 @@ lazy val core = (project in file(".")).
   settings(
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % "3.0.1" % "functional, test",
-      "com.typesafe.akka" %% "akka-testkit" % "2.5.2" % "functional, test"
+      "com.typesafe.akka" %% "akka-testkit" % "2.5.6" % "functional, test"
     ),
     parallelExecution in Functional := true
   )
