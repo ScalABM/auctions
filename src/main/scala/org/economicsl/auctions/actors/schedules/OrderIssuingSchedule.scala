@@ -21,8 +21,7 @@ import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration.{FiniteDuration, TimeUnit}
-import scala.util.Random
+import scala.concurrent.duration.FiniteDuration
 
 
 /** Mixin trait used to schedule the issuing of orders. */

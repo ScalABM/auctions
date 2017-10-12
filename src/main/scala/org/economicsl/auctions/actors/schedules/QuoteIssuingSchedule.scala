@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors.schedules
 
 import akka.actor.ReceiveTimeout
-import org.economicsl.auctions.actors.{AuctionActor, StackableActor}
+import org.economicsl.auctions.actors.{AuctionActor, MarketDataRouter, StackableActor}
 import org.economicsl.auctions.messages.InsertOrder
 import org.economicsl.auctions.quotes.QuoteRequest
 import org.economicsl.auctions.singleunit.OpenBidAuction
@@ -30,14 +30,14 @@ import scala.concurrent.duration.FiniteDuration
 /** Mixin trait that specifies a schedule for auction quoting events. */
 sealed trait QuoteIssuingSchedule[T <: Tradable]
     extends StackableActor {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidAuction[T]] with MarketDataRouter[T, OpenBidAuction[T]] =>
 }
 
 
 /** Schedules a quoting event to occur whenever a new order is inserted into the auction. */
 trait BidderActivityQuoteIssuingSchedule[T <: Tradable]
     extends QuoteIssuingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidAuction[T]] with MarketDataRouter[T, OpenBidAuction[T]] =>
 
   override def receive: Receive = {
     case message @ InsertOrder(_, _, _: SingleUnitOrder[T]) =>
@@ -54,7 +54,7 @@ trait BidderActivityQuoteIssuingSchedule[T <: Tradable]
 /** Schedules a quoting event to occur whenever no new orders have been received for a specified period. */
 trait BidderInActivityQuoteIssuingSchedule[T <: Tradable]
     extends QuoteIssuingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidAuction[T]] with MarketDataRouter[T, OpenBidAuction[T]] =>
 
   def timeout: FiniteDuration
 
@@ -77,7 +77,7 @@ trait BidderInActivityQuoteIssuingSchedule[T <: Tradable]
 /** Schedules a quoting event in response to an `AuctionParticipantActor` request. */
 trait OnDemandQuoteIssuingSchedule[T <: Tradable]
     extends QuoteIssuingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidAuction[T]] with MarketDataRouter[T, OpenBidAuction[T]] =>
 
   override def receive: Receive = {
     case request: QuoteRequest[T] =>
@@ -94,7 +94,7 @@ trait OnDemandQuoteIssuingSchedule[T <: Tradable]
 /** Schedules a clearing event to occur after fixed time intervals. */
 trait PeriodicQuoteIssuingSchedule[T <: Tradable]
     extends QuoteIssuingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidAuction[T]] with MarketDataRouter[T, OpenBidAuction[T]] =>
 
   def executionContext: ExecutionContext
 
@@ -119,5 +119,5 @@ trait PeriodicQuoteIssuingSchedule[T <: Tradable]
 /** Schedules a quoting event to occur after random time intervals. */
 trait RandomQuoteIssuingSchedule[T <: Tradable]
     extends PeriodicQuoteIssuingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidAuction[T]] with MarketDataRouter[T, OpenBidAuction[T]] =>
 }
