@@ -15,10 +15,12 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
+import java.util.UUID
+
 import akka.actor.{ActorRef, Props, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
-import org.economicsl.auctions.messages.{CancelOrder, InsertOrder}
+import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
@@ -41,8 +43,6 @@ import scala.concurrent.duration.FiniteDuration
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
     extends StackableActor {
   this: ClearingSchedule[T, A] =>
-
-  import AuctionActor._
 
   override def receive: Receive = {
     case message @ InsertOrder(_, token, order: SingleUnitOrder[T]) =>
@@ -69,14 +69,21 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           ???
       }
       super.receive(message)
-    case message @ RegisterAuctionParticipant(participant) =>
-      context.watch(participant)  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
-      ticker = ticker.addRoutee(participant)
-      participant ! auction.protocol
+    case message @ NewRegistration(registId) =>
+      context.watch(sender())  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
+      val registRefId: String = ???
+      participants = participants + (registRefId -> registId)
+      ticker = ticker.addRoutee(sender())
+      sender() ! AcceptedRegistration(registRefId, '0')
+      sender ! auction.protocol
       super.receive(message)
-    case message @ DeregisterAuctionParticipant(participant) =>
-      context.unwatch(participant)  // `AuctionActor` no longer be notified if `AuctionParticipantActor` "dies"...
-      ticker = ticker.removeRoutee(participant)
+    case message @ ReplaceRegistration(registId, registRefId) =>
+      participants = participants.updated(registRefId, registId)
+      super.receive(message)
+    case message @ CancelRegistration(_, registRefId) =>
+      context.unwatch(sender())  // `AuctionActor` no longer notified if `AuctionParticipantActor` "dies"...
+      participants = participants - registRefId
+      ticker = ticker.removeRoutee(sender())
       super.receive(message)
     case message @ Terminated(participant) =>
       context.unwatch(participant)
@@ -88,6 +95,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   /* `Auction` mechanism encapsulates the relevant state. */
   protected var auction: A
+
+  protected var participants: Map[???, ???] = Map.empty[???, ???]
 
   /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
   protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
@@ -130,12 +139,6 @@ object AuctionActor {
                                   : Props = {
     Props(new WithPeriodicClearingSchedule[T](auction, executionContext, initialDelay, interval, Some(settlementService)))
   }
-
-
-  final case class DeregisterAuctionParticipant(participant: ActorRef)
-
-
-  final case class RegisterAuctionParticipant(participant: ActorRef)
 
 
   /** Default implementation of an `AuctionActor with BidderActivityClearingSchedule`.
