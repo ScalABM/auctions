@@ -15,20 +15,14 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Token
-import org.economicsl.core.util.Timestamp
+import java.util.UUID
 
 
-/** Base trait for all trading messages.
+/**
   *
+  * @param request
+  * @tparam A
   * @author davidrpugh
   * @since 0.2.0
   */
-trait TradingMessage
-  extends Serializable {
-
-  def timestamp: Timestamp
-
-  def token: Token
-
-}
+final case class MarketDataSubscribe[-A](mDReqId: UUID, request: MarketDataRequest[A])

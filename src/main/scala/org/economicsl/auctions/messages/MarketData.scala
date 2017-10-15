@@ -16,28 +16,49 @@ limitations under the License.
 package org.economicsl.auctions.messages
 
 
+/** Base trait for all `MarketData` messages.
+  *
+  * A `MarketData` message may be sent in response to a `MarketDataRequest` message or may be unsolicited.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
 sealed trait MarketData {
 
-  def mDRequestId: Option[String]
+  def mDReqId: Option[String]
 
   def msgType: Char
 
 }
 
 
+/** Base trait for all `MarketDataSnapshot` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  * @note See the relevant [[https://www.onixs.biz/fix-dictionary/5.0/msgType_W_87.html Fix protocol docs]] for details.
+  */
 trait MarketDataSnapshot extends MarketData {
   val msgType: Char = 'W'
 }
 
 
-trait MarketDataFullRefresh extends MarketDataSnapshot
-
-
-trait MarketDataIncrementalRefresh extends MarketData {
-  val msgType: Char = 'X'
+/** Base trait for all `MarketDataFullRefresh` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  * @note See the relevant [[https://www.onixs.biz/fix-dictionary/5.0/msgType_W_87.html Fix protocol docs]] for details.
+  */
+trait MarketDataFullRefresh extends MarketData {
+  val msgType: Char = 'W'
 }
 
 
-trait MarketDataReject extends MarketData
-
-
+/** Base trait for all `MarketDataIncrementalRefresh` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  * @note See the relevant [[https://www.onixs.biz/fix-dictionary/5.0/msgType_X_88.html Fix protocol docs]] for details.
+  */
+trait MarketDataIncrementalRefresh extends MarketData {
+  val msgType: Char = 'X'
+}

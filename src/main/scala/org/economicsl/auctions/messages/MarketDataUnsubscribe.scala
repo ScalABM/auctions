@@ -15,20 +15,13 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Token
-import org.economicsl.core.util.Timestamp
+import java.util.UUID
 
 
-/** Base trait for all trading messages.
+/** Message used to indicate that a particular subscription should be canceled.
   *
+  * @param mDReqId identifier of the previously submitted `MarketDataRequest` that should be cancelled.
   * @author davidrpugh
   * @since 0.2.0
   */
-trait TradingMessage
-  extends Serializable {
-
-  def timestamp: Timestamp
-
-  def token: Token
-
-}
+final case class MarketDataUnsubscribe(mDReqId: UUID)

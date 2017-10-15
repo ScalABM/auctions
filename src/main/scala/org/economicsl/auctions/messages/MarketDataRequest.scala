@@ -15,26 +15,26 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
+import java.util.UUID
 
-sealed trait MarketDataRequest {
 
-  def mDReqId: String
+/** Base trait for all `MarketDataRequest` types.
+  *
+  * @tparam A should be a subtype of `Auction` so that auction designer can restrict the type of market data requests
+  *           that an `AuctionParticipant` can issue.
+  */
+sealed trait MarketDataRequest[-A] {
 
-  def subscriptionRequestType: Char
-
-  val msgType: Char = 'V'
+  /** Function that returns some `MarketData` as a function of `Auction` state. */
+  def query: A => Option[MarketData]
 
 }
 
 
-trait MarketDataSubscribe extends MarketDataRequest {
-  val subscriptionRequestType: Char = '1'
-}
 
 
-trait MarketDataUnsubscribe extends MarketDataRequest {
-  val subscriptionRequestType: Char = '2'
-}
+
+
 
 
 

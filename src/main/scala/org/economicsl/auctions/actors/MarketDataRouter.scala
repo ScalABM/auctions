@@ -15,9 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.Terminated
-import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
-import org.economicsl.auctions.messages.{MarketDataSubscribe, MarketDataUnsubscribe}
+import java.util.UUID
+
+import akka.actor.{ActorRef, Terminated}
+import akka.routing.{BroadcastRoutingLogic, Router}
+import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
@@ -28,13 +30,15 @@ trait MarketDataRouter[T <: Tradable, A <: Auction[T, A]]
   this: AuctionActor[T, A] =>
 
   override def receive: Receive = {
-    case message: MarketDataSubscribe =>
+    case message: MarketDataSubscribe[A] =>
       context.watch(sender())
       ticker = ticker.addRoutee(sender())
+      subscriptions = subscriptions + (message.mDReqId -> (sender(), message.request))
       super.receive(message)
-    case message: MarketDataUnsubscribe =>
+    case message @ MarketDataUnsubscribe(mDReqId) =>
       context.unwatch(sender())
       ticker = ticker.removeRoutee(sender())
+      subscriptions = subscriptions - mDReqId
       super.receive(message)
     case message @ Terminated(participant) =>
       context.unwatch(participant)
@@ -45,6 +49,6 @@ trait MarketDataRouter[T <: Tradable, A <: Auction[T, A]]
   }
 
   /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
-  protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
+  protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty)
 
 }
