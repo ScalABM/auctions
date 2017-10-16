@@ -17,22 +17,23 @@ package org.economicsl.auctions.messages
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.Auction
+import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.core.Tradable
 
 
 /** Base trait for all `AuctionDataRequest` types.
   *
-  * @tparam A should be a subtype of `Auction` so that auction designer can restrict the type of market data requests
-  *           that an `Auction` can handle.
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.2.0
   */
-trait AuctionDataRequest[A <: Auction[_ <: Tradable, A]]
+trait AuctionDataRequest[T <: Tradable]
   extends Message {
 
   def mDReqId: UUID
 
   /** Function that returns some `MarketData` as a function of `Auction` state. */
-  def query: A => AuctionData
+  def query: OpenBidAuction[T] => AuctionData
 
 }
 

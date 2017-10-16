@@ -21,8 +21,8 @@ import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.messages.Accepted;
 import org.economicsl.auctions.messages.Canceled;
 import org.economicsl.auctions.messages.Rejected;
-import org.economicsl.auctions.messages.Quote;
-import org.economicsl.auctions.messages.QuoteRequest;
+import org.economicsl.auctions.messages.AuctionData;
+import org.economicsl.auctions.messages.AuctionDataRequest;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -81,7 +81,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
         return new InsertResult<>(jAuction, result._2());
     }
 
-    public Quote receive(QuoteRequest<T> request) {
+    public AuctionData receive(AuctionDataRequest<T> request) {
         return auction.receive(request);
     }
 

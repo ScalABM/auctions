@@ -14,7 +14,7 @@ import org.economicsl.core.util.Timestamp
   * @since 0.1.0
   */
 final case class SpreadQuoteRequest[T <: Tradable](issuer: Issuer, mDReqId: UUID, timestamp: Timestamp)
-  extends AuctionDataRequest[OpenBidAuction[T]] {
+  extends AuctionDataRequest[T] {
 
   val query: (OpenBidAuction[T]) => SpreadQuote = {
     auction => SpreadQuote(auction.orderBook.spread)

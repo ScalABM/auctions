@@ -18,6 +18,7 @@ package org.economicsl.auctions.singleunit.participants
 import java.util.UUID
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.messages.AuctionDataRequest
 import org.economicsl.auctions.singleunit.orders.SingleUnitBidOrder
 import org.economicsl.core.{Price, Tradable}
 
@@ -46,6 +47,16 @@ class SingleUnitBuyer private(
   def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitBuyer, (Token, SingleUnitBidOrder[T]))] = {
     val valuation = valuations(protocol.tradable)
     Some((this, (randomToken(), SingleUnitBidOrder(issuer, valuation, protocol.tradable))))
+  }
+
+  /** Request auction data given some `AuctionProtocol`.
+    *
+    * @param protocol
+    * @tparam T
+    * @return
+    */
+  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitBuyer, (Token, AuctionDataRequest[T]))] = {
+    ???
   }
 
   /** Creates a new `SingleUnitBuyer` with an `updated` collection of outstanding orders. */

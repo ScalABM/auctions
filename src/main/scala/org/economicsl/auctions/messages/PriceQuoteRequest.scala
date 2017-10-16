@@ -28,7 +28,7 @@ import org.economicsl.core.util.Timestamp
   * @author davidrpugh
   * @since 0.1.0
   */
-trait PriceQuoteRequest[T <: Tradable] extends AuctionDataRequest[OpenBidAuction[T]]
+trait PriceQuoteRequest[T <: Tradable] extends AuctionDataRequest[T]
 
 
 /** Used by auction participants to request the current ask price quote.
@@ -70,7 +70,7 @@ final case class MidPointPriceQuoteRequest[T <: Tradable](issuer: Issuer, mDReqI
   extends PriceQuoteRequest[T] {
 
   val query: (OpenBidAuction[T]) => MidPointPriceQuote = {
-    auction => MidPointPriceQuote(auction.orderBook.bidPriceQuote)
+    auction => MidPointPriceQuote(auction.orderBook.midPointPriceQuote)
   }
 
 }

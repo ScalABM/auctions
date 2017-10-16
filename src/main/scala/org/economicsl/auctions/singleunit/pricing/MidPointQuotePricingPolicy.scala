@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.pricing
 
-import org.economicsl.core.Tradable
+import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+import org.economicsl.core.{Price, Tradable}
 
 
 /** Class implementing a mid-point pricing policy.
@@ -24,13 +25,21 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-class MidPointPricingPolicy[T <: Tradable] extends WeightedAveragePricingPolicy[T](0.5)
+class MidPointQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
 
+  def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.midPointPriceQuote
 
-object MidPointPricingPolicy {
+}
 
-  def apply[T <: Tradable](): MidPointPricingPolicy[T] = {
-    new MidPointPricingPolicy()
+/** Companion object for the `MidPointPricingPolicy` class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+object MidPointQuotePricingPolicy {
+
+  def apply[T <: Tradable](): MidPointQuotePricingPolicy[T] = {
+    new MidPointQuotePricingPolicy()
   }
 
 }

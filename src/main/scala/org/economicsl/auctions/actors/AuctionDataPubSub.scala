@@ -19,7 +19,7 @@ import java.util.UUID
 
 import akka.actor.{ActorRef, Terminated}
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.Auction
+import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.core.Tradable
 
 
@@ -33,12 +33,12 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.2.0
   */
-trait AuctionDataPubSub[T <: Tradable, A <: Auction[T, A]]
+trait AuctionDataPubSub[T <: Tradable]
     extends StackableActor {
-  this: AuctionActor[T, A] =>
+  this: AuctionActor[T, OpenBidAuction[T]] =>
 
   override def receive: Receive = {
-    case message: AuctionDataSubscribe[A] =>
+    case message: AuctionDataSubscribe[T] =>
       subscriptions = subscriptions + (message.mDReqId -> (sender() -> message.request))
       mDReqIdsByActorRef.get(sender()) match {
         case Some(mDReqIds) =>
@@ -80,7 +80,7 @@ trait AuctionDataPubSub[T <: Tradable, A <: Auction[T, A]]
   }
 
   /* Subscriptions stored as a mapping between some unique identifier and a `(ActorRef, MarketDataRequest)` pair. */
-  private[this] var subscriptions: Map[UUID, (ActorRef, AuctionDataRequest[A])] = Map.empty
+  private[this] var subscriptions: Map[UUID, (ActorRef, AuctionDataRequest[T])] = Map.empty
 
   /* Subscriptions stored as a mapping between `ActorRef` and its collection of subscription identifiers. */
   private[this] var mDReqIdsByActorRef: Map[ActorRef, Set[UUID]] = Map.empty

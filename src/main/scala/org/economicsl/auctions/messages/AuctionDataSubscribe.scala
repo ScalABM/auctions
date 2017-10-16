@@ -17,12 +17,14 @@ package org.economicsl.auctions.messages
 
 import java.util.UUID
 
+import org.economicsl.core.Tradable
+
 
 /**
   *
   * @param request
-  * @tparam A
+  * @tparam T
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class AuctionDataSubscribe[-A](mDReqId: UUID, request: AuctionDataRequest[A])
+final case class AuctionDataSubscribe[T <: Tradable](mDReqId: UUID, request: AuctionDataRequest[T])
