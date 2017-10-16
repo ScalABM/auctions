@@ -21,6 +21,7 @@ import org.economicsl.auctions.messages.{CancelOrder, InsertOrder}
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
+import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
@@ -38,7 +39,9 @@ import scala.concurrent.duration.FiniteDuration
   * @tparam A
   */
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
-    extends StackableActor {
+    extends StackableActor
+    with Timestamper
+    with UUIDGenerator {
   this: ClearingSchedule[T, A] =>
 
   import AuctionActor._

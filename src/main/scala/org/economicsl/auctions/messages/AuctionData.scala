@@ -15,20 +15,14 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Token
-import org.economicsl.core.util.Timestamp
 
-
-/** Base trait for all trading messages.
+/** Base trait for all `AuctionData` messages.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait TradingMessage
-  extends Serializable {
+trait AuctionData {
 
-  def timestamp: Timestamp
-
-  def token: Token
+  def value: Option[Any]
 
 }

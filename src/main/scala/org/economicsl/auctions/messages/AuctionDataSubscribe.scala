@@ -25,4 +25,4 @@ import java.util.UUID
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class MarketDataSubscribe[-A](mDReqId: UUID, request: MarketDataRequest[A])
+final case class AuctionDataSubscribe[-A](mDReqId: UUID, request: AuctionDataRequest[A])

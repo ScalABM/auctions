@@ -23,26 +23,23 @@ import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.core.Tradable
 
 
-/** Mixin trait that provides support for handling `MarketDataRequest` messages.
+/** Mixin trait that provides support for handling `AuctionDataRequest` messages.
   *
-  * Basic idea is that an `AuctionParticipantActor` can send `MarketDataRequest` messages directly in which case
-  * the request is handled and the result, if any, is immediately returned to sender in the form of a `MarketData`
-  * message. Alternatively, an `AuctionParticipantActor` can send a `MarketDataSubscribe` message containing a specific
-  * `MarketDataRequest` that whose results should be returned whenever the state of the `auction` changes.
+  * Basic idea is that an `AuctionParticipantActor` can send `AuctionDataRequest` messages directly in which case
+  * the request is handled and the result, if any, is immediately returned to sender as part of a `AuctionDataResponse`
+  * message. Alternatively, an `AuctionParticipantActor` can send a `AuctionDataSubscribe` message containing a specific
+  * `AuctionDataRequest` whose query results should be returned according to some user defined schedule.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait MarketDataPubSub[T <: Tradable, A <: Auction[T, A]]
+trait AuctionDataPubSub[T <: Tradable, A <: Auction[T, A]]
     extends StackableActor {
   this: AuctionActor[T, A] =>
 
   override def receive: Receive = {
-    case message: MarketDataRequest[A] =>
-      message.query(auction).foreach(marketData => sender() ! marketData)
-      super.receive(message)
-    case message: MarketDataSubscribe[A] =>
-      subscriptions = subscriptions + (message.mDReqId -> (sender(), message.request))
+    case message: AuctionDataSubscribe[A] =>
+      subscriptions = subscriptions + (message.mDReqId -> (sender() -> message.request))
       mDReqIdsByActorRef.get(sender()) match {
         case Some(mDReqIds) =>
           val updatedMDReqIds = mDReqIds + message.mDReqId
@@ -52,7 +49,7 @@ trait MarketDataPubSub[T <: Tradable, A <: Auction[T, A]]
           context.watch(sender())
       }
       super.receive(message)
-    case message @ MarketDataUnsubscribe(mDReqId) =>
+    case message @ AuctionDataUnsubscribe(mDReqId) =>
       subscriptions = subscriptions - mDReqId
       mDReqIdsByActorRef.get(sender()) match {
         case Some(mDReqIds) =>
@@ -64,7 +61,7 @@ trait MarketDataPubSub[T <: Tradable, A <: Auction[T, A]]
             mDReqIdsByActorRef = mDReqIdsByActorRef.updated(sender(), remainingMDReqIds)  // SIDE EFFECT!
           }
         case None =>
-          ???  // could happen if sender mistakenly sends `MarketDataUnsubscribeRequest` to wrong `AuctionActor`!
+          ???  // could happen if sender mistakenly sends `AuctionDataUnsubscribeRequest` to wrong `AuctionActor`!
       }
       super.receive(message)
     case message @ Terminated(actorRef) =>
@@ -72,26 +69,18 @@ trait MarketDataPubSub[T <: Tradable, A <: Auction[T, A]]
       mDReqIdsByActorRef = mDReqIdsByActorRef - actorRef
       context.unwatch(actorRef)
       super.receive(message)
-    case message: InsertOrder[T] =>
-      activeSubscriptions.foreach{ case (subscriber, marketData) => subscriber ! marketData }
-      super.receive(message)
-    case message: CancelOrder =>
-      activeSubscriptions.foreach{ case (subscriber, marketData) => subscriber ! marketData }
-      super.receive(message)
-    case message: ClearRequest =>  // coupling with ClearingSchedule!
-      activeSubscriptions.foreach{ case (subscriber, marketData) => subscriber ! marketData }
-      super.receive(message)
     case message =>
       super.receive(message)
   }
 
-  protected def activeSubscriptions: Map[ActorRef, MarketData] = subscriptions.flatMap {
-    case (_, (subscriber, marketDataRequest)) =>
-      marketDataRequest.query(auction).map(marketData => (subscriber, marketData))
+  protected def publishAuctionData(): Unit = subscriptions.foreach {
+    case (mDReqId, (subscriber, dataRequest)) =>
+      val auctionData = dataRequest.query(auction)
+      subscriber ! AuctionDataResponse(auctionData, randomUUID(), mDReqId, currentTimeMillis())
   }
 
   /* Subscriptions stored as a mapping between some unique identifier and a `(ActorRef, MarketDataRequest)` pair. */
-  protected var subscriptions: Map[UUID, (ActorRef, MarketDataRequest[A])] = Map.empty
+  private[this] var subscriptions: Map[UUID, (ActorRef, AuctionDataRequest[A])] = Map.empty
 
   /* Subscriptions stored as a mapping between `ActorRef` and its collection of subscription identifiers. */
   private[this] var mDReqIdsByActorRef: Map[ActorRef, Set[UUID]] = Map.empty

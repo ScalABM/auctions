@@ -19,4 +19,4 @@ import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.core.util.Timestamp
 
 
-final case class CancelOrder(reference: Reference, timestamp: Timestamp, token: Token) extends TradingMessage
+final case class CancelOrder(reference: Reference, timestamp: Timestamp, issuer: Token) extends Message

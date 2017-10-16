@@ -22,7 +22,7 @@ trait TokenGenerator
   extends UUIDGenerator {
 
   protected def randomToken(): Token = {
-    random()
+    randomUUID()
   }
 
 }

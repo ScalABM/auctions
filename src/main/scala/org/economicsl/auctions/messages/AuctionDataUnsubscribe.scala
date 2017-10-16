@@ -18,23 +18,10 @@ package org.economicsl.auctions.messages
 import java.util.UUID
 
 
-/** Base trait for all `MarketDataRequest` types.
+/** Message used to indicate that a particular subscription should be canceled.
   *
-  * @tparam A should be a subtype of `Auction` so that auction designer can restrict the type of market data requests
-  *           that an `AuctionParticipant` can issue.
+  * @param mDReqId identifier of the previously submitted `AuctionDataRequest` that should be cancelled.
+  * @author davidrpugh
+  * @since 0.2.0
   */
-sealed trait MarketDataRequest[-A] {
-
-  /** Function that returns some `MarketData` as a function of `Auction` state. */
-  def query: A => Option[MarketData]
-
-}
-
-
-
-
-
-
-
-
-
+final case class AuctionDataUnsubscribe(mDReqId: UUID)

@@ -15,13 +15,28 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import java.util.UUID
+
+import org.economicsl.core.Currency
+import play.api.libs.json.{Json, Writes}
 
 
-/** Message used to indicate that a particular subscription should be canceled.
+/** Class implementing a spread quote.
   *
-  * @param mDReqId identifier of the previously submitted `MarketDataRequest` that should be cancelled.
+  * @param value
   * @author davidrpugh
-  * @since 0.2.0
+  * @since 0.1.0
   */
-final case class MarketDataUnsubscribe(mDReqId: UUID)
+case class SpreadQuote(value: Option[Currency])
+  extends AuctionData
+
+
+/** Companion object for the `SpreadQuote` class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+object SpreadQuote {
+
+  implicit val writes: Writes[SpreadQuote] = Json.writes[SpreadQuote]
+
+}
