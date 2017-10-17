@@ -77,7 +77,7 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     * @param auctionDataResponse
     * @return
     */
-  def handle(auctionDataResponse: AuctionDataResponse): P
+  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): P
 
   /** Each `AuctionParticipant` needs to be uniquely identified. */
   def issuer: Issuer

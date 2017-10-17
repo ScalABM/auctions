@@ -37,7 +37,7 @@ abstract class OpenBidAuction[T <: Tradable]
     extends Auction[T, OpenBidAuction[T]] {
   this: OpenBidAuction[T] =>
 
-  def receive(request: AuctionDataRequest[T]): AuctionData = {
+  def receive(request: AuctionDataRequest[T]): AuctionData[T] = {
     request.query(this)
   }
 

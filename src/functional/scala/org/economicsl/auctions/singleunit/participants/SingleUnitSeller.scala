@@ -35,7 +35,7 @@ class SingleUnitSeller private(
     * @param auctionDataResponse
     * @return
     */
-  def handle(auctionDataResponse: AuctionDataResponse): SingleUnitAuctionParticipant = {
+  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): SingleUnitAuctionParticipant = {
     ???
   }
 

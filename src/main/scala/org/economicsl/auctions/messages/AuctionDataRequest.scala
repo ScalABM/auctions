@@ -33,7 +33,7 @@ trait AuctionDataRequest[T <: Tradable]
   def mDReqId: UUID
 
   /** Function that returns some `MarketData` as a function of `Auction` state. */
-  def query: OpenBidAuction[T] => AuctionData
+  def query: OpenBidAuction[T] => AuctionData[T]
 
 }
 

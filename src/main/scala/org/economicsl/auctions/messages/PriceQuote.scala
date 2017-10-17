@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.messages
 
 
-import org.economicsl.core.Price
+import org.economicsl.core.{Price, Tradable}
 import play.api.libs.json.{Json, Writes}
 
 
@@ -25,7 +25,7 @@ import play.api.libs.json.{Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-trait PriceQuote extends AuctionData {
+trait PriceQuote[+T <: Tradable] extends AuctionData[T] {
 
   def value: Option[Price]
 
@@ -34,47 +34,50 @@ trait PriceQuote extends AuctionData {
 
 /** Class implementing an ask price quote.
   *
+  * @param tradable
   * @param value
   * @author davidrpugh
   * @since 0.1.0
   */
-case class AskPriceQuote(value: Option[Price]) extends PriceQuote
+case class AskPriceQuote[+T <: Tradable](tradable: T, value: Option[Price]) extends PriceQuote[T]
 
 
 object AskPriceQuote {
 
-  implicit val writes: Writes[AskPriceQuote] = Json.writes[AskPriceQuote]
+  implicit def writes[T <: Tradable]: Writes[AskPriceQuote[T]] = Json.writes[AskPriceQuote[T]]
 
 }
 
 
 /** Class implementing a bid price quote.
   *
+  * @param tradable
   * @param value
   * @author davidrpugh
   * @since 0.1.0
   */
-case class BidPriceQuote(value: Option[Price]) extends PriceQuote
+case class BidPriceQuote[+T <: Tradable](tradable: T, value: Option[Price]) extends PriceQuote[T]
 
 
 object BidPriceQuote {
 
-  implicit val writes: Writes[BidPriceQuote] = Json.writes[BidPriceQuote]
+  implicit def writes[T <: Tradable]: Writes[BidPriceQuote[T]] = Json.writes[BidPriceQuote[T]]
 
 }
 
 
 /** Class implementing a mid-point price quote.
   *
+  * @param tradable
   * @param value
   * @author davidrpugh
   * @since 0.1.0
   */
-case class MidPointPriceQuote(value: Option[Price]) extends PriceQuote
+case class MidPointPriceQuote[+T <: Tradable](tradable: T, value: Option[Price]) extends PriceQuote[T]
 
 
 object MidPointPriceQuote {
 
-  implicit val writes: Writes[MidPointPriceQuote] = Json.writes[MidPointPriceQuote]
+  implicit def writes[T <: Tradable]: Writes[MidPointPriceQuote[T]] = Json.writes[MidPointPriceQuote[T]]
 
 }

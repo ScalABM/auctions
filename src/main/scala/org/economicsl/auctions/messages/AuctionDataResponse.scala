@@ -17,6 +17,7 @@ package org.economicsl.auctions.messages
 
 import java.util.UUID
 
+import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
 
 
@@ -27,8 +28,12 @@ import org.economicsl.core.util.Timestamp
   * @author davidrpugh
   * @since 0.2.0
   */
-case class AuctionDataResponse(data: AuctionData, issuer: UUID, mDReqId: Option[UUID], timestamp: Timestamp)
-  extends Message
+case class AuctionDataResponse[+T <: Tradable](
+  data: AuctionData[T],
+  issuer: UUID,
+  mDReqId: Option[UUID],
+  timestamp: Timestamp)
+    extends Message
 
 
 /** Companion object for the `AuctionDataResponse` class.
@@ -38,7 +43,7 @@ case class AuctionDataResponse(data: AuctionData, issuer: UUID, mDReqId: Option[
   */
 object AuctionDataResponse {
 
-  /** Create an unsolicited `AuctionDataResponse`.
+  /** Create an `AuctionDataResponse` for a previously submitted `AuctionDataRequest` message.
     *
     * @param data
     * @param issuer
@@ -46,7 +51,7 @@ object AuctionDataResponse {
     * @param timestamp
     * @return*
     */
-  def apply(data: AuctionData, issuer: UUID, mDReqId: UUID, timestamp: Timestamp): AuctionDataResponse = {
+  def apply[T <: Tradable](data: AuctionData[T], issuer: UUID, mDReqId: UUID, timestamp: Timestamp): AuctionDataResponse[T] = {
     new AuctionDataResponse(data, issuer, Some(mDReqId), timestamp)
   }
 
@@ -57,7 +62,7 @@ object AuctionDataResponse {
     * @param timestamp
     * @return*
     */
-  def apply(data: AuctionData, issuer: UUID, timestamp: Timestamp): AuctionDataResponse = {
+  def apply[T <: Tradable](data: AuctionData[T], issuer: UUID, timestamp: Timestamp): AuctionDataResponse[T] = {
     new AuctionDataResponse(data, issuer, None, timestamp)
   }
 

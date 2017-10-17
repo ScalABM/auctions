@@ -15,13 +15,17 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
+import org.economicsl.core.Tradable
+
 
 /** Base trait for all `AuctionData` messages.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait AuctionData {
+trait AuctionData[+T <: Tradable] {
+
+  def tradable: T
 
   def value: Option[Any]
 

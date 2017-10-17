@@ -39,8 +39,8 @@ trait PriceQuoteRequest[T <: Tradable] extends AuctionDataRequest[T]
 final case class AskPriceQuoteRequest[T <: Tradable](issuer: Issuer, mDReqId: UUID, timestamp: Timestamp)
   extends PriceQuoteRequest[T] {
 
-  val query: (OpenBidAuction[T]) => AskPriceQuote = {
-    auction => AskPriceQuote(auction.orderBook.askPriceQuote)
+  val query: (OpenBidAuction[T]) => AskPriceQuote[T] = {
+    auction => AskPriceQuote(auction.protocol.tradable, auction.orderBook.askPriceQuote)
   }
 
 }
@@ -54,8 +54,8 @@ final case class AskPriceQuoteRequest[T <: Tradable](issuer: Issuer, mDReqId: UU
 final case class BidPriceQuoteRequest[T <: Tradable](issuer: Issuer, mDReqId: UUID, timestamp: Timestamp)
   extends PriceQuoteRequest[T] {
 
-  val query: (OpenBidAuction[T]) => BidPriceQuote = {
-    auction => BidPriceQuote(auction.orderBook.bidPriceQuote)
+  val query: (OpenBidAuction[T]) => BidPriceQuote[T] = {
+    auction => BidPriceQuote(auction.protocol.tradable, auction.orderBook.bidPriceQuote)
   }
 
 }
@@ -69,8 +69,8 @@ final case class BidPriceQuoteRequest[T <: Tradable](issuer: Issuer, mDReqId: UU
 final case class MidPointPriceQuoteRequest[T <: Tradable](issuer: Issuer, mDReqId: UUID, timestamp: Timestamp)
   extends PriceQuoteRequest[T] {
 
-  val query: (OpenBidAuction[T]) => MidPointPriceQuote = {
-    auction => MidPointPriceQuote(auction.orderBook.midPointPriceQuote)
+  val query: (OpenBidAuction[T]) => MidPointPriceQuote[T] = {
+    auction => MidPointPriceQuote(auction.protocol.tradable, auction.orderBook.midPointPriceQuote)
   }
 
 }
