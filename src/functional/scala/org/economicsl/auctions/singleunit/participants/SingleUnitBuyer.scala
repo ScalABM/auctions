@@ -56,7 +56,7 @@ class SingleUnitBuyer private(
     * @return
     */
   def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitBuyer, (Token, AuctionDataRequest[T]))] = {
-    ???
+    None
   }
 
   /** Creates a new `SingleUnitBuyer` with an `updated` collection of outstanding orders. */
