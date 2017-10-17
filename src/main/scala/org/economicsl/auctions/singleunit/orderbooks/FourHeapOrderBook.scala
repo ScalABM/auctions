@@ -80,6 +80,11 @@ final class FourHeapOrderBook[T <: Tradable] private(
       None
   }
 
+  /** The mid-point price quote is an average of the bid and ask price quotes. */
+  def midPointPriceQuote: Option[Price] = {
+    askPriceQuote.flatMap(askPrice => bidPriceQuote.map(bidPrice => (askPrice / 2) + (bidPrice / 2)))
+  }
+
   def combineWith(that: FourHeapOrderBook[T]): FourHeapOrderBook[T] = {
     // drain that order book of its matched and unmatched orders...
     val (withOutMatchedOrders, additionalMatchedOrders) = that.removeAllMatchedOrders

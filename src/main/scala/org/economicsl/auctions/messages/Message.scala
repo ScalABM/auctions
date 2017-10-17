@@ -15,16 +15,25 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.{Order, Token}
-import org.economicsl.core.Tradable
+import org.economicsl.auctions.Token  // odd dependency on auctions package!
 import org.economicsl.core.util.Timestamp
 
 
-/**
+/** Base trait for all messages.
   *
-  * @param timestamp
-  * @param issuer
-  * @param order
-  * @tparam T
+  * See the FIX protocol [[http://www.onixs.biz/fix-dictionary/5.0/compBlock_StandardHeader.html standard header]] docs 
+  * for a rough idea of the type of information that might be included going forward.
+  * 
+  * @author davidrpugh
+  * @since 0.2.0
   */
-final case class InsertOrder[+T <: Tradable](timestamp: Timestamp, issuer: Token, order: Order[T]) extends Message
+trait Message
+  extends Serializable {
+
+  /** Unique token identifying the issuer of the message. */
+  def issuer: Token
+
+  /** Denotes the time at which the message was sent. */
+  def timestamp: Timestamp
+
+}

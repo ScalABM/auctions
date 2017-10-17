@@ -13,16 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.messages
 
-import org.economicsl.core.util.UUIDGenerator
+import java.util.UUID
+
+import org.economicsl.core.Tradable
 
 
-trait TokenGenerator
-  extends UUIDGenerator {
-
-  protected def randomToken(): Token = {
-    randomUUID()
-  }
-
-}
+/**
+  *
+  * @param request
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class AuctionDataSubscribe[T <: Tradable](mDReqId: UUID, request: AuctionDataRequest[T])

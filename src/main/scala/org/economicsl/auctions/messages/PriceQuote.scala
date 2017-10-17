@@ -13,24 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.quotes
+package org.economicsl.auctions.messages
 
-import org.economicsl.core.{Currency, Price}
+
+import org.economicsl.core.Price
 import play.api.libs.json.{Json, Writes}
-
-
-/** Base trait for all quote implementations.
-  *
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-sealed trait Quote {
-
-  def receiver: Receiver
-
-  def quote: Option[Any]
-
-}
 
 
 /** Base trait for all price quote implementations.
@@ -38,20 +25,20 @@ sealed trait Quote {
   * @author davidrpugh
   * @since 0.1.0
   */
-trait PriceQuote extends Quote {
+trait PriceQuote extends AuctionData {
 
-  def quote: Option[Price]
+  def value: Option[Price]
 
 }
 
 
 /** Class implementing an ask price quote.
   *
-  * @param quote
+  * @param value
   * @author davidrpugh
   * @since 0.1.0
   */
-case class AskPriceQuote(receiver: Receiver, quote: Option[Price]) extends PriceQuote
+case class AskPriceQuote(value: Option[Price]) extends PriceQuote
 
 
 object AskPriceQuote {
@@ -63,11 +50,11 @@ object AskPriceQuote {
 
 /** Class implementing a bid price quote.
   *
-  * @param quote
+  * @param value
   * @author davidrpugh
   * @since 0.1.0
   */
-case class BidPriceQuote(receiver: Receiver, quote: Option[Price]) extends PriceQuote
+case class BidPriceQuote(value: Option[Price]) extends PriceQuote
 
 
 object BidPriceQuote {
@@ -77,19 +64,17 @@ object BidPriceQuote {
 }
 
 
-/** Class implementing a spread quote.
+/** Class implementing a mid-point price quote.
   *
-  * @param quote
+  * @param value
   * @author davidrpugh
   * @since 0.1.0
-  * @todo a spread is the difference between two prices and as such the unit is not really `Price` but rather should
-  *       be `Currency`.
   */
-case class SpreadQuote(receiver: Receiver, quote: Option[Currency]) extends Quote
+case class MidPointPriceQuote(value: Option[Price]) extends PriceQuote
 
 
-object SpreadQuote {
+object MidPointPriceQuote {
 
-  implicit val writes: Writes[SpreadQuote] = Json.writes[SpreadQuote]
+  implicit val writes: Writes[MidPointPriceQuote] = Json.writes[MidPointPriceQuote]
 
 }

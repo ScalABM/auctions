@@ -13,17 +13,38 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.messages
 
 import java.util.UUID
 
+import org.economicsl.auctions.singleunit.OpenBidAuction
+import org.economicsl.core.Tradable
 
-/** The quotes package defines a mini vocabulary of messages that can be used by auction participants to query the
-  * auction to obtain information.
+
+/** Base trait for all `AuctionDataRequest` types.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.2.0
   */
-package object quotes {
+trait AuctionDataRequest[T <: Tradable]
+  extends Message {
 
-  /* Type alias for some type of unique identifier of the agent that should receive the quote. */
-  type Receiver = UUID
+  def mDReqId: UUID
+
+  /** Function that returns some `MarketData` as a function of `Auction` state. */
+  def query: OpenBidAuction[T] => AuctionData
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -13,16 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
-
-import org.economicsl.core.util.UUIDGenerator
+package org.economicsl.auctions.messages
 
 
-trait TokenGenerator
-  extends UUIDGenerator {
+/** Base trait for all `AuctionData` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait AuctionData {
 
-  protected def randomToken(): Token = {
-    randomUUID()
-  }
+  def value: Option[Any]
 
 }

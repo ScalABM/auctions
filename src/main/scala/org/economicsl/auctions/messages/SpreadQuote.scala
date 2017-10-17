@@ -13,16 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
-
-import org.economicsl.core.util.UUIDGenerator
+package org.economicsl.auctions.messages
 
 
-trait TokenGenerator
-  extends UUIDGenerator {
+import org.economicsl.core.Currency
+import play.api.libs.json.{Json, Writes}
 
-  protected def randomToken(): Token = {
-    randomUUID()
-  }
+
+/** Class implementing a spread quote.
+  *
+  * @param value
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+case class SpreadQuote(value: Option[Currency])
+  extends AuctionData
+
+
+/** Companion object for the `SpreadQuote` class.
+  *
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+object SpreadQuote {
+
+  implicit val writes: Writes[SpreadQuote] = Json.writes[SpreadQuote]
 
 }

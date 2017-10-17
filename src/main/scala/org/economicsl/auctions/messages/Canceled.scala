@@ -11,7 +11,7 @@ import org.economicsl.core.util.Timestamp
   * @since 0.2.0
   */
 trait Canceled
-  extends TradingMessage {
+  extends Message {
 
   def order: Order[Tradable]
 
@@ -23,11 +23,11 @@ trait Canceled
 /** Message used to indicate that a previously accepted order has been canceled by its issuer.
   *
   * @param timestamp
-  * @param token the unique (to the `AuctionParticipant`) identifier of the previously accepted order.
+  * @param issuer the unique (to the `AuctionParticipant`) identifier of the previously accepted order.
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class CanceledByIssuer(timestamp: Timestamp, token: Token, order: Order[Tradable])
+final case class CanceledByIssuer(timestamp: Timestamp, issuer: Token, order: Order[Tradable])
   extends Canceled {
   val reason: Reason = IssuerRequestedCancel(order)
 }

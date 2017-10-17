@@ -15,13 +15,13 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.{ActorRef, Props, Terminated}
-import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
+import akka.actor.{ActorRef, Props}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages.{CancelOrder, InsertOrder}
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
+import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
@@ -39,7 +39,9 @@ import scala.concurrent.duration.FiniteDuration
   * @tparam A
   */
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
-    extends StackableActor {
+    extends StackableActor
+    with Timestamper
+    with UUIDGenerator {
   this: ClearingSchedule[T, A] =>
 
   import AuctionActor._
@@ -71,16 +73,10 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       super.receive(message)
     case message @ RegisterAuctionParticipant(participant) =>
       context.watch(participant)  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
-      ticker = ticker.addRoutee(participant)
       participant ! auction.protocol
       super.receive(message)
     case message @ DeregisterAuctionParticipant(participant) =>
       context.unwatch(participant)  // `AuctionActor` no longer be notified if `AuctionParticipantActor` "dies"...
-      ticker = ticker.removeRoutee(participant)
-      super.receive(message)
-    case message @ Terminated(participant) =>
-      context.unwatch(participant)
-      ticker = ticker.removeRoutee(participant)
       super.receive(message)
     case message =>
       super.receive(message)
@@ -88,9 +84,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   /* `Auction` mechanism encapsulates the relevant state. */
   protected var auction: A
-
-  /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
-  protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
 
 }
 
