@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.messages.{Accepted, AuctionDataRequest, Canceled, Rejected}
+import org.economicsl.auctions.messages._
 import org.economicsl.core.{Price, Tradable}
 
 
@@ -71,6 +71,13 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     val updated = outstandingOrders - canceled.issuer
     withOutstandingOrders(updated)
   }
+
+  /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
+    *
+    * @param auctionDataResponse
+    * @return
+    */
+  def handle(auctionDataResponse: AuctionDataResponse): P
 
   /** Each `AuctionParticipant` needs to be uniquely identified. */
   def issuer: Issuer

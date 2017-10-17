@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit.participants
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages.AuctionDataRequest
+import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse}
 import org.economicsl.auctions.singleunit.orders.SingleUnitBidOrder
 import org.economicsl.core.{Price, Tradable}
 
@@ -36,6 +36,15 @@ class SingleUnitBuyer private(
   val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
   val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
+
+  /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
+    *
+    * @param auctionDataResponse
+    * @return
+    */
+  def handle(auctionDataResponse: AuctionDataResponse): SingleUnitAuctionParticipant = {
+    ???
+  }
 
   /** Issues an order for a particular tradable.
     *
