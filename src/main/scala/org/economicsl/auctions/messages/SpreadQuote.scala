@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.messages
 
 
-import org.economicsl.core.Currency
+import org.economicsl.core.{Currency, Tradable}
 import play.api.libs.json.{Json, Writes}
 
 
@@ -26,8 +26,7 @@ import play.api.libs.json.{Json, Writes}
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SpreadQuote(value: Option[Currency])
-  extends AuctionData
+case class SpreadQuote[+T <: Tradable](tradable: T, value: Option[Currency]) extends AuctionData[T]
 
 
 /** Companion object for the `SpreadQuote` class.
@@ -37,6 +36,6 @@ case class SpreadQuote(value: Option[Currency])
   */
 object SpreadQuote {
 
-  implicit val writes: Writes[SpreadQuote] = Json.writes[SpreadQuote]
+  implicit def writes[T <: Tradable]: Writes[SpreadQuote[T]] = Json.writes[SpreadQuote[T]]
 
 }
