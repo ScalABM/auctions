@@ -58,7 +58,7 @@ trait PeriodicAuctionDataRequestSchedule[P <: AuctionParticipant[P]]
       requestedAuctionData match {
         case Some((updated, (token, auctionDataRequest))) =>
           participant = updated  // SIDE EFFECT!!
-          auctions.get(protocol).foreach(auction => auction ! auctionDataRequest)
+          auctionActorRefsByTradable.get(protocol.tradable).foreach(auction => auction ! auctionDataRequest)
         case None =>
           // if no `AuctionDataRequest` is issued then there should be nothing to do!
       }

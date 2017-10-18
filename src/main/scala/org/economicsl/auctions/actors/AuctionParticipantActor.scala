@@ -38,7 +38,7 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     */
   override def receive: Receive = {
     case message: AuctionProtocol[Tradable] =>
-      auctions = auctions.updated(message, sender()) // `AuctionActor` response to `RegisterParticipant` message!
+      auctionActorRefsByTradable = auctionActorRefsByTradable.updated(message.tradable, sender()) // `AuctionActor` response to `RegisterParticipant` message!
       super.receive(message)
     case message: Accepted =>
       participant = participant.handle(message)
@@ -54,7 +54,7 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
   }
 
   /** Maps various auction protocols to their corresponding actor refs. */
-  protected var auctions: Map[AuctionProtocol[Tradable], ActorRef]
+  protected var auctionActorRefsByTradable: Map[Tradable, ActorRef]
 
   protected var participant: P
 
