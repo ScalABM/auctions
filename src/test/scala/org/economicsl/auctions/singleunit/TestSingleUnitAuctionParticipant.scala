@@ -16,6 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse}
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
@@ -41,6 +42,16 @@ class TestSingleUnitAuctionParticipant private(
   val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
+
+  /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
+    *
+    * @param auctionDataResponse
+    * @return
+    */
+  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): SingleUnitAuctionParticipant = {
+    ???
+  }
+
   /** Each `OrderIssuer` needs to issue orders given some `AuctionProtocol`.
     *
     * @param protocol
@@ -63,6 +74,17 @@ class TestSingleUnitAuctionParticipant private(
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
       Some((this, (randomToken(), SingleUnitBidOrder(issuer, limit, protocol.tradable))))
     }
+  }
+
+
+  /** Each `AuctionParticipant` needs to request auction data given some `AuctionProtocol`.
+    *
+    * @param protocol
+    * @tparam T
+    * @return
+    */
+  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitAuctionParticipant, (Token, AuctionDataRequest[T]))] = {
+    None
   }
 
   /** Factory method used by sub-classes to create an `A`. */

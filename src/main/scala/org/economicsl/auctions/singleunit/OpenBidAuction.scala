@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.AuctionProtocol
-import org.economicsl.auctions.quotes.{Quote, QuoteRequest}
+import org.economicsl.auctions.messages.{AuctionData, AuctionDataRequest}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -37,9 +37,11 @@ abstract class OpenBidAuction[T <: Tradable]
     extends Auction[T, OpenBidAuction[T]] {
   this: OpenBidAuction[T] =>
 
-  def receive(request: QuoteRequest[T]): Quote = {
-    request.query(orderBook)
+  def receive(request: AuctionDataRequest[T]): AuctionData[T] = {
+    request.query(this)
   }
+
+  val orderBook: FourHeapOrderBook[T]
 
 }
 
@@ -62,7 +64,7 @@ object OpenBidAuction {
 
 
   private class WithDiscriminatoryClearingPolicy[T <: Tradable](
-    protected val orderBook: FourHeapOrderBook[T],
+    val orderBook: FourHeapOrderBook[T],
     protected val pricingPolicy: PricingPolicy[T],
     val protocol: AuctionProtocol[T])
       extends OpenBidAuction[T]
@@ -87,7 +89,7 @@ object OpenBidAuction {
 
 
   private class WithUniformClearingPolicy[T <: Tradable](
-    protected val orderBook: FourHeapOrderBook[T],
+    val orderBook: FourHeapOrderBook[T],
     protected val pricingPolicy: PricingPolicy[T],
     val protocol: AuctionProtocol[T])
       extends OpenBidAuction[T]

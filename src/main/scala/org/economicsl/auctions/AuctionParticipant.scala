@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
+import org.economicsl.auctions.messages._
 import org.economicsl.core.{Price, Tradable}
 
 
@@ -68,9 +68,16 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     * @return
     */
   final def handle(canceled: Canceled): P = {
-    val updated = outstandingOrders - canceled.token
+    val updated = outstandingOrders - canceled.issuer
     withOutstandingOrders(updated)
   }
+
+  /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
+    *
+    * @param auctionDataResponse
+    * @return
+    */
+  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): P
 
   /** Each `AuctionParticipant` needs to be uniquely identified. */
   def issuer: Issuer
@@ -79,10 +86,17 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     *
     * @param protocol
     * @tparam T
-    * @return a `Tuple2` whose first element contains a `Token` that uniquely identifies an `Order` and whose second
-    *         element is an `Order`.
+    * @return
     */
   def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(P, (Token, Order[T]))]
+
+  /** Each `AuctionParticipant` needs to request auction data given some `AuctionProtocol`.
+    *
+    * @param protocol
+    * @tparam T
+    * @return
+    */
+  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(P, (Token, AuctionDataRequest[T]))]
 
   /** An `AuctionParticipant` needs to keep track of its previously issued `Order` instances. */
   def outstandingOrders: Map[Token, (Reference, Order[Tradable])]

@@ -18,6 +18,7 @@ package org.economicsl.auctions.singleunit.participants
 import java.util.UUID
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse}
 import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder
 import org.economicsl.core.{Price, Tradable}
 
@@ -27,6 +28,16 @@ class SingleUnitSeller private(
   val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
   val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
+
+
+  /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
+    *
+    * @param auctionDataResponse
+    * @return
+    */
+  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): SingleUnitAuctionParticipant = {
+    ???
+  }
 
   /** Issues an order for a particular tradable.
     *
@@ -38,6 +49,16 @@ class SingleUnitSeller private(
   def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller,(Token, SingleUnitAskOrder[T]))] = {
     val valuation = valuations(protocol.tradable)
     Some((this, (randomToken(), SingleUnitAskOrder(issuer, valuation, protocol.tradable))))
+  }
+
+  /** Request auction data given some `AuctionProtocol`.
+    *
+    * @param protocol
+    * @tparam T
+    * @return
+    */
+  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller, (Token, AuctionDataRequest[T]))] = {
+    None
   }
 
   /** Creates a new `SingleUnitSeller` with an `updated` collection of outstanding orders. */

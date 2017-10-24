@@ -15,15 +15,18 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
+
 import java.util.UUID
 
 import akka.actor.{ActorRef, Props, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
+
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
+import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
@@ -41,7 +44,9 @@ import scala.concurrent.duration.FiniteDuration
   * @tparam A
   */
 trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
-    extends StackableActor {
+    extends StackableActor
+    with Timestamper
+    with UUIDGenerator {
   this: ClearingSchedule[T, A] =>
 
   override def receive: Receive = {
@@ -95,11 +100,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   /* `Auction` mechanism encapsulates the relevant state. */
   protected var auction: A
-
-  protected var participants: Map[???, ???] = Map.empty[???, ???]
-
-  /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
-  protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
 
 }
 

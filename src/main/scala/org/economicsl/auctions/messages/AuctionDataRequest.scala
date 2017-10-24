@@ -13,16 +13,38 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.messages
 
-import org.economicsl.core.util.UUIDGenerator
+import java.util.UUID
+
+import org.economicsl.auctions.singleunit.OpenBidAuction
+import org.economicsl.core.Tradable
 
 
-trait TokenGenerator
-  extends UUIDGenerator {
+/** Base trait for all `AuctionDataRequest` types.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait AuctionDataRequest[T <: Tradable]
+  extends Message {
 
-  protected def randomToken(): Token = {
-    randomUUID()
-  }
+  def mDReqId: UUID
+
+  /** Function that returns some `MarketData` as a function of `Auction` state. */
+  def query: OpenBidAuction[T] => AuctionData[T]
 
 }
+
+
+
+
+
+
+
+
+
+
+
+

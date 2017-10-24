@@ -23,7 +23,7 @@ trait ReferenceGenerator
     extends UUIDGenerator {
 
   protected def randomReference(): Reference = {
-    random()
+    randomUUID()
   }
 
 }

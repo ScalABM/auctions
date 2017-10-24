@@ -5,7 +5,7 @@ import org.economicsl.auctions.messages.Accepted;
 import org.economicsl.auctions.messages.Rejected;
 import org.economicsl.auctions.singleunit.OpenBidAuction;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
-import org.economicsl.auctions.singleunit.pricing.MidPointPricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.MidPointQuotePricingPolicy;
 
 import scala.Option;
 import scala.Tuple2;
@@ -26,9 +26,9 @@ public class ImperativePeriodicDoubleAuction {
 
         // define the auction mechanism...
         TestStock googleStock = new TestStock();
-        MidPointPricingPolicy<TestStock> midpointPricingPolicy = new MidPointPricingPolicy<>();
+        MidPointQuotePricingPolicy<TestStock> midpointQuotePricingPolicy = new MidPointQuotePricingPolicy<>();
         AuctionProtocol<TestStock> protocol = AuctionProtocol$.MODULE$.apply(googleStock);  // todo create JAuctionProtocol?
-        OpenBidAuction<TestStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointPricingPolicy, protocol);
+        OpenBidAuction<TestStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(midpointQuotePricingPolicy, protocol);
 
         // generate some random order flow...
         int numberOrders = 10000;
