@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props, Terminated}
-import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
@@ -74,9 +73,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       context.watch(sender())  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
       val registRefId = randomUUID()
       participants = participants + (registRefId -> (registId -> sender()))
-      ticker = ticker.addRoutee(sender())
       sender() ! AcceptedNewRegistrationInstructions(registId, registRefId)
-      sender ! auction.protocol
+      sender ! auction.protocol  // todo check fix protocol to see whether `AcceptedNewRegistrationInstructions` message could include auction protocol information.
       super.receive(message)
     case message @ ReplaceRegistration(registId, registRefId) =>
       participants = participants.updated(registRefId, (registId, sender()))
@@ -86,11 +84,9 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       context.unwatch(sender())  // `AuctionActor` no longer notified if `AuctionParticipantActor` "dies"...
       participants = participants - registRefId
       sender() ! AcceptedCancelRegistrationInstructions(registId, registRefId)
-      ticker = ticker.removeRoutee(sender())
       super.receive(message)
     case message @ Terminated(participant) =>
       context.unwatch(participant)
-      ticker = ticker.removeRoutee(participant)
       super.receive(message)
     case message =>
       super.receive(message)
@@ -100,9 +96,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   protected var auction: A
 
   protected var participants: Map[RegistrationReferenceId, (RegistrationId, ActorRef)] = Map.empty
-
-  /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
-  protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
 
 }
 
