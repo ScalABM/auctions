@@ -15,12 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-
-import java.util.UUID
-
 import akka.actor.{ActorRef, Props, Terminated}
 import akka.routing.{ActorRefRoutee, BroadcastRoutingLogic, Router}
-
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
@@ -76,18 +72,20 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       super.receive(message)
     case message @ NewRegistration(registId) =>
       context.watch(sender())  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
-      val registRefId: String = ???
-      participants = participants + (registRefId -> registId)
+      val registRefId = randomUUID()
+      participants = participants + (registRefId -> (registId -> sender()))
       ticker = ticker.addRoutee(sender())
-      sender() ! AcceptedRegistration(registRefId, '0')
+      sender() ! AcceptedNewRegistrationInstructions(registId, registRefId)
       sender ! auction.protocol
       super.receive(message)
     case message @ ReplaceRegistration(registId, registRefId) =>
-      participants = participants.updated(registRefId, registId)
+      participants = participants.updated(registRefId, (registId, sender()))
+      sender() ! AcceptedReplaceRegistrationInstructions(registId, registRefId)
       super.receive(message)
-    case message @ CancelRegistration(_, registRefId) =>
+    case message @ CancelRegistration(registId, registRefId) =>
       context.unwatch(sender())  // `AuctionActor` no longer notified if `AuctionParticipantActor` "dies"...
       participants = participants - registRefId
+      sender() ! AcceptedCancelRegistrationInstructions(registId, registRefId)
       ticker = ticker.removeRoutee(sender())
       super.receive(message)
     case message @ Terminated(participant) =>
@@ -100,6 +98,11 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   /* `Auction` mechanism encapsulates the relevant state. */
   protected var auction: A
+
+  protected var participants: Map[RegistrationReferenceId, (RegistrationId, ActorRef)] = Map.empty
+
+  /* `Router` will broadcast messages to all registered auction participants (even if participants are remote!) */
+  protected var ticker: Router = Router(BroadcastRoutingLogic(), Vector.empty[ActorRefRoutee])
 
 }
 
