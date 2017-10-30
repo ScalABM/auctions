@@ -74,7 +74,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       val registRefId = randomUUID()
       participants = participants + (registRefId -> (registId -> sender()))
       sender() ! AcceptedNewRegistrationInstructions(registId, registRefId)
-      sender ! auction.protocol  // todo check fix protocol to see whether `AcceptedNewRegistrationInstructions` message could include auction protocol information.
+      sender() ! auction.protocol  // todo check fix protocol to see whether `AcceptedNewRegistrationInstructions` message could include auction protocol information.
       super.receive(message)
     case message @ ReplaceRegistration(registId, registRefId) =>
       participants = participants.updated(registRefId, (registId, sender()))
