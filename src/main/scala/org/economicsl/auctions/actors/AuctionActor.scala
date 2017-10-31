@@ -18,7 +18,7 @@ package org.economicsl.auctions.actors
 import akka.actor.{ActorRef, Props, Terminated}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
+import org.economicsl.auctions.singleunit.{SingleUnitAuction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.{Timestamper, UUIDGenerator}
@@ -38,7 +38,7 @@ import scala.concurrent.duration.FiniteDuration
   * @tparam T
   * @tparam A
   */
-trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
+trait AuctionActor[T <: Tradable, A <: SingleUnitAuction[T, A]]
     extends StackableActor
     with Timestamper
     with UUIDGenerator {

@@ -33,7 +33,7 @@ import org.economicsl.core.Tradable
   *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
   *       each auction implementation.
   */
-trait Auction[T <: Tradable, A <: Auction[T, A]]
+trait SingleUnitAuction[T <: Tradable, A <: SingleUnitAuction[T, A]]
     extends ReferenceGenerator
     with Timestamper {
   this: A =>

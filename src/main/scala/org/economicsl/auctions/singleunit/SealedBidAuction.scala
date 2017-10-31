@@ -33,7 +33,7 @@ import org.economicsl.core.Tradable
   * @since 0.1.0
   */
 abstract class SealedBidAuction[T <: Tradable]
-    extends Auction[T, SealedBidAuction[T]] {
+    extends SingleUnitAuction[T, SealedBidAuction[T]] {
   this: SealedBidAuction[T] =>
 }
 

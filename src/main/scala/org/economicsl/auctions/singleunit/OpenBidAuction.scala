@@ -34,7 +34,7 @@ import org.economicsl.core.Tradable
   * @since 0.1.0
   */
 abstract class OpenBidAuction[T <: Tradable]
-    extends Auction[T, OpenBidAuction[T]] {
+    extends SingleUnitAuction[T, OpenBidAuction[T]] {
   this: OpenBidAuction[T] =>
 
   def receive(request: AuctionDataRequest[T]): AuctionData[T] = {

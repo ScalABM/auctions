@@ -28,7 +28,7 @@ trait SingleUnitAuctionSimulation {
   type IssuedOrder[+T <: Tradable] = (SingleUnitAuctionParticipant, (Token, SingleUnitOrder[T]))
 
   /** Type representing the state of an auction simulation. */
-  type State[T <: Tradable, A <: Auction[T, A]] = (A, Iterable[SingleUnitAuctionParticipant])
+  type State[T <: Tradable, A <: SingleUnitAuction[T, A]] = (A, Iterable[SingleUnitAuctionParticipant])
 
   /** Issues orders for some auction.
     *
@@ -51,7 +51,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam A
     * @return
     */
-  def insertOrders[T <: Tradable, A <: Auction[T, A]]
+  def insertOrders[T <: Tradable, A <: SingleUnitAuction[T, A]]
                   (auction: A, issuedOrders: Iterable[(SingleUnitAuctionParticipant, (Token, SingleUnitOrder[T]))])
                   : (A, Iterable[SingleUnitAuctionParticipant]) = {
     issuedOrders.aggregate((auction, Seq.empty[SingleUnitAuctionParticipant]))(update[T, A], combine[T, A])
@@ -65,7 +65,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam A
     * @return
     */
-  def run[T <: Tradable, A <: Auction[T, A]]
+  def run[T <: Tradable, A <: SingleUnitAuction[T, A]]
          (auction: A, participants: Iterable[SingleUnitAuctionParticipant])
          : ((A, Iterable[SingleUnitAuctionParticipant]), Option[Iterable[SpotContract]]) = {
     val issuedOrders = issueOrders(auction.protocol, participants)
@@ -75,7 +75,7 @@ trait SingleUnitAuctionSimulation {
   }
 
   /** Draft type signature for a function that settles contracts. */
-  def settle[T <: Tradable, A <: Auction[T, A]]
+  def settle[T <: Tradable, A <: SingleUnitAuction[T, A]]
             (state: State[T, A], contracts: Iterable[Contract])
             : State[T, A] = {
     ???
@@ -240,7 +240,7 @@ trait SingleUnitAuctionSimulation {
   }
 
   /** Function that updates the state of auction given an order issued by some auction participant. */
-  private[this] def update[T <: Tradable, A <: Auction[T, A]]
+  private[this] def update[T <: Tradable, A <: SingleUnitAuction[T, A]]
                           (state: (A, Seq[SingleUnitAuctionParticipant]), issuedOrder: IssuedOrder[T])
                           : (A, Seq[SingleUnitAuctionParticipant]) = {
     val (auction, participants) = state
@@ -252,7 +252,7 @@ trait SingleUnitAuctionSimulation {
 
 
   /** Function that combines two states into a single state. */
-  private[this] def combine[T <: Tradable, A <: Auction[T, A]]
+  private[this] def combine[T <: Tradable, A <: SingleUnitAuction[T, A]]
                         (state1:(A, Seq[SingleUnitAuctionParticipant]), state2: (A, Seq[SingleUnitAuctionParticipant]))
                         : (A, Seq[SingleUnitAuctionParticipant]) = {
     val (auction, participants) = state1
