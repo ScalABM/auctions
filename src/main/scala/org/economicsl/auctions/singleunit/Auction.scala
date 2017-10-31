@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy

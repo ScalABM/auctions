@@ -1,6 +1,5 @@
-package org.economicsl.auctions.messages
+package org.economicsl.auctions
 
-import org.economicsl.auctions.{AuctionProtocol, Order, SinglePricePoint}
 import org.economicsl.core.Tradable
 
 

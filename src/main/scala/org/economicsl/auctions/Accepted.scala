@@ -1,6 +1,6 @@
-package org.economicsl.auctions.messages
+package org.economicsl.auctions
 
-import org.economicsl.auctions.{Order, Reference, Token}
+import org.economicsl.auctions.messages.Message
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
 

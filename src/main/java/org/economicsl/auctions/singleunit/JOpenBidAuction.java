@@ -18,9 +18,9 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
-import org.economicsl.auctions.messages.Accepted;
-import org.economicsl.auctions.messages.Canceled;
-import org.economicsl.auctions.messages.Rejected;
+import org.economicsl.auctions.Accepted;
+import org.economicsl.auctions.Canceled;
+import org.economicsl.auctions.Rejected;
 import org.economicsl.auctions.messages.AuctionData;
 import org.economicsl.auctions.messages.AuctionDataRequest;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;

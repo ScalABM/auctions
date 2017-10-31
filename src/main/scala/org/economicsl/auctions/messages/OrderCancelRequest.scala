@@ -13,28 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.singleunit;
-
-import org.economicsl.auctions.Canceled;
-import scala.Option;
+package org.economicsl.auctions.messages
 
 
-public final class CancelResult<A> {
+trait OrderCancelRequest
 
-    private A auction;
-    private Option<Canceled> result;
 
-    public CancelResult(A auction, Option<Canceled> result) {
-        this.auction = auction;
-        this.result = result;
-    }
-
-    public A getAuction() {
-        return auction;
-    }
-
-    public Option<Canceled> getResult() {
-        return result;
-    }
-
-}
