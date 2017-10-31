@@ -34,6 +34,10 @@ sealed trait RegistrationInstructionsResponse {
     */
   def registTransType: Char
 
+  /** Registration status as returned by the `AuctionActor`.
+    *
+    * @note Valid values are A: Accepted, R: Rejected
+    */
   def registStatus: Char
 
 }
@@ -54,8 +58,7 @@ trait AcceptedRegistrationInstructions extends RegistrationInstructionsResponse 
 final case class AcceptedNewRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
   extends AcceptedRegistrationInstructions {
 
-  /** Identifies registration transaction type. */
-  def registTransType: Char = '0'
+  val registTransType: Char = '0'
 
 }
 
@@ -63,8 +66,7 @@ final case class AcceptedNewRegistrationInstructions(registId: RegistrationId, r
 final case class AcceptedReplaceRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
   extends AcceptedRegistrationInstructions {
 
-  /** Identifies registration transaction type. */
-  def registTransType: Char = '1'
+  val registTransType: Char = '1'
 
 }
 
@@ -72,16 +74,37 @@ final case class AcceptedReplaceRegistrationInstructions(registId: RegistrationI
 final case class AcceptedCancelRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
   extends AcceptedRegistrationInstructions {
 
-  /** Identifies registration transaction type. */
-  def registTransType: Char = '2'
+  val registTransType: Char = '2'
 
 }
 
 
-final case class RejectedRegistrationInstructions(registId: RegistrationId, registRefId: String, registTransType: Char)
-  extends RegistrationInstructionsResponse {
+trait RejectedRegistrationInstructions extends RegistrationInstructionsResponse {
 
   val registStatus: Char = 'R'
 
 }
 
+
+final case class RejectedNewRegistrationInstructions(registId: RegistrationId)
+  extends RejectedRegistrationInstructions {
+
+  val registTransType: Char = '0'
+
+}
+
+
+final case class RejectedReplaceRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RejectedRegistrationInstructions {
+
+  val registTransType: Char = '1'
+
+}
+
+
+final case class RejectedCancelRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RejectedRegistrationInstructions {
+
+  val registTransType: Char = '2'
+
+}
