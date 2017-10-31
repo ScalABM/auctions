@@ -15,35 +15,35 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.core.{Currency, Tradable}
+import org.economicsl.core.Tradable
 
 
 /** Need some data structure to convey the information about an auction to participants. */
 trait AuctionProtocol[+T <: Tradable] {
 
-  def tickSize: Currency
+  def tickSize: TickSize
 
   def tradable: T
 
-  def withTickSize(updated: Currency): AuctionProtocol[T]
+  def withTickSize(updated: TickSize): AuctionProtocol[T]
 
 }
 
 
 object AuctionProtocol {
 
-  def apply[T <: Tradable](tickSize: Currency, tradable: T): AuctionProtocol[T] = {
+  def apply[T <: Tradable](tickSize: TickSize, tradable: T): AuctionProtocol[T] = {
     AuctionProtocolImpl(tickSize, tradable)
   }
 
   def apply[T <: Tradable](tradable: T): AuctionProtocol[T] = {
-    AuctionProtocolImpl(1L, tradable)
+    AuctionProtocolImpl(TickSize.one, tradable)
   }
 
-  private case class AuctionProtocolImpl[+T <: Tradable](tickSize: Currency, tradable: T)
+  private case class AuctionProtocolImpl[+T <: Tradable](tickSize: TickSize, tradable: T)
       extends AuctionProtocol[T] {
 
-    def withTickSize(updated: Currency): AuctionProtocol[T] = {
+    def withTickSize(updated: TickSize): AuctionProtocol[T] = {
       AuctionProtocolImpl(updated, tradable)
     }
 

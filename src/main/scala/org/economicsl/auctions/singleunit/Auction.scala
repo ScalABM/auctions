@@ -75,7 +75,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     require(protocol.tradable.equals(that.protocol.tradable), "Only auctions for the same Tradable can be combined!")
     val combinedOrderBooks = orderBook.combineWith(that.orderBook)
     val withCombinedOrderBooks = withOrderBook(combinedOrderBooks)
-    val combinedTickSize = leastCommonMultiple(protocol.tickSize, that.protocol.tickSize)
+    val combinedTickSize = protocol.tickSize.leastCommonMultiple(that.protocol.tickSize)
     val updatedProtocol = protocol.withTickSize(combinedTickSize)
     withCombinedOrderBooks.withProtocol(updatedProtocol)
   }
@@ -122,18 +122,6 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   protected val orderBook: FourHeapOrderBook[T]
 
   protected val pricingPolicy: PricingPolicy[T]
-
-  /** Computest the least common multiple of two tick sizes. */
-  private[this] def leastCommonMultiple(a: Long, b: Long) = {
-
-    @annotation.tailrec
-    def gcd(a: Long, b: Long): Long = {
-      if (b == 0) a.abs else gcd(b, a % b)
-    }
-
-    (a.abs / gcd(a,b)) * (b.abs / gcd(a, b))  // todo check for overflow?
-
-  }
 
 }
 
