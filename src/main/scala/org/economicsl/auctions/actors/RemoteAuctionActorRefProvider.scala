@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.actors
 
 import akka.actor.{ActorIdentity, ActorRef, Identify, Terminated}
-import org.economicsl.auctions.actors.AuctionActor.RegisterAuctionParticipant
 
 
 /** Mixin trait providing functionality for connecting to a remote `AuctionActor`.
@@ -35,7 +34,6 @@ trait RemoteAuctionActorRefProvider
         case Some(actorRef) =>
           context.watch(actorRef)
           auctionService = Some(actorRef)
-          auctionService.foreach(auctionRef => auctionRef ! RegisterAuctionParticipant(self))
         case None =>
           ???  // todo what should happen in this case? Log as a warning? Then retry? Could be that auction actor has not yet started?
       }

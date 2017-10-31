@@ -15,9 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.{ActorRef, Props, Terminated}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
-import org.economicsl.auctions.messages.{CancelOrder, InsertOrder}
+import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
@@ -44,8 +44,6 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
     with UUIDGenerator {
   this: ClearingSchedule[T, A] =>
 
-  import AuctionActor._
-
   override def receive: Receive = {
     case message @ InsertOrder(_, token, order: SingleUnitOrder[T]) =>
       val (updatedAuction, response) = auction.insert(token -> order)
@@ -71,12 +69,36 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           ???
       }
       super.receive(message)
-    case message @ RegisterAuctionParticipant(participant) =>
-      context.watch(participant)  // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
-      participant ! auction.protocol
+    case message @ NewRegistration(registId) =>
+      if (validate(message)) {
+        context.watch(sender()) // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
+        val registRefId = randomUUID()
+        participants = participants + (registRefId -> (registId -> sender()))
+        sender() ! AcceptedNewRegistrationInstructions(registId, registRefId)
+        sender() ! auction.protocol // todo check fix protocol to see whether `AcceptedNewRegistrationInstructions` message could include auction protocol information.
+      } else {
+        sender() ! RejectedNewRegistrationInstructions(registId)
+      }
       super.receive(message)
-    case message @ DeregisterAuctionParticipant(participant) =>
-      context.unwatch(participant)  // `AuctionActor` no longer be notified if `AuctionParticipantActor` "dies"...
+    case message @ ReplaceRegistration(registId, registRefId) =>
+      if (validate(message)) {
+        participants = participants.updated(registRefId, registId -> sender())
+        sender() ! AcceptedReplaceRegistrationInstructions(registId, registRefId)
+      } else {
+        sender() ! RejectedReplaceRegistrationInstructions(registId, registRefId)
+      }
+      super.receive(message)
+    case message @ CancelRegistration(registId, registRefId) =>
+      if (validate(message)) {
+        context.unwatch(sender()) // `AuctionActor` no longer notified if `AuctionParticipantActor` "dies"...
+        participants = participants - registRefId
+        sender() ! AcceptedCancelRegistrationInstructions(registId, registRefId)
+      } else {
+        sender() ! RejectedCancelRegistrationInstructions(registId, registRefId)
+      }
+      super.receive(message)
+    case message @ Terminated(participant) =>
+      context.unwatch(participant)
       super.receive(message)
     case message =>
       super.receive(message)
@@ -84,6 +106,20 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
 
   /* `Auction` mechanism encapsulates the relevant state. */
   protected var auction: A
+
+  protected var participants: Map[RegistrationReferenceId, (RegistrationId, ActorRef)] = Map.empty
+
+  private[this] def validate(registrationInstructions: NewRegistration): Boolean = {
+    true  // todo nothing to validate...yet!
+  }
+
+  private[this] def validate(registrationInstructions: CancelRegistration): Boolean = {
+    true // todo nothing to validate...yet!
+  }
+
+  private[this] def validate(registrationInstructions: ReplaceRegistration): Boolean = {
+    true // todo nothing to validate...yet!
+  }
 
 }
 
@@ -123,12 +159,6 @@ object AuctionActor {
                                   : Props = {
     Props(new WithPeriodicClearingSchedule[T](auction, executionContext, initialDelay, interval, Some(settlementService)))
   }
-
-
-  final case class DeregisterAuctionParticipant(participant: ActorRef)
-
-
-  final case class RegisterAuctionParticipant(participant: ActorRef)
 
 
   /** Default implementation of an `AuctionActor with BidderActivityClearingSchedule`.
