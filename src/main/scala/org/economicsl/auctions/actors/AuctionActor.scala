@@ -81,7 +81,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       }
       super.receive(message)
     case message @ ReplaceRegistration(registId, registRefId) =>
-      if (validate(message)) {
+      if (participants.contains(registRefId)) {
         participants = participants.updated(registRefId, registId -> sender())
         sender() ! AcceptedReplaceRegistration(registId, registRefId)
       } else {
@@ -89,7 +89,7 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
       }
       super.receive(message)
     case message @ CancelRegistration(registId, registRefId) =>
-      if (validate(message)) {
+      if (participants.contains(registRefId)) {
         context.unwatch(sender()) // `AuctionActor` no longer notified if `AuctionParticipantActor` "dies"...
         participants = participants - registRefId
         sender() ! AcceptedCancelRegistration(registId, registRefId)
@@ -107,18 +107,10 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   /* `Auction` mechanism encapsulates the relevant state. */
   protected var auction: A
 
-  protected var participants: Map[RegistrationReferenceId, (RegistrationId, ActorRef)] = Map.empty
+  private[this] var participants: Map[RegistrationReferenceId, (RegistrationId, ActorRef)] = Map.empty
 
   private[this] def validate(registrationInstructions: NewRegistration): Boolean = {
     true  // todo nothing to validate...yet!
-  }
-
-  private[this] def validate(registrationInstructions: CancelRegistration): Boolean = {
-    true // todo nothing to validate...yet!
-  }
-
-  private[this] def validate(registrationInstructions: ReplaceRegistration): Boolean = {
-    true // todo nothing to validate...yet!
   }
 
 }
