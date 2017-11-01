@@ -97,8 +97,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         sender() ! RejectedCancelRegistration(registId, registRefId)
       }
       super.receive(message)
-    case message @ Terminated(participant) =>
-      context.unwatch(participant)
+    case message @ Terminated(actorRef) if participants.exists{ case (_, (_, participantActorRef)) => actorRef == participantActorRef } =>
+      context.unwatch(actorRef)
       super.receive(message)
     case message =>
       super.receive(message)

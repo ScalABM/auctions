@@ -49,8 +49,8 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message @ AcceptedReplaceRegistration(registId, registRefId) =>
       registrations = registrations.updated(registId, registRefId -> sender())
       super.receive(message)
-    case message : RejectedRegistration =>
-      log.warning(message.toString)  // todo probably want to respond differently to sub-types!
+    case message : RejectedRegistration =>  // todo probably want to respond differently to sub-types!
+      log.warning(message.toString)
       super.receive(message)
     case message: Accepted =>
       participant = participant.handle(message)
@@ -65,6 +65,7 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
       super.receive(message)
   }
 
+  /* Need to store mapping between registration ids and information about the respective auctions. */
   private[this] var registrations: Map[RegistrationId, (RegistrationReferenceId, ActorRef)] = Map.empty
 
   /** Maps various auction protocols to their corresponding actor refs. */
