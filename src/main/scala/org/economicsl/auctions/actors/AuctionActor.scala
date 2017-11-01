@@ -74,27 +74,27 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         context.watch(sender()) // `AuctionActor` notified if `AuctionParticipantActor` "dies"...
         val registRefId = randomUUID()
         participants = participants + (registRefId -> (registId -> sender()))
-        sender() ! AcceptedNewRegistration(registId, registRefId)
+        sender() ! NewRegistrationAccepted(registId, registRefId)
         sender() ! auction.protocol // todo check fix protocol to see whether `AcceptedNewRegistrationInstructions` message could include auction protocol information.
       } else {
-        sender() ! RejectedNewRegistration(registId)
+        sender() ! NewRegistrationRejected(registId)
       }
       super.receive(message)
     case message @ ReplaceRegistration(registId, registRefId) =>
       if (participants.contains(registRefId)) {
         participants = participants.updated(registRefId, registId -> sender())
-        sender() ! AcceptedReplaceRegistration(registId, registRefId)
+        sender() ! ReplaceRegistrationAccepted(registId, registRefId)
       } else {
-        sender() ! RejectedReplaceRegistration(registId, registRefId)
+        sender() ! ReplaceRegistrationRejected(registId, registRefId)
       }
       super.receive(message)
     case message @ CancelRegistration(registId, registRefId) =>
       if (participants.contains(registRefId)) {
         context.unwatch(sender()) // `AuctionActor` no longer notified if `AuctionParticipantActor` "dies"...
         participants = participants - registRefId
-        sender() ! AcceptedCancelRegistration(registId, registRefId)
+        sender() ! CancelRegistrationAccepted(registId, registRefId)
       } else {
-        sender() ! RejectedCancelRegistration(registId, registRefId)
+        sender() ! CancelRegistrationRejected(registId, registRefId)
       }
       super.receive(message)
     case message @ Terminated(actorRef) =>

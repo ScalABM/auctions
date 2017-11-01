@@ -43,12 +43,12 @@ sealed trait RegistrationInstructionsResponse {
 }
 
 
-/** Base trait for all `AcceptedRegistration` messages.
+/** Base trait for all `RegistrationInstructionsAccepted` messages.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait AcceptedRegistration extends RegistrationInstructionsResponse {
+trait RegistrationInstructionsAccepted extends RegistrationInstructionsResponse {
 
   val registStatus: Char = 'A'
 
@@ -63,8 +63,8 @@ trait AcceptedRegistration extends RegistrationInstructionsResponse {
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class AcceptedNewRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends AcceptedRegistration {
+final case class NewRegistrationAccepted(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsAccepted {
 
   val registTransType: Char = '0'
 
@@ -79,8 +79,8 @@ final case class AcceptedNewRegistration(registId: RegistrationId, registRefId: 
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class AcceptedReplaceRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends AcceptedRegistration {
+final case class ReplaceRegistrationAccepted(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsAccepted {
 
   val registTransType: Char = '1'
 
@@ -95,20 +95,20 @@ final case class AcceptedReplaceRegistration(registId: RegistrationId, registRef
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class AcceptedCancelRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends AcceptedRegistration {
+final case class CancelRegistrationAccepted(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsAccepted {
 
   val registTransType: Char = '2'
 
 }
 
 
-/** Base trait for all `RejectedRegistration` messages.
+/** Base trait for all `RegistrationInstructionsRejected` messages.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait RejectedRegistration extends RegistrationInstructionsResponse {
+trait RegistrationInstructionsRejected extends RegistrationInstructionsResponse {
 
   val registStatus: Char = 'R'
 
@@ -122,8 +122,8 @@ trait RejectedRegistration extends RegistrationInstructionsResponse {
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class RejectedNewRegistration(registId: RegistrationId)
-  extends RejectedRegistration {
+final case class NewRegistrationRejected(registId: RegistrationId)
+  extends RegistrationInstructionsRejected {
 
   val registTransType: Char = '0'
 
@@ -138,8 +138,8 @@ final case class RejectedNewRegistration(registId: RegistrationId)
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class RejectedReplaceRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends RejectedRegistration {
+final case class ReplaceRegistrationRejected(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsRejected {
 
   val registTransType: Char = '1'
 
@@ -154,8 +154,8 @@ final case class RejectedReplaceRegistration(registId: RegistrationId, registRef
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class RejectedCancelRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends RejectedRegistration {
+final case class CancelRegistrationRejected(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsRejected {
 
   val registTransType: Char = '2'
 

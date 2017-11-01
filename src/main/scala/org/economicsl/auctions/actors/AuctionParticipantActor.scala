@@ -40,17 +40,17 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message: AuctionProtocol[Tradable] =>
       auctionActorRefsByTradable = auctionActorRefsByTradable.updated(message.tradable, sender()) // `AuctionActor` response to `RegisterParticipant` message!
       super.receive(message)
-    case message @ AcceptedNewRegistration(registId, registRefId) =>
+    case message @ NewRegistrationAccepted(registId, registRefId) =>
       context.watch(sender())  // `AuctionParticipantActor` will be notified if `AuctionActor` "dies"!
       registrations = registrations + (registId -> (registRefId -> sender()))
       super.receive(message)
-    case message @ AcceptedCancelRegistration(registId, _) =>
+    case message @ CancelRegistrationAccepted(registId, _) =>
       registrations = registrations - registId
       super.receive(message)
-    case message @ AcceptedReplaceRegistration(registId, registRefId) =>
+    case message @ ReplaceRegistrationAccepted(registId, registRefId) =>
       registrations = registrations.updated(registId, registRefId -> sender())
       super.receive(message)
-    case message : RejectedRegistration =>  // todo probably want to respond differently to sub-types!
+    case message : RegistrationInstructionsRejected =>  // todo probably want to respond differently to sub-types!
       log.warning(message.toString)
       super.receive(message)
     case message: Accepted =>
