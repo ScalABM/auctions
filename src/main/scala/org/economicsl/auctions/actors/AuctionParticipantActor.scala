@@ -17,7 +17,7 @@ package org.economicsl.auctions.actors
 
 import akka.actor.ActorRef
 import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
-import org.economicsl.auctions.messages.{Accepted, Canceled, Rejected}
+import org.economicsl.auctions.messages._
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamper
 
@@ -40,6 +40,18 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message: AuctionProtocol[Tradable] =>
       auctionActorRefsByTradable = auctionActorRefsByTradable.updated(message.tradable, sender()) // `AuctionActor` response to `RegisterParticipant` message!
       super.receive(message)
+    case message @ AcceptedNewRegistration(registId, registRefId) =>
+      registrations = registrations + (registId -> (registRefId -> sender()))
+      super.receive(message)
+    case message @ AcceptedCancelRegistration(registId, _) =>
+      registrations = registrations - registId
+      super.receive(message)
+    case message @ AcceptedReplaceRegistration(registId, registRefId) =>
+      registrations = registrations.updated(registId, registRefId -> sender())
+      super.receive(message)
+    case message : RejectedRegistration =>
+      log.warning(message.toString)  // todo probably want to respond differently to sub-types!
+      super.receive(message)
     case message: Accepted =>
       participant = participant.handle(message)
       super.receive(message)
@@ -52,6 +64,8 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message =>
       super.receive(message)
   }
+
+  private[this] var registrations: Map[RegistrationId, (RegistrationReferenceId, ActorRef)] = Map.empty
 
   /** Maps various auction protocols to their corresponding actor refs. */
   protected var auctionActorRefsByTradable: Map[Tradable, ActorRef]
