@@ -34,17 +34,37 @@ sealed trait RegistrationInstructions {
 }
 
 
+/** Message sent from an `AuctionParticipantActor` to some `AuctionActor` in order to register as a participant.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
 final case class NewRegistration(registId: RegistrationId) extends RegistrationInstructions {
   val registTransType: Char = '0'
 }
 
 
+/** Message sent from an `AuctionParticipantActor` to some `AuctionActor` in order to replace its existing registration.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
 final case class ReplaceRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
     extends RegistrationInstructions {
   val registTransType: Char = '1'
 }
 
 
+/** Message sent from an `AuctionParticipantActor` to some `AuctionActor` in order to cancel its existing registration.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
 final case class CancelRegistration(registId: RegistrationId, registRefId: RegistrationReferenceId)
     extends RegistrationInstructions {
   val registTransType: Char = '2'
