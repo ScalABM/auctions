@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, Terminated}
 import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
 import org.economicsl.auctions.messages._
 import org.economicsl.core.Tradable
@@ -41,6 +41,7 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
       auctionActorRefsByTradable = auctionActorRefsByTradable.updated(message.tradable, sender()) // `AuctionActor` response to `RegisterParticipant` message!
       super.receive(message)
     case message @ AcceptedNewRegistration(registId, registRefId) =>
+      context.watch(sender())  // `AuctionParticipantActor` will be notified if `AuctionActor` "dies"!
       registrations = registrations + (registId -> (registRefId -> sender()))
       super.receive(message)
     case message @ AcceptedCancelRegistration(registId, _) =>
@@ -60,6 +61,14 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
       super.receive(message)
     case message: Rejected =>
       participant = participant.handle(message)
+      super.receive(message)
+    case message @ Terminated(actorRef) =>
+      val existingRegistration = registrations find { case (_, (_, existingActorRef)) => actorRef == existingActorRef }
+      existingRegistration foreach {
+        case (registId, (_ , auctionActorRef) ) =>
+          context.unwatch(auctionActorRef)
+          registrations = registrations - registId
+      }
       super.receive(message)
     case message =>
       super.receive(message)

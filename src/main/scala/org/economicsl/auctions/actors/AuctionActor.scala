@@ -97,8 +97,13 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
         sender() ! RejectedCancelRegistration(registId, registRefId)
       }
       super.receive(message)
-    case message @ Terminated(actorRef) if participants.exists{ case (_, (_, participantActorRef)) => actorRef == participantActorRef } =>
-      context.unwatch(actorRef)
+    case message @ Terminated(actorRef) =>
+      val existingParticipant = participants find { case (_, (_, existingActorRef)) => actorRef == existingActorRef }
+      existingParticipant foreach {
+        case (registRefId, (_ , participantActorRef) ) =>
+          context.unwatch(participantActorRef)
+          participants = participants - registRefId
+      }
       super.receive(message)
     case message =>
       super.receive(message)
