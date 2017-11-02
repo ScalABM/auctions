@@ -18,15 +18,15 @@ package org.economicsl.auctions.singleunit.participants
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse}
+import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse, OrderId, OrderReferenceId}
 import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder
 import org.economicsl.core.{Price, Tradable}
 
 
 class SingleUnitSeller private(
-                                val issuer: Issuer,
-                                val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
-                                val valuations: Map[Tradable, Price])
+  val issuer: Issuer,
+  val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+  val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
 

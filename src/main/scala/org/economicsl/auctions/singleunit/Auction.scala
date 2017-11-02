@@ -103,7 +103,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       (this, Left(rejected))
     case (orderId, order) =>
       val orderRefId = randomOrderReferenceId() // todo would prefer that these not be randomly generated!
-      val senderId: SenderId = ???
+      val senderId = randomSenderId()
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val accepted = Accepted(order, orderId, orderRefId, senderId, timestamp)
       val updatedOrderBook = orderBook.insert(orderRefId -> kv)

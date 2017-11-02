@@ -17,7 +17,9 @@ package org.economicsl.auctions
 
 import java.util.UUID
 
+import org.economicsl.auctions.messages.OrderId
 import org.economicsl.auctions.singleunit.orders._
+import org.economicsl.core.util.UUIDGenerator
 import org.economicsl.core.{Price, Tradable}
 
 import scala.util.Random
@@ -28,10 +30,10 @@ import scala.util.Random
   * @author davidrpugh
   * @since 0.1.0
   */
-object OrderGenerator extends OrderIdGenerator {
+object OrderGenerator extends UUIDGenerator {
 
   def randomSingleUnitAskOrder[T <: Tradable](tradable: T, prng: Random): (OrderId, SingleUnitAskOrder[T]) = {
-    val token = randomOrderId()
+    val token = randomUUID()
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
     (token, SingleUnitAskOrder(issuer, limit, tradable))
@@ -53,7 +55,7 @@ object OrderGenerator extends OrderIdGenerator {
 
   def randomSingleUnitBidOrder[T <: Tradable](tradable: T, prng: Random): (OrderId, SingleUnitBidOrder[T]) = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
-    val token = randomOrderId()
+    val token = randomUUID()
     val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
     (token, SingleUnitBidOrder(issuer, limit, tradable))
   }
