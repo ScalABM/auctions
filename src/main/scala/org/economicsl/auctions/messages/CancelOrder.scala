@@ -15,8 +15,15 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.{Reference, Token}
 import org.economicsl.core.util.Timestamp
 
 
-final case class CancelOrder(reference: Reference, timestamp: Timestamp, issuer: Token) extends Message
+/** Message sent from an `AuctionParticipant` to an `Auction` in order to cancel an existing order.
+  *
+  * @param orderRefId
+  * @param senderId
+  * @param timestamp
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class CancelOrder(orderRefId: OrderReferenceId, senderId: OrderId, timestamp: Timestamp) extends Message

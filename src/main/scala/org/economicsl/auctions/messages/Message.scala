@@ -15,7 +15,6 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Token  // odd dependency on auctions package!
 import org.economicsl.core.util.Timestamp
 
 
@@ -31,7 +30,7 @@ trait Message
   extends Serializable {
 
   /** Unique token identifying the issuer of the message. */
-  def issuer: Token
+  def senderId: SenderId
 
   /** Denotes the time at which the message was sent. */
   def timestamp: Timestamp

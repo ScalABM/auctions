@@ -45,8 +45,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   this: ClearingSchedule[T, A] =>
 
   override def receive: Receive = {
-    case message @ InsertOrder(_, token, order: SingleUnitOrder[T]) =>
-      val (updatedAuction, response) = auction.insert(token -> order)
+    case message @ InsertOrder(order: SingleUnitOrder[T], orderId, _, _) =>
+      val (updatedAuction, response) = auction.insert(orderId -> order)
       response match {
         case Right(accepted) =>
           sender() ! accepted

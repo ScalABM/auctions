@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors.schedules
 
 import org.economicsl.auctions.actors.{AuctionParticipantActor, StackableActor}
-import org.economicsl.auctions.messages.CancelOrder
+import org.economicsl.auctions.messages.{CancelOrder, SenderId}
 import org.economicsl.auctions.AuctionParticipant
 import org.economicsl.core.Tradable
 
@@ -58,8 +58,9 @@ trait PeriodicOrderCancellationSchedule[P <: AuctionParticipant[P]]
     case IssueOrderCancellation =>
       val cancelledOrder = participant.outstandingOrders.headOption
       cancelledOrder.foreach {
-        case (token, (reference, order)) =>
-          val orderCancellation = CancelOrder(reference, currentTimeMillis(), token)
+        case (orderId, (orderRefId, order)) =>
+          val senderId: SenderId = ???
+          val orderCancellation = CancelOrder(orderRefId, senderId, currentTimeMillis())
           val auctionActorRef = auctionActorRefsByTradable(order.tradable)
           auctionActorRef ! orderCancellation
       }

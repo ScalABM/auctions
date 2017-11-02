@@ -13,19 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl
+package org.economicsl.auctions
 
-import java.util.UUID
+import org.economicsl.auctions.messages.OrderId
+import org.economicsl.core.util.UUIDGenerator
 
 
-/** General documentation for the auctions package should go here! */
-package object auctions {
+/** Mixin trait providing `OrderId` methods for generating `OrderId` instances.
+  *
+  * @tparam P
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait OrderIdGenerator[+P <: AuctionParticipant[P]]
+    extends UUIDGenerator {
+  this: P =>
 
-  type Buyer = UUID
-
-  type Seller = UUID
-
-  /* Type alias used to denote a unique identifier for each auction participant. */
-  type Issuer = UUID
+  protected def randomOrderId(): OrderId = {
+    randomUUID()
+  }
 
 }

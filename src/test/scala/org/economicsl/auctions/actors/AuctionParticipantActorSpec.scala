@@ -20,7 +20,7 @@ import java.util.UUID
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
 import org.economicsl.auctions.messages.{Accepted, CanceledByIssuer}
-import org.economicsl.auctions.{ReferenceGenerator, TestTradable, TokenGenerator}
+import org.economicsl.auctions.{OrderReferenceIdGenerator, TestTradable, OrderIdGenerator}
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.{Price, Tradable}
 import org.economicsl.core.util.Timestamper
@@ -34,9 +34,9 @@ class AuctionParticipantActorSpec
     with FeatureSpecLike
     with GivenWhenThen
     with Matchers
-    with ReferenceGenerator
+    with OrderReferenceIdGenerator
     with Timestamper
-    with TokenGenerator {
+    with OrderIdGenerator {
 
   val tradable = TestTradable()
 
@@ -58,11 +58,11 @@ class AuctionParticipantActorSpec
 
       When("an AuctionParticipantActor receives an Accepted message")
 
-      val token = randomToken()
+      val token = randomOrderId()
       val order = SingleUnitBidOrder(issuer, Price(10), tradable)
 
       val timestamp = currentTimeMillis()
-      val reference = randomReference()
+      val reference = randomOrderReferenceId()
       auctionParticipantActorRef ! Accepted(timestamp, token, order, reference)
 
       Then("the AuctionParticipantActor should add the accepted order to its collection of outstanding orders.")
@@ -87,11 +87,11 @@ class AuctionParticipantActorSpec
 
       Given("that an AuctionParticipantActor has already had at least one order accepted")
 
-      val token = randomToken()
+      val token = randomOrderId()
       val order = SingleUnitAskOrder(issuer, Price(137), tradable)
 
       val timestamp = currentTimeMillis()
-      val reference = randomReference()
+      val reference = randomOrderReferenceId()
       auctionParticipantActorRef ! Accepted(timestamp, token, order, reference)
 
       When("that AuctionParticipantActor receives a Canceled message for one of its previously accepted orders")

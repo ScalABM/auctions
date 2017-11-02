@@ -1,6 +1,21 @@
+/*
+Copyright (c) 2017 KAPSARC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.{Order, Token}
+import org.economicsl.auctions.Order  // auctions should only depend on messages!
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
 
@@ -8,11 +23,11 @@ import org.economicsl.core.util.Timestamp
 /** Message used to indicate that a previously submitted order has been rejected.
   *
   * @param timestamp
-  * @param issuer the unique (to the `AuctionParticipant`) identifier of the previously accepted order.
+  * @param senderId the unique (to the `AuctionParticipant`) identifier of the previously accepted order.
   * @param reason
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class Rejected(timestamp: Timestamp, issuer: Token, order: Order[Tradable], reason: Reason)
+final case class Rejected(timestamp: Timestamp, senderId: OrderId, order: Order[Tradable], reason: Reason)
   extends Message
 

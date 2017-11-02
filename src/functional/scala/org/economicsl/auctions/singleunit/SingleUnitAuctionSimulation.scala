@@ -18,14 +18,14 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.auctions.singleunit.pricing.{AskQuotePricingPolicy, BidQuotePricingPolicy}
-import org.economicsl.auctions.{AuctionProtocol, Contract, SpotContract, Token}
+import org.economicsl.auctions.{AuctionProtocol, Contract, SpotContract, OrderId}
 import org.economicsl.core.{Currency, Tradable}
 
 
 trait SingleUnitAuctionSimulation {
 
   /** Type used to represent a tuple matching an auction participant with its issued order. */
-  type IssuedOrder[+T <: Tradable] = (SingleUnitAuctionParticipant, (Token, SingleUnitOrder[T]))
+  type IssuedOrder[+T <: Tradable] = (SingleUnitAuctionParticipant, (OrderId, SingleUnitOrder[T]))
 
   /** Type representing the state of an auction simulation. */
   type State[T <: Tradable, A <: Auction[T, A]] = (A, Iterable[SingleUnitAuctionParticipant])
@@ -52,7 +52,7 @@ trait SingleUnitAuctionSimulation {
     * @return
     */
   def insertOrders[T <: Tradable, A <: Auction[T, A]]
-                  (auction: A, issuedOrders: Iterable[(SingleUnitAuctionParticipant, (Token, SingleUnitOrder[T]))])
+                  (auction: A, issuedOrders: Iterable[(SingleUnitAuctionParticipant, (OrderId, SingleUnitOrder[T]))])
                   : (A, Iterable[SingleUnitAuctionParticipant]) = {
     issuedOrders.aggregate((auction, Seq.empty[SingleUnitAuctionParticipant]))(update[T, A], combine[T, A])
   }

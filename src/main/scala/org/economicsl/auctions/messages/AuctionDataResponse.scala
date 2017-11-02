@@ -28,9 +28,9 @@ import org.economicsl.core.util.Timestamp
   * @author davidrpugh
   * @since 0.2.0
   */
-case class AuctionDataResponse[+T <: Tradable](
+final case class AuctionDataResponse[+T <: Tradable](
   data: AuctionData[T],
-  issuer: UUID,
+  senderId: SenderId,
   mDReqId: Option[UUID],
   timestamp: Timestamp)
     extends Message
