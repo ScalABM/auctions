@@ -24,9 +24,9 @@ import org.economicsl.core.{Price, Tradable}
 
 
 class SingleUnitSeller private(
-  val issuer: Issuer,
-  val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
-  val valuations: Map[Tradable, Price])
+                                val participantId: Issuer,
+                                val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+                                val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
 
@@ -48,7 +48,7 @@ class SingleUnitSeller private(
     */
   def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller,(OrderId, SingleUnitAskOrder[T]))] = {
     val valuation = valuations(protocol.tradable)
-    Some((this, (randomOrderId(), SingleUnitAskOrder(issuer, valuation, protocol.tradable))))
+    Some((this, (randomOrderId(), SingleUnitAskOrder(participantId, valuation, protocol.tradable))))
   }
 
   /** Request auction data given some `AuctionProtocol`.
@@ -63,12 +63,12 @@ class SingleUnitSeller private(
 
   /** Creates a new `SingleUnitSeller` with an `updated` collection of outstanding orders. */
   protected def withOutstandingOrders(updated: Map[OrderId, (OrderReferenceId, Order[Tradable])]): SingleUnitSeller = {
-    new SingleUnitSeller(issuer, updated, valuations)
+    new SingleUnitSeller(participantId, updated, valuations)
   }
 
   /** Creates a new `SingleUnitSeller` with `updated` valuations. */
   protected def withValuations(updated: Map[Tradable, Price]): SingleUnitSeller = {
-    new SingleUnitSeller(issuer, outstandingOrders, updated)
+    new SingleUnitSeller(participantId, outstandingOrders, updated)
   }
 
 }

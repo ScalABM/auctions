@@ -54,7 +54,7 @@ trait PeriodicOrderIssuingSchedule[P <: AuctionParticipant[P]]
       issuedOrder match {
         case Some((updated, (orderId, order))) =>
           participant = updated  // SIDE EFFECT!!
-          val senderId = participant.issuer
+          val senderId = participant.participantId
           val insertOrder = InsertOrder(order, orderId, senderId, currentTimeMillis())
           auctionActorRefsByTradable.get(protocol.tradable).foreach(auction => auction ! insertOrder)
         case None =>

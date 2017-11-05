@@ -80,7 +80,7 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
   def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): P
 
   /** Each `AuctionParticipant` needs to be uniquely identified. */
-  def issuer: Issuer
+  def participantId: SenderId
 
   /** Each `AuctionParticipant` needs to issue orders given some `AuctionProtocol`.
     *
