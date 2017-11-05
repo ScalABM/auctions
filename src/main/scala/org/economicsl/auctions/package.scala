@@ -21,6 +21,9 @@ import java.util.UUID
 /** General documentation for the auctions package should go here! */
 package object auctions {
 
+  /* Type alias used to denote a unique identifier for an `Auction`. */
+  type AuctionId = UUID
+
   type Buyer = UUID
 
   type Seller = UUID

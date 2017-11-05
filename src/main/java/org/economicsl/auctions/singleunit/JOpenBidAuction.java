@@ -102,8 +102,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol);
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(auctionId, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -114,8 +114,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, protocol);
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(auctionId, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 
