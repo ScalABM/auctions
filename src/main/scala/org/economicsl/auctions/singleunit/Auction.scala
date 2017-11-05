@@ -27,17 +27,21 @@ import org.economicsl.core.Tradable
 /** Base trait for all auction implementations.
   *
   * @tparam T
-  * @tparam A
   * @note Note the use of F-bounded polymorphism over Type classes. We developed an alternative implementation using the
   *       Type class pattern that was quite elegant, however Type classes can not be used directly from Java. In order
   *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
   *       each auction implementation.
   */
-trait Auction[T <: Tradable, A <: Auction[T, A]]
-    extends OrderReferenceIdGenerator[T, A]
+abstract class Auction[T <: Tradable](
+  protected val orderBook: FourHeapOrderBook[T],
+  protected val pricingPolicy: PricingPolicy[T],
+  protected val protocol: AuctionProtocol[T])
+    extends OrderReferenceIdGenerator[T]
     with SenderIdGenerator
     with Timestamper {
-  this: A =>
+  self =>
+
+  type A >: self.type <: Auction[T]
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
@@ -58,14 +62,6 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
         (this, None)
     }
   }
-
-  /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
-    *
-    * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
-    *         instance of the type class `A` whose `orderBook` contains all previously submitted but unmatched
-    *         `AskOrder` and `BidOrder` instances.
-    */
-  def clear: (A, Option[Stream[SpotContract]])
 
   /** Combines and `Auction` mechanism with some other `Auction`.
   *
@@ -110,21 +106,20 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       (withOrderBook(updatedOrderBook), Right(accepted))
   }
 
-  /** An `Auction` must have some protocol that contains all relevant information about auction. */
-  def protocol: AuctionProtocol[T]
+  /** Factory method used by sub-classes to create an `A`. */
+  protected def withOrderBook(updated: FourHeapOrderBook[T]): A = {
+    new Auction[T](updated, pricingPolicy, protocol) {}
+  }
 
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
-  def withPricingPolicy(updated: PricingPolicy[T]): A
+  def withPricingPolicy(updated: PricingPolicy[T]): A = {
+    new Auction[T](orderBook, updated, protocol) {}
+  }
 
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
-  def withProtocol(updated: AuctionProtocol[T]): A
-
-  /** Factory method used by sub-classes to create an `A`. */
-  protected def withOrderBook(updated: FourHeapOrderBook[T]): A
-
-  protected val orderBook: FourHeapOrderBook[T]
-
-  protected val pricingPolicy: PricingPolicy[T]
+  def withProtocol(updated: AuctionProtocol[T]): A = {
+    new Auction[T](orderBook, pricingPolicy, updated) {}
+  }
 
   /** Computest the least common multiple of two tick sizes. */
   private[this] def leastCommonMultiple(a: Long, b: Long) = {
