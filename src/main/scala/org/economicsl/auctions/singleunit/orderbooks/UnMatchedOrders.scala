@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.{Reference, Token}
+import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
 import org.economicsl.auctions.singleunit.orders._
 import org.economicsl.core.{Quantity, Tradable}
 
@@ -36,10 +36,10 @@ final class UnMatchedOrders[T <: Tradable] private(
   require(heapsNotCrossed, "Limit price of best `BidOrder` must not exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `UnMatchedOrders` instance. */
-  val askOrdering: Ordering[(Reference, (Token, SingleUnitAskOrder[T]))] = askOrders.ordering
+  val askOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitAskOrder[T]))] = askOrders.ordering
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
-  val bidOrdering: Ordering[(Reference, (Token, SingleUnitBidOrder[T]))] = bidOrders.ordering
+  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))] = bidOrders.ordering
 
   /** Total number of units of the `Tradable` contained in the `UnMatchedOrders`. */
   val numberUnits: Quantity = askOrders.numberUnits + bidOrders.numberUnits
@@ -50,25 +50,25 @@ final class UnMatchedOrders[T <: Tradable] private(
     * @return a new `UnMatchedOrders` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (Reference, (Token, SingleUnitOrder[T]))): UnMatchedOrders[T] = kv match {
-    case (reference, (token, order: SingleUnitAskOrder[T])) =>
-      new UnMatchedOrders(askOrders + (reference -> (token -> order)), bidOrders)
-    case (reference, (token, order: SingleUnitBidOrder[T])) =>
-      new UnMatchedOrders(askOrders, bidOrders + (reference -> (token -> order)))
+  def + (kv: (OrderReferenceId, (OrderId, SingleUnitOrder[T]))): UnMatchedOrders[T] = kv match {
+    case (orderRefId, (orderId, order: SingleUnitAskOrder[T])) =>
+      new UnMatchedOrders(askOrders + (orderRefId -> (orderId -> order)), bidOrders)
+    case (orderRefId, (orderId, order: SingleUnitBidOrder[T])) =>
+      new UnMatchedOrders(askOrders, bidOrders + (orderRefId -> (orderId -> order)))
   }
 
   /** Remove an order from the collection of unmatched orders.
     *
-    * @param reference
+    * @param orderRefId
     * @return a tuple whose first element is ??? and whose second element is ???
     */
-  def - (reference: Reference): (UnMatchedOrders[T], Option[(Token, SingleUnitOrder[T])]) = {
-    val (remainingAskOrders, removedAskOrder) = askOrders - reference
+  def - (orderRefId: OrderReferenceId): (UnMatchedOrders[T], Option[(OrderId, SingleUnitOrder[T])]) = {
+    val (remainingAskOrders, removedAskOrder) = askOrders - orderRefId
     removedAskOrder match {
       case Some(_) =>
         (new UnMatchedOrders(remainingAskOrders, bidOrders), removedAskOrder)
       case None =>
-        val (remainingBidOrders, removedBidOrder) = bidOrders - reference
+        val (remainingBidOrders, removedBidOrder) = bidOrders - orderRefId
         (new UnMatchedOrders(askOrders, remainingBidOrders), removedBidOrder)
     }
   }
@@ -78,13 +78,13 @@ final class UnMatchedOrders[T <: Tradable] private(
     * @param reference the `AskOrder` instance to test for membership.
     * @return `true` if the `order` is contained in this `UnMatchedOrders` instance; `false` otherwise.
     */
-  def contains(reference: Reference): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
+  def contains(reference: OrderReferenceId): Boolean = askOrders.contains(reference) || bidOrders.contains(reference)
 
-  def get(reference: Reference): Option[(Token, SingleUnitOrder[T])] = {
+  def get(reference: OrderReferenceId): Option[(OrderId, SingleUnitOrder[T])] = {
     askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
-  def headOption: (Option[(Reference, (Token, SingleUnitAskOrder[T]))], Option[(Reference, (Token, SingleUnitBidOrder[T]))]) = {
+  def headOption: (Option[(OrderReferenceId, (OrderId, SingleUnitAskOrder[T]))], Option[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))]) = {
     (askOrders.headOption, bidOrders.headOption)
   }
 

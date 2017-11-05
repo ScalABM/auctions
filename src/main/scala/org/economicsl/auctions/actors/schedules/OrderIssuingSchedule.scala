@@ -52,9 +52,10 @@ trait PeriodicOrderIssuingSchedule[P <: AuctionParticipant[P]]
     case message @ IssueOrder(protocol) =>
       val issuedOrder = participant.issueOrder(protocol)
       issuedOrder match {
-        case Some((updated, (token, order))) =>
+        case Some((updated, (orderId, order))) =>
           participant = updated  // SIDE EFFECT!!
-          val insertOrder = InsertOrder(currentTimeMillis(), token, order)
+          val senderId = participant.participantId
+          val insertOrder = InsertOrder(order, orderId, senderId, currentTimeMillis())
           auctionActorRefsByTradable.get(protocol.tradable).foreach(auction => auction ! insertOrder)
         case None =>
           // if no order is issued then there should be nothing to do!

@@ -18,15 +18,15 @@ package org.economicsl.auctions.singleunit.participants
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse}
+import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse, OrderId, OrderReferenceId}
 import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder
 import org.economicsl.core.{Price, Tradable}
 
 
 class SingleUnitSeller private(
-  val issuer: Issuer,
-  val outstandingOrders: Map[Token, (Reference, Order[Tradable])],
-  val valuations: Map[Tradable, Price])
+                                val participantId: Issuer,
+                                val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+                                val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
 
@@ -46,9 +46,9 @@ class SingleUnitSeller private(
     * @return
     * @note
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller,(Token, SingleUnitAskOrder[T]))] = {
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller,(OrderId, SingleUnitAskOrder[T]))] = {
     val valuation = valuations(protocol.tradable)
-    Some((this, (randomToken(), SingleUnitAskOrder(issuer, valuation, protocol.tradable))))
+    Some((this, (randomOrderId(), SingleUnitAskOrder(participantId, valuation, protocol.tradable))))
   }
 
   /** Request auction data given some `AuctionProtocol`.
@@ -57,18 +57,18 @@ class SingleUnitSeller private(
     * @tparam T
     * @return
     */
-  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller, (Token, AuctionDataRequest[T]))] = {
+  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller, (OrderId, AuctionDataRequest[T]))] = {
     None
   }
 
   /** Creates a new `SingleUnitSeller` with an `updated` collection of outstanding orders. */
-  protected def withOutstandingOrders(updated: Map[Token, (Reference, Order[Tradable])]): SingleUnitSeller = {
-    new SingleUnitSeller(issuer, updated, valuations)
+  protected def withOutstandingOrders(updated: Map[OrderId, (OrderReferenceId, Order[Tradable])]): SingleUnitSeller = {
+    new SingleUnitSeller(participantId, updated, valuations)
   }
 
   /** Creates a new `SingleUnitSeller` with `updated` valuations. */
   protected def withValuations(updated: Map[Tradable, Price]): SingleUnitSeller = {
-    new SingleUnitSeller(issuer, outstandingOrders, updated)
+    new SingleUnitSeller(participantId, outstandingOrders, updated)
   }
 
 }
@@ -82,13 +82,13 @@ class SingleUnitSeller private(
 object SingleUnitSeller {
 
   def apply(issuer: Issuer, valuations: Map[Tradable, Price]): SingleUnitSeller = {
-    val outstandingOrders = Map.empty[Token, (Reference, Order[Tradable])]
+    val outstandingOrders = Map.empty[OrderId, (OrderReferenceId, Order[Tradable])]
     new SingleUnitSeller(issuer, outstandingOrders, valuations)
   }
 
   def apply(valuations: Map[Tradable, Price]): SingleUnitSeller = {
     val issuer = UUID.randomUUID()
-    val outstandingOrders = Map.empty[Token, (Reference, Order[Tradable])]
+    val outstandingOrders = Map.empty[OrderId, (OrderReferenceId, Order[Tradable])]
     new SingleUnitSeller(issuer, outstandingOrders, valuations)
   }
 

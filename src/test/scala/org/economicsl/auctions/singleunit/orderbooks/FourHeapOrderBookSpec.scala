@@ -16,8 +16,10 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions._
+import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.Quantity
+import org.economicsl.core.util.UUIDGenerator
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
@@ -31,17 +33,17 @@ import scala.util.Random
 class FourHeapOrderBookSpec
     extends FlatSpec
     with Matchers
-    with ReferenceGenerator {
+    with UUIDGenerator {
 
   val tradable = TestTradable()
 
   val numberBids = 100
-  val bidReferences: Iterable[Reference] = for (i <- 0 until numberBids) yield randomReference()
-  val bids: Stream[(Token, SingleUnitBidOrder[TestTradable])] = OrderGenerator.randomSingleUnitBidOrders(numberBids, tradable, new Random(42))
+  val bidReferences: Iterable[OrderReferenceId] = for (i <- 0 until numberBids) yield randomUUID()
+  val bids: Stream[(OrderId, SingleUnitBidOrder[TestTradable])] = OrderGenerator.randomSingleUnitBidOrders(numberBids, tradable, new Random(42))
 
   val numberOffers = 100
-  val offerReferences: Iterable[Reference] = for (i <- 0 until numberOffers) yield randomReference()
-  val offers: Stream[(Token, SingleUnitAskOrder[TestTradable])] = OrderGenerator.randomSingleUnitAskOrders(numberOffers, tradable, new Random(42))
+  val offerReferences: Iterable[OrderReferenceId] = for (i <- 0 until numberOffers) yield randomUUID()
+  val offers: Stream[(OrderId, SingleUnitAskOrder[TestTradable])] = OrderGenerator.randomSingleUnitAskOrders(numberOffers, tradable, new Random(42))
 
   val initial: FourHeapOrderBook[TestTradable] = FourHeapOrderBook.empty[TestTradable]
   val withBids: FourHeapOrderBook[TestTradable] = bidReferences.zip(bids).foldLeft(initial){

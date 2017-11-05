@@ -26,10 +26,19 @@ import java.util.UUID
   */
 package object messages {
 
+  /* Unique reference identifier for an accepted order as assigned by an `Auction`. */
+  type OrderReferenceId = UUID
+
+  /* Unique identifier for an accepted order as assigned by an `AuctionParticipant`. */
+  type OrderId = UUID
+
   /** Unique reference identifier for the registration details as assigned by the `AuctionActor`. */
   type RegistrationReferenceId = UUID
 
   /** Unique identifier of the registration details as assigned by the `AuctionParticipantActor`. */
   type RegistrationId = UUID
+
+  /** Unique identifier of the sender of a particular `Message`. */
+  type SenderId = UUID
 
 }
