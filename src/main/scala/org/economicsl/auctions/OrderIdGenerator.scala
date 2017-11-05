@@ -13,26 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions.messages
+package org.economicsl.auctions
 
-import org.economicsl.core.util.Timestamp
+import org.economicsl.auctions.messages.OrderId
+import org.economicsl.core.util.UUIDGenerator
 
 
-/** Base trait for all messages.
+/** Mixin trait providing `OrderId` methods for generating `OrderId` instances.
   *
-  * See the FIX protocol [[http://www.onixs.biz/fix-dictionary/5.0/compBlock_StandardHeader.html standard header]] docs 
-  * for a rough idea of the type of information that might be included going forward.
-  * 
+  * @tparam P
   * @author davidrpugh
   * @since 0.2.0
   */
-trait Message
-  extends Serializable {
+trait OrderIdGenerator[+P <: AuctionParticipant[P]]
+    extends UUIDGenerator {
+  this: P =>
 
-  /** Unique token identifying the issuer of the message. */
-  def senderId: SenderId
-
-  /** Denotes the time at which the message was sent. */
-  def timestamp: Timestamp
+  protected def randomOrderId(): OrderId = {
+    randomUUID()
+  }
 
 }

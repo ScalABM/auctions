@@ -43,67 +43,119 @@ sealed trait RegistrationInstructionsResponse {
 }
 
 
-/** Base trait for all `AcceptedRegistrationInstructionsResponse` messages.
+/** Base trait for all `RegistrationInstructionsAccepted` messages.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-trait AcceptedRegistrationInstructions extends RegistrationInstructionsResponse {
+trait RegistrationInstructionsAccepted extends RegistrationInstructionsResponse {
 
   val registStatus: Char = 'A'
 
 }
 
 
-final case class AcceptedNewRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends AcceptedRegistrationInstructions {
+/** Message sent from an `AuctionActor` to some `AuctionParticipantActor` indicating that its previously submitted
+  * `NewRegistration` has been accepted.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class NewRegistrationAccepted(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsAccepted {
 
   val registTransType: Char = '0'
 
 }
 
 
-final case class AcceptedReplaceRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends AcceptedRegistrationInstructions {
+/** Message sent from an `AuctionActor` to some `AuctionParticipantActor` indicating that its previously submitted
+  * `ReplaceRegistration` has been accepted.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class ReplaceRegistrationAccepted(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsAccepted {
 
   val registTransType: Char = '1'
 
 }
 
 
-final case class AcceptedCancelRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends AcceptedRegistrationInstructions {
+/** Message sent from an `AuctionActor` to some `AuctionParticipantActor` indicating that its previously submitted
+  * `CancelRegistration` has been accepted.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class CancelRegistrationAccepted(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsAccepted {
 
   val registTransType: Char = '2'
 
 }
 
 
-trait RejectedRegistrationInstructions extends RegistrationInstructionsResponse {
+/** Base trait for all `RegistrationInstructionsRejected` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait RegistrationInstructionsRejected extends RegistrationInstructionsResponse {
 
   val registStatus: Char = 'R'
 
 }
 
 
-final case class RejectedNewRegistrationInstructions(registId: RegistrationId)
-  extends RejectedRegistrationInstructions {
+/** Message sent from an `AuctionActor` to some `AuctionParticipantActor` indicating that its previously submitted
+  * `NewRegistration` has been accepted.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class NewRegistrationRejected(registId: RegistrationId)
+  extends RegistrationInstructionsRejected {
 
   val registTransType: Char = '0'
 
 }
 
 
-final case class RejectedReplaceRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends RejectedRegistrationInstructions {
+/** Message sent from an `AuctionActor` to some `AuctionParticipantActor` indicating that its previously submitted
+  * `ReplaceRegistration` has been rejected.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class ReplaceRegistrationRejected(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsRejected {
 
   val registTransType: Char = '1'
 
 }
 
 
-final case class RejectedCancelRegistrationInstructions(registId: RegistrationId, registRefId: RegistrationReferenceId)
-  extends RejectedRegistrationInstructions {
+/** Message sent from an `AuctionActor` to some `AuctionParticipantActor` indicating that its previously submitted
+  * `CancelRegistration` has been accepted.
+  *
+  * @param registId unique identifier for the registration instructions assigned by the `AuctionParticipantActor`.
+  * @param registRefId unique identifier for the registration instructions assigned by the `AuctionActor`.
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class CancelRegistrationRejected(registId: RegistrationId, registRefId: RegistrationReferenceId)
+  extends RegistrationInstructionsRejected {
 
   val registTransType: Char = '2'
 

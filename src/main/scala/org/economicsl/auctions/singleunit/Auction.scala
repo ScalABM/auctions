@@ -34,23 +34,25 @@ import org.economicsl.core.Tradable
   *       each auction implementation.
   */
 trait Auction[T <: Tradable, A <: Auction[T, A]]
-    extends ReferenceGenerator
+    extends OrderReferenceIdGenerator[T, A]
+    with SenderIdGenerator
     with Timestamper {
   this: A =>
 
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
     *
-    * @param reference the unique identifier for the order that should be removed.
+    * @param orderRefId the unique identifier for the order that should be removed.
     * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     *         except the `order`.
     */
-  def cancel(reference: Reference): (A, Option[Canceled]) = {
-    val (residualOrderBook, removedOrder) = orderBook.remove(reference)
+  def cancel(orderRefId: OrderReferenceId): (A, Option[Canceled]) = {
+    val (residualOrderBook, removedOrder) = orderBook.remove(orderRefId)
     removedOrder match {
-      case Some((token, order)) =>
+      case Some((orderId, order)) =>
+        val senderId = randomSenderId()
         val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-        val canceled = CanceledByIssuer(timestamp, token, order)
+        val canceled = CanceledByIssuer(order, orderId, senderId, timestamp)
         (withOrderBook(residualOrderBook), Some(canceled))
       case None =>
         (this, None)
@@ -88,22 +90,23 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
     *         instances.
     */
-  def insert(kv: (Token, SingleUnitOrder[T])): (A, Either[Rejected, Accepted]) = kv match {
-    case (token, order) if order.limit.value % protocol.tickSize > 0 =>
+  def insert(kv: (OrderId, SingleUnitOrder[T])): (A, Either[Rejected, Accepted]) = kv match {
+    case (orderId, order) if order.limit.value % protocol.tickSize > 0 =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTickSize(order, protocol)
-      val rejected = Rejected(timestamp, token, order, reason)
+      val rejected = Rejected(timestamp, orderId, order, reason)
       (this, Left(rejected))
-    case (token, order) if !order.tradable.equals(protocol.tradable) =>
+    case (orderId, order) if !order.tradable.equals(protocol.tradable) =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTradable(order, protocol)
-      val rejected = Rejected(timestamp, token, order, reason)
+      val rejected = Rejected(timestamp, orderId, order, reason)
       (this, Left(rejected))
-    case (token, order) =>
+    case (orderId, order) =>
+      val orderRefId = randomOrderReferenceId() // todo would prefer that these not be randomly generated!
+      val senderId = randomSenderId()
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val reference = randomReference() // todo would prefer that these not be randomly generated!
-      val accepted = Accepted(timestamp, token, order, reference)
-      val updatedOrderBook = orderBook.insert(reference -> kv)
+      val accepted = Accepted(order, orderId, orderRefId, senderId, timestamp)
+      val updatedOrderBook = orderBook.insert(orderRefId -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
   }
 

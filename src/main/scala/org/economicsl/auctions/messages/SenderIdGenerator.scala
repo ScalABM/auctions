@@ -13,19 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
-
+package org.economicsl.auctions.messages
 
 import org.economicsl.core.util.UUIDGenerator
 
 
-trait ReferenceGenerator
-    extends UUIDGenerator {
+/** Mixin trait providing methods for generating `SenderId` instances.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait SenderIdGenerator
+  extends UUIDGenerator {
 
-  protected def randomReference(): Reference = {
+  protected def randomSenderId(): SenderId = {
     randomUUID()
   }
 
 }
-
-

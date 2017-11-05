@@ -15,15 +15,13 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import java.util.UUID
-
 import akka.actor.ActorSystem
 import akka.testkit.{TestActorRef, TestKit}
 import org.economicsl.auctions.messages.{Accepted, CanceledByIssuer}
-import org.economicsl.auctions.{ReferenceGenerator, TestTradable, TokenGenerator}
+import org.economicsl.auctions.TestTradable
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder}
 import org.economicsl.core.{Price, Tradable}
-import org.economicsl.core.util.Timestamper
+import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 import org.scalatest.{FeatureSpecLike, GivenWhenThen, Matchers}
 
 import scala.util.Random
@@ -34,9 +32,8 @@ class AuctionParticipantActorSpec
     with FeatureSpecLike
     with GivenWhenThen
     with Matchers
-    with ReferenceGenerator
-    with Timestamper
-    with TokenGenerator {
+    with UUIDGenerator
+    with Timestamper {
 
   val tradable = TestTradable()
 
@@ -48,7 +45,7 @@ class AuctionParticipantActorSpec
 
     val prng = new Random(42)
     val askOrderProbability = 0.5
-    val issuer = UUID.randomUUID()
+    val issuer = randomUUID()
     val valuations = Map.empty[Tradable, Price]
     val props = TestAuctionParticipantActor.props(prng, askOrderProbability, issuer, valuations)
     val auctionParticipantActorRef = TestActorRef[TestAuctionParticipantActor](props)
@@ -58,16 +55,17 @@ class AuctionParticipantActorSpec
 
       When("an AuctionParticipantActor receives an Accepted message")
 
-      val token = randomToken()
+      val orderId = randomUUID()
       val order = SingleUnitBidOrder(issuer, Price(10), tradable)
 
       val timestamp = currentTimeMillis()
-      val reference = randomReference()
-      auctionParticipantActorRef ! Accepted(timestamp, token, order, reference)
+      val orderRefId = randomUUID()
+      val senderId = randomUUID()
+      auctionParticipantActorRef ! Accepted(order, orderId, orderRefId, senderId, timestamp)
 
       Then("the AuctionParticipantActor should add the accepted order to its collection of outstanding orders.")
 
-      auctionParticipantActor.participant.outstandingOrders.get(token) should be(Some((reference, order)))
+      auctionParticipantActor.participant.outstandingOrders.get(orderId) should be(Some((orderRefId, order)))
 
     }
 
@@ -77,7 +75,7 @@ class AuctionParticipantActorSpec
 
     val prng = new Random(42)
     val askOrderProbability = 0.5
-    val issuer = UUID.randomUUID()
+    val issuer = randomUUID()
     val valuations = Map.empty[Tradable, Price]
     val props = TestAuctionParticipantActor.props(prng, askOrderProbability, issuer, valuations)
     val auctionParticipantActorRef = TestActorRef[TestAuctionParticipantActor](props)
@@ -87,21 +85,22 @@ class AuctionParticipantActorSpec
 
       Given("that an AuctionParticipantActor has already had at least one order accepted")
 
-      val token = randomToken()
+      val orderId = randomUUID()
       val order = SingleUnitAskOrder(issuer, Price(137), tradable)
 
       val timestamp = currentTimeMillis()
-      val reference = randomReference()
-      auctionParticipantActorRef ! Accepted(timestamp, token, order, reference)
+      val orderRefId = randomUUID()
+      val senderId = randomUUID()
+      auctionParticipantActorRef ! Accepted(order, orderId, orderRefId, senderId, timestamp)
 
       When("that AuctionParticipantActor receives a Canceled message for one of its previously accepted orders")
 
       val laterTimestamp = currentTimeMillis()
-      auctionParticipantActorRef ! CanceledByIssuer(laterTimestamp, token, order)
+      auctionParticipantActorRef ! CanceledByIssuer(order, orderId, senderId, laterTimestamp)
 
       Then("that AuctionParticipantActor should remove the canceled order from its collection of outstanding orders.")
 
-      auctionParticipantActor.participant.outstandingOrders.get(token) should be(None)
+      auctionParticipantActor.participant.outstandingOrders.get(orderId) should be(None)
 
     }
 
