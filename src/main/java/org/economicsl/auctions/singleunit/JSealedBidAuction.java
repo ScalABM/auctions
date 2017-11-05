@@ -96,8 +96,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol);
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(auctionId, pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
 
@@ -108,8 +108,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(pricingPolicy, protocol);
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(auctionId, pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
 

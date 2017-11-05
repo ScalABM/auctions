@@ -39,6 +39,9 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     with Timestamper {
   this: A =>
 
+  /** Unique identifier for an `Auction`. */
+  def auctionId: AuctionId
+
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
     *
@@ -50,9 +53,8 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     val (residualOrderBook, removedOrder) = orderBook.remove(orderRefId)
     removedOrder match {
       case Some((orderId, order)) =>
-        val senderId = randomSenderId()
         val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-        val canceled = CanceledByIssuer(order, orderId, senderId, timestamp)
+        val canceled = CanceledByIssuer(order, orderId, auctionId, timestamp)
         (withOrderBook(residualOrderBook), Some(canceled))
       case None =>
         (this, None)
@@ -103,9 +105,8 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       (this, Left(rejected))
     case (orderId, order) =>
       val orderRefId = randomOrderReferenceId() // todo would prefer that these not be randomly generated!
-      val senderId = randomSenderId()
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val accepted = Accepted(order, orderId, orderRefId, senderId, timestamp)
+      val accepted = Accepted(order, orderId, orderRefId, auctionId, timestamp)
       val updatedOrderBook = orderBook.insert(orderRefId -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
   }
