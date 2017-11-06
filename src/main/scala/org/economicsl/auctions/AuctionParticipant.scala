@@ -35,7 +35,7 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     * @return
     * @note implementation delegates to overloaded `handle` depending on whether result is `Accepted` or `Rejected`.
     */
-  final def handle(result: Either[Rejected, Accepted]): P = {
+  final def handle(result: Either[NewOrderRejected, NewOrderAccepted]): P = {
     result match {
       case Left(rejected) => handle(rejected)
       case Right(accepted) => handle(accepted)
@@ -47,9 +47,15 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     * @param accepted
     * @return
     */
-  final def handle(accepted: Accepted): P = {
-    val updated = outstandingOrders + accepted.kv
-    withOutstandingOrders(updated)
+  final def handle(accepted: NewOrderAccepted): P = {
+    issuedOrders.get(accepted.orderId) match {
+      case Some(order) =>
+        val remainingIssuedOrders = issuedOrders - accepted.orderId
+        val additionalOutstandingOrders = outstandingOrders + (accepted.orderId -> (accepted.orderRefId -> order))
+        withIssuedOrders(remainingIssuedOrders).withOutstandingOrders(additionalOutstandingOrders)
+      case None =>
+        this
+    }
   }
 
   /** Returns an `AuctionParticipant` whose outstanding orders do not contain the rejected order.
@@ -58,8 +64,9 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     * @return
     * @note sub-classes may want to override this method and call super.
     */
-  def handle(rejected: Rejected): P = {
-    withOutstandingOrders(outstandingOrders)
+  def handle(rejected: NewOrderRejected): P = {
+    val remainingIssuedOrders = issuedOrders - rejected.orderId
+    withIssuedOrders(remainingIssuedOrders)
   }
 
   /** Returns a new `AuctionParticipant` whose outstanding orders no longer contains the canceled order.
@@ -99,10 +106,16 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
   def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(P, (OrderId, AuctionDataRequest[T]))]
 
   /** An `AuctionParticipant` needs to keep track of its previously issued `Order` instances. */
+  def issuedOrders: Map[OrderId, Order[Tradable]]
+
+  /** An `AuctionParticipant` needs to keep track of its outstanding `Order` instances. */
   def outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])]
 
   /** An `AuctionParticipant` needs to keep track of its valuations for each `Tradable`. */
   def valuations: Map[Tradable, Price]
+
+  /** Factory method used to delegate instance creation to sub-classes. */
+  protected def withIssuedOrders(updated: Map[OrderId, Order[Tradable]]): P
 
   /** Factory method used to delegate instance creation to sub-classes. */
   protected def withOutstandingOrders(updated: Map[OrderId, (OrderReferenceId, Order[Tradable])]): P

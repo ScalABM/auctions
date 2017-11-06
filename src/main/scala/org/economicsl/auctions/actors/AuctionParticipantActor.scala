@@ -53,13 +53,13 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message : RegistrationInstructionsRejected =>  // todo probably want to respond differently to sub-types!
       log.warning(message.toString)
       super.receive(message)
-    case message: Accepted =>
+    case message: NewOrderAccepted =>
       participant = participant.handle(message)
       super.receive(message)
     case message: Canceled =>
       participant = participant.handle(message)
       super.receive(message)
-    case message: Rejected =>
+    case message: NewOrderRejected =>
       participant = participant.handle(message)
       super.receive(message)
     case message @ Terminated(actorRef) =>

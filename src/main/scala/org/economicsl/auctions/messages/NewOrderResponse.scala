@@ -15,29 +15,50 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Order  // messages should not depend on auctions!
-import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
+
+
+/** Base trait for all `NewOrderResponse` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait NewOrderResponse extends Message {
+
+  /** Unique identifier of the new order. */
+  def orderId: OrderId
+
+}
 
 
 /** Message used to indicate that a previously submitted order was accepted.
   *
-  * @param order
-  * @param orderId the unique (to the `AuctionParticipant`) identifier of the previously accepted order.
+  * @param orderId the unique (to the `AuctionParticipant`) identifier of the accepted order.
   * @param orderRefId the unique (to the auction) reference number assigned to the order at the time of receipt.
   * @param senderId
   * @param timestamp
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class Accepted(
-  order: Order[Tradable],
+final case class NewOrderAccepted(
   orderId: OrderId,
   orderRefId: OrderReferenceId,
   senderId: SenderId,
   timestamp: Timestamp)
-    extends Message {
+    extends NewOrderResponse
 
-  val kv: (OrderId, (OrderReferenceId, Order[Tradable])) = orderId -> (orderRefId -> order)
 
-}
+/** Message used to indicate that a previously submitted order was rejected.
+  *
+  * @param orderId
+  * @param senderId
+  * @param timestamp
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class NewOrderRejected(
+  orderId: OrderId,
+  reason: Reason,
+  senderId: SenderId,
+  timestamp: Timestamp)
+    extends NewOrderResponse
