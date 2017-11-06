@@ -92,21 +92,21 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
     *         instances.
     */
-  def insert(kv: (OrderId, SingleUnitOrder[T])): (A, Either[Rejected, Accepted]) = kv match {
+  def insert(kv: (OrderId, SingleUnitOrder[T])): (A, Either[NewOrderRejected, NewOrderAccepted]) = kv match {
     case (orderId, order) if order.limit.value % protocol.tickSize > 0 =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTickSize(order, protocol)
-      val rejected = Rejected(timestamp, orderId, order, reason)
+      val rejected = NewOrderRejected(orderId, reason, auctionId, timestamp)
       (this, Left(rejected))
     case (orderId, order) if !order.tradable.equals(protocol.tradable) =>
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
       val reason = InvalidTradable(order, protocol)
-      val rejected = Rejected(timestamp, orderId, order, reason)
+      val rejected = NewOrderRejected(orderId, reason, auctionId, timestamp)
       (this, Left(rejected))
     case (orderId, order) =>
       val orderRefId = randomOrderReferenceId() // todo would prefer that these not be randomly generated!
       val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val accepted = Accepted(order, orderId, orderRefId, auctionId, timestamp)
+      val accepted = NewOrderAccepted(orderId, orderRefId, auctionId, timestamp)
       val updatedOrderBook = orderBook.insert(orderRefId -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
   }

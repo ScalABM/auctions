@@ -18,9 +18,9 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
-import org.economicsl.auctions.messages.Accepted;
+import org.economicsl.auctions.messages.NewOrderAccepted;
 import org.economicsl.auctions.messages.Canceled;
-import org.economicsl.auctions.messages.Rejected;
+import org.economicsl.auctions.messages.NewOrderRejected;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -74,7 +74,7 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      */
     public InsertResult<JSealedBidAuction<T>> insert(UUID token, SingleUnitOrder<T> order) {
         Tuple2<UUID, SingleUnitOrder<T>> kv = new Tuple2<>(token, order);
-        Tuple2<SealedBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(kv);
+        Tuple2<SealedBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(kv);
         JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }

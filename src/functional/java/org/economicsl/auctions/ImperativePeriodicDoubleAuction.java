@@ -1,8 +1,8 @@
 package org.economicsl.auctions;
 
 
-import org.economicsl.auctions.messages.Accepted;
-import org.economicsl.auctions.messages.Rejected;
+import org.economicsl.auctions.messages.NewOrderAccepted;
+import org.economicsl.auctions.messages.NewOrderRejected;
 import org.economicsl.auctions.singleunit.OpenBidAuction;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.MidPointQuotePricingPolicy;
@@ -36,10 +36,10 @@ public class ImperativePeriodicDoubleAuction {
         Random prng = new Random(42);
         Stream<Tuple2<UUID, SingleUnitOrder<TestStock>>> orders = OrderGenerator.randomSingleUnitOrders(0.5, numberOrders, googleStock, prng);
 
-        List<Either<Rejected, Accepted>> insertResults = new ArrayList<>();
+        List<Either<NewOrderRejected, NewOrderAccepted>> insertResults = new ArrayList<>();
 
         for (Tuple2<UUID, SingleUnitOrder<TestStock>> order:JavaConverters.seqAsJavaList(orders)) {
-            Tuple2<OpenBidAuction<TestStock>, Either<Rejected, Accepted>> insertResult = doubleAuction.insert(order);
+            Tuple2<OpenBidAuction<TestStock>, Either<NewOrderRejected, NewOrderAccepted>> insertResult = doubleAuction.insert(order);
             doubleAuction = insertResult._1();
             insertResults.add(insertResult._2());
         }

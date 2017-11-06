@@ -31,15 +31,17 @@ import scala.util.Random
   * @param prng a pseudo-random number generator.
   * @param askOrderProbability probability that the `TestOrderIssuer` generates a `SingleLimitAskOrder`.
   * @param participantId
+  * @param issuedOrders
   * @param outstandingOrders
   * @param valuations
   */
 class TestSingleUnitAuctionParticipant private(
-                                                prng: Random,
-                                                askOrderProbability: Double,
-                                                val participantId: Issuer,
-                                                val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
-                                                val valuations: Map[Tradable, Price])
+  prng: Random,
+  askOrderProbability: Double,
+  val participantId: Issuer,
+  val issuedOrders: Map[OrderId, Order[Tradable]],
+  val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+  val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
 
@@ -66,13 +68,17 @@ class TestSingleUnitAuctionParticipant private(
       val valuation = valuations.getOrElse(protocol.tradable, Price.MinValue)
       val remainder = valuation.value % protocol.tickSize
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value + (protocol.tickSize - remainder))
-      Some((this, (randomOrderId(), SingleUnitAskOrder(participantId, limit, protocol.tradable))))
+      val issuedOrder = SingleUnitAskOrder(participantId, limit, protocol.tradable)
+      val updated = issuedOrders + (randomOrderId() -> issuedOrder)
+      Some((withIssuedOrders(updated), randomOrderId() ->issuedOrder))
     } else {
       // if valuation is not multiple of tick size, price is largest multiple of tick size less than valuation.
       val valuation = valuations.getOrElse(protocol.tradable, Price.MaxValue)
       val remainder = valuation.value % protocol.tickSize
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
-      Some((this, (randomOrderId(), SingleUnitBidOrder(participantId, limit, protocol.tradable))))
+      val issuedOrder = SingleUnitBidOrder(participantId, limit, protocol.tradable)
+      val updated = issuedOrders + (randomOrderId() -> issuedOrder)
+      Some((withIssuedOrders(updated), randomOrderId() -> issuedOrder))
     }
   }
 
@@ -88,13 +94,18 @@ class TestSingleUnitAuctionParticipant private(
   }
 
   /** Factory method used by sub-classes to create an `A`. */
+  protected def withIssuedOrders(updated: Map[OrderId, Order[Tradable]]): TestSingleUnitAuctionParticipant = {
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, participantId, updated, outstandingOrders, valuations)
+  }
+
+  /** Factory method used by sub-classes to create an `A`. */
   protected def withOutstandingOrders(updated: Map[OrderId, (OrderReferenceId, Order[Tradable])]): TestSingleUnitAuctionParticipant = {
-    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, participantId, updated, valuations)
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, participantId, issuedOrders, updated, valuations)
   }
 
   /** Factory method used to delegate instance creation to sub-classes. */
   protected def withValuations(updated: Map[Tradable, Price]): TestSingleUnitAuctionParticipant = {
-    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, participantId, outstandingOrders, updated)
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, participantId, issuedOrders, outstandingOrders, updated)
   }
 
 }
@@ -107,8 +118,9 @@ object TestSingleUnitAuctionParticipant {
                               issuer: Issuer,
                               valuations: Map[Tradable, Price])
                              : TestSingleUnitAuctionParticipant = {
+    val emptyIssuedOrders = immutable.HashMap.empty[OrderId, Order[Tradable]]
     val emptyOutstandingOrders = immutable.HashMap.empty[OrderId, (OrderReferenceId, Order[Tradable])]
-    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, emptyOutstandingOrders, valuations)
+    new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, emptyIssuedOrders, emptyOutstandingOrders, valuations)
   }
 
 }
