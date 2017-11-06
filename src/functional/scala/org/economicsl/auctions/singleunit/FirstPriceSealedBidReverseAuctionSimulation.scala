@@ -15,6 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import java.util.UUID
+
 import org.economicsl.auctions._
 import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder
 import org.economicsl.auctions.singleunit.participants.{SingleUnitAuctionParticipant, SingleUnitBuyer, SingleUnitSeller}
@@ -49,7 +51,8 @@ class FirstPriceSealedBidReverseAuctionSimulation
   val auctionParticipants: IndexedSeq[SingleUnitAuctionParticipant] = buyer +: sellers
 
   // use factory method to create instance of first-priced sealed bid reverse auction...
-  val auction: SealedBidAuction[Service] = firstPriceSealedBidReverseAuction(tradable)
+  val auctionId: AuctionId = UUID.randomUUID()
+  val auction: SealedBidAuction[Service] = firstPriceSealedBidReverseAuction(auctionId, tradable)
 
   val issuedOrders: Iterable[IssuedOrder[Service]] = issueOrders(auction.protocol, auctionParticipants)
   val askOrders: Iterable[SingleUnitAskOrder[Service]] = issuedOrders.collect {

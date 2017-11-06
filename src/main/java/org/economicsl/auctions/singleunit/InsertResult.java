@@ -16,17 +16,17 @@ limitations under the License.
 package org.economicsl.auctions.singleunit;
 
 
-import org.economicsl.auctions.Accepted;
-import org.economicsl.auctions.Rejected;
+import org.economicsl.auctions.messages.NewOrderAccepted;
+import org.economicsl.auctions.messages.NewOrderRejected;
 import scala.util.Either;
 
 
 public final class InsertResult<A> {
 
     private A auction;
-    private Either<Rejected, Accepted> result;
+    private Either<NewOrderRejected, NewOrderAccepted> result;
 
-    public InsertResult(A auction, Either<Rejected, Accepted> result) {
+    public InsertResult(A auction, Either<NewOrderRejected, NewOrderAccepted> result) {
         this.auction = auction;
         this.result = result;
     }
@@ -35,7 +35,7 @@ public final class InsertResult<A> {
         return auction;
     }
 
-    public Either<Rejected, Accepted> getResult() {
+    public Either<NewOrderRejected, NewOrderAccepted> getResult() {
         return result;
     }
 

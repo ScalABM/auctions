@@ -15,24 +15,38 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
+import org.economicsl.auctions.Order
+import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
 
 
-/** Base trait for all messages.
+/** Base trait for all canceled messages.
   *
-  * See the FIX protocol [[http://www.onixs.biz/fix-dictionary/5.0/compBlock_StandardHeader.html standard header]] docs 
-  * for a rough idea of the type of information that might be included going forward.
-  * 
   * @author davidrpugh
   * @since 0.2.0
   */
-trait Message
-  extends Serializable {
+trait Canceled
+  extends Message {
 
-  /** Unique token identifying the issuer of the message. */
-  def senderId: SenderId
+  def order: Order[Tradable]
 
-  /** Denotes the time at which the message was sent. */
-  def timestamp: Timestamp
+  def orderId: OrderId
 
+  def reason: Reason
+
+}
+
+
+/** Message used to indicate that a previously accepted order has been canceled by its issuer.
+  *
+  * @param order
+  * @param orderId
+  * @param senderId
+  * @param timestamp
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+final case class CanceledByIssuer(order: Order[Tradable], orderId: OrderId, senderId: SenderId, timestamp: Timestamp)
+  extends Canceled {
+  val reason: Reason = IssuerRequestedCancel(order)
 }

@@ -58,8 +58,9 @@ trait PeriodicOrderCancellationSchedule[P <: AuctionParticipant[P]]
     case IssueOrderCancellation =>
       val cancelledOrder = participant.outstandingOrders.headOption
       cancelledOrder.foreach {
-        case (token, (reference, order)) =>
-          val orderCancellation = CancelOrder(reference, currentTimeMillis(), token)
+        case (orderId, (orderRefId, order)) =>
+          val senderId = participant.participantId
+          val orderCancellation = CancelOrder(orderRefId, senderId, currentTimeMillis())
           val auctionActorRef = auctionActorRefsByTradable(order.tradable)
           auctionActorRef ! orderCancellation
       }

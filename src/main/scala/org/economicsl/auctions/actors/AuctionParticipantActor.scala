@@ -15,8 +15,9 @@ limitations under the License.
 */
 package org.economicsl.auctions.actors
 
-import akka.actor.ActorRef
-import org.economicsl.auctions._
+import akka.actor.{ActorRef, Terminated}
+import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
+import org.economicsl.auctions.messages._
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamper
 
@@ -39,18 +40,42 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message: AuctionProtocol[Tradable] =>
       auctionActorRefsByTradable = auctionActorRefsByTradable.updated(message.tradable, sender()) // `AuctionActor` response to `RegisterParticipant` message!
       super.receive(message)
-    case message: Accepted =>
+    case message @ NewRegistrationAccepted(registId, registRefId) =>
+      context.watch(sender())  // `AuctionParticipantActor` will be notified if `AuctionActor` "dies"!
+      registrations = registrations + (registId -> (registRefId -> sender()))
+      super.receive(message)
+    case message @ CancelRegistrationAccepted(registId, _) =>
+      registrations = registrations - registId
+      super.receive(message)
+    case message @ ReplaceRegistrationAccepted(registId, registRefId) =>
+      registrations = registrations.updated(registId, registRefId -> sender())
+      super.receive(message)
+    case message : RegistrationInstructionsRejected =>  // todo probably want to respond differently to sub-types!
+      log.warning(message.toString)
+      super.receive(message)
+    case message: NewOrderAccepted =>
       participant = participant.handle(message)
       super.receive(message)
     case message: Canceled =>
       participant = participant.handle(message)
       super.receive(message)
-    case message: Rejected =>
+    case message: NewOrderRejected =>
       participant = participant.handle(message)
+      super.receive(message)
+    case message @ Terminated(actorRef) =>
+      val existingRegistration = registrations find { case (_, (_, existingActorRef)) => actorRef == existingActorRef }
+      existingRegistration foreach {
+        case (registId, (_ , auctionActorRef) ) =>
+          context.unwatch(auctionActorRef)
+          registrations = registrations - registId
+      }
       super.receive(message)
     case message =>
       super.receive(message)
   }
+
+  /* Need to store mapping between registration ids and information about the respective auctions. */
+  private[this] var registrations: Map[RegistrationId, (RegistrationReferenceId, ActorRef)] = Map.empty
 
   /** Maps various auction protocols to their corresponding actor refs. */
   protected var auctionActorRefsByTradable: Map[Tradable, ActorRef]

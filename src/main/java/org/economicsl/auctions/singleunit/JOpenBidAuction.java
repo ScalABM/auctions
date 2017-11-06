@@ -18,9 +18,9 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
-import org.economicsl.auctions.Accepted;
-import org.economicsl.auctions.Canceled;
-import org.economicsl.auctions.Rejected;
+import org.economicsl.auctions.messages.NewOrderAccepted;
+import org.economicsl.auctions.messages.Canceled;
+import org.economicsl.auctions.messages.NewOrderRejected;
 import org.economicsl.auctions.messages.AuctionData;
 import org.economicsl.auctions.messages.AuctionDataRequest;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
@@ -76,7 +76,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      */
     public InsertResult<JOpenBidAuction<T>> insert(UUID token, SingleUnitOrder<T> order) {
         Tuple2<UUID, SingleUnitOrder<T>> kv = new Tuple2<>(token, order);
-        Tuple2<OpenBidAuction<T>, Either<Rejected, Accepted>> result = auction.insert(kv);
+        Tuple2<OpenBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(kv);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }
@@ -102,8 +102,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(pricingPolicy, protocol);
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(auctionId, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -114,8 +114,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(pricingPolicy, protocol);
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(auctionId, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 

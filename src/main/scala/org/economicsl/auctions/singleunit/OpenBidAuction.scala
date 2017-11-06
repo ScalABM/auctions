@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.AuctionProtocol
+import org.economicsl.auctions.{AuctionId, AuctionProtocol}
 import org.economicsl.auctions.messages.{AuctionData, AuctionDataRequest}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
@@ -49,21 +49,22 @@ abstract class OpenBidAuction[T <: Tradable]
 object OpenBidAuction {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
-                                      (pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                                      (auctionId: AuctionId, pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
                                       : OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new WithDiscriminatoryClearingPolicy[T](orderBook, pricingPolicy, protocol)
+    new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
   def withUniformClearingPolicy[T <: Tradable]
-                               (pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                               (auctionId: AuctionId, pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
                                : OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T]
-    new WithUniformClearingPolicy[T](orderBook, pricingPolicy, protocol)
+    new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
 
   private class WithDiscriminatoryClearingPolicy[T <: Tradable](
+    val auctionId: AuctionId,
     val orderBook: FourHeapOrderBook[T],
     protected val pricingPolicy: PricingPolicy[T],
     val protocol: AuctionProtocol[T])
@@ -72,23 +73,24 @@ object OpenBidAuction {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
     def withPricingPolicy(updated: PricingPolicy[T]): OpenBidAuction[T] = {
-      new WithDiscriminatoryClearingPolicy[T](orderBook, updated, protocol)
+      new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, updated, protocol)
     }
 
     /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
     def withProtocol(updated: AuctionProtocol[T]): OpenBidAuction[T] = {
-      new WithDiscriminatoryClearingPolicy[T](orderBook, pricingPolicy, updated)
+      new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, updated)
     }
 
     /** Factory method used by sub-classes to create an `Auction` of type `A`. */
     protected def withOrderBook(updated: FourHeapOrderBook[T]): OpenBidAuction[T] = {
-      new WithDiscriminatoryClearingPolicy[T](updated, pricingPolicy, protocol)
+      new WithDiscriminatoryClearingPolicy[T](auctionId, updated, pricingPolicy, protocol)
     }
 
   }
 
 
   private class WithUniformClearingPolicy[T <: Tradable](
+    val auctionId: AuctionId,
     val orderBook: FourHeapOrderBook[T],
     protected val pricingPolicy: PricingPolicy[T],
     val protocol: AuctionProtocol[T])
@@ -97,17 +99,17 @@ object OpenBidAuction {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
     def withPricingPolicy(updated: PricingPolicy[T]): OpenBidAuction[T] = {
-      new WithUniformClearingPolicy[T](orderBook, updated, protocol)
+      new WithUniformClearingPolicy[T](auctionId, orderBook, updated, protocol)
     }
 
     /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
     def withProtocol(updated: AuctionProtocol[T]): OpenBidAuction[T] = {
-      new WithUniformClearingPolicy[T](orderBook, pricingPolicy, updated)
+      new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, updated)
     }
 
     /** Factory method used by sub-classes to create an `Auction` of type `A`. */
     protected def withOrderBook(updated: FourHeapOrderBook[T]): OpenBidAuction[T] = {
-      new WithUniformClearingPolicy[T](updated, pricingPolicy, protocol)
+      new WithUniformClearingPolicy[T](auctionId, updated, pricingPolicy, protocol)
     }
 
   }
