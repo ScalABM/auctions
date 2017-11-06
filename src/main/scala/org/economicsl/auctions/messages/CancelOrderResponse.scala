@@ -15,7 +15,24 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
+import org.economicsl.core.util.Timestamp
 
-trait OrderCancelRequest
+
+/** Base trait for all `CancelOrderResponse` messages.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+trait CancelOrderResponse extends Message {
+
+  def orderId: OrderId
+
+}
 
 
+final case class CancelOrderAccepted(orderId: OrderId, senderId: SenderId, timestamp: Timestamp)
+  extends CancelOrderResponse
+
+
+final case class CancelOrderRejected(orderId: OrderId, reason: Reason, senderId: SenderId, timestamp: Timestamp)
+  extends CancelOrderResponse

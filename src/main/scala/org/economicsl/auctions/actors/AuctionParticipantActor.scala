@@ -56,10 +56,13 @@ trait AuctionParticipantActor[P <: AuctionParticipant[P]]
     case message: NewOrderAccepted =>
       participant = participant.handle(message)
       super.receive(message)
-    case message: Canceled =>
+    case message: CancelOrderAccepted =>
       participant = participant.handle(message)
       super.receive(message)
     case message: NewOrderRejected =>
+      participant = participant.handle(message)
+      super.receive(message)
+    case message: CancelOrderRejected =>
       participant = participant.handle(message)
       super.receive(message)
     case message @ Terminated(actorRef) =>

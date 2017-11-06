@@ -20,10 +20,16 @@ import org.economicsl.core.util.Timestamp
 
 /** Message sent from an `AuctionParticipant` to an `Auction` in order to cancel an existing order.
   *
+  * @param orderId
   * @param orderRefId
   * @param senderId
   * @param timestamp
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class CancelOrder(orderRefId: OrderReferenceId, senderId: OrderId, timestamp: Timestamp) extends Message
+final case class CancelOrder(
+  orderId: OrderId,
+  orderRefId: OrderReferenceId,
+  senderId: OrderId,
+  timestamp: Timestamp)
+    extends Message

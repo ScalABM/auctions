@@ -37,8 +37,8 @@ abstract class OpenBidAuction[T <: Tradable]
     extends Auction[T, OpenBidAuction[T]] {
   this: OpenBidAuction[T] =>
 
-  def receive(query: (OpenBidAuction[T]) => Option[Any]): AuctionData[T] = {
-    query(this)
+  def receive(message: AuctionDataRequest[T]): AuctionData[T] = {
+    message.query(this)
   }
 
   val orderBook: FourHeapOrderBook[T]
