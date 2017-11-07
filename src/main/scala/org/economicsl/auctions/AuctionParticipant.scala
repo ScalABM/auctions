@@ -82,8 +82,11 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     *
     * @param message
     * @return
+    * @note sub-classes may wish to override this behavior and call super.
     */
-  def handle(message: CancelOrderRejected): P
+  def handle(message: CancelOrderRejected): P = {
+    this
+  }
 
   /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
     *
