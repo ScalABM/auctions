@@ -45,19 +45,22 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     * except the `order`.
     *
-    * @param orderRefId the unique identifier for the order that should be removed.
+    * @param message the unique identifier for the order that should be removed.
     * @return an instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
     *         except the `order`.
     */
-  def cancel(orderRefId: OrderReferenceId): (A, Option[Canceled]) = {
-    val (residualOrderBook, removedOrder) = orderBook.remove(orderRefId)
+  def cancel(message: CancelOrder): (A, Either[CancelOrderRejected, CancelOrderAccepted]) = {
+    val (residualOrderBook, removedOrder) = orderBook.remove(message.orderRefId)
     removedOrder match {
-      case Some((orderId, order)) =>
+      case Some((orderId, _)) =>
         val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-        val canceled = CanceledByIssuer(order, orderId, auctionId, timestamp)
-        (withOrderBook(residualOrderBook), Some(canceled))
+        val accepted = CancelOrderAccepted(orderId, auctionId, timestamp)
+        (withOrderBook(residualOrderBook), Right(accepted))
       case None =>
-        (this, None)
+        val reason = ??? // order not found!
+        val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
+        val rejected = CancelOrderRejected(message.orderId, reason, auctionId, timestamp)
+        (this, Left(rejected))
     }
   }
 

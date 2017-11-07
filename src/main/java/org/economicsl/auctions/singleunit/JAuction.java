@@ -2,6 +2,7 @@ package org.economicsl.auctions.singleunit;
 
 
 import org.economicsl.auctions.AuctionProtocol;
+import org.economicsl.auctions.messages.CancelOrder;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -14,10 +15,10 @@ public abstract class JAuction<T extends Tradable, A extends JAuction<T, A>> {
     /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
      * except the `order`.
      *
-     * @param reference
+     * @param message
      * @return
      */
-    public abstract CancelResult<A> cancel(UUID reference);
+    public abstract CancelResult<A> cancel(CancelOrder message);
 
     /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
      *

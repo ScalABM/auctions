@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages.{AuctionDataRequest, AuctionDataResponse, OrderId, OrderReferenceId}
+import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
@@ -43,7 +43,6 @@ class TestSingleUnitAuctionParticipant private(
   val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
   val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
-
 
   /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
     *
@@ -81,7 +80,6 @@ class TestSingleUnitAuctionParticipant private(
       Some((withIssuedOrders(updated), randomOrderId() -> issuedOrder))
     }
   }
-
 
   /** Each `AuctionParticipant` needs to request auction data given some `AuctionProtocol`.
     *

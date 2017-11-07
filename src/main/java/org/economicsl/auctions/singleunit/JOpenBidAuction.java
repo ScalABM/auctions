@@ -18,11 +18,7 @@ package org.economicsl.auctions.singleunit;
 
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
-import org.economicsl.auctions.messages.NewOrderAccepted;
-import org.economicsl.auctions.messages.Canceled;
-import org.economicsl.auctions.messages.NewOrderRejected;
-import org.economicsl.auctions.messages.AuctionData;
-import org.economicsl.auctions.messages.AuctionDataRequest;
+import org.economicsl.auctions.messages.*;
 import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
@@ -49,11 +45,11 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
     /** Create a new instance of type `A` whose order book contains all previously submitted `BidOrder` instances
      * except the `order`.
      *
-     * @param reference
+     * @param message
      * @return
      */
-    public CancelResult<JOpenBidAuction<T>> cancel(UUID reference) {
-        Tuple2<OpenBidAuction<T>, Option<Canceled>> result = auction.cancel(reference);
+    public CancelResult<JOpenBidAuction<T>> cancel(CancelOrder message) {
+        Tuple2<OpenBidAuction<T>, Either<CancelOrderRejected, CancelOrderAccepted> > result = auction.cancel(message);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
         return new CancelResult<>(jAuction, result._2);
     }

@@ -53,20 +53,18 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
           auction = updatedAuction
         case Left(rejected) =>
           sender() ! rejected
+          auction = updatedAuction
       }
       super.receive(message)
-    case message @ CancelOrder(reference, _, _) =>
-      val (updatedAuction, cancelResult) = auction.cancel(reference)
-      cancelResult match {
-        case Some(canceled) =>
-          sender() ! canceled
+    case message: CancelOrder =>
+      val (updatedAuction, cancelOrderResponse) = auction.cancel(message)
+      cancelOrderResponse match {
+        case Right(cancelOrderAccepted) =>
+          sender() ! cancelOrderAccepted
           auction = updatedAuction
-        case None =>
-          /* indicates that the reference was not found in the auction; could mean that CancelOrder was sent to wrong
-          AuctionActor, or, depending on the ClearingStrategy used by the AuctionActor, that the order corresponding
-          to the reference was cleared prior to the AuctionActor processing the CancelOrder message.
-          */
-          ???
+        case Left(cancelOrderRejected) =>
+          sender() ! cancelOrderRejected
+          auction = updatedAuction
       }
       super.receive(message)
     case message @ NewRegistration(registId) =>

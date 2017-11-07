@@ -62,21 +62,30 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     *
     * @param rejected
     * @return
-    * @note sub-classes may want to override this method and call super.
     */
-  def handle(rejected: NewOrderRejected): P = {
+  final def handle(rejected: NewOrderRejected): P = {
     val remainingIssuedOrders = issuedOrders - rejected.orderId
     withIssuedOrders(remainingIssuedOrders)
   }
 
   /** Returns a new `AuctionParticipant` whose outstanding orders no longer contains the canceled order.
     *
-    * @param canceled
+    * @param message
     * @return
     */
-  final def handle(canceled: Canceled): P = {
-    val updated = outstandingOrders - canceled.orderId
+  final def handle(message: CancelOrderAccepted): P = {
+    val updated = outstandingOrders - message.orderId
     withOutstandingOrders(updated)
+  }
+
+  /**
+    *
+    * @param message
+    * @return
+    * @note sub-classes may wish to override this behavior and call super.
+    */
+  def handle(message: CancelOrderRejected): P = {
+    this
   }
 
   /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.

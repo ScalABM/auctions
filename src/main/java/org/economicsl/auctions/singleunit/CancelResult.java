@@ -15,16 +15,17 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit;
 
-import org.economicsl.auctions.messages.Canceled;
-import scala.Option;
+import org.economicsl.auctions.messages.CancelOrderAccepted;
+import org.economicsl.auctions.messages.CancelOrderRejected;
+import scala.util.Either;
 
 
 public final class CancelResult<A> {
 
     private A auction;
-    private Option<Canceled> result;
+    private Either<CancelOrderRejected, CancelOrderAccepted> result;
 
-    public CancelResult(A auction, Option<Canceled> result) {
+    public CancelResult(A auction, Either<CancelOrderRejected, CancelOrderAccepted> result) {
         this.auction = auction;
         this.result = result;
     }
@@ -33,7 +34,7 @@ public final class CancelResult<A> {
         return auction;
     }
 
-    public Option<Canceled> getResult() {
+    public Either<CancelOrderRejected, CancelOrderAccepted>  getResult() {
         return result;
     }
 
