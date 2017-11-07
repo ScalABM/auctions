@@ -19,7 +19,6 @@ import akka.actor.{ActorRef, Props, Terminated}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 
@@ -45,8 +44,8 @@ trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
   this: ClearingSchedule[T, A] =>
 
   override def receive: Receive = {
-    case message @ NewOrder(order: SingleUnitOrder[T], orderId, _, _) =>
-      val (updatedAuction, response) = auction.insert(orderId -> order)
+    case message: NewSingleUnitOrder[T] =>
+      val (updatedAuction, response) = auction.insert(message)
       response match {
         case Right(accepted) =>
           sender() ! accepted

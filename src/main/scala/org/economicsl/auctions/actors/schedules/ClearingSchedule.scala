@@ -19,7 +19,6 @@ import akka.actor.{ActorRef, ReceiveTimeout}
 import org.economicsl.auctions.actors.{AuctionActor, StackableActor}
 import org.economicsl.auctions.messages.NewOrder
 import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
@@ -55,7 +54,7 @@ trait BidderActivityClearingSchedule[T <: Tradable, A <: Auction[T, A]]
   this: AuctionActor[T, A] =>
 
   override def receive: Receive = {
-    case message @ NewOrder(_: SingleUnitOrder[T], _, _, _) =>
+    case message: NewOrder[T] =>
       settlementService match {
         case Some(actorRef) =>
           val (clearedAuction, results) = auction.clear

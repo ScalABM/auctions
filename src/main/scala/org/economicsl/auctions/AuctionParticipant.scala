@@ -104,7 +104,7 @@ trait AuctionParticipant[+P <: AuctionParticipant[P]]
     * @tparam T
     * @return
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(P, (OrderId, Order[T]))]
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(P, NewOrder[T])]
 
   /** Each `AuctionParticipant` needs to request auction data given some `AuctionProtocol`.
     *

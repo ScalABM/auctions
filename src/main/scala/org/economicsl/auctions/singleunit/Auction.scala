@@ -89,29 +89,32 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
 
   /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
     *
-    * @param kv a mapping between a unique (to the auction participant) `Token` and the `BidOrder` that should be
-    *           entered into the `orderBook`.
-    * @return a `Tuple` whose first element is a unique `Reference` identifier for the inserted `BidOrder` and whose
-    *         second element is an instance of type class `A` whose order book contains all submitted `BidOrder`
-    *         instances.
+    * @param message
+    * @return
     */
-  def insert(kv: (OrderId, SingleUnitOrder[T])): (A, Either[NewOrderRejected, NewOrderAccepted]) = kv match {
-    case (orderId, order) if order.limit.value % protocol.tickSize > 0 =>
-      val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val reason = InvalidTickSize(order, protocol)
-      val rejected = NewOrderRejected(orderId, reason, auctionId, timestamp)
+  def insert(message: NewSingleUnitOrder[T]): (A, Either[NewOrderRejected, NewOrderAccepted]) = {
+    if (message.limit.value % protocol.tickSize > 0) {
+      val timestamp = currentTimeMillis()
+      // todo not sure that we want to use real time for timestamps!
+      val reason = InvalidTickSize(message.limit, protocol.tickSize)
+      val rejected = NewOrderRejected(message.orderId, reason, auctionId, timestamp)
       (this, Left(rejected))
-    case (orderId, order) if !order.tradable.equals(protocol.tradable) =>
-      val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val reason = InvalidTradable(order, protocol)
-      val rejected = NewOrderRejected(orderId, reason, auctionId, timestamp)
+    } else if (!message.tradable.equals(protocol.tradable)) {
+      val timestamp = currentTimeMillis()
+      // todo not sure that we want to use real time for timestamps!
+      val reason = InvalidTradable(message.tradable, protocol.tradable)
+      val rejected = NewOrderRejected(message.orderId, reason, auctionId, timestamp)
       (this, Left(rejected))
-    case (orderId, order) =>
-      val orderRefId = randomOrderReferenceId() // todo would prefer that these not be randomly generated!
-      val timestamp = currentTimeMillis()  // todo not sure that we want to use real time for timestamps!
-      val accepted = NewOrderAccepted(orderId, orderRefId, auctionId, timestamp)
+    } else {
+      val orderRefId = randomOrderReferenceId()
+      // todo would prefer that these not be randomly generated!
+      val timestamp = currentTimeMillis()
+      // todo not sure that we want to use real time for timestamps!
+      val accepted = NewOrderAccepted(message.orderId, orderRefId, auctionId, timestamp)
+      val kv = (message.orderId, SingleUnitOrder.from(message))
       val updatedOrderBook = orderBook.insert(orderRefId -> kv)
       (withOrderBook(updatedOrderBook), Right(accepted))
+    }
   }
 
   /** An `Auction` must have some protocol that contains all relevant information about auction. */

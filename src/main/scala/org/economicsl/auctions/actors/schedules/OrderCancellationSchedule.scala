@@ -54,22 +54,6 @@ trait PeriodicOrderCancellationSchedule[P <: AuctionParticipant[P]]
 
   def executionContext: ExecutionContext
 
-  override def receive: Receive = {
-    case IssueOrderCancellation =>
-      val cancelledOrder = participant.outstandingOrders.headOption
-      cancelledOrder.foreach {
-        case (orderId, (orderRefId, order)) =>
-          val senderId = participant.participantId
-          val cancelOrder = CancelOrder(orderId, orderRefId, senderId, currentTimeMillis())
-          val auctionActorRef = auctionActorRefsByTradable(order.tradable)
-          auctionActorRef ! cancelOrder
-      }
-      scheduleOrderCancellation(delay, executionContext)
-      super.receive(IssueOrderCancellation)
-    case message =>
-      super.receive(message)
-  }
-
   /** Schedule this `AuctionParticipantActor` to receive an `IssueOrderCancellation` message after some delay. */
   protected def scheduleOrderCancellation[T <: Tradable](delay: FiniteDuration, ec: ExecutionContext): Unit = {
     context.system.scheduler.scheduleOnce(delay, self, IssueOrderCancellation)(ec)

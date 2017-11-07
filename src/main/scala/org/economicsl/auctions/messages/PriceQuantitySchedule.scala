@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.messages
 
 import org.economicsl.core.{Price, Quantity, Tradable}
 
@@ -33,5 +33,8 @@ trait PriceQuantitySchedule[+T <: Tradable] {
     * of a `Tradable` at specific, discrete price-points.
     */
   def schedule: GenIterable[PricePoint]
+
+
+  def tradable: T
 
 }

@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orders
 
-import org.economicsl.auctions.{Issuer, Order, SinglePricePoint}
+import org.economicsl.auctions.messages.SinglePricePoint
+import org.economicsl.auctions.{Issuer, Order}
 import org.economicsl.core.{Price, Quantity, Tradable}
 
 

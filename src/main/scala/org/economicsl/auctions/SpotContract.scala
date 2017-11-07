@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.messages.SinglePricePoint
 import org.economicsl.core.{Price, Quantity, Tradable}
 import play.api.libs.json.{Json, Writes}
 

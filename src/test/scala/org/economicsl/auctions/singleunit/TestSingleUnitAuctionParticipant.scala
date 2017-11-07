@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer$, SingleUnitBid$, SingleUnitOrder}
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
 
@@ -67,7 +67,7 @@ class TestSingleUnitAuctionParticipant private(
       val valuation = valuations.getOrElse(protocol.tradable, Price.MinValue)
       val remainder = valuation.value % protocol.tickSize
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value + (protocol.tickSize - remainder))
-      val issuedOrder = SingleUnitAskOrder(participantId, limit, protocol.tradable)
+      val issuedOrder = SingleUnitOffer(participantId, limit, protocol.tradable)
       val updated = issuedOrders + (randomOrderId() -> issuedOrder)
       Some((withIssuedOrders(updated), randomOrderId() ->issuedOrder))
     } else {
@@ -75,7 +75,7 @@ class TestSingleUnitAuctionParticipant private(
       val valuation = valuations.getOrElse(protocol.tradable, Price.MaxValue)
       val remainder = valuation.value % protocol.tickSize
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
-      val issuedOrder = SingleUnitBidOrder(participantId, limit, protocol.tradable)
+      val issuedOrder = SingleUnitBid(participantId, limit, protocol.tradable)
       val updated = issuedOrders + (randomOrderId() -> issuedOrder)
       Some((withIssuedOrders(updated), randomOrderId() -> issuedOrder))
     }

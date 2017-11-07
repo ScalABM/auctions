@@ -15,20 +15,23 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Order  // auction should depend on messages!
 import org.economicsl.core.Tradable
-import org.economicsl.core.util.Timestamp
 
 
 /** A message sent from an `AuctionParticipant` to an `Auction` specifying a new order.
   *
-  * @param order
-  * @param orderId
-  * @param senderId
-  * @param timestamp
   * @tparam T
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class NewOrder[+T <: Tradable](order: Order[T], orderId: OrderId, senderId: SenderId, timestamp: Timestamp)
-  extends Message
+trait NewOrder[+T <: Tradable] extends Message {
+  this: PriceQuantitySchedule[T] =>
+
+  def orderId: OrderId
+
+}
+
+
+
+
+

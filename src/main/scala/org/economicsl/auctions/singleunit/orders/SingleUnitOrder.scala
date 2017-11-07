@@ -1,15 +1,19 @@
 package org.economicsl.auctions.singleunit.orders
 
-import org.economicsl.auctions.{Issuer, Order, SingleUnit}
+import org.economicsl.auctions.messages._
+import org.economicsl.auctions.{Issuer, Order}
 import org.economicsl.core.{Price, Tradable}
 
 
 
-/** Base trait for all single-unit order implementations.
+/** Base trait for all `SingleUnitOrder` implementations.
   *
   * @tparam T
   */
-sealed trait SingleUnitOrder[+T <: Tradable] extends Order[T] with SingleUnit[T]
+sealed trait SingleUnitOrder[+T <: Tradable]
+  extends Order[T]
+  with SinglePricePoint[T]
+  with SingleUnit[T]
 
 
 /** Companion object for the `SingleUnitOrder` trait.
@@ -28,6 +32,17 @@ object SingleUnitOrder {
     Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
   }
 
+  /** Factory method used to create a `SingleUnitOrder` from a `NewSingleUnitOrder` message.
+    *
+    * @param message
+    * @tparam T
+    * @return
+    */
+  def from[T <: Tradable](message: NewSingleUnitOrder[T]): SingleUnitOrder[T] = message match {
+    case message: NewSingleUnitBid[T] => SingleUnitBid.from(message)
+    case message: NewSingleUnitOffer[T] => SingleUnitOffer.from(message)
+  }
+
 }
 
 
@@ -37,7 +52,7 @@ object SingleUnitOrder {
   * @author davidrpugh
   * @since 0.2.0
   */
-case class SingleUnitAskOrder[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
+final case class SingleUnitOffer[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
   extends SingleUnitOrder[T]
 
 
@@ -46,10 +61,20 @@ case class SingleUnitAskOrder[+T <: Tradable](issuer: Issuer, limit: Price, trad
   * @author davidrpugh
   * @since 0.2.0
   */
-object SingleUnitAskOrder {
+object SingleUnitOffer {
 
-  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitAskOrder[T] = {
-    new SingleUnitAskOrder(issuer, Price.MinValue, tradable)
+  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitOffer[T] = {
+    new SingleUnitOffer(issuer, Price.MinValue, tradable)
+  }
+
+  /** Factory method for creating `SingleUnitOffer` from a `NewSingleUnitOffer` message.
+    *
+    * @param message
+    * @tparam T
+    * @return
+    */
+  def from[T <: Tradable](message: NewSingleUnitOffer[T]): SingleUnitOffer[T] = {
+    new SingleUnitOffer[T](???, message.limit, message.tradable)
   }
 
 }
@@ -61,7 +86,7 @@ object SingleUnitAskOrder {
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SingleUnitBidOrder[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
+case class SingleUnitBid[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
   extends SingleUnitOrder[T]
 
 
@@ -70,10 +95,20 @@ case class SingleUnitBidOrder[+T <: Tradable](issuer: Issuer, limit: Price, trad
   * @author davidrpugh
   * @since 0.2.0
   */
-object SingleUnitBidOrder {
+object SingleUnitBid {
 
-  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitBidOrder[T] = {
-    new SingleUnitBidOrder(issuer, Price.MinValue, tradable)
+  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitBid[T] = {
+    new SingleUnitBid(issuer, Price.MaxValue, tradable)
+  }
+
+  /** Factory method for creating `SingleUnitBid` from a `NewSingleUnitBid` message.
+    *
+    * @param message
+    * @tparam T
+    * @return
+    */
+  def from[T <: Tradable](message: NewSingleUnitBid[T]): SingleUnitBid[T] = {
+    new SingleUnitBid[T](???, message.limit, message.tradable)
   }
 
 }

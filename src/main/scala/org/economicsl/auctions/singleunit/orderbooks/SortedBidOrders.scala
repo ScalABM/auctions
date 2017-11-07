@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
-import org.economicsl.auctions.singleunit.orders.SingleUnitBidOrder
+import org.economicsl.auctions.singleunit.orders.SingleUnitBid
 import org.economicsl.core.{Quantity, Tradable}
 
 import scala.collection.immutable
@@ -34,12 +34,12 @@ import scala.collection.immutable
   * @author davidrpugh
   * @since 0.1.0
   */
-final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId, (OrderId, SingleUnitBidOrder[T])],
-                                                   sortedOrders: immutable.TreeSet[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))],
+final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId, (OrderId, SingleUnitBid[T])],
+                                                   sortedOrders: immutable.TreeSet[(OrderReferenceId, (OrderId, SingleUnitBid[T]))],
                                                    val numberUnits: Quantity) {
 
   /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
-  val ordering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))] = sortedOrders.ordering
+  val ordering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = sortedOrders.ordering
 
   /** Create a new `SortedBidOrders` instance containing the additional `BidOrder`.
     *
@@ -47,7 +47,7 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId,
     * @return a new `SortedBidOrder` instance that contains all of the `BidOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))): SortedBidOrders[T] = {
+  def + (kv: (OrderReferenceId, (OrderId, SingleUnitBid[T]))): SortedBidOrders[T] = {
     val (_, (_, order)) = kv
     new SortedBidOrders(orders + kv, sortedOrders + kv, numberUnits + order.quantity)
   }
@@ -57,7 +57,7 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId,
     * @param orderRefId
     * @return
     */
-  def - (orderRefId: OrderReferenceId): (SortedBidOrders[T], Option[(OrderId, SingleUnitBidOrder[T])]) = {
+  def - (orderRefId: OrderReferenceId): (SortedBidOrders[T], Option[(OrderId, SingleUnitBid[T])]) = {
     orders.get(orderRefId) match {
       case Some(kv @ (_, order)) =>
         val remainingOrders = orders - orderRefId
@@ -76,7 +76,7 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId,
     */
   def contains(orderRefId: OrderReferenceId): Boolean = orders.contains(orderRefId)
 
-  def get(orderRefId: OrderReferenceId): Option[(OrderId, SingleUnitBidOrder[T])] = {
+  def get(orderRefId: OrderReferenceId): Option[(OrderId, SingleUnitBid[T])] = {
     orders.get(orderRefId)
   }
 
@@ -84,13 +84,13 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId,
     *
     * @return the first `BidOrder` instance contained in this `SortedBidOrders` instance.
     */
-  def head: (OrderReferenceId, (OrderId, SingleUnitBidOrder[T])) = sortedOrders.head
+  def head: (OrderReferenceId, (OrderId, SingleUnitBid[T])) = sortedOrders.head
 
   /** Optionally selects the first `BidOrder` instance contained in this `SortedBidOrders` instance.
     *
     * @return Some `BidOrder` instance if this `SortedBidOrders` instance is non empty; `None` otherwise.
     */
-  def headOption: Option[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))] = sortedOrders.headOption
+  def headOption: Option[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = sortedOrders.headOption
 
   /** Tests whether this `SortedBidOrder` instance is empty.
     *
@@ -98,7 +98,7 @@ final class SortedBidOrders[T <: Tradable] private(orders: Map[OrderReferenceId,
     */
   def isEmpty: Boolean = sortedOrders.isEmpty
 
-  def splitOffTopOrder: (SortedBidOrders[T], Option[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))]) = {
+  def splitOffTopOrder: (SortedBidOrders[T], Option[(OrderReferenceId, (OrderId, SingleUnitBid[T]))]) = {
     headOption match {
       case Some((orderRefId, (_, askOrder))) =>
         val remainingOrders = orders - orderRefId
@@ -131,10 +131,10 @@ object SortedBidOrders {
     * @tparam T all `BidOrder` instances stored in the heap should be for the same type of `Tradable`.
     * @return an instance of `SortedBidOrders`.
     */
-  def empty[T <: Tradable](ordering: Ordering[SingleUnitBidOrder[T]]): SortedBidOrders[T] = {
-    val orders = immutable.HashMap.empty[OrderReferenceId, (OrderId, SingleUnitBidOrder[T])]
-    val byBidOrder = Ordering.by[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T])), SingleUnitBidOrder[T]]{ case (_, (_, order)) => order }(ordering)
-    val sortedOrders = immutable.TreeSet.empty[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))](byBidOrder)
+  def empty[T <: Tradable](ordering: Ordering[SingleUnitBid[T]]): SortedBidOrders[T] = {
+    val orders = immutable.HashMap.empty[OrderReferenceId, (OrderId, SingleUnitBid[T])]
+    val byBidOrder = Ordering.by[(OrderReferenceId, (OrderId, SingleUnitBid[T])), SingleUnitBid[T]]{ case (_, (_, order)) => order }(ordering)
+    val sortedOrders = immutable.TreeSet.empty[(OrderReferenceId, (OrderId, SingleUnitBid[T]))](byBidOrder)
     new SortedBidOrders(orders, sortedOrders, Quantity.zero)
   }
 

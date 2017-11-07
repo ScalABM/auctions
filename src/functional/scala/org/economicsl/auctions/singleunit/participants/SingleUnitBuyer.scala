@@ -19,7 +19,7 @@ import java.util.UUID
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.orders.SingleUnitBidOrder
+import org.economicsl.auctions.singleunit.orders.SingleUnitBid$
 import org.economicsl.core.{Price, Tradable}
 
 
@@ -55,10 +55,10 @@ class SingleUnitBuyer private(
     * @return
     * @note
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitBuyer, (OrderId, SingleUnitBidOrder[T]))] = {
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitBuyer, (OrderId, SingleUnitBid[T]))] = {
     val valuation = valuations(protocol.tradable)
     val orderId = randomOrderId()
-    val issuedOrder = SingleUnitBidOrder(participantId, valuation, protocol.tradable)
+    val issuedOrder = SingleUnitBid(participantId, valuation, protocol.tradable)
     val updated = issuedOrders + (orderId -> issuedOrder)
     Some((withIssuedOrders(updated), orderId -> issuedOrder))
   }

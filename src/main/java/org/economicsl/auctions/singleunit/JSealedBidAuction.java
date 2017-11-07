@@ -66,13 +66,11 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
 
     /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
      *
-     * @param token
-     * @param order
+     * @param message
      * @return
      */
-    public InsertResult<JSealedBidAuction<T>> insert(UUID token, SingleUnitOrder<T> order) {
-        Tuple2<UUID, SingleUnitOrder<T>> kv = new Tuple2<>(token, order);
-        Tuple2<SealedBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(kv);
+    public InsertResult<JSealedBidAuction<T>> insert(NewSingleUnitOrder<T> message) {
+        Tuple2<SealedBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(message);
         JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }

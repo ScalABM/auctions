@@ -15,10 +15,11 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.messages.PriceQuantitySchedule
 import org.economicsl.core.Tradable
 
 
-/** Base trait for all orders.
+/** Base trait for all `Order` implementations.
   *
   * @tparam T each `Order` must be issued for a particular type of `Tradable`.
   * @author davidrpugh
@@ -26,7 +27,4 @@ import org.economicsl.core.Tradable
   */
 trait Order[+T <: Tradable] extends Contract {
   this: PriceQuantitySchedule[T] =>
-
-  def tradable: T
-
 }

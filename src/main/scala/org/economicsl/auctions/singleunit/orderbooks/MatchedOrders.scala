@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
-import org.economicsl.auctions.singleunit.orders.{SingleUnitAskOrder, SingleUnitBidOrder, SingleUnitOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer, SingleUnitBid, SingleUnitOrder}
 import org.economicsl.core.{Quantity, Tradable}
 
 
@@ -31,17 +31,17 @@ import org.economicsl.core.{Quantity, Tradable}
   */
 private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAskOrders[T], bidOrders: SortedBidOrders[T]) {
 
-  type Match = ((OrderReferenceId, (OrderId, SingleUnitAskOrder[T])), (OrderReferenceId, (OrderId, SingleUnitBidOrder[T])))
+  type Match = ((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T])))
 
   /* If `MatchedOrders` becomes public, then these should be changes to require!*/
   assert(askOrders.numberUnits == bidOrders.numberUnits)
   assert(invariantsHold, "Limit price of the best `BidOrder` must exceed the limit price of the best `AskOrder`.")
 
   /** The ordering used to sort the `AskOrder` instances contained in this `MatchedOrders` instance. */
-  val askOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitAskOrder[T]))] = askOrders.ordering
+  val askOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))] = askOrders.ordering
 
   /** The ordering used to sort the `BidOrder` instances contained in this `MatchedOrders` instance. */
-  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))] = bidOrders.ordering
+  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = bidOrders.ordering
 
   /** Total number of units of the `Tradable` contained in the `MatchedOrders`. */
   val numberUnits: Quantity = askOrders.numberUnits + bidOrders.numberUnits
@@ -53,7 +53,7 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `BidOrder` instances of this
     *         instance and that also contains the matched pair of  `orders`.
     */
-  def + (kv1: (OrderReferenceId, (OrderId, SingleUnitAskOrder[T])), kv2: (OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))): MatchedOrders[T] = {
+  def + (kv1: (OrderReferenceId, (OrderId, SingleUnitOffer[T])), kv2: (OrderReferenceId, (OrderId, SingleUnitBid[T]))): MatchedOrders[T] = {
     new MatchedOrders(askOrders + kv1, bidOrders + kv2)
   }
 
@@ -92,11 +92,11 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
     askOrders.get(reference).orElse(bidOrders.get(reference))
   }
 
-  def head: ((OrderReferenceId, (OrderId, SingleUnitAskOrder[T])), (OrderReferenceId, (OrderId, SingleUnitBidOrder[T]))) = {
+  def head: ((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T]))) = {
     (askOrders.head, bidOrders.head)
   }
 
-  def headOption: Option[((OrderReferenceId, (OrderId, SingleUnitAskOrder[T])), (OrderReferenceId, (OrderId, SingleUnitBidOrder[T])))] = {
+  def headOption: Option[((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T])))] = {
     askOrders.headOption.flatMap(askOrder => bidOrders.headOption.map(bidOrder => (askOrder, bidOrder)))
   }
 
@@ -113,11 +113,11 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](askOrders: SortedAs
     */
   def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, (OrderId, SingleUnitOrder[T]))): (MatchedOrders[T], (OrderId, SingleUnitOrder[T])) = {
     incoming match {
-      case (refOrderId, (orderId, order: SingleUnitAskOrder[T])) =>
+      case (refOrderId, (orderId, order: SingleUnitOffer[T])) =>
         val (remainingAskOrders, Some(removedAskOrder)) = askOrders - existing
         val updatedAskOrders = remainingAskOrders + (refOrderId -> (orderId -> order))
         (new MatchedOrders(updatedAskOrders, bidOrders), removedAskOrder)
-      case (reference, (token, order: SingleUnitBidOrder[T])) =>
+      case (reference, (token, order: SingleUnitBid[T])) =>
         val (remainingBidOrders, Some(removedBidOrder)) = bidOrders - existing
         val updatedBidOrders = remainingBidOrders + (reference -> (token -> order))
         (new MatchedOrders(askOrders, updatedBidOrders), removedBidOrder)
@@ -168,7 +168,7 @@ object MatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from low to high based on `limit` price.
     */
-  def empty[T <: Tradable](askOrdering: Ordering[SingleUnitAskOrder[T]], bidOrdering: Ordering[SingleUnitBidOrder[T]]): MatchedOrders[T] = {
+  def empty[T <: Tradable](askOrdering: Ordering[SingleUnitOffer[T]], bidOrdering: Ordering[SingleUnitBid[T]]): MatchedOrders[T] = {
     new MatchedOrders(SortedAskOrders.empty(askOrdering), SortedBidOrders.empty(bidOrdering))
   }
 
