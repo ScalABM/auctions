@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.actors.schedules
 
 import org.economicsl.auctions.actors.{AuctionParticipantActor, StackableActor}
-import org.economicsl.auctions.messages.InsertOrder
+import org.economicsl.auctions.messages.NewOrder
 import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
 import org.economicsl.core.Tradable
 
@@ -55,7 +55,7 @@ trait PeriodicOrderIssuingSchedule[P <: AuctionParticipant[P]]
         case Some((updated, (orderId, order))) =>
           participant = updated  // SIDE EFFECT!!
           val senderId = participant.participantId
-          val insertOrder = InsertOrder(order, orderId, senderId, currentTimeMillis())
+          val insertOrder = NewOrder(order, orderId, senderId, currentTimeMillis())
           auctionActorRefsByTradable.get(protocol.tradable).foreach(auction => auction ! insertOrder)
         case None =>
           // if no order is issued then there should be nothing to do!

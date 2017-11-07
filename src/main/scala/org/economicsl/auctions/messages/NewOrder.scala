@@ -30,5 +30,5 @@ import org.economicsl.core.util.Timestamp
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class InsertOrder[+T <: Tradable](order: Order[T], orderId: OrderId, senderId: SenderId, timestamp: Timestamp)
+final case class NewOrder[+T <: Tradable](order: Order[T], orderId: OrderId, senderId: SenderId, timestamp: Timestamp)
   extends Message
