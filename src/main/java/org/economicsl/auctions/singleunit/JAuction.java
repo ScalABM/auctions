@@ -4,11 +4,8 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.messages.CancelOrder;
 import org.economicsl.auctions.messages.NewSingleUnitOrder;
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
-
-import java.util.UUID;
 
 
 public abstract class JAuction<T extends Tradable, A extends JAuction<T, A>> {

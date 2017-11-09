@@ -15,16 +15,20 @@ limitations under the License.
 */
 package org.economicsl.auctions.multiunit.orders
 
-import org.economicsl.auctions.messages.SinglePricePoint
-import org.economicsl.auctions.{Issuer, Order}
+import org.economicsl.auctions.messages._
+import org.economicsl.auctions.{IssuerId, Order}
 import org.economicsl.core.{Price, Quantity, Tradable}
 
 
 /** Base trait for all single price-point order implementations.
   *
   * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
   */
-sealed trait SinglePricePointOrder[+T <: Tradable] extends Order[T] with SinglePricePoint[T]
+sealed trait SinglePricePointOrder[+T <: Tradable]
+  extends Order[T]
+    with SinglePricePoint[T]
 
 
 /** Companion object for the `SinglePricePointOrder` trait.
@@ -40,35 +44,12 @@ object SinglePricePointOrder {
     * @return `Ordering` defined over `SinglePricePointOrder` instances.
     */
   def ordering[T <: Tradable, O <: SinglePricePointOrder[T]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
+    Ordering.by(o => (o.limit, o.issuerId)) // todo re-visit whether or not issuer can only have a single active order!
   }
 
-}
-
-
-/** Base trait for all multi-unit orders to sell a particular `Tradable`.
-  *
-  * @tparam T
-  * @author davidrpugh
-  * @since 0.1.0
-  */
-case class SinglePricePointAskOrder[+T <: Tradable](
-  issuer: Issuer,
-  limit: Price,
-  quantity: Quantity,
-  tradable: T)
-    extends SinglePricePointOrder[T]
-
-
-/** Companion object for SinglePricePointBidOrder.
-  *
-  * @author davidrpugh
-  * @since 0.2.0
-  */
-object SinglePricePointAskOrder {
-
-  def apply[T <: Tradable](issuer: Issuer, quantity: Quantity, tradable: T): SinglePricePointAskOrder[T] = {
-    new SinglePricePointAskOrder(issuer, Price.MinValue, quantity, tradable)
+  def from[T <: Tradable](message: NewSinglePricePointOrder[T]): SinglePricePointOrder[T] = message match {
+    case m: NewSinglePricePointBid[T] => SinglePricePointBid.from(m)
+    case m: NewSinglePricePointOffer[T] => SinglePricePointOffer.from(m)
   }
 
 }
@@ -80,8 +61,8 @@ object SinglePricePointAskOrder {
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SinglePricePointBidOrder[+T <: Tradable](
-  issuer: Issuer,
+case class SinglePricePointBid[+T <: Tradable](
+  issuerId: IssuerId,
   limit: Price,
   quantity: Quantity,
   tradable: T)
@@ -93,10 +74,46 @@ case class SinglePricePointBidOrder[+T <: Tradable](
   * @author davidrpugh
   * @since 0.2.0
   */
-object SinglePricePointBidOrder {
+object SinglePricePointBid {
 
-  def apply[T <: Tradable](issuer: Issuer, quantity: Quantity, tradable: T): SinglePricePointBidOrder[T] = {
-    new SinglePricePointBidOrder[T](issuer, Price.MaxValue, quantity, tradable)
+  def apply[T <: Tradable](issuer: IssuerId, quantity: Quantity, tradable: T): SinglePricePointBid[T] = {
+    new SinglePricePointBid[T](issuer, Price.MaxValue, quantity, tradable)
+  }
+
+  def from[T <: Tradable](message: NewSinglePricePointBid[T]): SinglePricePointBid[T] = {
+    new SinglePricePointBid[T](message.orderId, message.limit, message.quantity, message.tradable)
+  }
+
+}
+
+
+/** Base trait for all multi-unit orders to sell a particular `Tradable`.
+  *
+  * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
+  */
+case class SinglePricePointOffer[+T <: Tradable](
+  issuerId: IssuerId,
+  limit: Price,
+  quantity: Quantity,
+  tradable: T)
+    extends SinglePricePointOrder[T]
+
+
+/** Companion object for SinglePricePointBidOrder.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+object SinglePricePointOffer {
+
+  def apply[T <: Tradable](issuer: IssuerId, quantity: Quantity, tradable: T): SinglePricePointOffer[T] = {
+    new SinglePricePointOffer(issuer, Price.MinValue, quantity, tradable)
+  }
+
+  def from[T <: Tradable](message: NewSinglePricePointOffer[T]): SinglePricePointOffer[T] = {
+    new SinglePricePointOffer[T](message.orderId, message.limit, message.quantity, message.tradable)
   }
 
 }

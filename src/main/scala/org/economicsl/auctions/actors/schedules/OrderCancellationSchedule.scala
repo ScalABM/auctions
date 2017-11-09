@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.actors.schedules
 
 import org.economicsl.auctions.actors.{AuctionParticipantActor, StackableActor}
-import org.economicsl.auctions.messages.CancelOrder
 import org.economicsl.auctions.AuctionParticipant
 import org.economicsl.core.Tradable
 

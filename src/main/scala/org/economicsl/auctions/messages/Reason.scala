@@ -18,14 +18,20 @@ package org.economicsl.auctions.messages
 import org.economicsl.core.{Currency, Price, Tradable}
 
 
+/** Base trait for all `Reason` implementations.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
 sealed trait Reason {
 
   def message: String
 
 }
 
-final case class SenderRequestedCancel(senderId: SenderId) extends Reason {
-  val message: String = s"Sender $senderId requested cancel."
+
+case object OrderNotFound extends Reason {
+  val message: String = "Order not found in the order book."
 }
 
 

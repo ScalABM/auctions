@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
-import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer, SingleUnitBid, SingleUnitOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitBid, SingleUnitOffer, SingleUnitOrder}
 import org.economicsl.core.{Currency, Price, Quantity, Tradable}
 
 import scala.collection.{GenIterable, GenSet}
@@ -114,22 +114,22 @@ final class FourHeapOrderBook[T <: Tradable] private(
         case _ =>
           new FourHeapOrderBook(matchedOrders, unMatchedOrders + (orderRefId -> (orderId -> order)))
       }
-    case (reference, (token, order: SingleUnitBid[T])) =>
+    case (orderRefId, (orderId, order: SingleUnitBid[T])) =>
       (matchedOrders.headOption, unMatchedOrders.askOrders.headOption) match {
         case (Some((_, (_, (_, matchedBidOrder)))), Some((existing, rationedAskOrder @ (_, askOrder))))
           if order.limit >= askOrder.limit && matchedBidOrder.limit >= askOrder.limit =>
           val (remainingUnMatchedOrders, _) = unMatchedOrders - existing
-          val updatedMatchedOrders = matchedOrders + (existing -> rationedAskOrder, reference -> (token -> order))
+          val updatedMatchedOrders = matchedOrders + (existing -> rationedAskOrder, orderRefId -> (orderId -> order))
           new FourHeapOrderBook(updatedMatchedOrders, remainingUnMatchedOrders)
         case (Some((_, (existing, (_, bidOrder)))), _) if order.limit > bidOrder.limit => // no rationing!
-          val (updatedMatchedOrders, replacedBidOrder) = matchedOrders.replace(existing, reference -> (token -> order))
+          val (updatedMatchedOrders, replacedBidOrder) = matchedOrders.replace(existing, orderRefId -> (orderId -> order))
           new FourHeapOrderBook(updatedMatchedOrders, unMatchedOrders + (existing -> replacedBidOrder))
         case (None, Some((existing, unMatchedAskOrder @ (_, askOrder)))) if order.limit > askOrder.limit =>
           val (remainingUnMatchedOrders, _) = unMatchedOrders - existing
-          val updatedMatchedOrders = matchedOrders + (existing -> unMatchedAskOrder, reference -> (token -> order))
+          val updatedMatchedOrders = matchedOrders + (existing -> unMatchedAskOrder, orderRefId -> (orderId -> order))
           new FourHeapOrderBook(updatedMatchedOrders, remainingUnMatchedOrders)
         case _ =>
-          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (reference -> (token -> order)))
+          new FourHeapOrderBook(matchedOrders, unMatchedOrders + (orderRefId -> (orderId -> order)))
       }
   }
 

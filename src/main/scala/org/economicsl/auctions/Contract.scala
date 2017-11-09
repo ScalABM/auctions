@@ -22,9 +22,4 @@ package org.economicsl.auctions
   * @since 0.1.0
   * @todo move this to the settlement repo when ready.
   */
-trait Contract extends Serializable {
-
-  /** Some kind of unique identifier indicating the actor for whom this `Contract` is a liability. */
-  def issuer: Issuer
-
-}
+trait Contract extends Serializable

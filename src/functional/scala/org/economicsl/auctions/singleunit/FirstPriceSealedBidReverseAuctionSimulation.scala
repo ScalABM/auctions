@@ -62,9 +62,9 @@ class FirstPriceSealedBidReverseAuctionSimulation
 
   "A first-price, sealed-bid reverse auction (FPSBRA)" should "allocate the parking space to the bidder that submits the offer with the lowest price." in {
 
-    val actualWinner: Option[Issuer] = contracts.flatMap(_.headOption.map(_.counterparty))
+    val actualWinner: Option[IssuerId] = contracts.flatMap(_.headOption.map(_.counterparty))
     val lowestPricedAskOrder = askOrders.minBy(order => order.limit)
-    val expectedWinner: Option[Issuer] = Some(lowestPricedAskOrder.issuer)
+    val expectedWinner: Option[IssuerId] = Some(lowestPricedAskOrder.issuer)
     actualWinner should be(expectedWinner)
 
   }

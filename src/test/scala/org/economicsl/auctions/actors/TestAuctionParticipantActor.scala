@@ -17,7 +17,7 @@ package org.economicsl.auctions.actors
 
 import akka.actor.{ActorRef, Props}
 import org.economicsl.auctions.singleunit.TestSingleUnitAuctionParticipant
-import org.economicsl.auctions.Issuer
+import org.economicsl.auctions.IssuerId
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
 
@@ -35,7 +35,7 @@ class TestAuctionParticipantActor(var participant: SingleUnitAuctionParticipant)
 
 object TestAuctionParticipantActor {
 
-  def props(prng: Random, askOrderProbability: Double, issuer: Issuer, valuations: Map[Tradable, Price]): Props = {
+  def props(prng: Random, askOrderProbability: Double, issuer: IssuerId, valuations: Map[Tradable, Price]): Props = {
     val participant = TestSingleUnitAuctionParticipant.withNoOutstandingOrders(prng, askOrderProbability, issuer, valuations)
     Props(new TestAuctionParticipantActor(participant))
   }

@@ -1,19 +1,35 @@
+/*
+Copyright (c) 2017 KAPSARC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 package org.economicsl.auctions.singleunit.orders
 
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.{Issuer, Order}
+import org.economicsl.auctions.{IssuerId, Order}
 import org.economicsl.core.{Price, Tradable}
-
 
 
 /** Base trait for all `SingleUnitOrder` implementations.
   *
   * @tparam T
+  * @author davidrpugh
+  * @since 0.1.0
   */
 sealed trait SingleUnitOrder[+T <: Tradable]
   extends Order[T]
-  with SinglePricePoint[T]
-  with SingleUnit[T]
+    with SinglePricePoint[T]
+    with SingleUnit[T]
 
 
 /** Companion object for the `SingleUnitOrder` trait.
@@ -29,18 +45,12 @@ object SingleUnitOrder {
     * @return `Ordering` defined over `SingleUnitOrder` instances.
     */
   def ordering[T <: Tradable, O <: SingleUnitOrder[T]]: Ordering[O] = {
-    Ordering.by(o => (o.limit, o.issuer)) // todo re-visit whether or not issuer can only have a single active order!
+    Ordering.by(o => (o.limit, o.issuerId)) // todo re-visit whether or not issuer can only have a single active order!
   }
 
-  /** Factory method used to create a `SingleUnitOrder` from a `NewSingleUnitOrder` message.
-    *
-    * @param message
-    * @tparam T
-    * @return
-    */
   def from[T <: Tradable](message: NewSingleUnitOrder[T]): SingleUnitOrder[T] = message match {
-    case message: NewSingleUnitBid[T] => SingleUnitBid.from(message)
-    case message: NewSingleUnitOffer[T] => SingleUnitOffer.from(message)
+    case m: NewSingleUnitBid[T] => SingleUnitBid.from(m)
+    case m: NewSingleUnitOffer[T] => SingleUnitOffer.from(m)
   }
 
 }
@@ -52,7 +62,7 @@ object SingleUnitOrder {
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class SingleUnitOffer[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
+final case class SingleUnitOffer[+T <: Tradable](issuerId: IssuerId, limit: Price, tradable: T)
   extends SingleUnitOrder[T]
 
 
@@ -63,7 +73,7 @@ final case class SingleUnitOffer[+T <: Tradable](issuer: Issuer, limit: Price, t
   */
 object SingleUnitOffer {
 
-  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitOffer[T] = {
+  def apply[T <: Tradable](issuer: IssuerId, tradable: T): SingleUnitOffer[T] = {
     new SingleUnitOffer(issuer, Price.MinValue, tradable)
   }
 
@@ -74,7 +84,7 @@ object SingleUnitOffer {
     * @return
     */
   def from[T <: Tradable](message: NewSingleUnitOffer[T]): SingleUnitOffer[T] = {
-    new SingleUnitOffer[T](???, message.limit, message.tradable)
+    new SingleUnitOffer[T](message.senderId, message.limit, message.tradable)
   }
 
 }
@@ -86,7 +96,7 @@ object SingleUnitOffer {
   * @author davidrpugh
   * @since 0.1.0
   */
-case class SingleUnitBid[+T <: Tradable](issuer: Issuer, limit: Price, tradable: T)
+case class SingleUnitBid[+T <: Tradable](issuerId: IssuerId, limit: Price, tradable: T)
   extends SingleUnitOrder[T]
 
 
@@ -97,7 +107,7 @@ case class SingleUnitBid[+T <: Tradable](issuer: Issuer, limit: Price, tradable:
   */
 object SingleUnitBid {
 
-  def apply[T <: Tradable](issuer: Issuer, tradable: T): SingleUnitBid[T] = {
+  def apply[T <: Tradable](issuer: IssuerId, tradable: T): SingleUnitBid[T] = {
     new SingleUnitBid(issuer, Price.MaxValue, tradable)
   }
 
@@ -108,7 +118,7 @@ object SingleUnitBid {
     * @return
     */
   def from[T <: Tradable](message: NewSingleUnitBid[T]): SingleUnitBid[T] = {
-    new SingleUnitBid[T](???, message.limit, message.tradable)
+    new SingleUnitBid[T](message.senderId, message.limit, message.tradable)
   }
 
 }

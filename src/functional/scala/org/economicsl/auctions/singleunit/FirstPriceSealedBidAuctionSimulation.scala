@@ -63,9 +63,9 @@ class FirstPriceSealedBidAuctionSimulation
 
   "A first-price, sealed-bid auction (FPSBA)" should "allocate the parking space to the bidder that submits the bid with the highest price." in {
 
-    val actualWinner: Option[Issuer] = contracts.flatMap(_.headOption.map(_.issuer))
+    val actualWinner: Option[IssuerId] = contracts.flatMap(_.headOption.map(_.issuer))
     val highestPricedBidOrder = bidOrders.maxBy(bidOrder => bidOrder.limit)
-    val expectedWinner: Option[Issuer] = Some(highestPricedBidOrder.issuer)
+    val expectedWinner: Option[IssuerId] = Some(highestPricedBidOrder.issuer)
     actualWinner should be(expectedWinner)
 
   }

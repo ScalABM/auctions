@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer$, SingleUnitBid$, SingleUnitOrder}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer$, SingleUnitBid$}
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
 
@@ -36,12 +36,12 @@ import scala.util.Random
   * @param valuations
   */
 class TestSingleUnitAuctionParticipant private(
-  prng: Random,
-  askOrderProbability: Double,
-  val participantId: Issuer,
-  val issuedOrders: Map[OrderId, Order[Tradable]],
-  val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
-  val valuations: Map[Tradable, Price])
+                                                prng: Random,
+                                                askOrderProbability: Double,
+                                                val participantId: IssuerId,
+                                                val issuedOrders: Map[OrderId, Order[Tradable]],
+                                                val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+                                                val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
   /** Returns a new `AuctionParticipant` that has observed the `AuctionDataResponse`.
@@ -113,7 +113,7 @@ object TestSingleUnitAuctionParticipant {
 
   def withNoOutstandingOrders(prng: Random,
                               askOrderProbability: Double,
-                              issuer: Issuer,
+                              issuer: IssuerId,
                               valuations: Map[Tradable, Price])
                              : TestSingleUnitAuctionParticipant = {
     val emptyIssuedOrders = immutable.HashMap.empty[OrderId, Order[Tradable]]

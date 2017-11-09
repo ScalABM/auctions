@@ -24,10 +24,10 @@ import org.economicsl.core.{Price, Tradable}
 
 
 class SingleUnitSeller private(
-  val participantId: Issuer,
-  val issuedOrders: Map[OrderId, Order[Tradable]],
-  val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
-  val valuations: Map[Tradable, Price])
+                                val participantId: IssuerId,
+                                val issuedOrders: Map[OrderId, Order[Tradable]],
+                                val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+                                val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
 
@@ -90,7 +90,7 @@ class SingleUnitSeller private(
   */
 object SingleUnitSeller {
 
-  def apply(issuer: Issuer, valuations: Map[Tradable, Price]): SingleUnitSeller = {
+  def apply(issuer: IssuerId, valuations: Map[Tradable, Price]): SingleUnitSeller = {
     val issuedOrders = Map.empty[OrderId, Order[Tradable]]
     val outstandingOrders = Map.empty[OrderId, (OrderReferenceId, Order[Tradable])]
     new SingleUnitSeller(issuer, issuedOrders, outstandingOrders, valuations)

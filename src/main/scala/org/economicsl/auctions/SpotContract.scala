@@ -41,7 +41,7 @@ object SpotContract {
                                 bidOrder: Order[T] with SinglePricePoint[T],
                                 price: Price): SpotContract = {
     require(askOrder.limit <= price); require(price <= bidOrder.limit)
-    SpotContract(bidOrder.issuer, askOrder.issuer, price, askOrder.quantity min bidOrder.quantity, askOrder.tradable)
+    SpotContract(bidOrder.issuerId, askOrder.issuerId, price, askOrder.quantity min bidOrder.quantity, askOrder.tradable)
   }
 
 }

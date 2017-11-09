@@ -27,4 +27,8 @@ import org.economicsl.core.Tradable
   */
 trait Order[+T <: Tradable] extends Contract {
   this: PriceQuantitySchedule[T] =>
+
+  /** Unique identifier for the participant whose issued the order. */
+  def issuerId: IssuerId
+
 }

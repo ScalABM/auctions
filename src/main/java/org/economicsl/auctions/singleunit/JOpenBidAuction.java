@@ -19,7 +19,6 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.messages.*;
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;

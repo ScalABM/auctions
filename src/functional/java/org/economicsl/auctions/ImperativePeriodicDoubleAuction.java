@@ -4,7 +4,7 @@ package org.economicsl.auctions;
 import org.economicsl.auctions.messages.NewOrderAccepted;
 import org.economicsl.auctions.messages.NewOrderRejected;
 import org.economicsl.auctions.singleunit.OpenBidAuction;
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
+import org.economicsl.auctions.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.MidPointQuotePricingPolicy;
 
 import scala.Option;
