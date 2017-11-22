@@ -18,7 +18,6 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions.{AuctionId, AuctionProtocol, OrderReferenceIdGenerator, SpotContract}
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.core.util.Timestamper
 import org.economicsl.core.Tradable
@@ -106,8 +105,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       val orderRefId = randomOrderReferenceId()
       val timestamp = currentTimeMillis()
       val accepted = NewOrderAccepted(message.orderId, orderRefId, auctionId, timestamp)
-      val kv = message.orderId -> SingleUnitOrder.from(message)
-      val updatedOrderBook = orderBook.insert(orderRefId -> kv)
+      val updatedOrderBook = orderBook.insert(orderRefId -> (message.orderId -> message))
       (withOrderBook(updatedOrderBook), Right(accepted))
     }
   }

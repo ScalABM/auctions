@@ -25,7 +25,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.2.0
   */
-trait NewSingleUnitOrder[+T <: Tradable]
+sealed trait NewSingleUnitOrder[+T <: Tradable]
   extends NewSinglePricePointOrder[T]
   with SingleUnit[T]
 

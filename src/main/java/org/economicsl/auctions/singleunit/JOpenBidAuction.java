@@ -24,6 +24,7 @@ import org.economicsl.core.Tradable;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.immutable.Stream;
+import scala.math.Ordering;
 import scala.util.Either;
 
 import java.util.UUID;
@@ -95,8 +96,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(auctionId, pricingPolicy, protocol);
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, Ordering<NewSingleUnitBid<T>> bidOrdering, Ordering<NewSingleUnitOffer<T>> offerOrdering, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -107,8 +108,8 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(auctionId, pricingPolicy, protocol);
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, Ordering<NewSingleUnitBid<T>> bidOrdering, Ordering<NewSingleUnitOffer<T>> offerOrdering, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 
