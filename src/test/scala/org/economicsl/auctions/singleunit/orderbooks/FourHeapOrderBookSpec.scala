@@ -17,7 +17,7 @@ package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
-import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer$, SingleUnitBid$}
+import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer, SingleUnitBid}
 import org.economicsl.core.Quantity
 import org.economicsl.core.util.UUIDGenerator
 import org.scalatest.{FlatSpec, Matchers}

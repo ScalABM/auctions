@@ -18,7 +18,7 @@ package org.economicsl.auctions.messages
 import org.economicsl.core.Tradable
 
 
-/** A message sent from an `AuctionParticipant` to an `Auction` specifying a new order.
+/** Base trait  message sent from an `AuctionParticipant` to an `Auction` specifying a new order.
   *
   * @tparam T
   * @author davidrpugh
@@ -27,6 +27,7 @@ import org.economicsl.core.Tradable
 trait NewOrder[+T <: Tradable] extends Message {
   this: PriceQuantitySchedule[T] =>
 
+  /* Unique identifier for an order assigned by an `AuctionParticipant`. */
   def orderId: OrderId
 
 }
