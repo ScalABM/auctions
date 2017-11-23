@@ -19,7 +19,7 @@ import org.economicsl.auctions.{AuctionId, AuctionProtocol}
 import org.economicsl.auctions.messages.{AuctionData, AuctionDataRequest, SingleUnitBid, SingleUnitOffer}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
 import org.economicsl.core.Tradable
 
 
@@ -49,14 +49,14 @@ abstract class OpenBidAuction[T <: Tradable]
 object OpenBidAuction {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
-                                      (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                                      (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: SingleUnitPricingPolicy[T], protocol: AuctionProtocol[T])
                                       : OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
   def withUniformClearingPolicy[T <: Tradable]
-                               (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                               (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: SingleUnitPricingPolicy[T], protocol: AuctionProtocol[T])
                                : OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
@@ -64,15 +64,15 @@ object OpenBidAuction {
 
 
   private class WithDiscriminatoryClearingPolicy[T <: Tradable](
-    val auctionId: AuctionId,
-    val orderBook: FourHeapOrderBook[T],
-    protected val pricingPolicy: PricingPolicy[T],
-    val protocol: AuctionProtocol[T])
+                                                                 val auctionId: AuctionId,
+                                                                 val orderBook: FourHeapOrderBook[T],
+                                                                 protected val pricingPolicy: SingleUnitPricingPolicy[T],
+                                                                 val protocol: AuctionProtocol[T])
       extends OpenBidAuction[T]
       with DiscriminatoryClearingPolicy[T, OpenBidAuction[T]] {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
-    def withPricingPolicy(updated: PricingPolicy[T]): OpenBidAuction[T] = {
+    def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): OpenBidAuction[T] = {
       new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, updated, protocol)
     }
 
@@ -90,15 +90,15 @@ object OpenBidAuction {
 
 
   private class WithUniformClearingPolicy[T <: Tradable](
-    val auctionId: AuctionId,
-    val orderBook: FourHeapOrderBook[T],
-    protected val pricingPolicy: PricingPolicy[T],
-    val protocol: AuctionProtocol[T])
+                                                          val auctionId: AuctionId,
+                                                          val orderBook: FourHeapOrderBook[T],
+                                                          protected val pricingPolicy: SingleUnitPricingPolicy[T],
+                                                          val protocol: AuctionProtocol[T])
       extends OpenBidAuction[T]
       with UniformClearingPolicy[T, OpenBidAuction[T]] {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
-    def withPricingPolicy(updated: PricingPolicy[T]): OpenBidAuction[T] = {
+    def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): OpenBidAuction[T] = {
       new WithUniformClearingPolicy[T](auctionId, orderBook, updated, protocol)
     }
 

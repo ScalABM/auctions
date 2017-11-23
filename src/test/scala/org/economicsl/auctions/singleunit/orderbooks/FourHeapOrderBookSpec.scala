@@ -48,10 +48,10 @@ class FourHeapOrderBookSpec
   val offerOrdering: Ordering[SingleUnitOffer[TestTradable]] = SingleUnitOffer.priceOrdering
   val initial: FourHeapOrderBook[TestTradable] = FourHeapOrderBook.empty[TestTradable](bidOrdering, offerOrdering)
   val withBids: FourHeapOrderBook[TestTradable] = bidReferences.zip(bids).foldLeft(initial){
-    case (orderBook, (reference, bidOrder)) => orderBook.insert(reference -> bidOrder)
+    case (orderBook, (reference, bidOrder)) => orderBook + (reference -> bidOrder)
   }
   val withOffers: FourHeapOrderBook[TestTradable] = offerReferences.zip(offers).foldLeft(initial){
-    case (orderBook, (reference, askOrder)) => orderBook.insert(reference -> askOrder)
+    case (orderBook, (reference, askOrder)) => orderBook + (reference -> askOrder)
   }
 
   "A FourHeapOrderBook" should "be able to insert bid orders" in {
@@ -76,7 +76,7 @@ class FourHeapOrderBookSpec
 
     val withOutOffers = offerReferences.foldLeft(withOffers) {
       case (orderBook, reference) =>
-        val (residual, removedAskOrders) = orderBook.remove(reference)
+        val (residual, _) = orderBook - reference
         residual
     }
     assert(withOutOffers.unMatchedOrders.offers.isEmpty)
@@ -87,7 +87,7 @@ class FourHeapOrderBookSpec
 
     val withOutBids = bidReferences.foldLeft(withBids){
       case (orderBook, reference) =>
-        val (residual, removedBidOrders) = orderBook.remove(reference)
+        val (residual, _) = orderBook - reference
         residual
     }
     assert(withOutBids.unMatchedOrders.bids.isEmpty)

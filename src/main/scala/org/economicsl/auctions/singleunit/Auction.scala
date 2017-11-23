@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import org.economicsl.auctions.{AuctionId, AuctionProtocol, OrderReferenceIdGenerator, SpotContract}
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
 import org.economicsl.core.util.Timestamper
 import org.economicsl.core.Tradable
 
@@ -48,7 +48,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
     * @return
     */
   def cancel(message: CancelOrder): (A, Either[CancelOrderRejected, CancelOrderAccepted]) = {
-    val (residualOrderBook, removedOrder) = orderBook.remove(message.orderRefId)
+    val (residualOrderBook, removedOrder) = orderBook - message.orderRefId
     removedOrder match {
       case Some((orderId, _)) =>
         val timestamp = currentTimeMillis()
@@ -105,7 +105,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       val orderRefId = randomOrderReferenceId()
       val timestamp = currentTimeMillis()
       val accepted = NewOrderAccepted(message.orderId, orderRefId, auctionId, timestamp)
-      val updatedOrderBook = orderBook.insert(orderRefId -> (message.orderId -> message))
+      val updatedOrderBook = orderBook + (orderRefId -> (message.orderId -> message))
       (withOrderBook(updatedOrderBook), Right(accepted))
     }
   }
@@ -114,7 +114,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   def protocol: AuctionProtocol[T]
 
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
-  def withPricingPolicy(updated: PricingPolicy[T]): A
+  def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): A
 
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
   def withProtocol(updated: AuctionProtocol[T]): A
@@ -124,7 +124,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
 
   protected val orderBook: FourHeapOrderBook[T]
 
-  protected val pricingPolicy: PricingPolicy[T]
+  protected val pricingPolicy: SingleUnitPricingPolicy[T]
 
   /** Computest the least common multiple of two tick sizes. */
   private[this] def leastCommonMultiple(a: Long, b: Long) = {
