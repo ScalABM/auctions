@@ -27,7 +27,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.2.0
   */
-trait OrderBook[T <: Tradable, O <: NewOrder[T], +OB <: OrderBook[T, O, OB]] {
+trait OrderBook[+T <: Tradable, -O <: NewOrder[T], OB <: OrderBook[T, O, OB]] {
 
   /** Return a new `OrderBook` containing the new order.
     *
@@ -43,6 +43,6 @@ trait OrderBook[T <: Tradable, O <: NewOrder[T], +OB <: OrderBook[T, O, OB]] {
     * @return
     * @note implementation should be O(1) (i.e., constant time).
     */
-  def - (existing: OrderReferenceId): (OB, Option[(OrderId, O)])
+  def - [O1 <: O](existing: OrderReferenceId): (OB, Option[(OrderId, O1)])
 
 }

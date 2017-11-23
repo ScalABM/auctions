@@ -36,30 +36,6 @@ trait SingleUnitAuction[T <: Tradable]
     with SenderIdGenerator
     with Timestamper {
 
-  /** Unique identifier for an `Auction`. */
-  def auctionId: AuctionId
-
-  /** Create a new instance of type class `A` whose order book contains all previously submitted `BidOrder` instances
-    * except the `order`.
-    *
-    * @param message the unique identifier for the order that should be removed.
-    * @return
-    */
-  def cancel(message: CancelOrder): (A, Either[CancelOrderRejected, CancelOrderAccepted]) = {
-    val (residualOrderBook, removedOrder) = orderBook - message.orderRefId
-    removedOrder match {
-      case Some((orderId, _)) =>
-        val timestamp = currentTimeMillis()
-        val accepted = CancelOrderAccepted(orderId, auctionId, timestamp)
-        (withOrderBook(residualOrderBook), Right(accepted))
-      case None =>
-        val reason = OrderNotFound
-        val timestamp = currentTimeMillis()
-        val rejected = CancelOrderRejected(message.orderId, reason, auctionId, timestamp)
-        (this, Left(rejected))
-    }
-  }
-
   /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
     *
     * @return an instance of `ClearResult` class containing an optional collection of `Fill` instances as well as an
@@ -81,31 +57,6 @@ trait SingleUnitAuction[T <: Tradable]
     val combinedTickSize = leastCommonMultiple(protocol.tickSize, that.protocol.tickSize)
     val updatedProtocol = protocol.withTickSize(combinedTickSize)
     withCombinedOrderBooks.withProtocol(updatedProtocol)
-  }
-
-  /** Create a new instance of type class `A` whose order book contains an additional `BidOrder`.
-    *
-    * @param message
-    * @return
-    */
-  def insert(message: NewSingleUnitOrder[T]): (A, Either[NewOrderRejected, NewOrderAccepted]) = {
-    if (message.limit.value % protocol.tickSize > 0) {
-      val timestamp = currentTimeMillis()
-      val reason = InvalidTickSize(message.limit, protocol.tickSize)
-      val rejected = NewOrderRejected(message.orderId, reason, auctionId, timestamp)
-      (this, Left(rejected))
-    } else if (!message.tradable.equals(protocol.tradable)) {
-      val timestamp = currentTimeMillis()
-      val reason = InvalidTradable(message.tradable, protocol.tradable)
-      val rejected = NewOrderRejected(message.orderId, reason, auctionId, timestamp)
-      (this, Left(rejected))
-    } else {
-      val orderRefId = randomOrderReferenceId()
-      val timestamp = currentTimeMillis()
-      val accepted = NewOrderAccepted(message.orderId, orderRefId, auctionId, timestamp)
-      val updatedOrderBook = orderBook + (orderRefId -> (message.orderId -> message))
-      (withOrderBook(updatedOrderBook), Right(accepted))
-    }
   }
 
   /** An `Auction` must have some protocol that contains all relevant information about auction. */

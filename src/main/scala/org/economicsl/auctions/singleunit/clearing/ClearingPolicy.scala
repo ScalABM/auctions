@@ -1,13 +1,8 @@
 package org.economicsl.auctions.singleunit.clearing
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-<<<<<<< Updated upstream
 import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
-import org.economicsl.auctions.singleunit.Auction
-=======
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
 import org.economicsl.auctions.singleunit.SingleUnitAuction
->>>>>>> Stashed changes
 import org.economicsl.auctions.SpotContract
 import org.economicsl.core.{Price, Tradable}
 

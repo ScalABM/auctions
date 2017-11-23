@@ -32,7 +32,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait GenAuction[T <: Tradable, O <: NewOrder[T], OB <: OrderBook[T, O, OB], A <: GenAuction[T, O, A, OB]]
+trait GenAuction[T <: Tradable, -O <: NewOrder[T] with PriceQuantitySchedule[T], OB <: OrderBook[T, O, OB], A <: GenAuction[T, O, OB, A]]
     extends OrderReferenceIdGenerator[T, O, A]
     with Timestamper {
   this: A =>
@@ -45,7 +45,20 @@ trait GenAuction[T <: Tradable, O <: NewOrder[T], OB <: OrderBook[T, O, OB], A <
     * @param message the unique identifier for the order that should be removed.
     * @return
     */
-  def cancel(message: CancelOrder): (A, Either[CancelOrderRejected, CancelOrderAccepted])
+  def cancel(message: CancelOrder): (A, Either[CancelOrderRejected, CancelOrderAccepted]) = {
+    val (residualOrderBook, removedOrder) = orderBook - message.orderRefId
+    removedOrder match {
+      case Some((orderId, _)) =>
+        val timestamp = currentTimeMillis()
+        val accepted = CancelOrderAccepted(orderId, auctionId, timestamp)
+        (withOrderBook(residualOrderBook), Right(accepted))
+      case None =>
+        val reason = OrderNotFound
+        val timestamp = currentTimeMillis()
+        val rejected = CancelOrderRejected(message.orderId, reason, auctionId, timestamp)
+        (this, Left(rejected))
+    }
+  }
 
   /** Calculate a clearing price(s) and remove all orders instances that are matched at that price(s).
     *
@@ -66,7 +79,20 @@ trait GenAuction[T <: Tradable, O <: NewOrder[T], OB <: OrderBook[T, O, OB], A <
     * @param message
     * @return
     */
-  def insert(message: O): (A, Either[NewOrderRejected, NewOrderAccepted])
+  def insert(message: O): (A, Either[NewOrderRejected, NewOrderAccepted]) = {
+    if (!message.tradable.equals(protocol.tradable)) {
+      val timestamp = currentTimeMillis()
+      val reason = InvalidTradable(message.tradable, protocol.tradable)
+      val rejected = NewOrderRejected(message.orderId, reason, auctionId, timestamp)
+      (this, Left(rejected))
+    } else {
+      val orderRefId = randomOrderReferenceId()
+      val timestamp = currentTimeMillis()
+      val accepted = NewOrderAccepted(message.orderId, orderRefId, auctionId, timestamp)
+      val updatedOrderBook = orderBook + (orderRefId -> (message.orderId -> message))
+      (withOrderBook(updatedOrderBook), Right(accepted))
+    }
+  }
 
   /** An `Auction` must have some protocol that contains all relevant information about auction. */
   def protocol: AuctionProtocol[T]

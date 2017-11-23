@@ -27,4 +27,4 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait SingleUnitPricingPolicy[T <: Tradable] extends PricingPolicy[T, NewSingleUnitOrder[T], FourHeapOrderBook[T]]
+trait SingleUnitPricingPolicy[+T <: Tradable] extends PricingPolicy[T, NewSingleUnitOrder[T], FourHeapOrderBook[T]]
