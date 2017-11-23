@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
+import org.economicsl.auctions.OrderBook
 import org.economicsl.auctions.messages._
 import org.economicsl.core.{Currency, Price, Quantity, Tradable}
 
@@ -37,7 +38,8 @@ import scala.collection.{GenIterable, GenSet}
   */
 final class FourHeapOrderBook[T <: Tradable] private(
   val matchedOrders: MatchedOrders[T],
-  val unMatchedOrders: UnMatchedOrders[T]) {
+  val unMatchedOrders: UnMatchedOrders[T])
+    extends OrderBook[T, NewSingleUnitOrder[T], FourHeapOrderBook[T]] {
 
   /** If the constructor for `FourHeapOrderBook` becomes public, then this should be changed to require. */
   assert(orderBookInvariantsHold, "FourHeapOrderBook invariants failed!")
@@ -86,8 +88,8 @@ final class FourHeapOrderBook[T <: Tradable] private(
 
   def combineWith(that: FourHeapOrderBook[T]): FourHeapOrderBook[T] = {
     // drain that order book of its matched and unmatched orders...
-    val (withOutMatchedOrders, additionalMatchedOrders) = that.removeAllMatchedOrders
-    val (residualOrderBook, additionalUnMatchedOrders) = withOutMatchedOrders.removeAllUnMatchedOrders
+    val (withOutMatchedOrders, additionalMatchedOrders) = that.withoutMatchedOrders
+    val (residualOrderBook, additionalUnMatchedOrders) = withOutMatchedOrders.withoutUnMatchedOrders
     assert(residualOrderBook.isEmpty, "After removing all matched and un-matched orders, order book should be empty!")
 
     // ...and add them to this order book!
@@ -95,7 +97,7 @@ final class FourHeapOrderBook[T <: Tradable] private(
     withAdditionalMatchedOrders.insert(additionalUnMatchedOrders)
   }
 
-  def insert(kv: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): FourHeapOrderBook[T] = kv match {
+  def + (kv: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): FourHeapOrderBook[T] = kv match {
     case (orderRefId, (orderId, order: SingleUnitOffer[T])) =>
       (matchedOrders.headOption, unMatchedOrders.bids.headOption) match {
         case (Some(((_, (_, askOrder)), _)), Some((existing, rationedBidOrder @ (_, bidOrder))))
@@ -139,7 +141,7 @@ final class FourHeapOrderBook[T <: Tradable] private(
     * @note depending on the type of collection `kvs` this method might be done in parallel.
     */
   def insert(kvs: GenIterable[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]): FourHeapOrderBook[T] = {
-    kvs.aggregate(this)((orderBook, kv) => orderBook.insert(kv), (ob1, ob2) => ob1.combineWith(ob2))
+    kvs.aggregate(this)((orderBook, kv) => orderBook + kv, (ob1, ob2) => ob1.combineWith(ob2))
   }
 
   /**
@@ -158,13 +160,12 @@ final class FourHeapOrderBook[T <: Tradable] private(
     !isEmpty
   }
 
-  /** Create a new `FourHeapOrderBook` with a given `AskOrder` removed from this order book.
+  /** Create a new `FourHeapOrderBook` that does not contain a particular `NewSingleUnitOrder`.
     *
     * @param existing
     * @return
-    * @note if `reference` is not found in this order book, then this order book is returned.
     */
-  def remove(existing: OrderReferenceId): (FourHeapOrderBook[T], Option[(OrderId, NewSingleUnitOrder[T])]) = {
+  def - (existing: OrderReferenceId): (FourHeapOrderBook[T], Option[(OrderId, NewSingleUnitOrder[T])]) = {
     val (remainingUnMatchedOrders, removedOrder) = unMatchedOrders - existing
     removedOrder match {
       case Some(_) =>
@@ -228,7 +229,7 @@ final class FourHeapOrderBook[T <: Tradable] private(
     * @return
     * @todo benchmark this method!
     */
-  private def removeAllMatchedOrders: (FourHeapOrderBook[T], GenSet[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]) = {
+  private def withoutMatchedOrders: (FourHeapOrderBook[T], GenSet[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]) = {
 
     @annotation.tailrec
     def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]) = {
@@ -250,7 +251,7 @@ final class FourHeapOrderBook[T <: Tradable] private(
     * @return
     * @todo benchmark this method!
     */
-  private def removeAllUnMatchedOrders: (FourHeapOrderBook[T], GenIterable[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]) = {
+  private def withoutUnMatchedOrders: (FourHeapOrderBook[T], GenIterable[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]) = {
 
     @annotation.tailrec
     def accumulate(orderBook: FourHeapOrderBook[T], orders: GenSet[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]): (FourHeapOrderBook[T], GenSet[(OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))]) = {
