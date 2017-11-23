@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.messages.SinglePricePoint
+import org.economicsl.auctions.messages.{NewSinglePricePointBid, NewSinglePricePointOffer, NewSingleUnitBid, NewSingleUnitOffer}
 import org.economicsl.core.{Price, Quantity, Tradable}
 import play.api.libs.json.{Json, Writes}
 
@@ -37,11 +37,33 @@ object SpotContract {
 
   implicit val writes: Writes[SpotContract] = Json.writes[SpotContract]
 
-  def fromOrders[T <: Tradable](askOrder: Order[T] with SinglePricePoint[T],
-                                bidOrder: Order[T] with SinglePricePoint[T],
-                                price: Price): SpotContract = {
-    require(askOrder.limit <= price); require(price <= bidOrder.limit)
-    SpotContract(bidOrder.issuerId, askOrder.issuerId, price, askOrder.quantity min bidOrder.quantity, askOrder.tradable)
+  /** Creates a `SpotContract` from a matched `NewSinglePricePointBid` and `NewSinglePricePointOffer`.
+    *
+    * @param bid
+    * @param offer
+    * @param price
+    * @tparam T
+    * @return
+    */
+  def fromSinglePricePointOrders[T <: Tradable]
+                                (bid: NewSinglePricePointBid[T], offer: NewSinglePricePointOffer[T], price: Price)
+                                : SpotContract = {
+    require(offer.limit <= price); require(price <= bid.limit)  // incentive compatibility check!
+    SpotContract(bid.senderId, offer.senderId, price, offer.quantity min bid.quantity, offer.tradable)
   }
 
+  /** Creates a `SpotContract` from a matched `NewSingleUnitBid` and `NewSingleUnitOffer`.
+    *
+    * @param bid
+    * @param offer
+    * @param price
+    * @tparam T
+    * @return
+    */
+  def fromSingleUnitOrders[T <: Tradable]
+                          (bid: NewSingleUnitBid[T], offer: NewSingleUnitOffer[T], price: Price)
+                          : SpotContract = {
+    require(offer.limit <= price); require(price <= bid.limit)  // incentive compatibility check!
+    SpotContract(bid.senderId, offer.senderId, price, offer.quantity min bid.quantity, offer.tradable)
+  }
 }

@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
+import org.economicsl.auctions.messages.{NewSingleUnitBid, NewSingleUnitOffer}
 import org.economicsl.auctions.{AuctionId, AuctionProtocol}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
@@ -41,16 +42,16 @@ abstract class SealedBidAuction[T <: Tradable]
 object SealedBidAuction {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
-                                      (auctionId: AuctionId, pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                                      (auctionId: AuctionId, bidOrdering: Ordering[NewSingleUnitBid[T]], offerOrdering: Ordering[NewSingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
                                       : SealedBidAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
   def withUniformClearingPolicy[T <: Tradable]
-                               (auctionId: AuctionId, pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                               (auctionId: AuctionId, bidOrdering: Ordering[NewSingleUnitBid[T]], offerOrdering: Ordering[NewSingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
                                : SealedBidAuction[T] = {
-    val orderBook = FourHeapOrderBook.empty[T]
+    val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 

@@ -36,8 +36,8 @@ trait DiscriminatoryClearingPolicy[T <: Tradable, A <: Auction[T, A]]
       val currentPrice = pricingPolicy(ob)
       val (residualOrderBook, topMatch) = ob.splitAtTopMatch
       topMatch match {
-        case Some(((_, (_, askOrder)), (_, (_, bidOrder)))) =>
-          val fill = currentPrice.map(price => SpotContract.fromOrders(askOrder, bidOrder, price))
+        case Some(((_, (_, offer)), (_, (_, bid)))) =>
+          val fill = currentPrice.map(price => SpotContract.fromSingleUnitOrders(bid, offer, price))
           loop(pricingPolicy)(fill.fold(contracts)(_ #:: contracts), residualOrderBook)
         case None =>
           val results = if (contracts.nonEmpty) Some(contracts) else None
@@ -76,8 +76,8 @@ trait UniformClearingPolicy[T <: Tradable, A <: Auction[T, A]]
   private[this] def accumulate(price: Price)(ob: FourHeapOrderBook[T], contracts: Stream[SpotContract]): (FourHeapOrderBook[T], Stream[SpotContract]) = {
     val (residualOrderBook, topMatch) = ob.splitAtTopMatch
     topMatch match {
-      case Some(((_, (_, askOrder)), (_, (_, bidOrder)))) =>
-        val fill = SpotContract.fromOrders(askOrder, bidOrder, price)
+      case Some(((_, (_, offer)), (_, (_, bid)))) =>
+        val fill = SpotContract.fromSingleUnitOrders(bid, offer, price)
         accumulate(price)(residualOrderBook, fill #:: contracts)
       case None =>
         (ob, contracts)
