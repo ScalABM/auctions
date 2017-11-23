@@ -21,13 +21,12 @@ import org.economicsl.core.Tradable
 
 /** Base trait defining the interface for all `OrderBook` implementations.
   *
-  * @tparam T
   * @tparam O
   * @tparam OB
   * @author davidrpugh
   * @since 0.2.0
   */
-trait OrderBook[T <: Tradable, O <: NewOrder[T], +OB <: OrderBook[T, O, OB]] {
+trait OrderBook[O <: NewOrder[_ <: Tradable], +OB <: OrderBook[O, OB]] {
 
   /** Return a new `OrderBook` containing the new order.
     *
