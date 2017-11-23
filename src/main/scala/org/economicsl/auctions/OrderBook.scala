@@ -35,7 +35,7 @@ trait OrderBook[T <: Tradable, O <: NewOrder[T], +OB <: OrderBook[T, O, OB]] {
     * @return
     * @note implementation should be O(1) (i.e., constant time).
     */
-  def + (kv: (OrderReferenceId, (OrderId, O))): OB
+  def + (kv: (OrderReferenceId, O)): OB
 
   /** Return a new `OrderBook` without a particular order.
     *

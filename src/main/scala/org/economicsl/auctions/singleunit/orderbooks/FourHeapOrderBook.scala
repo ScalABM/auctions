@@ -97,7 +97,7 @@ final class FourHeapOrderBook[T <: Tradable] private(
     withAdditionalMatchedOrders.insert(additionalUnMatchedOrders)
   }
 
-  def + (kv: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): FourHeapOrderBook[T] = kv match {
+  def + (kv: (OrderReferenceId, NewSingleUnitOrder[T])): FourHeapOrderBook[T] = kv match {
     case (orderRefId, (orderId, order: SingleUnitOffer[T])) =>
       (matchedOrders.headOption, unMatchedOrders.bids.headOption) match {
         case (Some(((_, (_, askOrder)), _)), Some((existing, rationedBidOrder @ (_, bidOrder))))

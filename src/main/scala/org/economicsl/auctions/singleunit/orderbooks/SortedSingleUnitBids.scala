@@ -35,13 +35,13 @@ import scala.collection.immutable
   * @since 0.1.0
   */
 final class SortedSingleUnitBids[T <: Tradable] private(
-  orders: Map[OrderReferenceId, (OrderId, SingleUnitBid[T])],
-  sortedOrders: immutable.TreeSet[(OrderReferenceId, (OrderId, SingleUnitBid[T]))],
+  orders: Map[OrderReferenceId, SingleUnitBid[T]],
+  sortedOrders: immutable.TreeSet[(OrderReferenceId, SingleUnitBid[T])],
   val numberUnits: Quantity)
     extends OrderBook[T, SingleUnitBid[T], SortedSingleUnitBids[T]] {
 
   /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
-  val ordering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = sortedOrders.ordering
+  val ordering: Ordering[(OrderReferenceId, SingleUnitBid[T])] = sortedOrders.ordering
 
   /** Create a new `SortedBidOrders` instance containing the additional `BidOrder`.
     *
@@ -49,7 +49,7 @@ final class SortedSingleUnitBids[T <: Tradable] private(
     * @return a new `SortedBidOrder` instance that contains all of the `BidOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (OrderReferenceId, (OrderId, SingleUnitBid[T]))): SortedSingleUnitBids[T] = {
+  def + (kv: (OrderReferenceId, SingleUnitBid[T])): SortedSingleUnitBids[T] = {
     val (_, (_, order)) = kv
     new SortedSingleUnitBids(orders + kv, sortedOrders + kv, numberUnits + order.quantity)
   }

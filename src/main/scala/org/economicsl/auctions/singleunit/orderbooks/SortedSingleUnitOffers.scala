@@ -35,13 +35,13 @@ import scala.collection.immutable
   * @since 0.1.0
   */
 final class SortedSingleUnitOffers[T <: Tradable] private(
-  orders: Map[OrderReferenceId, (OrderId, SingleUnitOffer[T])],
-  sortedOrders: immutable.TreeSet[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))],
+  orders: Map[OrderReferenceId, SingleUnitOffer[T]],
+  sortedOrders: immutable.TreeSet[(OrderReferenceId, SingleUnitOffer[T])],
   val numberUnits: Quantity)
     extends OrderBook[T, SingleUnitOffer[T], SortedSingleUnitOffers[T]] {
 
   /** The ordering used to sort the `AskOrder` instances contained in this `SortedSingleUnitOffers` instance. */
-  val ordering: Ordering[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))] = sortedOrders.ordering
+  val ordering: Ordering[(OrderReferenceId, SingleUnitOffer[T])] = sortedOrders.ordering
 
   /** Create a new `SortedSingleUnitOffers` instance containing the additional `AskOrder`.
     *
@@ -49,7 +49,7 @@ final class SortedSingleUnitOffers[T <: Tradable] private(
     * @return a new `SortedAskOrder` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (OrderReferenceId, (OrderId, SingleUnitOffer[T]))): SortedSingleUnitOffers[T] = kv match {
+  def + (kv: (OrderReferenceId, SingleUnitOffer[T])): SortedSingleUnitOffers[T] = kv match {
     case (_, (_, order)) =>
       new SortedSingleUnitOffers(orders + kv, sortedOrders + kv, numberUnits + order.quantity)
   }

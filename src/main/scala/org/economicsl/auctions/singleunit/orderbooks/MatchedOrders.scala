@@ -39,10 +39,10 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
   assert(invariantsHold, "Limit price of the best `NewSingleUnitBid` must exceed the limit price of the best `NewSingleUnitOffer`.")
 
   /** The ordering used to sort the `Bid` instances contained in this `MatchedOrders` instance. */
-  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = bids.ordering
+  val bidOrdering: Ordering[(OrderReferenceId, SingleUnitBid[T])] = bids.ordering
 
   /** The ordering used to sort the `AskOrder` instances contained in this `MatchedOrders` instance. */
-  val offerOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))] = offers.ordering
+  val offerOrdering: Ordering[(OrderReferenceId, SingleUnitOffer[T])] = offers.ordering
 
   /** Total number of units of the `Tradable` contained in the `MatchedOrders`. */
   val numberUnits: Quantity = offers.numberUnits + bids.numberUnits
@@ -54,7 +54,7 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `Bid` instances of this
     *         instance and that also contains the matched pair of  `orders`.
     */
-  def + (kv1: (OrderReferenceId, (OrderId, SingleUnitOffer[T])), kv2: (OrderReferenceId, (OrderId, SingleUnitBid[T]))): MatchedOrders[T] = {
+  def + (kv1: (OrderReferenceId, SingleUnitOffer[T]), kv2: (OrderReferenceId, SingleUnitBid[T])): MatchedOrders[T] = {
     new MatchedOrders(bids + kv2, offers + kv1)
   }
 
@@ -111,15 +111,15 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @param incoming
     * @return
     */
-  def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): (MatchedOrders[T], (OrderId, NewSingleUnitOrder[T])) = {
+  def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, NewSingleUnitOrder[T])): (MatchedOrders[T], (OrderId, NewSingleUnitOrder[T])) = {
     incoming match {
-      case (refOrderId, (orderId, order: SingleUnitOffer[T])) =>
+      case (refOrderId, order: SingleUnitOffer[T]) =>
         val (remainingOffers, Some(removedOffer)) = offers - existing
-        val updatedOffers = remainingOffers + (refOrderId -> (orderId -> order))
+        val updatedOffers = remainingOffers + (refOrderId -> order)
         (new MatchedOrders(bids, updatedOffers), removedOffer)
-      case (reference, (token, order: SingleUnitBid[T])) =>
+      case (reference, order: SingleUnitBid[T]) =>
         val (remainingBids, Some(removedBid)) = bids - existing
-        val updatedBids = remainingBids + (reference -> (token -> order))
+        val updatedBids = remainingBids + (reference -> order)
         (new MatchedOrders(updatedBids, offers), removedBid)
     }
   }
