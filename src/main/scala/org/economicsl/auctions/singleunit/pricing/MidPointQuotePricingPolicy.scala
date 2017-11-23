@@ -25,7 +25,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class MidPointQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
+class MidPointQuotePricingPolicy[T <: Tradable] extends SingleUnitPricingPolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.midPointPriceQuote
 

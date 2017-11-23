@@ -15,7 +15,8 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.orderbooks
 
-import org.economicsl.auctions.messages.{SingleUnitBid, OrderId, OrderReferenceId}
+import org.economicsl.auctions.OrderBook
+import org.economicsl.auctions.messages.{OrderId, OrderReferenceId, SingleUnitBid}
 import org.economicsl.core.{Quantity, Tradable}
 
 import scala.collection.immutable
@@ -36,7 +37,8 @@ import scala.collection.immutable
 final class SortedSingleUnitBids[T <: Tradable] private(
   orders: Map[OrderReferenceId, (OrderId, SingleUnitBid[T])],
   sortedOrders: immutable.TreeSet[(OrderReferenceId, (OrderId, SingleUnitBid[T]))],
-  val numberUnits: Quantity) {
+  val numberUnits: Quantity)
+    extends OrderBook[T, SingleUnitBid[T], SortedSingleUnitBids[T]] {
 
   /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
   val ordering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = sortedOrders.ordering
