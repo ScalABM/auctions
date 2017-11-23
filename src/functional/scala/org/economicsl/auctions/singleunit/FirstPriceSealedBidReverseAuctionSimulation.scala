@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.orders.SingleUnitOffer$
+import org.economicsl.auctions.messages.NewSingleUnitOffer
 import org.economicsl.auctions.singleunit.participants.{SingleUnitAuctionParticipant, SingleUnitBuyer, SingleUnitSeller}
 import org.economicsl.core.{Price, Tradable}
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -55,8 +55,8 @@ class FirstPriceSealedBidReverseAuctionSimulation
   val auction: SealedBidAuction[Service] = firstPriceSealedBidReverseAuction(auctionId, tradable)
 
   val issuedOrders: Iterable[IssuedOrder[Service]] = issueOrders(auction.protocol, auctionParticipants)
-  val askOrders: Iterable[SingleUnitOffer[Service]] = issuedOrders.collect {
-    case (_, (_, order: SingleUnitOffer[Service])) => order
+  val askOrders: Iterable[NewSingleUnitOffer[Service]] = issuedOrders.collect {
+    case (_, order: NewSingleUnitOffer[Service]) => order
   }
   val ((clearedAuction, _), contracts) = run[Service, SealedBidAuction[Service]](auction, auctionParticipants)
 
@@ -64,7 +64,7 @@ class FirstPriceSealedBidReverseAuctionSimulation
 
     val actualWinner: Option[IssuerId] = contracts.flatMap(_.headOption.map(_.counterparty))
     val lowestPricedAskOrder = askOrders.minBy(order => order.limit)
-    val expectedWinner: Option[IssuerId] = Some(lowestPricedAskOrder.issuer)
+    val expectedWinner: Option[IssuerId] = Some(lowestPricedAskOrder.senderId)
     actualWinner should be(expectedWinner)
 
   }
