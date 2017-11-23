@@ -20,7 +20,7 @@ import org.economicsl.core.Tradable
 
 
 trait GenSinglePricePointAuction[T <: Tradable, OB <: OrderBook[T, NewSinglePricePointOrder[T], OB], A <: GenSinglePricePointAuction[T, OB, A]]
-  extends GenSingleUnitAuction[T, OB, A] {
+    extends GenSingleUnitAuction[T, OB, A] {
   this: A =>
 
   /**

@@ -39,4 +39,19 @@ trait GenSingleUnitAuction[T <: Tradable, OB <: OrderBook[T, NewSingleUnitOrder[
     }
   }
 
+  /** Combines and `Auction` mechanism with some other `Auction`.
+    *
+    * @param that
+    * @return
+    * @note this method is necessary in order to parallelize auction simulations.
+    */
+  def combineWith(that: A): A = {
+    require(protocol.tradable.equals(that.protocol.tradable), "Only auctions for the same Tradable can be combined!")
+    val combinedOrderBooks = orderBook.combineWith(that.orderBook)
+    val withCombinedOrderBooks = withOrderBook(combinedOrderBooks)
+    val combinedTickSize = leastCommonMultiple(protocol.tickSize, that.protocol.tickSize)
+    val updatedProtocol = protocol.withTickSize(combinedTickSize)
+    withCombinedOrderBooks.withProtocol(updatedProtocol)
+  }
+
 }

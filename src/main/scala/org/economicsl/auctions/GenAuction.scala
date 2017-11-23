@@ -32,7 +32,7 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait GenAuction[T <: Tradable, -O <: NewOrder[T] with PriceQuantitySchedule[T], OB <: OrderBook[T, O, OB], A <: GenAuction[T, O, OB, A]]
+trait GenAuction[T <: Tradable, -O <: NewOrder[T] with PriceQuantitySchedule[T], -OB <: OrderBook[T, O, OB], A <: GenAuction[T, O, OB, A]]
     extends OrderReferenceIdGenerator[T, O, A]
     with Timestamper {
   this: A =>
@@ -100,7 +100,10 @@ trait GenAuction[T <: Tradable, -O <: NewOrder[T] with PriceQuantitySchedule[T],
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOrderBook(updated: OB): A
 
-  protected val orderBook: OB
+  /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
+  def withProtocol(updated: AuctionProtocol[T]): A
+
+  protected def orderBook: OB
 
   protected val pricingPolicy: PricingPolicy[T, O, OB]
 

@@ -57,7 +57,7 @@ trait DiscriminatoryClearingPolicy[T <: Tradable, A <: SingleUnitAuction[T, A]]
   * @author davidrpugh
   * @since 0.1.0
   */
-trait UniformClearingPolicy[T <: Tradable, A <: SingleUnitAuction[T, A]]
+trait UniformClearingPolicy[T <: Tradable, A <: SingleUnitAuction[T]]
     extends ClearingPolicy[T, A] {
   this: A =>
 

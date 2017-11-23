@@ -31,10 +31,11 @@ import org.economicsl.core.Tradable
   *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
   *       each auction implementation.
   */
-trait SingleUnitAuction[T <: Tradable]
-    extends GenSingleUnitAuction[T]
+trait SingleUnitAuction[T <: Tradable, A <: SingleUnitAuction[T, A]]
+    extends GenSingleUnitAuction[T, FourHeapOrderBook[T], A]
     with SenderIdGenerator
     with Timestamper {
+  this: A =>
 
   /** Calculate a clearing price and remove all `AskOrder` and `BidOrder` instances that are matched at that price.
     *
@@ -44,29 +45,8 @@ trait SingleUnitAuction[T <: Tradable]
     */
   def clear: (A, Option[Stream[SpotContract]])
 
-  /** Combines and `Auction` mechanism with some other `Auction`.
-  *
-    * @param that
-    * @return
-    * @note this method is necessary in order to parallelize auction simulations.
-    */
-  def combineWith(that: A): A = {
-    require(protocol.tradable.equals(that.protocol.tradable), "Only auctions for the same Tradable can be combined!")
-    val combinedOrderBooks = orderBook.combineWith(that.orderBook)
-    val withCombinedOrderBooks = withOrderBook(combinedOrderBooks)
-    val combinedTickSize = leastCommonMultiple(protocol.tickSize, that.protocol.tickSize)
-    val updatedProtocol = protocol.withTickSize(combinedTickSize)
-    withCombinedOrderBooks.withProtocol(updatedProtocol)
-  }
-
-  /** An `Auction` must have some protocol that contains all relevant information about auction. */
-  def protocol: AuctionProtocol[T]
-
   /** Returns an auction of type `A` that encapsulates the current auction state but with a new pricing policy. */
   def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): A
-
-  /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
-  def withProtocol(updated: AuctionProtocol[T]): A
 
   /** Factory method used by sub-classes to create an `A`. */
   protected def withOrderBook(updated: FourHeapOrderBook[T]): A

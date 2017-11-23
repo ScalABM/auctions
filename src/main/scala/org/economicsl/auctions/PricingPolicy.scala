@@ -25,6 +25,6 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.2.0
   * @note A `PricingPolicy` should map the state of an `Auction` to an optional price.  Currently all `Auction` state
-  *       is encapsulated by an `OrderBook`; in the future this might not be the case.
+  *       is encapsulated by an `OrderBook`.
   */
-trait PricingPolicy[+T <: Tradable, -O <: NewOrder[T], OB <: OrderBook[T, O, OB]] extends ((OB) => Option[Price])
+trait PricingPolicy[+T <: Tradable, -O <: NewOrder[T], -OB <: OrderBook[T, O, OB]] extends ((OB) => Option[Price])
