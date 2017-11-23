@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.orders.SingleUnitAskOrder
+import org.economicsl.auctions.messages.SingleUnitOffer
 import org.economicsl.auctions.singleunit.participants.{SingleUnitAuctionParticipant, SingleUnitBuyer, SingleUnitSeller}
 import org.economicsl.core.{Price, Tradable}
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -55,16 +55,16 @@ class FirstPriceSealedBidReverseAuctionSimulation
   val auction: SealedBidAuction[Service] = firstPriceSealedBidReverseAuction(auctionId, tradable)
 
   val issuedOrders: Iterable[IssuedOrder[Service]] = issueOrders(auction.protocol, auctionParticipants)
-  val askOrders: Iterable[SingleUnitAskOrder[Service]] = issuedOrders.collect {
-    case (_, (_, order: SingleUnitAskOrder[Service])) => order
+  val askOrders: Iterable[SingleUnitOffer[Service]] = issuedOrders.collect {
+    case (_, order: SingleUnitOffer[Service]) => order
   }
   val ((clearedAuction, _), contracts) = run[Service, SealedBidAuction[Service]](auction, auctionParticipants)
 
   "A first-price, sealed-bid reverse auction (FPSBRA)" should "allocate the parking space to the bidder that submits the offer with the lowest price." in {
 
-    val actualWinner: Option[Issuer] = contracts.flatMap(_.headOption.map(_.counterparty))
+    val actualWinner: Option[IssuerId] = contracts.flatMap(_.headOption.map(_.counterparty))
     val lowestPricedAskOrder = askOrders.minBy(order => order.limit)
-    val expectedWinner: Option[Issuer] = Some(lowestPricedAskOrder.issuer)
+    val expectedWinner: Option[IssuerId] = Some(lowestPricedAskOrder.senderId)
     actualWinner should be(expectedWinner)
 
   }

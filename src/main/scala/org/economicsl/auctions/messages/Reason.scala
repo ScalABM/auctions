@@ -15,29 +15,31 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.{AuctionProtocol, Order, SinglePricePoint}
-import org.economicsl.core.Tradable
+import org.economicsl.core.{Currency, Price, Tradable}
 
 
+/** Base trait for all `Reason` implementations.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
 sealed trait Reason {
 
   def message: String
 
 }
 
-final case class IssuerRequestedCancel(order: Order[Tradable])
-  extends Reason {
-  val message: String = s"Issuer ${order.issuer} requested cancel."
+
+case object OrderNotFound extends Reason {
+  val message: String = "Order not found in the order book."
 }
 
 
-final case class InvalidTickSize[+T <: Tradable](order: Order[T] with SinglePricePoint[T], protocol: AuctionProtocol[T])
-  extends Reason {
-  val message: String = s"Limit price of ${order.limit} is not a multiple of the tick size ${protocol.tickSize}."
+final case class InvalidTickSize(limit: Price, tickSize: Currency) extends Reason {
+  val message: String = s"Limit price of $limit is not a multiple of the tick size $tickSize."
 }
 
 
-final case class InvalidTradable[+T <: Tradable](order: Order[T], protocol: AuctionProtocol[T])
-  extends Reason {
-  val message: String = s"Order tradable ${order.tradable} must be the same as auction ${protocol.tradable}."
+final case class InvalidTradable[+T <: Tradable](actual: Tradable, required: Tradable) extends Reason {
+  val message: String = s"Order tradable $actual must be the same as auction $required."
 }

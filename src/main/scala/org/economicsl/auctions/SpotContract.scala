@@ -15,6 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
+import org.economicsl.auctions.messages.{SinglePricePointBid, SinglePricePointOffer, SingleUnitBid, SingleUnitOffer}
 import org.economicsl.core.{Price, Quantity, Tradable}
 import play.api.libs.json.{Json, Writes}
 
@@ -36,11 +37,33 @@ object SpotContract {
 
   implicit val writes: Writes[SpotContract] = Json.writes[SpotContract]
 
-  def fromOrders[T <: Tradable](askOrder: Order[T] with SinglePricePoint[T],
-                                bidOrder: Order[T] with SinglePricePoint[T],
-                                price: Price): SpotContract = {
-    require(askOrder.limit <= price); require(price <= bidOrder.limit)
-    SpotContract(bidOrder.issuer, askOrder.issuer, price, askOrder.quantity min bidOrder.quantity, askOrder.tradable)
+  /** Creates a `SpotContract` from a matched `NewSinglePricePointBid` and `NewSinglePricePointOffer`.
+    *
+    * @param bid
+    * @param offer
+    * @param price
+    * @tparam T
+    * @return
+    */
+  def fromSinglePricePointOrders[T <: Tradable]
+                                (bid: SinglePricePointBid[T], offer: SinglePricePointOffer[T], price: Price)
+                                : SpotContract = {
+    require(offer.limit <= price); require(price <= bid.limit)  // incentive compatibility check!
+    SpotContract(bid.senderId, offer.senderId, price, offer.quantity min bid.quantity, offer.tradable)
   }
 
+  /** Creates a `SpotContract` from a matched `NewSingleUnitBid` and `NewSingleUnitOffer`.
+    *
+    * @param bid
+    * @param offer
+    * @param price
+    * @tparam T
+    * @return
+    */
+  def fromSingleUnitOrders[T <: Tradable]
+                          (bid: SingleUnitBid[T], offer: SingleUnitOffer[T], price: Price)
+                          : SpotContract = {
+    require(offer.limit <= price); require(price <= bid.limit)  // incentive compatibility check!
+    SpotContract(bid.senderId, offer.senderId, price, offer.quantity min bid.quantity, offer.tradable)
+  }
 }

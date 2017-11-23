@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.actors.schedules
 
 import org.economicsl.auctions.actors.{AuctionParticipantActor, StackableActor}
-import org.economicsl.auctions.messages.InsertOrder
 import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
 import org.economicsl.core.Tradable
 
@@ -50,13 +49,11 @@ trait PeriodicOrderIssuingSchedule[P <: AuctionParticipant[P]]
 
   override def receive: Receive = {
     case message @ IssueOrder(protocol) =>
-      val issuedOrder = participant.issueOrder(protocol)
-      issuedOrder match {
-        case Some((updated, (orderId, order))) =>
+      val result = participant.issueOrder(protocol)
+      result match {
+        case Some((updated, newOrder)) =>
           participant = updated  // SIDE EFFECT!!
-          val senderId = participant.participantId
-          val insertOrder = InsertOrder(order, orderId, senderId, currentTimeMillis())
-          auctionActorRefsByTradable.get(protocol.tradable).foreach(auction => auction ! insertOrder)
+          auctionActorRefsByTradable.get(protocol.tradable).foreach(auction => auction ! newOrder)
         case None =>
           // if no order is issued then there should be nothing to do!
       }

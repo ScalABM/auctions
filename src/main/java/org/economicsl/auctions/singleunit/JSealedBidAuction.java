@@ -19,12 +19,12 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.messages.*;
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder;
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.immutable.Stream;
+import scala.math.Ordering;
 import scala.util.Either;
 
 import java.util.UUID;
@@ -66,13 +66,11 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
 
     /** Create a new instance of type `A` whose order book contains an additional `BidOrder`.
      *
-     * @param token
-     * @param order
+     * @param message
      * @return
      */
-    public InsertResult<JSealedBidAuction<T>> insert(UUID token, SingleUnitOrder<T> order) {
-        Tuple2<UUID, SingleUnitOrder<T>> kv = new Tuple2<>(token, order);
-        Tuple2<SealedBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(kv);
+    public InsertResult<JSealedBidAuction<T>> insert(NewSingleUnitOrder<T> message) {
+        Tuple2<SealedBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(message);
         JSealedBidAuction<T> jAuction = new JSealedBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }
@@ -94,8 +92,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(auctionId, pricingPolicy, protocol);
+    public static <T extends Tradable> JSealedBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        SealedBidAuction<T> auction = SealedBidAuction.withDiscriminatoryClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
 
@@ -106,8 +104,8 @@ class JSealedBidAuction<T extends Tradable> extends JAuction<T, JSealedBidAuctio
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(UUID auctionId, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(auctionId, pricingPolicy, protocol);
+    public static <T extends Tradable> JSealedBidAuction<T> withUniformClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+        SealedBidAuction<T> auction = SealedBidAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JSealedBidAuction<>(auction);
     }
 

@@ -15,20 +15,28 @@ limitations under the License.
 */
 package org.economicsl.auctions.messages
 
-import org.economicsl.auctions.Order  // auction should depend on messages!
-import org.economicsl.core.Tradable
-import org.economicsl.core.util.Timestamp
+import org.economicsl.core.{Price, Quantity, Tradable}
+
+import scala.collection.immutable
 
 
-/** A message sent from an `AuctionParticipant` to an `Auction` specifying a new order.
+/** Mixin trait defining an `Order` for multiple units of a `Tradable` at some limit price.
   *
-  * @param order
-  * @param orderId
-  * @param senderId
-  * @param timestamp
-  * @tparam T
   * @author davidrpugh
-  * @since 0.2.0
+  * @since 0.1.0
   */
-final case class InsertOrder[+T <: Tradable](order: Order[T], orderId: OrderId, senderId: SenderId, timestamp: Timestamp)
-  extends Message
+trait SinglePricePoint[+T <: Tradable] extends PriceQuantitySchedule[T] {
+
+  /** Limit price (per unit of the `Tradable`) for the Order.
+    *
+    * The limit price imposes an upper (lower) bound on a bid (ask) order.
+    */
+  def limit: Price
+
+  /** Desired number of units of the `Tradable`. */
+  def quantity: Quantity
+
+  val schedule: immutable.Map[Price, Quantity] = immutable.Map(limit -> quantity)
+
+}
+

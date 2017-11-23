@@ -13,20 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package org.economicsl.auctions
+package org.economicsl.auctions.messages
 
 import org.economicsl.core.Tradable
 
 
-/** Base trait for all orders.
+/** Base trait  message sent from an `AuctionParticipant` to an `Auction` specifying a new order.
   *
-  * @tparam T each `Order` must be issued for a particular type of `Tradable`.
+  * @tparam T
   * @author davidrpugh
   * @since 0.2.0
   */
-trait Order[+T <: Tradable] extends Contract {
+trait NewOrder[+T <: Tradable] extends Message {
   this: PriceQuantitySchedule[T] =>
 
-  def tradable: T
+  /* Unique identifier for an order assigned by an `AuctionParticipant`. */
+  def orderId: OrderId
 
 }
+
+
+
+
+

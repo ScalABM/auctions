@@ -17,7 +17,7 @@ package org.economicsl.auctions.actors.schedules
 
 import akka.actor.ReceiveTimeout
 import org.economicsl.auctions.actors.{AuctionActor, AuctionDataPubSub, StackableActor}
-import org.economicsl.auctions.messages.{CancelOrder, InsertOrder, AuctionDataRequest, AuctionDataResponse}
+import org.economicsl.auctions.messages.{CancelOrder, NewOrder, AuctionDataRequest, AuctionDataResponse}
 import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.core.Tradable
 
@@ -48,7 +48,7 @@ trait BidderActivityAuctionDataPublishingSchedule[T <: Tradable]
   this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
 
   override def receive: Receive = {
-    case message: InsertOrder[T] =>
+    case message: NewOrder[T] =>
       publishAuctionData()
       super.receive(message)
     case message: CancelOrder =>

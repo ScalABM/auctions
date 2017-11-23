@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.singleunit.orders.SingleUnitBidOrder
+import org.economicsl.auctions.messages.SingleUnitBid
 import org.economicsl.auctions.singleunit.participants.{SingleUnitAuctionParticipant, SingleUnitBuyer, SingleUnitSeller}
 import org.economicsl.core.{Price, Tradable}
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -56,16 +56,16 @@ class FirstPriceSealedBidAuctionSimulation
 
 
   val issuedOrders: Iterable[IssuedOrder[ParkingSpace]] = issueOrders(auction.protocol, auctionParticipants)
-  val bidOrders: Iterable[SingleUnitBidOrder[ParkingSpace]] = issuedOrders.collect {
-    case (_, (_, order: SingleUnitBidOrder[ParkingSpace])) => order
+  val bidOrders: Iterable[SingleUnitBid[ParkingSpace]] = issuedOrders.collect {
+    case (_, order: SingleUnitBid[ParkingSpace]) => order
   }
   val ((clearedAuction, _), contracts) = run[ParkingSpace, SealedBidAuction[ParkingSpace]](auction, auctionParticipants)
 
   "A first-price, sealed-bid auction (FPSBA)" should "allocate the parking space to the bidder that submits the bid with the highest price." in {
 
-    val actualWinner: Option[Issuer] = contracts.flatMap(_.headOption.map(_.issuer))
+    val actualWinner: Option[IssuerId] = contracts.flatMap(_.headOption.map(_.issuer))
     val highestPricedBidOrder = bidOrders.maxBy(bidOrder => bidOrder.limit)
-    val expectedWinner: Option[Issuer] = Some(highestPricedBidOrder.issuer)
+    val expectedWinner: Option[IssuerId] = Some(highestPricedBidOrder.senderId)
     actualWinner should be(expectedWinner)
 
   }

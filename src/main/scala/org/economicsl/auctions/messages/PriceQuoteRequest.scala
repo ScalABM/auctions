@@ -17,7 +17,7 @@ package org.economicsl.auctions.messages
 
 import java.util.UUID
 
-import org.economicsl.auctions.Issuer
+import org.economicsl.auctions.IssuerId
 import org.economicsl.auctions.singleunit.OpenBidAuction
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.Timestamp
@@ -36,7 +36,7 @@ trait PriceQuoteRequest[T <: Tradable] extends AuctionDataRequest[T]
   * @author davidrpugh
   * @since 0.1.0
   */
-final case class AskPriceQuoteRequest[T <: Tradable](senderId: Issuer, mDReqId: UUID, timestamp: Timestamp)
+final case class AskPriceQuoteRequest[T <: Tradable](senderId: IssuerId, mDReqId: UUID, timestamp: Timestamp)
   extends PriceQuoteRequest[T] {
 
   val query: (OpenBidAuction[T]) => AskPriceQuote[T] = {
@@ -51,7 +51,7 @@ final case class AskPriceQuoteRequest[T <: Tradable](senderId: Issuer, mDReqId: 
   * @author davidrpugh
   * @since 0.1.0
   */
-final case class BidPriceQuoteRequest[T <: Tradable](senderId: Issuer, mDReqId: UUID, timestamp: Timestamp)
+final case class BidPriceQuoteRequest[T <: Tradable](senderId: IssuerId, mDReqId: UUID, timestamp: Timestamp)
   extends PriceQuoteRequest[T] {
 
   val query: (OpenBidAuction[T]) => BidPriceQuote[T] = {
@@ -66,7 +66,7 @@ final case class BidPriceQuoteRequest[T <: Tradable](senderId: Issuer, mDReqId: 
   * @author davidrpugh
   * @since 0.2.0
   */
-final case class MidPointPriceQuoteRequest[T <: Tradable](senderId: Issuer, mDReqId: UUID, timestamp: Timestamp)
+final case class MidPointPriceQuoteRequest[T <: Tradable](senderId: IssuerId, mDReqId: UUID, timestamp: Timestamp)
   extends PriceQuoteRequest[T] {
 
   val query: (OpenBidAuction[T]) => MidPointPriceQuote[T] = {

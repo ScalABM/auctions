@@ -15,8 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit.participants
 
-import org.economicsl.auctions.messages.OrderId
-import org.economicsl.auctions.singleunit.orders.SingleUnitOrder
+import org.economicsl.auctions.messages.NewSingleUnitOrder
 import org.economicsl.auctions.{AuctionParticipant, AuctionProtocol}
 import org.economicsl.core.Tradable
 
@@ -35,6 +34,6 @@ trait SingleUnitAuctionParticipant
     * @tparam T
     * @return
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitAuctionParticipant, (OrderId, SingleUnitOrder[T]))]
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitAuctionParticipant, NewSingleUnitOrder[T])]
 
 }
