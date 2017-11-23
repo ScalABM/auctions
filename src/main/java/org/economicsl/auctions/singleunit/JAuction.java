@@ -4,7 +4,7 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.messages.CancelOrder;
 import org.economicsl.auctions.messages.NewSingleUnitOrder;
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy;
 import org.economicsl.core.Tradable;
 
 
@@ -32,7 +32,7 @@ public abstract class JAuction<T extends Tradable, A extends JAuction<T, A>> {
     public abstract InsertResult<A> insert(NewSingleUnitOrder<T> message);
 
     /** Returns an auction of type `A` with a particular pricing policy. */
-    public abstract A withPricingPolicy(PricingPolicy<T> updated);
+    public abstract A withPricingPolicy(SingleUnitPricingPolicy<T> updated);
 
     /** Returns an auction of type `A` with a particular protocol. */
     public abstract A withProtocol(AuctionProtocol<T> protocol);

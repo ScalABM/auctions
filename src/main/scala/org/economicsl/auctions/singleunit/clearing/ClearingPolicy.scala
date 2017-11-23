@@ -1,7 +1,7 @@
 package org.economicsl.auctions.singleunit.clearing
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
 import org.economicsl.auctions.singleunit.Auction
 import org.economicsl.auctions.SpotContract
 import org.economicsl.core.{Price, Tradable}
@@ -32,7 +32,7 @@ trait DiscriminatoryClearingPolicy[T <: Tradable, A <: Auction[T, A]]
   def clear: (A, Option[Stream[SpotContract]]) = {
 
     @annotation.tailrec
-    def loop(pricingPolicy: PricingPolicy[T])(contracts: Stream[SpotContract], ob: FourHeapOrderBook[T]): (A, Option[Stream[SpotContract]]) = {
+    def loop(pricingPolicy: SingleUnitPricingPolicy[T])(contracts: Stream[SpotContract], ob: FourHeapOrderBook[T]): (A, Option[Stream[SpotContract]]) = {
       val currentPrice = pricingPolicy(ob)
       val (residualOrderBook, topMatch) = ob.splitAtTopMatch
       topMatch match {

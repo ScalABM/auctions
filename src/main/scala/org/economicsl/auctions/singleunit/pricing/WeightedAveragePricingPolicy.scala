@@ -26,7 +26,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class WeightedAveragePricingPolicy[T <: Tradable](weight: Double) extends PricingPolicy[T] {
+class WeightedAveragePricingPolicy[T <: Tradable](weight: Double) extends SingleUnitPricingPolicy[T] {
   require(0 <= weight && weight <= 1.0)  // individual rationality requirement!
 
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = {
