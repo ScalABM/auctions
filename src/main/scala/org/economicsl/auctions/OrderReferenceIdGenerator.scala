@@ -15,22 +15,17 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-
 import org.economicsl.auctions.messages.OrderReferenceId
-import org.economicsl.auctions.singleunit.Auction
-import org.economicsl.core.Tradable
 import org.economicsl.core.util.UUIDGenerator
 
 
 /** Mixin trait providing methods for generating OrderRId` instances.
   *
-  * @tparam A
   * @author davidrpugh
   * @since 0.2.0
   */
-trait OrderReferenceIdGenerator[T <: Tradable, A <: Auction[T, A]]
-    extends UUIDGenerator {
-  this: A =>
+trait OrderReferenceIdGenerator
+  extends UUIDGenerator {
 
   protected def randomOrderReferenceId(): OrderReferenceId = {
     randomUUID()

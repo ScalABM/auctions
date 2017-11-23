@@ -33,7 +33,7 @@ import org.economicsl.core.Tradable
   *       each auction implementation.
   */
 trait Auction[T <: Tradable, A <: Auction[T, A]]
-    extends OrderReferenceIdGenerator[T, A]
+    extends OrderReferenceIdGenerator
     with SenderIdGenerator
     with Timestamper {
   this: A =>
