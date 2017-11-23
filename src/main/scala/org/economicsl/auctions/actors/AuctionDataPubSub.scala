@@ -19,7 +19,7 @@ import java.util.UUID
 
 import akka.actor.{ActorRef, Terminated}
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.OpenBidAuction
+import org.economicsl.auctions.singleunit.OpenBidSingleUnitAuction
 import org.economicsl.core.Tradable
 
 
@@ -35,7 +35,7 @@ import org.economicsl.core.Tradable
   */
 trait AuctionDataPubSub[T <: Tradable]
     extends StackableActor {
-  this: AuctionActor[T, OpenBidAuction[T]] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] =>
 
   override def receive: Receive = {
     case message: AuctionDataSubscribe[T] =>

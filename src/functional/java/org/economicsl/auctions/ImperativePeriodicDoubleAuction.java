@@ -2,7 +2,7 @@ package org.economicsl.auctions;
 
 
 import org.economicsl.auctions.messages.*;
-import org.economicsl.auctions.singleunit.OpenBidAuction;
+import org.economicsl.auctions.singleunit.OpenBidSingleUnitAuction;
 import org.economicsl.auctions.singleunit.pricing.MidPointQuotePricingPolicy;
 
 import scala.Option;
@@ -30,7 +30,7 @@ public class ImperativePeriodicDoubleAuction {
         Ordering<SingleUnitOffer<TestStock>> offerOrdering = SingleUnitOffer.priceOrdering();
         MidPointQuotePricingPolicy<TestStock> midpointQuotePricingPolicy = new MidPointQuotePricingPolicy<>();
         AuctionProtocol<TestStock> protocol = AuctionProtocol$.MODULE$.apply(googleStock);  // todo create JAuctionProtocol?
-        OpenBidAuction<TestStock> doubleAuction = OpenBidAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, midpointQuotePricingPolicy, protocol);
+        OpenBidSingleUnitAuction<TestStock> doubleAuction = OpenBidSingleUnitAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, midpointQuotePricingPolicy, protocol);
 
         // generate some random order flow...
         int numberOrders = 10000;
@@ -40,13 +40,13 @@ public class ImperativePeriodicDoubleAuction {
         List<Either<NewOrderRejected, NewOrderAccepted>> insertResults = new ArrayList<>();
 
         for (Tuple2<UUID, NewSingleUnitOrder<TestStock>> order:JavaConverters.seqAsJavaList(orders)) {
-            Tuple2<OpenBidAuction<TestStock>, Either<NewOrderRejected, NewOrderAccepted>> insertResult = doubleAuction.insert(order._2);
+            Tuple2<OpenBidSingleUnitAuction<TestStock>, Either<NewOrderRejected, NewOrderAccepted>> insertResult = doubleAuction.insert(order._2);
             doubleAuction = insertResult._1();
             insertResults.add(insertResult._2());
         }
 
         // clear the auction...
-        Tuple2<OpenBidAuction<TestStock>, Option<Stream<SpotContract>>> results = doubleAuction.clear();
+        Tuple2<OpenBidSingleUnitAuction<TestStock>, Option<Stream<SpotContract>>> results = doubleAuction.clear();
         List<SpotContract> fills = JavaConverters.seqAsJavaList(results._2().get());
 
         // print the results to console...

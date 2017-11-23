@@ -18,7 +18,7 @@ package org.economicsl.auctions.actors
 import akka.actor.{ActorRef, Props, Terminated}
 import org.economicsl.auctions.actors.schedules.{BidderActivityClearingSchedule, ClearingSchedule, PeriodicClearingSchedule}
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.{Auction, SealedBidAuction}
+import org.economicsl.auctions.singleunit.{SingleUnitAuction, SealedBidSingleUnitAuction}
 import org.economicsl.core.Tradable
 import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 
@@ -37,7 +37,7 @@ import scala.concurrent.duration.FiniteDuration
   * @tparam T
   * @tparam A
   */
-trait AuctionActor[T <: Tradable, A <: Auction[T, A]]
+trait AuctionActor[T <: Tradable, A <: SingleUnitAuction[T, A]]
     extends StackableActor
     with Timestamper
     with UUIDGenerator {
@@ -128,7 +128,7 @@ object AuctionActor {
     * @return a `Props` instance used to create an instance of an `AuctionActor with BidderActivityClearingSchedule`.
     */
   def withBidderActivityClearingSchedule[T <: Tradable]
-                                        (auction: SealedBidAuction[T], settlementService: ActorRef)
+                                        (auction: SealedBidSingleUnitAuction[T], settlementService: ActorRef)
                                         : Props = {
     Props(new WithBidderActivityClearingSchedule[T](auction, Some(settlementService)))
   }
@@ -145,7 +145,7 @@ object AuctionActor {
     * @return a `Props` instance used to create an instance of an `AuctionActor with PeriodicClearingSchedule`.
     */
   def withPeriodicClearingSchedule[T <: Tradable]
-                                  (auction: SealedBidAuction[T],
+                                  (auction: SealedBidSingleUnitAuction[T],
                                    executionContext: ExecutionContext,
                                    initialDelay: FiniteDuration,
                                    interval: FiniteDuration,
@@ -164,10 +164,10 @@ object AuctionActor {
     * @tparam T
     */
   private class WithBidderActivityClearingSchedule[T <: Tradable](
-    protected var auction: SealedBidAuction[T],
-    protected var settlementService: Option[ActorRef])
-      extends AuctionActor[T, SealedBidAuction[T]]
-      with BidderActivityClearingSchedule[T, SealedBidAuction[T]]
+                                                                   protected var auction: SealedBidSingleUnitAuction[T],
+                                                                   protected var settlementService: Option[ActorRef])
+      extends AuctionActor[T, SealedBidSingleUnitAuction[T]]
+      with BidderActivityClearingSchedule[T, SealedBidSingleUnitAuction[T]]
 
 
   /** Default implementation of an `AuctionActor with PeriodicClearingSchedule`.
@@ -180,12 +180,12 @@ object AuctionActor {
     * @tparam T
     */
   private class WithPeriodicClearingSchedule[T <: Tradable](
-    protected var auction: SealedBidAuction[T],
-    val executionContext: ExecutionContext,
-    val initialDelay: FiniteDuration,
-    val interval: FiniteDuration,
-    protected var settlementService: Option[ActorRef])
-      extends AuctionActor[T, SealedBidAuction[T]]
-      with PeriodicClearingSchedule[T, SealedBidAuction[T]]
+                                                             protected var auction: SealedBidSingleUnitAuction[T],
+                                                             val executionContext: ExecutionContext,
+                                                             val initialDelay: FiniteDuration,
+                                                             val interval: FiniteDuration,
+                                                             protected var settlementService: Option[ActorRef])
+      extends AuctionActor[T, SealedBidSingleUnitAuction[T]]
+      with PeriodicClearingSchedule[T, SealedBidSingleUnitAuction[T]]
 
 }

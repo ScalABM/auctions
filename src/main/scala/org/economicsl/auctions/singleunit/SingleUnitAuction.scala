@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.{AuctionId, AuctionProtocol, OrderReferenceIdGenerator, SpotContract}
+import org.economicsl.auctions._
 import org.economicsl.auctions.messages._
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
@@ -26,17 +26,15 @@ import org.economicsl.core.Tradable
 /** Base trait for all auction implementations.
   *
   * @tparam T
-  * @tparam A
   * @note Note the use of F-bounded polymorphism over Type classes. We developed an alternative implementation using the
   *       Type class pattern that was quite elegant, however Type classes can not be used directly from Java. In order
   *       to use the Type class implementation from Java, we would need to develop (and maintain!) separate wrappers for
   *       each auction implementation.
   */
-trait Auction[T <: Tradable, A <: Auction[T, A]]
-    extends OrderReferenceIdGenerator[T, A]
+trait SingleUnitAuction[T <: Tradable]
+    extends GenSingleUnitAuction[T]
     with SenderIdGenerator
     with Timestamper {
-  this: A =>
 
   /** Unique identifier for an `Auction`. */
   def auctionId: AuctionId

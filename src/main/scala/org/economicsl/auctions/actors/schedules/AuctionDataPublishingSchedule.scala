@@ -18,7 +18,7 @@ package org.economicsl.auctions.actors.schedules
 import akka.actor.ReceiveTimeout
 import org.economicsl.auctions.actors.{AuctionActor, AuctionDataPubSub, StackableActor}
 import org.economicsl.auctions.messages.{CancelOrder, NewOrder, AuctionDataRequest, AuctionDataResponse}
-import org.economicsl.auctions.singleunit.OpenBidAuction
+import org.economicsl.auctions.singleunit.OpenBidSingleUnitAuction
 import org.economicsl.core.Tradable
 
 import scala.concurrent.ExecutionContext
@@ -33,7 +33,7 @@ import scala.concurrent.duration.FiniteDuration
   */
 sealed trait AuctionDataPublishingSchedule[T <: Tradable]
     extends StackableActor {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 }
 
 
@@ -45,7 +45,7 @@ sealed trait AuctionDataPublishingSchedule[T <: Tradable]
   */
 trait BidderActivityAuctionDataPublishingSchedule[T <: Tradable]
     extends AuctionDataPublishingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 
   override def receive: Receive = {
     case message: NewOrder[T] =>
@@ -69,7 +69,7 @@ trait BidderActivityAuctionDataPublishingSchedule[T <: Tradable]
   */
 trait BidderInActivityAuctionDataPublishingSchedule[T <: Tradable]
     extends AuctionDataPublishingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 
   def timeout: FiniteDuration
 
@@ -98,7 +98,7 @@ trait BidderInActivityAuctionDataPublishingSchedule[T <: Tradable]
   */
 trait OnDemandAuctionDataPublishingSchedule[T <: Tradable]
     extends AuctionDataPublishingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 
   override def receive: Receive = {
     case message: AuctionDataRequest[T] =>
@@ -120,7 +120,7 @@ trait OnDemandAuctionDataPublishingSchedule[T <: Tradable]
   */
 trait PeriodicAuctionDataPublishingSchedule[T <: Tradable]
     extends AuctionDataPublishingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 
   def executionContext: ExecutionContext
 
@@ -152,7 +152,7 @@ trait PeriodicAuctionDataPublishingSchedule[T <: Tradable]
   */
 trait RandomAuctionDataPublishingSchedule[T <: Tradable]
     extends PeriodicAuctionDataPublishingSchedule[T] {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 }
 
 
@@ -165,5 +165,5 @@ trait RandomAuctionDataPublishingSchedule[T <: Tradable]
 trait PoissonAuctionDataPublishingSchedule[T <: Tradable]
     extends RandomAuctionDataPublishingSchedule[T]
     with PoissonProcess {
-  this: AuctionActor[T, OpenBidAuction[T]] with AuctionDataPubSub[T] =>
+  this: AuctionActor[T, OpenBidSingleUnitAuction[T]] with AuctionDataPubSub[T] =>
 }

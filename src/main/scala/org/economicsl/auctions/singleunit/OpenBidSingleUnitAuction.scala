@@ -15,67 +15,74 @@ limitations under the License.
 */
 package org.economicsl.auctions.singleunit
 
-import org.economicsl.auctions.messages.{SingleUnitBid, SingleUnitOffer}
 import org.economicsl.auctions.{AuctionId, AuctionProtocol}
+import org.economicsl.auctions.messages.{AuctionData, AuctionDataRequest, SingleUnitBid, SingleUnitOffer}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
 import org.economicsl.core.Tradable
 
 
-/** Base trait for all "sealed-bid" auction mechanisms.
+/** Base trait for all "Open-bid" auction implementations.
   *
-  * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `SealedBidAuction` must be for the same
+  * @tparam T all `AskOrder` and `BidOrder` instances submitted to the `OpenBidAuction` must be for the same
   *           type of `Tradable`.
-  * @note `SealedBidAuction` is an abstract class rather than a trait in order to facilitate Java interop. Specifically
-  *      abstract class implementation allows Java methods to access the methods defined on the `SealedBidAuction`
+  * @note `OpenBidAuction` is an abstract class rather than a trait in order to facilitate Java interop. Specifically
+  *      abstract class implementation allows Java methods to access the methods defined on the `OpenBidAuction`
   *      companion object from a static context.
   * @author davidrpugh
   * @since 0.1.0
   */
-abstract class SealedBidAuction[T <: Tradable]
-    extends Auction[T, SealedBidAuction[T]] {
-  this: SealedBidAuction[T] =>
+abstract class OpenBidSingleUnitAuction[T <: Tradable]
+    extends SingleUnitAuction[T, OpenBidSingleUnitAuction[T]] {
+  this: OpenBidSingleUnitAuction[T] =>
+
+  def receive(message: AuctionDataRequest[T]): AuctionData[T] = {
+    message.query(this)
+  }
+
+  val orderBook: FourHeapOrderBook[T]
+
 }
 
 
-object SealedBidAuction {
+object OpenBidSingleUnitAuction {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
                                       (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: SingleUnitPricingPolicy[T], protocol: AuctionProtocol[T])
-                                      : SealedBidAuction[T] = {
+                                      : OpenBidSingleUnitAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
   def withUniformClearingPolicy[T <: Tradable]
                                (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: SingleUnitPricingPolicy[T], protocol: AuctionProtocol[T])
-                               : SealedBidAuction[T] = {
+                               : OpenBidSingleUnitAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
 
   private class WithDiscriminatoryClearingPolicy[T <: Tradable](
-                                                                 val auctionId: AuctionId,
-                                                                 protected val orderBook: FourHeapOrderBook[T],
-                                                                 protected val pricingPolicy: SingleUnitPricingPolicy[T],
-                                                                 val protocol: AuctionProtocol[T])
-      extends SealedBidAuction[T]
-      with DiscriminatoryClearingPolicy[T, SealedBidAuction[T]] {
+    val auctionId: AuctionId,
+    val orderBook: FourHeapOrderBook[T],
+    protected val pricingPolicy: SingleUnitPricingPolicy[T],
+    val protocol: AuctionProtocol[T])
+      extends OpenBidSingleUnitAuction[T]
+      with DiscriminatoryClearingPolicy[T, OpenBidSingleUnitAuction[T]] {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
-    def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): SealedBidAuction[T] = {
+    def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): OpenBidSingleUnitAuction[T] = {
       new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, updated, protocol)
     }
 
     /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
-    def withProtocol(updated: AuctionProtocol[T]): SealedBidAuction[T] = {
+    def withProtocol(updated: AuctionProtocol[T]): OpenBidSingleUnitAuction[T] = {
       new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, updated)
     }
 
     /** Factory method used by sub-classes to create an `Auction` of type `A`. */
-    protected def withOrderBook(updated: FourHeapOrderBook[T]): SealedBidAuction[T] = {
+    protected def withOrderBook(updated: FourHeapOrderBook[T]): OpenBidSingleUnitAuction[T] = {
       new WithDiscriminatoryClearingPolicy[T](auctionId, updated, pricingPolicy, protocol)
     }
 
@@ -83,25 +90,25 @@ object SealedBidAuction {
 
 
   private class WithUniformClearingPolicy[T <: Tradable](
-                                                          val auctionId: AuctionId,
-                                                          protected val orderBook: FourHeapOrderBook[T],
-                                                          protected val pricingPolicy: SingleUnitPricingPolicy[T],
-                                                          val protocol: AuctionProtocol[T])
-      extends SealedBidAuction[T]
-      with UniformClearingPolicy[T, SealedBidAuction[T]] {
+    val auctionId: AuctionId,
+    val orderBook: FourHeapOrderBook[T],
+    protected val pricingPolicy: SingleUnitPricingPolicy[T],
+    val protocol: AuctionProtocol[T])
+      extends OpenBidSingleUnitAuction[T]
+      with UniformClearingPolicy[T, OpenBidSingleUnitAuction[T]] {
 
     /** Returns an auction of type `A` with a particular pricing policy. */
-    def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): SealedBidAuction[T] = {
+    def withPricingPolicy(updated: SingleUnitPricingPolicy[T]): OpenBidSingleUnitAuction[T] = {
       new WithUniformClearingPolicy[T](auctionId, orderBook, updated, protocol)
     }
 
     /** Returns an auction of type `A` that encapsulates the current auction state but with a new protocol. */
-    def withProtocol(updated: AuctionProtocol[T]): SealedBidAuction[T] = {
+    def withProtocol(updated: AuctionProtocol[T]): OpenBidSingleUnitAuction[T] = {
       new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, updated)
     }
 
     /** Factory method used by sub-classes to create an `Auction` of type `A`. */
-    protected def withOrderBook(updated: FourHeapOrderBook[T]): SealedBidAuction[T] = {
+    protected def withOrderBook(updated: FourHeapOrderBook[T]): OpenBidSingleUnitAuction[T] = {
       new WithUniformClearingPolicy[T](auctionId, updated, pricingPolicy, protocol)
     }
 

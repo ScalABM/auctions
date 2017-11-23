@@ -52,14 +52,14 @@ class FirstPriceSealedBidAuctionSimulation
 
   // use factory method to create instance of first-priced sealed bid auction...
   val auctionId: AuctionId = UUID.randomUUID()
-  val auction: SealedBidAuction[ParkingSpace] = firstPriceSealedBidAuction(auctionId, tradable)
+  val auction: SealedBidSingleUnitAuction[ParkingSpace] = firstPriceSealedBidAuction(auctionId, tradable)
 
 
   val issuedOrders: Iterable[IssuedOrder[ParkingSpace]] = issueOrders(auction.protocol, auctionParticipants)
   val bidOrders: Iterable[SingleUnitBid[ParkingSpace]] = issuedOrders.collect {
     case (_, order: SingleUnitBid[ParkingSpace]) => order
   }
-  val ((clearedAuction, _), contracts) = run[ParkingSpace, SealedBidAuction[ParkingSpace]](auction, auctionParticipants)
+  val ((clearedAuction, _), contracts) = run[ParkingSpace, SealedBidSingleUnitAuction[ParkingSpace]](auction, auctionParticipants)
 
   "A first-price, sealed-bid auction (FPSBA)" should "allocate the parking space to the bidder that submits the bid with the highest price." in {
 

@@ -36,9 +36,9 @@ import java.util.UUID;
  */
 class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>> {
 
-    private OpenBidAuction<T> auction;
+    private OpenBidSingleUnitAuction<T> auction;
 
-    private JOpenBidAuction(OpenBidAuction<T> auction) {
+    private JOpenBidAuction(OpenBidSingleUnitAuction<T> auction) {
         this.auction = auction;
     }
 
@@ -49,7 +49,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public CancelResult<JOpenBidAuction<T>> cancel(CancelOrder message) {
-        Tuple2<OpenBidAuction<T>, Either<CancelOrderRejected, CancelOrderAccepted> > result = auction.cancel(message);
+        Tuple2<OpenBidSingleUnitAuction<T>, Either<CancelOrderRejected, CancelOrderAccepted> > result = auction.cancel(message);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
         return new CancelResult<>(jAuction, result._2);
     }
@@ -59,7 +59,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return an instance of `ClearResult` class.
      */
     public ClearResult<JOpenBidAuction<T>> clear() {
-        Tuple2<OpenBidAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
+        Tuple2<OpenBidSingleUnitAuction<T>, Option<Stream<SpotContract>>> result = auction.clear();
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1);
         return new ClearResult<>(jAuction, result._2);
     }
@@ -70,7 +70,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public InsertResult<JOpenBidAuction<T>> insert(NewSingleUnitOrder<T> message) {
-        Tuple2<OpenBidAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(message);
+        Tuple2<OpenBidSingleUnitAuction<T>, Either<NewOrderRejected, NewOrderAccepted>> result = auction.insert(message);
         JOpenBidAuction<T> jAuction = new JOpenBidAuction<>(result._1());
         return new InsertResult<>(jAuction, result._2());
     }
@@ -80,12 +80,12 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
     }
 
     public JOpenBidAuction<T> withPricingPolicy(SingleUnitPricingPolicy<T> updated) {
-        OpenBidAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
+        OpenBidSingleUnitAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
         return new JOpenBidAuction<>(withUpdatedPricingPolicy);
     }
 
     public JOpenBidAuction<T> withProtocol(AuctionProtocol<T> updated) {
-        OpenBidAuction<T> withUpdatedTickSize = auction.withProtocol(updated);
+        OpenBidSingleUnitAuction<T> withUpdatedTickSize = auction.withProtocol(updated);
         return new JOpenBidAuction<>(withUpdatedTickSize);
     }
 
@@ -97,7 +97,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, SingleUnitPricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
+        OpenBidSingleUnitAuction<T> auction = OpenBidSingleUnitAuction.withDiscriminatoryClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 
@@ -109,7 +109,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @return
      */
     public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, SingleUnitPricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
-        OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
+        OpenBidSingleUnitAuction<T> auction = OpenBidSingleUnitAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
 

@@ -28,7 +28,7 @@ trait SingleUnitAuctionSimulation {
   type IssuedOrder[+T <: Tradable] = (SingleUnitAuctionParticipant, NewSingleUnitOrder[T])
 
   /** Type representing the state of an auction simulation. */
-  type State[T <: Tradable, A <: Auction[T, A]] = (A, Iterable[SingleUnitAuctionParticipant])
+  type State[T <: Tradable, A <: SingleUnitAuction[T, A]] = (A, Iterable[SingleUnitAuctionParticipant])
 
   /** Issues orders for some auction.
     *
@@ -51,7 +51,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam A
     * @return
     */
-  def insertOrders[T <: Tradable, A <: Auction[T, A]]
+  def insertOrders[T <: Tradable, A <: SingleUnitAuction[T, A]]
                   (auction: A, issuedOrders: Iterable[(SingleUnitAuctionParticipant, NewSingleUnitOrder[T])])
                   : (A, Iterable[SingleUnitAuctionParticipant]) = {
     issuedOrders.aggregate((auction, Seq.empty[SingleUnitAuctionParticipant]))(update[T, A], combine[T, A])
@@ -65,7 +65,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam A
     * @return
     */
-  def run[T <: Tradable, A <: Auction[T, A]]
+  def run[T <: Tradable, A <: SingleUnitAuction[T, A]]
          (auction: A, participants: Iterable[SingleUnitAuctionParticipant])
          : ((A, Iterable[SingleUnitAuctionParticipant]), Option[Iterable[SpotContract]]) = {
     val issuedOrders = issueOrders(auction.protocol, participants)
@@ -75,7 +75,7 @@ trait SingleUnitAuctionSimulation {
   }
 
   /** Draft type signature for a function that settles contracts. */
-  def settle[T <: Tradable, A <: Auction[T, A]]
+  def settle[T <: Tradable, A <: SingleUnitAuction[T, A]]
             (state: State[T, A], contracts: Iterable[Contract])
             : State[T, A] = {
     ???
@@ -88,12 +88,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def firstPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidAuction[T] = {
+  def firstPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = AskQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    OpenBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    OpenBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
   /** Creates a first-price open bid auction for a particular `Tradable`.
@@ -102,19 +102,19 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def firstPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidAuction[T] = {
+  def firstPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidSingleUnitAuction[T] = {
     firstPriceOpenBidAuction(auctionId, 1L, tradable)
   }
 
-  def firstPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidAuction[T] = {
+  def firstPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = BidQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    OpenBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    OpenBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
-  def firstPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidAuction[T] = {
+  def firstPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidSingleUnitAuction[T] = {
     firstPriceOpenBidReverseAuction(auctionId, 1L, tradable)
   }
 
@@ -125,12 +125,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def firstPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidAuction[T] = {
+  def firstPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = AskQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    SealedBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    SealedBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
   /** Creates a first-price sealed bid auction for a particular `Tradable`.
@@ -139,19 +139,19 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def firstPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidAuction[T] = {
+  def firstPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidSingleUnitAuction[T] = {
     firstPriceSealedBidAuction(auctionId, 1L, tradable)
   }
 
-  def firstPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidAuction[T] = {
+  def firstPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = BidQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    SealedBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    SealedBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
-  def firstPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidAuction[T] = {
+  def firstPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidSingleUnitAuction[T] = {
     firstPriceSealedBidReverseAuction(auctionId, 1L, tradable)
   }
 
@@ -162,12 +162,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidAuction[T] = {
+  def secondPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = BidQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    OpenBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    OpenBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
   /** Creates a second-price open bid auction for a particular `Tradable`.
@@ -176,7 +176,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidAuction[T] = {
+  def secondPriceOpenBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidSingleUnitAuction[T] = {
     secondPriceOpenBidAuction(auctionId, 1L, tradable)
   }
 
@@ -187,12 +187,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidAuction[T] = {
+  def secondPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): OpenBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = AskQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    OpenBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    OpenBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
   /** Creates a second-price open bid reverse auction for a particular `Tradable`.
@@ -201,7 +201,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidAuction[T] = {
+  def secondPriceOpenBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): OpenBidSingleUnitAuction[T] = {
     secondPriceOpenBidReverseAuction(auctionId, 1L, tradable)
   }
 
@@ -212,12 +212,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidAuction[T] = {
+  def secondPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = BidQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    SealedBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    SealedBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
   /** Creates a second-price sealed bid auction for a particular `Tradable`.
@@ -226,7 +226,7 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidAuction[T] = {
+  def secondPriceSealedBidAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidSingleUnitAuction[T] = {
     secondPriceSealedBidAuction(auctionId, 1L, tradable)
   }
 
@@ -237,12 +237,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidAuction[T] = {
+  def secondPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tickSize: Currency, tradable: T): SealedBidSingleUnitAuction[T] = {
     val bidOrdering = SingleUnitBid.priceOrdering[T]
     val offerOrdering = SingleUnitOffer.priceOrdering[T]
     val pricingPolicy = AskQuotePricingPolicy[T]()
     val protocol = AuctionProtocol[T](tickSize, tradable)
-    SealedBidAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
+    SealedBidSingleUnitAuction.withUniformClearingPolicy[T](auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol)
   }
 
   /** Creates a second-price sealed bid reverse auction for a particular `Tradable`.
@@ -251,12 +251,12 @@ trait SingleUnitAuctionSimulation {
     * @tparam T
     * @return
     */
-  def secondPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidAuction[T] = {
+  def secondPriceSealedBidReverseAuction[T <: Tradable](auctionId: AuctionId, tradable: T): SealedBidSingleUnitAuction[T] = {
     secondPriceSealedBidReverseAuction(auctionId, 1L, tradable)
   }
 
   /** Function that updates the state of auction given an order issued by some auction participant. */
-  private[this] def update[T <: Tradable, A <: Auction[T, A]]
+  private[this] def update[T <: Tradable, A <: SingleUnitAuction[T, A]]
                           (state: (A, Seq[SingleUnitAuctionParticipant]), issuedOrder: IssuedOrder[T])
                           : (A, Seq[SingleUnitAuctionParticipant]) = {
     val (auction, participants) = state
@@ -268,7 +268,7 @@ trait SingleUnitAuctionSimulation {
 
 
   /** Function that combines two states into a single state. */
-  private[this] def combine[T <: Tradable, A <: Auction[T, A]]
+  private[this] def combine[T <: Tradable, A <: SingleUnitAuction[T, A]]
                         (state1:(A, Seq[SingleUnitAuctionParticipant]), state2: (A, Seq[SingleUnitAuctionParticipant]))
                         : (A, Seq[SingleUnitAuctionParticipant]) = {
     val (auction, participants) = state1

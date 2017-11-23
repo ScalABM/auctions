@@ -17,7 +17,7 @@ package org.economicsl.auctions.messages
 
 import java.util.UUID
 
-import org.economicsl.auctions.singleunit.OpenBidAuction
+import org.economicsl.auctions.singleunit.OpenBidSingleUnitAuction
 import org.economicsl.core.Tradable
 
 
@@ -33,7 +33,7 @@ trait AuctionDataRequest[T <: Tradable]
   def mDReqId: UUID
 
   /** Function that returns some `MarketData` as a function of `Auction` state. */
-  def query: OpenBidAuction[T] => AuctionData[T]
+  def query: OpenBidSingleUnitAuction[T] => AuctionData[T]
 
 }
 

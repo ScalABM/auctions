@@ -1,8 +1,13 @@
 package org.economicsl.auctions.singleunit.clearing
 
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
+<<<<<<< Updated upstream
 import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy
 import org.economicsl.auctions.singleunit.Auction
+=======
+import org.economicsl.auctions.singleunit.pricing.PricingPolicy
+import org.economicsl.auctions.singleunit.SingleUnitAuction
+>>>>>>> Stashed changes
 import org.economicsl.auctions.SpotContract
 import org.economicsl.core.{Price, Tradable}
 
@@ -12,7 +17,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-sealed trait ClearingPolicy[T <: Tradable, A <: Auction[T, A]] {
+sealed trait ClearingPolicy[T <: Tradable, A <: SingleUnitAuction[T, A]] {
   this: A =>
 
   def clear: (A, Option[Stream[SpotContract]])
@@ -25,7 +30,7 @@ sealed trait ClearingPolicy[T <: Tradable, A <: Auction[T, A]] {
   * @author davidrpugh
   * @since 0.1.0
   */
-trait DiscriminatoryClearingPolicy[T <: Tradable, A <: Auction[T, A]]
+trait DiscriminatoryClearingPolicy[T <: Tradable, A <: SingleUnitAuction[T, A]]
     extends ClearingPolicy[T, A] {
   this: A =>
 
@@ -57,7 +62,7 @@ trait DiscriminatoryClearingPolicy[T <: Tradable, A <: Auction[T, A]]
   * @author davidrpugh
   * @since 0.1.0
   */
-trait UniformClearingPolicy[T <: Tradable, A <: Auction[T, A]]
+trait UniformClearingPolicy[T <: Tradable, A <: SingleUnitAuction[T, A]]
     extends ClearingPolicy[T, A] {
   this: A =>
 

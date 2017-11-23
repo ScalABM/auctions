@@ -52,13 +52,13 @@ class FirstPriceSealedBidReverseAuctionSimulation
 
   // use factory method to create instance of first-priced sealed bid reverse auction...
   val auctionId: AuctionId = UUID.randomUUID()
-  val auction: SealedBidAuction[Service] = firstPriceSealedBidReverseAuction(auctionId, tradable)
+  val auction: SealedBidSingleUnitAuction[Service] = firstPriceSealedBidReverseAuction(auctionId, tradable)
 
   val issuedOrders: Iterable[IssuedOrder[Service]] = issueOrders(auction.protocol, auctionParticipants)
   val askOrders: Iterable[SingleUnitOffer[Service]] = issuedOrders.collect {
     case (_, order: SingleUnitOffer[Service]) => order
   }
-  val ((clearedAuction, _), contracts) = run[Service, SealedBidAuction[Service]](auction, auctionParticipants)
+  val ((clearedAuction, _), contracts) = run[Service, SealedBidSingleUnitAuction[Service]](auction, auctionParticipants)
 
   "A first-price, sealed-bid reverse auction (FPSBRA)" should "allocate the parking space to the bidder that submits the offer with the lowest price." in {
 
