@@ -17,7 +17,6 @@ package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions._
 import org.economicsl.auctions.messages._
-import org.economicsl.auctions.singleunit.orders.{SingleUnitBid, SingleUnitOffer, SingleUnitOrder}
 import org.economicsl.auctions.singleunit.participants.SingleUnitAuctionParticipant
 import org.economicsl.core.{Price, Tradable}
 
@@ -40,7 +39,7 @@ class TestSingleUnitAuctionParticipant private(
   askOrderProbability: Double,
   val participantId: IssuerId,
   val issuedOrders: Map[OrderId, NewOrder[Tradable]],
-  val outstandingOrders: Map[OrderId, (OrderReferenceId, Order[Tradable])],
+  val outstandingOrders: Map[OrderId, (OrderReferenceId, NewOrder[Tradable])],
   val valuations: Map[Tradable, Price])
     extends SingleUnitAuctionParticipant {
 
@@ -49,7 +48,7 @@ class TestSingleUnitAuctionParticipant private(
     * @param auctionDataResponse
     * @return
     */
-  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): SingleUnitAuctionParticipant = {
+  def handle[T <: Tradable](auctionDataResponse: AuctionDataResponse[T]): TestSingleUnitAuctionParticipant = {
     ???
   }
 
@@ -61,7 +60,7 @@ class TestSingleUnitAuctionParticipant private(
     *         element is an `Order`.
     * @note care is needed in order to guarantee that the limit price is a multiple of the tick size.
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(TestSingleUnitAuctionParticipant, (OrderId, NewSingleUnitOrder[T]))] = {
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(TestSingleUnitAuctionParticipant, NewSingleUnitOrder[T])] = {
     if (prng.nextDouble() <= askOrderProbability) {
       // if valuation is not multiple of tick size, price is smallest multiple of tick size greater than valuation.
       val valuation = valuations.getOrElse(protocol.tradable, Price.MinValue)
@@ -70,8 +69,8 @@ class TestSingleUnitAuctionParticipant private(
       val orderId = randomOrderId()
       val timestamp = currentTimeMillis()
       val newOffer = NewSingleUnitOffer(limit, orderId, participantId ,timestamp, protocol.tradable)
-      val updated = issuedOrders + (randomOrderId() -> newOffer)
-      Some((withIssuedOrders(updated), randomOrderId() -> newOffer))
+      val updated = issuedOrders + (orderId -> newOffer)
+      Some((withIssuedOrders(updated), newOffer))
     } else {
       // if valuation is not multiple of tick size, price is largest multiple of tick size less than valuation.
       val valuation = valuations.getOrElse(protocol.tradable, Price.MaxValue)
@@ -80,8 +79,8 @@ class TestSingleUnitAuctionParticipant private(
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
       val timestamp = currentTimeMillis()
       val newBid = NewSingleUnitBid(limit, orderId, participantId, timestamp, protocol.tradable)
-      val updated = issuedOrders + (randomOrderId() -> newBid)
-      Some((withIssuedOrders(updated), randomOrderId() -> newBid))
+      val updated = issuedOrders + (orderId -> newBid)
+      Some((withIssuedOrders(updated), newBid))
     }
   }
 
@@ -91,7 +90,7 @@ class TestSingleUnitAuctionParticipant private(
     * @tparam T
     * @return
     */
-  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitAuctionParticipant, (OrderId, AuctionDataRequest[T]))] = {
+  def requestAuctionData[T <: Tradable](protocol: AuctionProtocol[T]): Option[(TestSingleUnitAuctionParticipant, (OrderId, AuctionDataRequest[T]))] = {
     None
   }
 
@@ -101,7 +100,7 @@ class TestSingleUnitAuctionParticipant private(
   }
 
   /** Factory method used by sub-classes to create an `A`. */
-  protected def withOutstandingOrders(updated: Map[OrderId, (OrderReferenceId, Order[Tradable])]): TestSingleUnitAuctionParticipant = {
+  protected def withOutstandingOrders(updated: Map[OrderId, (OrderReferenceId, NewOrder[Tradable])]): TestSingleUnitAuctionParticipant = {
     new TestSingleUnitAuctionParticipant(prng, askOrderProbability, participantId, issuedOrders, updated, valuations)
   }
 
@@ -121,7 +120,7 @@ object TestSingleUnitAuctionParticipant {
                               valuations: Map[Tradable, Price])
                              : TestSingleUnitAuctionParticipant = {
     val emptyIssuedOrders = immutable.HashMap.empty[OrderId, NewOrder[Tradable]]
-    val emptyOutstandingOrders = immutable.HashMap.empty[OrderId, (OrderReferenceId, Order[Tradable])]
+    val emptyOutstandingOrders = immutable.HashMap.empty[OrderId, (OrderReferenceId, NewOrder[Tradable])]
     new TestSingleUnitAuctionParticipant(prng, askOrderProbability, issuer, emptyIssuedOrders, emptyOutstandingOrders, valuations)
   }
 

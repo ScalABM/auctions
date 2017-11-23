@@ -16,8 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.orderbooks
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages.{OrderId, OrderReferenceId}
-import org.economicsl.auctions.singleunit.orders.{SingleUnitOffer, SingleUnitBid}
+import org.economicsl.auctions.messages._
 import org.economicsl.core.Quantity
 import org.economicsl.core.util.UUIDGenerator
 import org.scalatest.{FlatSpec, Matchers}
@@ -39,13 +38,15 @@ class FourHeapOrderBookSpec
 
   val numberBids = 100
   val bidReferences: Iterable[OrderReferenceId] = for (i <- 0 until numberBids) yield randomUUID()
-  val bids: Stream[(OrderId, SingleUnitBid[TestTradable])] = OrderGenerator.randomSingleUnitBidOrders(numberBids, tradable, new Random(42))
+  val bids: Stream[(OrderId, NewSingleUnitBid[TestTradable])] = NewOrderGenerator.randomSingleUnitBids(numberBids, tradable, new Random(42))
 
   val numberOffers = 100
   val offerReferences: Iterable[OrderReferenceId] = for (i <- 0 until numberOffers) yield randomUUID()
-  val offers: Stream[(OrderId, SingleUnitOffer[TestTradable])] = OrderGenerator.randomSingleUnitAskOrders(numberOffers, tradable, new Random(42))
+  val offers: Stream[(OrderId, NewSingleUnitOffer[TestTradable])] = NewOrderGenerator.randomSingleUnitOffers(numberOffers, tradable, new Random(42))
 
-  val initial: FourHeapOrderBook[TestTradable] = FourHeapOrderBook.empty[TestTradable]
+  val bidOrdering: Ordering[NewSingleUnitBid[TestTradable]] = NewSingleUnitBid.priceOrdering
+  val offerOrdering: Ordering[NewSingleUnitOffer[TestTradable]] = NewSingleUnitOffer.priceOrdering
+  val initial: FourHeapOrderBook[TestTradable] = FourHeapOrderBook.empty[TestTradable](bidOrdering, offerOrdering)
   val withBids: FourHeapOrderBook[TestTradable] = bidReferences.zip(bids).foldLeft(initial){
     case (orderBook, (reference, bidOrder)) => orderBook.insert(reference -> bidOrder)
   }
@@ -57,8 +58,8 @@ class FourHeapOrderBookSpec
 
     withBids.matchedOrders.numberUnits should be(Quantity.zero)
 
-    withBids.unMatchedOrders.askOrders.numberUnits should be(Quantity.zero)
-    withBids.unMatchedOrders.bidOrders.numberUnits should be(Quantity(numberBids))
+    withBids.unMatchedOrders.offers.numberUnits should be(Quantity.zero)
+    withBids.unMatchedOrders.bids.numberUnits should be(Quantity(numberBids))
 
   }
 
@@ -66,8 +67,8 @@ class FourHeapOrderBookSpec
 
     withOffers.matchedOrders.numberUnits should be(Quantity.zero)
 
-    withOffers.unMatchedOrders.askOrders.numberUnits should be(Quantity(numberOffers))
-    withOffers.unMatchedOrders.bidOrders.numberUnits should be(Quantity.zero)
+    withOffers.unMatchedOrders.offers.numberUnits should be(Quantity(numberOffers))
+    withOffers.unMatchedOrders.bids.numberUnits should be(Quantity.zero)
 
   }
 
@@ -78,7 +79,7 @@ class FourHeapOrderBookSpec
         val (residual, removedAskOrders) = orderBook.remove(reference)
         residual
     }
-    assert(withOutOffers.unMatchedOrders.askOrders.isEmpty)
+    assert(withOutOffers.unMatchedOrders.offers.isEmpty)
 
   }
 
@@ -89,7 +90,7 @@ class FourHeapOrderBookSpec
         val (residual, removedBidOrders) = orderBook.remove(reference)
         residual
     }
-    assert(withOutBids.unMatchedOrders.bidOrders.isEmpty)
+    assert(withOutBids.unMatchedOrders.bids.isEmpty)
 
   }
 

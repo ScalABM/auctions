@@ -30,6 +30,25 @@ sealed trait NewSingleUnitOrder[+T <: Tradable]
   with SingleUnit[T]
 
 
+/** Companion object for the `NewSingleUnitOrder` trait.
+  *
+  * @author davidrpugh
+  * @ since 0.2.0
+  */
+object NewSingleUnitOrder {
+
+  /** An ordering of `NewSingleUnitOrder` instances based on limit price.
+    *
+    * @tparam T
+    * @tparam O
+    * @return an ordering of `NewSingleUnitOrder` instances based on limit price.
+    */
+  def priceOrdering[T <: Tradable, O <: NewSingleUnitOrder[T]]: Ordering[O] = {
+    NewSinglePricePointOrder.priceOrdering[T, O]
+  }
+
+}
+
 
 final case class NewSingleUnitBid[+T <: Tradable](
   limit: Price,
@@ -45,6 +64,25 @@ final case class NewSingleUnitBid[+T <: Tradable](
 }
 
 
+/** Companion object for the `NewSingleUnitOrder` trait.
+  *
+  * @author davidrpugh
+  * @ since 0.2.0
+  */
+object NewSingleUnitBid {
+
+  /** An ordering of `NewSingleUnitBid` instances based on limit price.
+    *
+    * @tparam T
+    * @return an ordering of `NewSingleUnitBid` instances based on limit price.
+    */
+  def priceOrdering[T <: Tradable]: Ordering[NewSingleUnitBid[T]] = {
+    NewSinglePricePointOrder.priceOrdering[T, NewSingleUnitBid[T]]
+  }
+
+}
+
+
 final case class NewSingleUnitOffer[+T <: Tradable](
   limit: Price,
   orderId: OrderId,
@@ -55,5 +93,24 @@ final case class NewSingleUnitOffer[+T <: Tradable](
 
   /** A `NewSingleUnitOffer` is a `NewSingleUnitOrder` to sell a particular type of `Tradable`. */
   val side: Char = '2'
+
+}
+
+
+/** Companion object for the `NewSingleUnitOffer` trait.
+  *
+  * @author davidrpugh
+  * @ since 0.2.0
+  */
+object NewSingleUnitOffer {
+
+  /** An ordering of `NewSingleUnitOffer` instances based on limit price.
+    *
+    * @tparam T
+    * @return an ordering of `NewSingleUnitOffer` instances based on limit price.
+    */
+  def priceOrdering[T <: Tradable]: Ordering[NewSingleUnitOffer[T]] = {
+    NewSinglePricePointOrder.priceOrdering[T, NewSingleUnitOffer[T]]
+  }
 
 }

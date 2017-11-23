@@ -45,11 +45,11 @@ trait NewSinglePricePointOrder[+T <: Tradable]
   */
 object NewSinglePricePointOrder {
 
-  /** An ordering of `NewSinglePricePoint` instances based on limit price.
+  /** An ordering of `NewSinglePricePointOrder` instances based on limit price.
     *
     * @tparam T
     * @tparam O
-    * @return an ordering of `NewSinglePricePoint` instances based on limit price.
+    * @return an ordering of `NewSinglePricePointOrder` instances based on limit price.
     */
   def priceOrdering[T <: Tradable, O <: NewSinglePricePointOrder[T]]: Ordering[O] = {
     Ordering.by(order => (order.limit, order.senderId, order.orderId))
@@ -73,6 +73,25 @@ final case class NewSinglePricePointBid[+T <: Tradable](
 }
 
 
+/** Companion object for `NewSinglePricePointBid`.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+object NewSinglePricePointBid {
+
+  /** An ordering of `NewSinglePricePointBid` instances based on limit price.
+    *
+    * @tparam T
+    * @return an ordering of `NewSinglePricePointBid` instances based on limit price.
+    */
+  def priceOrdering[T <: Tradable]: Ordering[NewSinglePricePointBid[T]] = {
+    NewSinglePricePointOrder.priceOrdering[T, NewSinglePricePointBid[T]]
+  }
+
+}
+
+
 final case class NewSinglePricePointOffer[+T <: Tradable](
   limit: Price,
   orderId: OrderId,
@@ -84,5 +103,24 @@ final case class NewSinglePricePointOffer[+T <: Tradable](
 
   /** A `NewSinglePricePointOffer` is a `NewSinglePricePointOrder` to sell a particular type of `Tradable`. */
   val side: Char = '2'
+
+}
+
+
+/** Companion object for `NewSinglePricePointOffer`.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+object NewSinglePricePointOffer {
+
+  /** An ordering of `NewSinglePricePointOffer` instances based on limit price.
+    *
+    * @tparam T
+    * @return an ordering of `NewSinglePricePointOffer` instances based on limit price.
+    */
+  def priceOrdering[T <: Tradable]: Ordering[NewSinglePricePointOffer[T]] = {
+    NewSinglePricePointOrder.priceOrdering[T, NewSinglePricePointOffer[T]]
+  }
 
 }

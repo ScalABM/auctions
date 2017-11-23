@@ -34,7 +34,7 @@ public class ImperativePeriodicDoubleAuction {
         // generate some random order flow...
         int numberOrders = 10000;
         Random prng = new Random(42);
-        Stream<Tuple2<UUID, SingleUnitOrder<TestStock>>> orders = OrderGenerator.randomSingleUnitOrders(0.5, numberOrders, googleStock, prng);
+        Stream<Tuple2<UUID, SingleUnitOrder<TestStock>>> orders = NewOrderGenerator.randomSingleUnitOrders(0.5, numberOrders, googleStock, prng);
 
         List<Either<NewOrderRejected, NewOrderAccepted>> insertResults = new ArrayList<>();
 
