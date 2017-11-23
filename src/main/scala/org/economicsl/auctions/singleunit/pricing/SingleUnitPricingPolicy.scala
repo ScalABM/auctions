@@ -16,7 +16,6 @@ limitations under the License.
 package org.economicsl.auctions.singleunit.pricing
 
 import org.economicsl.auctions.PricingPolicy
-import org.economicsl.auctions.messages.NewSingleUnitOrder
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.core.Tradable
 
@@ -27,4 +26,4 @@ import org.economicsl.core.Tradable
   * @author davidrpugh
   * @since 0.1.0
   */
-trait SingleUnitPricingPolicy[T <: Tradable] extends PricingPolicy[T, NewSingleUnitOrder[T], FourHeapOrderBook[T]]
+trait SingleUnitPricingPolicy[T <: Tradable] extends PricingPolicy[FourHeapOrderBook[T]]
