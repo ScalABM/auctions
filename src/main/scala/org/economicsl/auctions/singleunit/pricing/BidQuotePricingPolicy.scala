@@ -26,7 +26,7 @@ import org.economicsl.core.{Price, Tradable}
   * @author davidrpugh
   * @since 0.1.0
   */
-class BidQuotePricingPolicy[T <: Tradable] extends PricingPolicy[T] {
+class BidQuotePricingPolicy[T <: Tradable] extends SingleUnitPricingPolicy[T] {
 
   def apply(orderBook: FourHeapOrderBook[T]): Option[Price] = orderBook.bidPriceQuote
 

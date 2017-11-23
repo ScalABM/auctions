@@ -19,7 +19,7 @@ package org.economicsl.auctions.singleunit;
 import org.economicsl.auctions.AuctionProtocol;
 import org.economicsl.auctions.SpotContract;
 import org.economicsl.auctions.messages.*;
-import org.economicsl.auctions.singleunit.pricing.PricingPolicy;
+import org.economicsl.auctions.singleunit.pricing.SingleUnitPricingPolicy;
 import org.economicsl.core.Tradable;
 import scala.Option;
 import scala.Tuple2;
@@ -79,7 +79,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
         return auction.receive(request);
     }
 
-    public JOpenBidAuction<T> withPricingPolicy(PricingPolicy<T> updated) {
+    public JOpenBidAuction<T> withPricingPolicy(SingleUnitPricingPolicy<T> updated) {
         OpenBidAuction<T> withUpdatedPricingPolicy = auction.withPricingPolicy(updated);
         return new JOpenBidAuction<>(withUpdatedPricingPolicy);
     }
@@ -96,7 +96,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+    public static <T extends Tradable> JOpenBidAuction<T> withDiscriminatoryClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, SingleUnitPricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
         OpenBidAuction<T> auction = OpenBidAuction.withDiscriminatoryClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
@@ -108,7 +108,7 @@ class JOpenBidAuction<T extends Tradable> extends JAuction<T, JOpenBidAuction<T>
      * @param <T>
      * @return
      */
-    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, PricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
+    public static <T extends Tradable> JOpenBidAuction<T> withUniformClearingPolicy(UUID auctionId, Ordering<SingleUnitBid<T>> bidOrdering, Ordering<SingleUnitOffer<T>> offerOrdering, SingleUnitPricingPolicy<T> pricingPolicy, AuctionProtocol<T> protocol) {
         OpenBidAuction<T> auction = OpenBidAuction.withUniformClearingPolicy(auctionId, bidOrdering, offerOrdering, pricingPolicy, protocol);
         return new JOpenBidAuction<>(auction);
     }
