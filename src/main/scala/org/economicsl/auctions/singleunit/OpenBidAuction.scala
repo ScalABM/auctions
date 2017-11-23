@@ -16,7 +16,7 @@ limitations under the License.
 package org.economicsl.auctions.singleunit
 
 import org.economicsl.auctions.{AuctionId, AuctionProtocol}
-import org.economicsl.auctions.messages.{AuctionData, AuctionDataRequest, NewSingleUnitBid, NewSingleUnitOffer}
+import org.economicsl.auctions.messages.{AuctionData, AuctionDataRequest, SingleUnitBid, SingleUnitOffer}
 import org.economicsl.auctions.singleunit.clearing.{DiscriminatoryClearingPolicy, UniformClearingPolicy}
 import org.economicsl.auctions.singleunit.orderbooks.FourHeapOrderBook
 import org.economicsl.auctions.singleunit.pricing.PricingPolicy
@@ -49,14 +49,14 @@ abstract class OpenBidAuction[T <: Tradable]
 object OpenBidAuction {
 
   def withDiscriminatoryClearingPolicy[T <: Tradable]
-                                      (auctionId: AuctionId, bidOrdering: Ordering[NewSingleUnitBid[T]], offerOrdering: Ordering[NewSingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                                      (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
                                       : OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithDiscriminatoryClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)
   }
 
   def withUniformClearingPolicy[T <: Tradable]
-                               (auctionId: AuctionId, bidOrdering: Ordering[NewSingleUnitBid[T]], offerOrdering: Ordering[NewSingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
+                               (auctionId: AuctionId, bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]], pricingPolicy: PricingPolicy[T], protocol: AuctionProtocol[T])
                                : OpenBidAuction[T] = {
     val orderBook = FourHeapOrderBook.empty[T](bidOrdering, offerOrdering)
     new WithUniformClearingPolicy[T](auctionId, orderBook, pricingPolicy, protocol)

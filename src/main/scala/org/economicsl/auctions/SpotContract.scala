@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.messages.{NewSinglePricePointBid, NewSinglePricePointOffer, NewSingleUnitBid, NewSingleUnitOffer}
+import org.economicsl.auctions.messages.{SinglePricePointBid, SinglePricePointOffer, SingleUnitBid, SingleUnitOffer}
 import org.economicsl.core.{Price, Quantity, Tradable}
 import play.api.libs.json.{Json, Writes}
 
@@ -46,7 +46,7 @@ object SpotContract {
     * @return
     */
   def fromSinglePricePointOrders[T <: Tradable]
-                                (bid: NewSinglePricePointBid[T], offer: NewSinglePricePointOffer[T], price: Price)
+                                (bid: SinglePricePointBid[T], offer: SinglePricePointOffer[T], price: Price)
                                 : SpotContract = {
     require(offer.limit <= price); require(price <= bid.limit)  // incentive compatibility check!
     SpotContract(bid.senderId, offer.senderId, price, offer.quantity min bid.quantity, offer.tradable)
@@ -61,7 +61,7 @@ object SpotContract {
     * @return
     */
   def fromSingleUnitOrders[T <: Tradable]
-                          (bid: NewSingleUnitBid[T], offer: NewSingleUnitOffer[T], price: Price)
+                          (bid: SingleUnitBid[T], offer: SingleUnitOffer[T], price: Price)
                           : SpotContract = {
     require(offer.limit <= price); require(price <= bid.limit)  // incentive compatibility check!
     SpotContract(bid.senderId, offer.senderId, price, offer.quantity min bid.quantity, offer.tradable)

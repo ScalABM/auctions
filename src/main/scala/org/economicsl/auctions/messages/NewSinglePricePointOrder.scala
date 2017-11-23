@@ -58,7 +58,7 @@ object NewSinglePricePointOrder {
 }
 
 
-final case class NewSinglePricePointBid[+T <: Tradable](
+final case class SinglePricePointBid[+T <: Tradable](
   limit: Price,
   orderId: OrderId,
   quantity: Quantity,
@@ -67,32 +67,32 @@ final case class NewSinglePricePointBid[+T <: Tradable](
   tradable: T)
     extends NewSinglePricePointOrder[T] {
 
-  /** A NewSinglePricePointBid` is a `NewSinglePricePointOrder` to buy a particular type of `Tradable`. */
+  /** A `SinglePricePointBid` is a `NewSinglePricePointOrder` to buy a particular type of `Tradable`. */
   val side: Char = '1'
 
 }
 
 
-/** Companion object for `NewSinglePricePointBid`.
+/** Companion object for `SinglePricePointBid`.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-object NewSinglePricePointBid {
+object SinglePricePointBid {
 
-  /** An ordering of `NewSinglePricePointBid` instances based on limit price.
+  /** An ordering of `SinglePricePointBid` instances based on limit price.
     *
     * @tparam T
-    * @return an ordering of `NewSinglePricePointBid` instances based on limit price.
+    * @return an ordering of `SinglePricePointBid` instances based on limit price.
     */
-  def priceOrdering[T <: Tradable]: Ordering[NewSinglePricePointBid[T]] = {
-    NewSinglePricePointOrder.priceOrdering[T, NewSinglePricePointBid[T]]
+  def priceOrdering[T <: Tradable]: Ordering[SinglePricePointBid[T]] = {
+    NewSinglePricePointOrder.priceOrdering[T, SinglePricePointBid[T]]
   }
 
 }
 
 
-final case class NewSinglePricePointOffer[+T <: Tradable](
+final case class SinglePricePointOffer[+T <: Tradable](
   limit: Price,
   orderId: OrderId,
   quantity: Quantity,
@@ -101,26 +101,26 @@ final case class NewSinglePricePointOffer[+T <: Tradable](
   tradable: T)
     extends NewSinglePricePointOrder[T] {
 
-  /** A `NewSinglePricePointOffer` is a `NewSinglePricePointOrder` to sell a particular type of `Tradable`. */
+  /** A `SinglePricePointOffer` is a `NewSinglePricePointOrder` to sell a particular type of `Tradable`. */
   val side: Char = '2'
 
 }
 
 
-/** Companion object for `NewSinglePricePointOffer`.
+/** Companion object for `SinglePricePointOffer`.
   *
   * @author davidrpugh
   * @since 0.2.0
   */
-object NewSinglePricePointOffer {
+object SinglePricePointOffer {
 
-  /** An ordering of `NewSinglePricePointOffer` instances based on limit price.
+  /** An ordering of `SinglePricePointOffer` instances based on limit price.
     *
     * @tparam T
-    * @return an ordering of `NewSinglePricePointOffer` instances based on limit price.
+    * @return an ordering of `SinglePricePointOffer` instances based on limit price.
     */
-  def priceOrdering[T <: Tradable]: Ordering[NewSinglePricePointOffer[T]] = {
-    NewSinglePricePointOrder.priceOrdering[T, NewSinglePricePointOffer[T]]
+  def priceOrdering[T <: Tradable]: Ordering[SinglePricePointOffer[T]] = {
+    NewSinglePricePointOrder.priceOrdering[T, SinglePricePointOffer[T]]
   }
 
 }

@@ -18,7 +18,7 @@ package org.economicsl.auctions.singleunit
 import java.util.UUID
 
 import org.economicsl.auctions._
-import org.economicsl.auctions.messages.NewSingleUnitBid
+import org.economicsl.auctions.messages.SingleUnitBid
 import org.economicsl.auctions.singleunit.participants.{SingleUnitAuctionParticipant, SingleUnitBuyer, SingleUnitSeller}
 import org.economicsl.core.{Price, Tradable}
 import org.scalatest.{FlatSpecLike, Matchers}
@@ -56,8 +56,8 @@ class FirstPriceSealedBidAuctionSimulation
 
 
   val issuedOrders: Iterable[IssuedOrder[ParkingSpace]] = issueOrders(auction.protocol, auctionParticipants)
-  val bidOrders: Iterable[NewSingleUnitBid[ParkingSpace]] = issuedOrders.collect {
-    case (_, order: NewSingleUnitBid[ParkingSpace]) => order
+  val bidOrders: Iterable[SingleUnitBid[ParkingSpace]] = issuedOrders.collect {
+    case (_, order: SingleUnitBid[ParkingSpace]) => order
   }
   val ((clearedAuction, _), contracts) = run[ParkingSpace, SealedBidAuction[ParkingSpace]](auction, auctionParticipants)
 

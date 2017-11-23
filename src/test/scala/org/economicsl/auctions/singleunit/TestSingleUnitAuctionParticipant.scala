@@ -68,7 +68,7 @@ class TestSingleUnitAuctionParticipant private(
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value + (protocol.tickSize - remainder))
       val orderId = randomOrderId()
       val timestamp = currentTimeMillis()
-      val newOffer = NewSingleUnitOffer(limit, orderId, participantId ,timestamp, protocol.tradable)
+      val newOffer = SingleUnitOffer(limit, orderId, participantId ,timestamp, protocol.tradable)
       val updated = issuedOrders + (orderId -> newOffer)
       Some((withIssuedOrders(updated), newOffer))
     } else {
@@ -78,7 +78,7 @@ class TestSingleUnitAuctionParticipant private(
       val orderId = randomOrderId()
       val limit = if (valuation.isMultipleOf(protocol.tickSize)) valuation else Price(valuation.value - remainder)
       val timestamp = currentTimeMillis()
-      val newBid = NewSingleUnitBid(limit, orderId, participantId, timestamp, protocol.tradable)
+      val newBid = SingleUnitBid(limit, orderId, participantId, timestamp, protocol.tradable)
       val updated = issuedOrders + (orderId -> newBid)
       Some((withIssuedOrders(updated), newBid))
     }

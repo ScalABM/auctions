@@ -46,11 +46,11 @@ class SingleUnitSeller private(
     * @return
     * @note
     */
-  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller, NewSingleUnitOffer[T])] = {
+  def issueOrder[T <: Tradable](protocol: AuctionProtocol[T]): Option[(SingleUnitSeller, SingleUnitOffer[T])] = {
     val limit = valuations(protocol.tradable)
     val orderId = randomOrderId()
     val timestamp = currentTimeMillis()
-    val issuedOrder = NewSingleUnitOffer(limit, orderId, participantId, timestamp, protocol.tradable)
+    val issuedOrder = SingleUnitOffer(limit, orderId, participantId, timestamp, protocol.tradable)
     val updated = issuedOrders + (orderId -> issuedOrder)
     Some((withIssuedOrders(updated), issuedOrder))
   }

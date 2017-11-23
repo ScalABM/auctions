@@ -36,10 +36,10 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
   assert(heapsNotCrossed, "Limit price of best `SingleUnitBid` must not exceed the limit price of the best `SingleUnitOffer`.")
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
-  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, NewSingleUnitBid[T]))] = bids.ordering
+  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = bids.ordering
 
   /** The ordering used to sort the `AskOrder` instances contained in this `UnMatchedOrders` instance. */
-  val offerOrdering: Ordering[(OrderReferenceId, (OrderId, NewSingleUnitOffer[T]))] = offers.ordering
+  val offerOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))] = offers.ordering
 
   /** Total number of units of the `Tradable` contained in the `UnMatchedOrders`. */
   val numberUnits: Quantity = offers.numberUnits + bids.numberUnits
@@ -51,9 +51,9 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
     *         also contains the `order`.
     */
   def + (kv: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): UnMatchedOrders[T] = kv match {
-    case (orderRefId, (orderId, order: NewSingleUnitOffer[T])) =>
+    case (orderRefId, (orderId, order: SingleUnitOffer[T])) =>
       new UnMatchedOrders(bids, offers + (orderRefId -> (orderId -> order)))
-    case (orderRefId, (orderId, order: NewSingleUnitBid[T])) =>
+    case (orderRefId, (orderId, order: SingleUnitBid[T])) =>
       new UnMatchedOrders(bids + (orderRefId -> (orderId -> order)), offers)
   }
 
@@ -84,7 +84,7 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
     offers.get(reference).orElse(bids.get(reference))
   }
 
-  def headOption: (Option[(OrderReferenceId, (OrderId, NewSingleUnitOffer[T]))], Option[(OrderReferenceId, (OrderId, NewSingleUnitBid[T]))]) = {
+  def headOption: (Option[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))], Option[(OrderReferenceId, (OrderId, SingleUnitBid[T]))]) = {
     (offers.headOption, bids.headOption)
   }
 
@@ -136,7 +136,7 @@ object UnMatchedOrders {
     *       based on `limit` price; the heap used to store store the `BidOrder` instances is
     *       ordered from high to low based on `limit` price.
     */
-  def empty[T <: Tradable](bidOrdering: Ordering[NewSingleUnitBid[T]], offerOrdering: Ordering[NewSingleUnitOffer[T]]): UnMatchedOrders[T] = {
+  def empty[T <: Tradable](bidOrdering: Ordering[SingleUnitBid[T]], offerOrdering: Ordering[SingleUnitOffer[T]]): UnMatchedOrders[T] = {
     new UnMatchedOrders(SortedSingleUnitBids.empty(bidOrdering), SortedSingleUnitOffers.empty(offerOrdering))
   }
 
