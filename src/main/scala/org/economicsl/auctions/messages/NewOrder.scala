@@ -33,6 +33,25 @@ trait NewOrder[+T <: Tradable] extends Message {
 }
 
 
+/** Companion object for the `NewOrder` trait.
+  *
+  * @author davidrpugh
+  * @since 0.2.0
+  */
+object NewOrder {
+
+  /** Defines an ordering over `NewOrder` types.
+    *
+    * @tparam O subtype of `NewOrder` for which the ordering is defined.
+    * @return an ordering over a subtype of `NewOrder`.
+    */
+  def ordering[O <: NewOrder[_<: Tradable]]: Ordering[O] = {
+    Ordering.by(order => (order.senderId, order.orderId))
+  }
+
+}
+
+
 
 
 

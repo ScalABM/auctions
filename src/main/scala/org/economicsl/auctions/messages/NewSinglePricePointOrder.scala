@@ -29,7 +29,7 @@ trait NewSinglePricePointOrder[+T <: Tradable]
   extends NewOrder[T]
   with SinglePricePoint[T] {
 
-  /** Side of the `NewOrder`.
+  /** Side of the `NewPricePointOrder`.
     *
     * @note Current valid values are 1: "buy" and 2: "sell".
     */
