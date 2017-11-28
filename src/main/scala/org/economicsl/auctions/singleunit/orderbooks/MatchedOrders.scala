@@ -32,7 +32,7 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
   bids: SortedSingleUnitBids[T],
   offers: SortedSingleUnitOffers[T]) {
 
-  type Match = ((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T])))
+  type Match = ((OrderReferenceId, SingleUnitOffer[T]), (OrderReferenceId, SingleUnitBid[T]))
 
   /* If `MatchedOrders` becomes public, then these assert statements should be changed to require statements!*/
   assert(offers.numberUnits == bids.numberUnits)
@@ -64,17 +64,17 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `Bid` instances of this
     *         instance but that does not contain the matched pair of  `orders`.
     */
-  def - (reference: OrderReferenceId): (MatchedOrders[T], Option[((OrderId, NewSingleUnitOrder[T]), (OrderReferenceId, (OrderId, NewSingleUnitOrder[T])))]) = {
+  def - (reference: OrderReferenceId): (MatchedOrders[T], Option[(NewSingleUnitOrder[T], (OrderReferenceId, NewSingleUnitOrder[T]))]) = {
     val (remainingOffers, removedOffer) = offers - reference
     removedOffer match {
       case Some(askOrder) =>
-        val (remainingBids, Some(marginalBid)) = bids.splitOffTopOrder
+        val (remainingBids, Some(marginalBid)) = bids.dequeue
         (new MatchedOrders(remainingBids, remainingOffers), Some((askOrder, marginalBid)))
       case None =>
         val (remainingBids, removedBid) = bids - reference
         removedBid match {
           case Some(bidOrder) =>
-            val (remainingOffers, Some(marginalOffer)) = offers.splitOffTopOrder
+            val (remainingOffers, Some(marginalOffer)) = offers.dequeue
             (new MatchedOrders(remainingBids, remainingOffers), Some((bidOrder, marginalOffer)))
           case None =>
             (this, None)
@@ -89,16 +89,16 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     */
   def contains(reference: OrderReferenceId): Boolean = offers.contains(reference) || bids.contains(reference)
 
-  def get(reference: OrderReferenceId): Option[(OrderId, NewSingleUnitOrder[T])] = {
+  def get(reference: OrderReferenceId): Option[NewSingleUnitOrder[T]] = {
     offers.get(reference).orElse(bids.get(reference))
   }
 
-  def head: ((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T]))) = {
+  def head: ((OrderReferenceId, SingleUnitOffer[T]), (OrderReferenceId, SingleUnitBid[T])) = {
     (offers.head, bids.head)
   }
 
-  def headOption: Option[((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T])))] = {
-    offers.headOption.flatMap(askOrder => bids.headOption.map(bidOrder => (askOrder, bidOrder)))
+  def headOption: Option[((OrderReferenceId, SingleUnitOffer[T]), (OrderReferenceId, SingleUnitBid[T]))] = {
+    offers.headOption.flatMap(offer => bids.headOption.map(bid => (offer, bid)))
   }
 
   def isEmpty: Boolean = {
@@ -111,7 +111,7 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @param incoming
     * @return
     */
-  def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, NewSingleUnitOrder[T])): (MatchedOrders[T], (OrderId, NewSingleUnitOrder[T])) = {
+  def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, NewSingleUnitOrder[T])): (MatchedOrders[T], NewSingleUnitOrder[T]) = {
     incoming match {
       case (refOrderId, order: SingleUnitOffer[T]) =>
         val (remainingOffers, Some(removedOffer)) = offers - existing
@@ -144,8 +144,8 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
   }
 
   private[this] def invariantsHold: Boolean = {
-    bids.headOption.forall{ case (_, (_, bid)) =>
-      offers.headOption.forall{ case (_, (_, offer)) =>
+    bids.headOption.forall{ case (_, bid) =>
+      offers.headOption.forall{ case (_, offer) =>
         bid.limit >= offer.limit
       }
     }

@@ -17,7 +17,7 @@ package org.economicsl.auctions
 
 import java.util.UUID
 
-import org.economicsl.auctions.messages.{SingleUnitBid, SingleUnitOffer, NewSingleUnitOrder, OrderId}
+import org.economicsl.auctions.messages.{SingleUnitBid, SingleUnitOffer, NewSingleUnitOrder}
 import org.economicsl.core.util.{Timestamper, UUIDGenerator}
 import org.economicsl.core.{Price, Tradable}
 
@@ -33,17 +33,17 @@ object NewOrderGenerator
   extends UUIDGenerator
   with Timestamper {
 
-  def randomSingleUnitOffer[T <: Tradable](tradable: T, prng: Random): (OrderId, SingleUnitOffer[T]) = {
+  def randomSingleUnitOffer[T <: Tradable](tradable: T, prng: Random): SingleUnitOffer[T] = {
     val orderId = randomUUID()
     val issuer = randomUUID()  // todo make this reproducible!
     val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
-    (orderId, SingleUnitOffer(limit, orderId, issuer, currentTimeMillis(), tradable))
+    SingleUnitOffer(limit, orderId, issuer, currentTimeMillis(), tradable)
   }
 
 
-  def randomSingleUnitOffers[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(OrderId, SingleUnitOffer[T])] = {
+  def randomSingleUnitOffers[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[SingleUnitOffer[T]] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[(OrderId, SingleUnitOffer[T])], remaining: Int): Stream[(OrderId, SingleUnitOffer[T])] = {
+    def loop(accumulated: Stream[SingleUnitOffer[T]], remaining: Int): Stream[SingleUnitOffer[T]] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -51,19 +51,19 @@ object NewOrderGenerator
         loop(ask #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[(OrderId, SingleUnitOffer[T])], n)
+    loop(Stream.empty[SingleUnitOffer[T]], n)
   }
 
-  def randomSingleUnitBid[T <: Tradable](tradable: T, prng: Random): (OrderId, SingleUnitBid[T]) = {
+  def randomSingleUnitBid[T <: Tradable](tradable: T, prng: Random): SingleUnitBid[T] = {
     val issuer = UUID.randomUUID()  // todo make this reproducible!
     val orderId = randomUUID()
     val limit = randomPrice(minimum=Price.MinValue, maximum=Price.MaxValue, prng)
-    (orderId, SingleUnitBid(limit, orderId, issuer, currentTimeMillis(), tradable))
+    SingleUnitBid(limit, orderId, issuer, currentTimeMillis(), tradable)
   }
 
-  def randomSingleUnitBids[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[(OrderId, SingleUnitBid[T])] = {
+  def randomSingleUnitBids[T <: Tradable](n: Int, tradable: T, prng: Random): Stream[SingleUnitBid[T]] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[(OrderId, SingleUnitBid[T])], remaining: Int): Stream[(OrderId, SingleUnitBid[T])] = {
+    def loop(accumulated: Stream[SingleUnitBid[T]], remaining: Int): Stream[SingleUnitBid[T]] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -71,11 +71,11 @@ object NewOrderGenerator
         loop(bid #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[(OrderId, SingleUnitBid[T])], n)
+    loop(Stream.empty[SingleUnitBid[T]], n)
   }
 
 
-  def randomSingleUnitOrder[T <: Tradable](askOrderProbability: Double)(tradable: T, prng: Random): (OrderId, NewSingleUnitOrder[T]) = {
+  def randomSingleUnitOrder[T <: Tradable](askOrderProbability: Double)(tradable: T, prng: Random): NewSingleUnitOrder[T] = {
     if (prng.nextDouble() <= askOrderProbability) {
       randomSingleUnitOffer(tradable, prng)
     } else {
@@ -84,9 +84,9 @@ object NewOrderGenerator
   }
 
 
-  def randomSingleUnitOrders[T <: Tradable](askOrderProbability: Double)(n: Int, tradable: T, prng: Random): Stream[(OrderId, NewSingleUnitOrder[T])] = {
+  def randomSingleUnitOrders[T <: Tradable](askOrderProbability: Double)(n: Int, tradable: T, prng: Random): Stream[NewSingleUnitOrder[T]] = {
     @annotation.tailrec
-    def loop(accumulated: Stream[(OrderId, NewSingleUnitOrder[T])], remaining: Int): Stream[(OrderId, NewSingleUnitOrder[T])] = {
+    def loop(accumulated: Stream[NewSingleUnitOrder[T]], remaining: Int): Stream[NewSingleUnitOrder[T]] = {
       if (remaining == 0) {
         accumulated
       } else {
@@ -94,7 +94,7 @@ object NewOrderGenerator
         loop(order #:: accumulated, remaining - 1)
       }
     }
-    loop(Stream.empty[(OrderId, NewSingleUnitOrder[T])], n)
+    loop(Stream.empty[NewSingleUnitOrder[T]], n)
   }
 
 

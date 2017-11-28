@@ -15,7 +15,7 @@ limitations under the License.
 */
 package org.economicsl.auctions
 
-import org.economicsl.auctions.messages.{NewOrder, OrderId, OrderReferenceId}
+import org.economicsl.auctions.messages.{NewOrder, OrderReferenceId}
 import org.economicsl.core.Tradable
 
 
@@ -41,8 +41,7 @@ trait OrderBook[T <: Tradable, O <: NewOrder[T], +OB <: OrderBook[T, O, OB]] {
     *
     * @param existing
     * @return
-    * @note implementation should be O(1) (i.e., constant time).
     */
-  def - (existing: OrderReferenceId): (OB, Option[(OrderId, O)])
+  def - (existing: OrderReferenceId): (OB, Option[O])
 
 }

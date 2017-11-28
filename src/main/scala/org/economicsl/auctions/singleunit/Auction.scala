@@ -50,9 +50,9 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
   def cancel(message: CancelOrder): (A, Either[CancelOrderRejected, CancelOrderAccepted]) = {
     val (residualOrderBook, removedOrder) = orderBook - message.orderRefId
     removedOrder match {
-      case Some((orderId, _)) =>
+      case Some(order) =>
         val timestamp = currentTimeMillis()
-        val accepted = CancelOrderAccepted(orderId, auctionId, timestamp)
+        val accepted = CancelOrderAccepted(order.orderId, auctionId, timestamp)
         (withOrderBook(residualOrderBook), Right(accepted))
       case None =>
         val reason = OrderNotFound
@@ -105,7 +105,7 @@ trait Auction[T <: Tradable, A <: Auction[T, A]]
       val orderRefId = randomOrderReferenceId()
       val timestamp = currentTimeMillis()
       val accepted = NewOrderAccepted(message.orderId, orderRefId, auctionId, timestamp)
-      val updatedOrderBook = orderBook + (orderRefId -> (message.orderId -> message))
+      val updatedOrderBook = orderBook + (orderRefId -> message)
       (withOrderBook(updatedOrderBook), Right(accepted))
     }
   }
