@@ -32,17 +32,17 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
   bids: SortedSingleUnitBids[T],
   offers: SortedSingleUnitOffers[T]) {
 
-  type Match = ((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T])))
+  type Match = ((OrderReferenceId, SingleUnitOffer[T]), (OrderReferenceId, SingleUnitBid[T]))
 
   /* If `MatchedOrders` becomes public, then these assert statements should be changed to require statements!*/
   assert(offers.numberUnits == bids.numberUnits)
   assert(invariantsHold, "Limit price of the best `NewSingleUnitBid` must exceed the limit price of the best `NewSingleUnitOffer`.")
 
   /** The ordering used to sort the `Bid` instances contained in this `MatchedOrders` instance. */
-  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = bids.ordering
+  val bidOrdering: Ordering[(OrderReferenceId, SingleUnitBid[T])] = bids.ordering
 
   /** The ordering used to sort the `AskOrder` instances contained in this `MatchedOrders` instance. */
-  val offerOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))] = offers.ordering
+  val offerOrdering: Ordering[(OrderReferenceId, SingleUnitOffer[T])] = offers.ordering
 
   /** Total number of units of the `Tradable` contained in the `MatchedOrders`. */
   val numberUnits: Quantity = offers.numberUnits + bids.numberUnits
@@ -54,7 +54,7 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `Bid` instances of this
     *         instance and that also contains the matched pair of  `orders`.
     */
-  def + (kv1: (OrderReferenceId, (OrderId, SingleUnitOffer[T])), kv2: (OrderReferenceId, (OrderId, SingleUnitBid[T]))): MatchedOrders[T] = {
+  def + (kv1: (OrderReferenceId, SingleUnitOffer[T]), kv2: (OrderReferenceId, SingleUnitBid[T])): MatchedOrders[T] = {
     new MatchedOrders(bids + kv2, offers + kv1)
   }
 
@@ -64,17 +64,17 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @return a new `MatchedOrders` instance that contains all of the `AskOrder` and `Bid` instances of this
     *         instance but that does not contain the matched pair of  `orders`.
     */
-  def - (reference: OrderReferenceId): (MatchedOrders[T], Option[((OrderId, NewSingleUnitOrder[T]), (OrderReferenceId, (OrderId, NewSingleUnitOrder[T])))]) = {
+  def - (reference: OrderReferenceId): (MatchedOrders[T], Option[(NewSingleUnitOrder[T], (OrderReferenceId, NewSingleUnitOrder[T]))]) = {
     val (remainingOffers, removedOffer) = offers - reference
     removedOffer match {
       case Some(askOrder) =>
-        val (remainingBids, Some(marginalBid)) = bids.splitOffTopOrder
+        val (remainingBids, Some(marginalBid)) = bids.dequeue
         (new MatchedOrders(remainingBids, remainingOffers), Some((askOrder, marginalBid)))
       case None =>
         val (remainingBids, removedBid) = bids - reference
         removedBid match {
           case Some(bidOrder) =>
-            val (remainingOffers, Some(marginalOffer)) = offers.splitOffTopOrder
+            val (remainingOffers, Some(marginalOffer)) = offers.dequeue
             (new MatchedOrders(remainingBids, remainingOffers), Some((bidOrder, marginalOffer)))
           case None =>
             (this, None)
@@ -89,16 +89,16 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     */
   def contains(reference: OrderReferenceId): Boolean = offers.contains(reference) || bids.contains(reference)
 
-  def get(reference: OrderReferenceId): Option[(OrderId, NewSingleUnitOrder[T])] = {
+  def get(reference: OrderReferenceId): Option[NewSingleUnitOrder[T]] = {
     offers.get(reference).orElse(bids.get(reference))
   }
 
-  def head: ((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T]))) = {
+  def head: ((OrderReferenceId, SingleUnitOffer[T]), (OrderReferenceId, SingleUnitBid[T])) = {
     (offers.head, bids.head)
   }
 
-  def headOption: Option[((OrderReferenceId, (OrderId, SingleUnitOffer[T])), (OrderReferenceId, (OrderId, SingleUnitBid[T])))] = {
-    offers.headOption.flatMap(askOrder => bids.headOption.map(bidOrder => (askOrder, bidOrder)))
+  def headOption: Option[((OrderReferenceId, SingleUnitOffer[T]), (OrderReferenceId, SingleUnitBid[T]))] = {
+    offers.headOption.flatMap(offer => bids.headOption.map(bid => (offer, bid)))
   }
 
   def isEmpty: Boolean = {
@@ -111,15 +111,15 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
     * @param incoming
     * @return
     */
-  def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): (MatchedOrders[T], (OrderId, NewSingleUnitOrder[T])) = {
+  def replace(existing: OrderReferenceId, incoming: (OrderReferenceId, NewSingleUnitOrder[T])): (MatchedOrders[T], NewSingleUnitOrder[T]) = {
     incoming match {
-      case (refOrderId, (orderId, order: SingleUnitOffer[T])) =>
+      case (refOrderId, order: SingleUnitOffer[T]) =>
         val (remainingOffers, Some(removedOffer)) = offers - existing
-        val updatedOffers = remainingOffers + (refOrderId -> (orderId -> order))
+        val updatedOffers = remainingOffers + (refOrderId -> order)
         (new MatchedOrders(bids, updatedOffers), removedOffer)
-      case (reference, (token, order: SingleUnitBid[T])) =>
+      case (reference, order: SingleUnitBid[T]) =>
         val (remainingBids, Some(removedBid)) = bids - existing
-        val updatedBids = remainingBids + (reference -> (token -> order))
+        val updatedBids = remainingBids + (reference -> order)
         (new MatchedOrders(updatedBids, offers), removedBid)
     }
   }
@@ -144,8 +144,8 @@ private[orderbooks] final class MatchedOrders[T <: Tradable](
   }
 
   private[this] def invariantsHold: Boolean = {
-    bids.headOption.forall{ case (_, (_, bid)) =>
-      offers.headOption.forall{ case (_, (_, offer)) =>
+    bids.headOption.forall{ case (_, bid) =>
+      offers.headOption.forall{ case (_, offer) =>
         bid.limit >= offer.limit
       }
     }

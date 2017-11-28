@@ -36,10 +36,10 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
   assert(heapsNotCrossed, "Limit price of best `SingleUnitBid` must not exceed the limit price of the best `SingleUnitOffer`.")
 
   /** The ordering used to sort the `BidOrder` instances contained in this `UnMatchedOrders` instance. */
-  val bidOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitBid[T]))] = bids.ordering
+  val bidOrdering: Ordering[(OrderReferenceId, SingleUnitBid[T])] = bids.ordering
 
   /** The ordering used to sort the `AskOrder` instances contained in this `UnMatchedOrders` instance. */
-  val offerOrdering: Ordering[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))] = offers.ordering
+  val offerOrdering: Ordering[(OrderReferenceId, SingleUnitOffer[T])] = offers.ordering
 
   /** Total number of units of the `Tradable` contained in the `UnMatchedOrders`. */
   val numberUnits: Quantity = offers.numberUnits + bids.numberUnits
@@ -50,11 +50,11 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
     * @return a new `UnMatchedOrders` instance that contains all of the `AskOrder` instances of this instance and that
     *         also contains the `order`.
     */
-  def + (kv: (OrderReferenceId, (OrderId, NewSingleUnitOrder[T]))): UnMatchedOrders[T] = kv match {
-    case (orderRefId, (orderId, order: SingleUnitOffer[T])) =>
-      new UnMatchedOrders(bids, offers + (orderRefId -> (orderId -> order)))
-    case (orderRefId, (orderId, order: SingleUnitBid[T])) =>
-      new UnMatchedOrders(bids + (orderRefId -> (orderId -> order)), offers)
+  def + (kv: (OrderReferenceId, NewSingleUnitOrder[T])): UnMatchedOrders[T] = kv match {
+    case (orderRefId, order: SingleUnitOffer[T]) =>
+      new UnMatchedOrders(bids, offers + (orderRefId -> order))
+    case (orderRefId, order: SingleUnitBid[T]) =>
+      new UnMatchedOrders(bids + (orderRefId -> order), offers)
   }
 
   /** Remove an order from the collection of unmatched orders.
@@ -62,7 +62,7 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
     * @param orderRefId
     * @return a tuple whose first element is ??? and whose second element is ???
     */
-  def - (orderRefId: OrderReferenceId): (UnMatchedOrders[T], Option[(OrderId, NewSingleUnitOrder[T])]) = {
+  def - (orderRefId: OrderReferenceId): (UnMatchedOrders[T], Option[NewSingleUnitOrder[T]]) = {
     val (remainingAskOrders, removedAskOrder) = offers - orderRefId
     removedAskOrder match {
       case Some(_) =>
@@ -80,11 +80,11 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
     */
   def contains(reference: OrderReferenceId): Boolean = offers.contains(reference) || bids.contains(reference)
 
-  def get(reference: OrderReferenceId): Option[(OrderId, NewSingleUnitOrder[T])] = {
+  def get(reference: OrderReferenceId): Option[NewSingleUnitOrder[T]] = {
     offers.get(reference).orElse(bids.get(reference))
   }
 
-  def headOption: (Option[(OrderReferenceId, (OrderId, SingleUnitOffer[T]))], Option[(OrderReferenceId, (OrderId, SingleUnitBid[T]))]) = {
+  def headOption: (Option[(OrderReferenceId, SingleUnitOffer[T])], Option[(OrderReferenceId, SingleUnitBid[T])]) = {
     (offers.headOption, bids.headOption)
   }
 
@@ -108,9 +108,9 @@ private[orderbooks] final class UnMatchedOrders[T <: Tradable] private(
 
   /* Used to check that highest priced bid order does not match with lowest priced ask order. */
   private[this] def heapsNotCrossed: Boolean = {
-    bids.headOption.forall{ case (_, (_, bidOrder)) =>
-      offers.headOption.forall{ case (_, (_, askOrder)) =>
-        bidOrder.limit <= askOrder.limit
+    bids.headOption.forall{ case (_, bid) =>
+      offers.headOption.forall{ case (_, offer) =>
+        bid.limit <= offer.limit
       }
     }
   }

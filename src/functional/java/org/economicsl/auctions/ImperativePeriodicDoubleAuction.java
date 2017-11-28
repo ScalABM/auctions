@@ -35,12 +35,12 @@ public class ImperativePeriodicDoubleAuction {
         // generate some random order flow...
         int numberOrders = 10000;
         Random prng = new Random(42);
-        Stream<Tuple2<UUID, NewSingleUnitOrder<TestStock>>> orders = NewOrderGenerator.randomSingleUnitOrders(0.5, numberOrders, googleStock, prng);
+        Stream<NewSingleUnitOrder<TestStock>> orders = NewOrderGenerator.randomSingleUnitOrders(0.5, numberOrders, googleStock, prng);
 
         List<Either<NewOrderRejected, NewOrderAccepted>> insertResults = new ArrayList<>();
 
-        for (Tuple2<UUID, NewSingleUnitOrder<TestStock>> order:JavaConverters.seqAsJavaList(orders)) {
-            Tuple2<OpenBidAuction<TestStock>, Either<NewOrderRejected, NewOrderAccepted>> insertResult = doubleAuction.insert(order._2);
+        for (NewSingleUnitOrder<TestStock> order:JavaConverters.seqAsJavaList(orders)) {
+            Tuple2<OpenBidAuction<TestStock>, Either<NewOrderRejected, NewOrderAccepted>> insertResult = doubleAuction.insert(order);
             doubleAuction = insertResult._1();
             insertResults.add(insertResult._2());
         }

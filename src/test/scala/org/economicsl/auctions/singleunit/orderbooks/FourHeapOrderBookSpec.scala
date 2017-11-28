@@ -38,11 +38,11 @@ class FourHeapOrderBookSpec
 
   val numberBids = 100
   val bidReferences: Iterable[OrderReferenceId] = for (i <- 0 until numberBids) yield randomUUID()
-  val bids: Stream[(OrderId, SingleUnitBid[TestTradable])] = NewOrderGenerator.randomSingleUnitBids(numberBids, tradable, new Random(42))
+  val bids: Stream[SingleUnitBid[TestTradable]] = NewOrderGenerator.randomSingleUnitBids(numberBids, tradable, new Random(42))
 
   val numberOffers = 100
   val offerReferences: Iterable[OrderReferenceId] = for (i <- 0 until numberOffers) yield randomUUID()
-  val offers: Stream[(OrderId, SingleUnitOffer[TestTradable])] = NewOrderGenerator.randomSingleUnitOffers(numberOffers, tradable, new Random(42))
+  val offers: Stream[SingleUnitOffer[TestTradable]] = NewOrderGenerator.randomSingleUnitOffers(numberOffers, tradable, new Random(42))
 
   val bidOrdering: Ordering[SingleUnitBid[TestTradable]] = SingleUnitBid.priceOrdering
   val offerOrdering: Ordering[SingleUnitOffer[TestTradable]] = SingleUnitOffer.priceOrdering
