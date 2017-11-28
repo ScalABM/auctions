@@ -38,7 +38,7 @@ final class SortedSingleUnitBids[T <: Tradable] private(
   orders: Map[OrderReferenceId, SingleUnitBid[T]],
   sortedOrders: immutable.TreeSet[(OrderReferenceId, SingleUnitBid[T])],
   val numberUnits: Quantity)
-    extends OrderBook[T, SingleUnitBid[T], SortedSingleUnitBids[T]] {
+    extends OrderBook[SingleUnitBid[T], SortedSingleUnitBids[T]] {
 
   /** The ordering used to sort the `BidOrder` instances contained in this `SortedBidOrders` instance. */
   val ordering: Ordering[(OrderReferenceId, SingleUnitBid[T])] = sortedOrders.ordering

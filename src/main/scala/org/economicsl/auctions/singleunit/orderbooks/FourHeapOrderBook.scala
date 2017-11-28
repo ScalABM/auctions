@@ -39,7 +39,7 @@ import scala.collection.{GenIterable, GenSet}
 final class FourHeapOrderBook[T <: Tradable] private(
   val matchedOrders: MatchedOrders[T],
   val unMatchedOrders: UnMatchedOrders[T])
-    extends OrderBook[T, NewSingleUnitOrder[T], FourHeapOrderBook[T]] {
+    extends OrderBook[NewSingleUnitOrder[T], FourHeapOrderBook[T]] {
 
   /** If the constructor for `FourHeapOrderBook` becomes public, then this should be changed to require. */
   assert(orderBookInvariantsHold, "FourHeapOrderBook invariants failed!")
